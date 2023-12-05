@@ -23,7 +23,7 @@ function FastLogicRunner.client_onInteract(self, character, state)
 end
 
 function FastLogicRunner.server_onInteract(self, character, state)
-    self.data = nil
+    self.data = "new"
     self:refresh()
 end
 
@@ -31,7 +31,7 @@ function FastLogicRunner.refresh(self)
     self.updateTicks = 0
     self.tickType = self.tickType or 1
     self.openDisplays = self.openDisplays or {}
-    if (self.data == nil) then
+    if (self.data == "new") then
         self.data = self:getBLockData(self.interactable:getBody())
         self:prepData()
     end

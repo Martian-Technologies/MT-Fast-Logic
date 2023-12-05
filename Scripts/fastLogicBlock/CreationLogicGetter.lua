@@ -59,7 +59,6 @@ function FastLogicRunner.makeBlockData(self, block, shape)
         outputs = {},
         inputs = {},
         color = block.color,
-        blueprint = block
     }
     -- set block specific data
     if (block.shapeId == "9f0f56e8-2c31-4d83-996c-d00a9b296c3f") then -- vanilla logic

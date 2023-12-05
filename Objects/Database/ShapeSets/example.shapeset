@@ -1,0 +1,22 @@
+{
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "FFFFFF",
+         "name" : "Fast Logic Runner",
+         "physicsMaterial" : "Default",
+         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "rotationSet" : "Default",
+         "scripted" : {
+            "classname" : "FastLogicRunner",
+            "filename" : "$CONTENT_DATA/Scripts/fastLogicBlock/FastLogicRunner.lua"
+         },
+         "showInInventory" : true,
+         "uuid" : "3706ba55-bd11-4053-b437-bbf2aff823b4"
+      }
+   ]
+}

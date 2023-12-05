@@ -104,3 +104,11 @@ function table.tostring(tbl)
     end
     return result .. "}"
 end
+
+function table.length(tbl)
+    local count = 0
+    for _, _ in pairs(tbl) do
+       count = count + 1
+    end
+    return count
+end

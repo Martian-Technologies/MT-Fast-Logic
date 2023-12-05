@@ -39,6 +39,12 @@ function FastLogicRunner.refresh(self)
     print("reloaded")
 end
 
+function FastLogicRunner.server_onMelee(self)
+    for k, v in pairs(self.blockStates) do
+        self.blockStates[k] = false
+    end
+end
+
 function FastLogicRunner.client_refresh(self)
     self.displayGUIs = self.displayGUIs or {}
 end
@@ -121,17 +127,107 @@ function FastLogicRunner.prepData(self)
             end
         end
     end
-    -- print("-----------------------------")
-    -- print("inputBlocks")
-    -- print(self.inputBlocks)
-    -- print("throughBlocks")
-    -- print(self.throughBlocks)
-    -- print("norThroughBlocks")
-    -- print(self.norThroughBlocks)
-    -- print("timerBlocks")
-    -- print(self.timerBlocks)
-    -- print("lightBlocks")
-    -- print(self.lightBlocks)
+end
+
+function FastLogicRunner.getOutputLengths(self, tbl)
+    local lengths = {}
+    for id, _ in pairs(tbl) do
+        local outLength
+        if self.data[id] == nil then
+            outLength = "NIL"
+        else
+            outLength = #self.data[id].outputs
+        end
+        if (lengths[outLength] == nil) then
+            lengths[outLength] = 0
+        end
+        lengths[outLength] = lengths[outLength] + 1
+    end
+    local otherName = "["
+    local otherCount = 0
+    for length, count in pairs(lengths) do
+        if (count < table.length(tbl) / 20) then
+            otherCount = otherCount + count
+            if otherName ~= "[" then
+                otherName = otherName .. ", "
+            end
+            otherName = otherName .. length
+            lengths[length] = nil
+        end
+    end
+    if otherCount > 0 then
+        lengths[otherName .. "]"] = otherCount
+    end
+    return lengths
+end
+
+function FastLogicRunner.getInputLengths(self, tbl)
+    local lengths = {}
+    for _, inputs in pairs(tbl) do
+        if (lengths[#inputs] == nil) then
+            lengths[#inputs] = 0
+        end
+        lengths[#inputs] = lengths[#inputs] + 1
+    end
+    local otherName = "["
+    local otherCount = 0
+    for length, count in pairs(lengths) do
+        if (count < table.length(tbl) / 20) then
+            otherCount = otherCount + count
+            if otherName ~= "[" then
+                otherName = otherName .. ", "
+            end
+            otherName = otherName .. length
+            lengths[length] = nil
+        end
+    end
+    if otherCount > 0 then
+        lengths[otherName .. "]"] = otherCount
+    end
+    return lengths
+end
+
+function FastLogicRunner.server_onProjectile(self)
+    print("-----------------------------")
+    print("inputBlocks")
+    print("count:", table.length(self.inputBlocks))
+    print("outputs:", self:getOutputLengths(self.inputBlocks))
+    print("throughBlocks")
+    print("count:", table.length(self.throughBlocks))
+    print("outputs:", self:getOutputLengths(self.throughBlocks))
+    print("norThroughBlocks")
+    print("count:", table.length(self.norThroughBlocks))
+    print("outputs:", self:getOutputLengths(self.norThroughBlocks))
+    print("andBlocks")
+    print("count:", table.length(self.andBlocks))
+    print("inputs", self:getInputLengths(self.andBlocks))
+    print("outputs:", self:getOutputLengths(self.andBlocks))
+    print("orBlocks")
+    print("count:", table.length(self.orBlocks))
+    print("inputs", self:getInputLengths(self.orBlocks))
+    print("outputs:", self:getOutputLengths(self.orBlocks))
+    print("xorBlocks")
+    print("count:", table.length(self.xorBlocks))
+    print("inputs", self:getInputLengths(self.xorBlocks))
+    print("outputs:", self:getOutputLengths(self.xorBlocks))
+    print("nandBlocks")
+    print("count:", table.length(self.nandBlocks))
+    print("inputs", self:getInputLengths(self.nandBlocks))
+    print("outputs:", self:getOutputLengths(self.nandBlocks))
+    print("norBlocks")
+    print("count:", table.length(self.norBlocks))
+    print("inputs", self:getInputLengths(self.norBlocks))
+    print("outputs:", self:getOutputLengths(self.norBlocks))
+    print("xnorBlocks")
+    print("count:", table.length(self.xnorBlocks))
+    print("inputs", self:getInputLengths(self.xnorBlocks))
+    print("outputs:", self:getOutputLengths(self.xnorBlocks))
+    print("timerBlocks")
+    print("count:", table.length(self.timerBlocks))
+    print("outputs:", self:getOutputLengths(self.timerBlocks))
+    print("lightBlocks")
+    print("count:", table.length(self.lightBlocks))
+    print("-----------------------------")
 end
 
 function FastLogicRunner.doUpdates(self)
@@ -165,8 +261,8 @@ function FastLogicRunner.doUpdate(self)
     end
     -- and
     for blockId, inputs in pairs(self.andBlocks) do
-        for _, id in ipairs(inputs) do
-            if (not lastBlockStates[id]) then
+        for i = 1, #inputs, 1 do
+            if (not lastBlockStates[inputs[i]]) then
                 self.blockStates[blockId] = false
                 goto andend
             end
@@ -176,8 +272,8 @@ function FastLogicRunner.doUpdate(self)
     end
     -- or
     for blockId, inputs in pairs(self.orBlocks) do
-        for _, id in ipairs(inputs) do
-            if (lastBlockStates[id]) then
+        for i = 1, #inputs, 1 do
+            if (lastBlockStates[inputs[i]]) then
                 self.blockStates[blockId] = true
                 goto orend
             end
@@ -188,8 +284,8 @@ function FastLogicRunner.doUpdate(self)
     -- xor
     for blockId, inputs in pairs(self.xorBlocks) do
         local count = 0
-        for _, id in ipairs(inputs) do
-            if (lastBlockStates[id]) then
+        for i = 1, #inputs, 1 do
+            if (lastBlockStates[inputs[i]]) then
                 count = count + 1
             end
         end
@@ -197,8 +293,8 @@ function FastLogicRunner.doUpdate(self)
     end
     -- nand
     for blockId, inputs in pairs(self.nandBlocks) do
-        for _, id in ipairs(inputs) do
-            if (not lastBlockStates[id]) then
+        for i = 1, #inputs, 1 do
+            if (not lastBlockStates[inputs[i]]) then
                 self.blockStates[blockId] = true
                 goto nandend
             end
@@ -208,8 +304,8 @@ function FastLogicRunner.doUpdate(self)
     end
     -- nor
     for blockId, inputs in pairs(self.norBlocks) do
-        for _, id in ipairs(inputs) do
-            if (lastBlockStates[id]) then
+        for i = 1, #inputs, 1 do
+            if (lastBlockStates[inputs[i]]) then
                 self.blockStates[blockId] = false
                 goto norend
             end
@@ -220,8 +316,8 @@ function FastLogicRunner.doUpdate(self)
     -- xnor
     for blockId, inputs in pairs(self.xnorBlocks) do
         local count = 0
-        for _, id in ipairs(inputs) do
-            if (lastBlockStates[id]) then
+        for i = 1, #inputs, 1 do
+            if (lastBlockStates[inputs[i]]) then
                 count = count + 1
             end
         end

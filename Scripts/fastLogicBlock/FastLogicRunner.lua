@@ -63,8 +63,9 @@ function FastLogicRunner.prepData(self)
     self.timerBlocks = {}
     self.inputBlocks = {}
     self.lightBlocks = {}
+    print("---")
     for id, block in pairs(self.data) do
-        if (block.type == "vanilla input") then
+        if (block.type == "vanilla input" and (#block.outputs > 0 or block.color == "420420")) then
             self.inputBlocks[id] = block.shape:getInteractable()
             self.blockStates[id] = false
         elseif (block.type == "vanilla light") then
@@ -78,15 +79,18 @@ function FastLogicRunner.prepData(self)
             if (#block.inputs == 0) then
                 self.blockStates[id] = false
             elseif (#block.outputs > 0 or block.color == "420420") then
-                if (block.ticks == 0) then
-                    self.throughBlocks[id] = block.inputs[1]
+                if (block.ticks <= 1) then
+                    self.throughBlocks[id + (block.ticks) / (block.ticks + 1)] = block.inputs[1]
+                    for i = 0, block.ticks - 1, 1 do
+                        self.throughBlocks[id + i / (block.ticks + 1)] = id + (i + 1) / (block.ticks + 1)
+                    end
                 else
-                    self.timerBlocks[id] = {input = block.inputs[1], data = deque.new()}
+                    self.timerBlocks[id] = { input = block.inputs[1], data = deque.new() }
                     for i = 1, block.ticks, 1 do
                         deque.push_back(self.timerBlocks[id].data, false)
                     end
+                    self.blockStates[id] = false
                 end
-                self.blockStates[id] = false
             end
         elseif (block.type == "vanilla logic") then
             if (#block.inputs == 0) then
@@ -117,23 +121,36 @@ function FastLogicRunner.prepData(self)
             end
         end
     end
+    -- print("-----------------------------")
+    -- print("inputBlocks")
+    -- print(self.inputBlocks)
+    -- print("throughBlocks")
+    -- print(self.throughBlocks)
+    -- print("norThroughBlocks")
+    -- print(self.norThroughBlocks)
+    -- print("timerBlocks")
+    -- print(self.timerBlocks)
+    -- print("lightBlocks")
+    -- print(self.lightBlocks)
 end
 
 function FastLogicRunner.doUpdates(self)
     self.updateTicks = self.updateTicks + numberOfUpdatesPerTick
-    while self.updateTicks >= 1 do
-        self:doUpdate()
-        self.updateTicks = self.updateTicks - 1
+    if self.updateTicks >= 1 then
+        -- input
+        for blockId, input in pairs(self.inputBlocks) do
+            if sm.exists(input) then
+                self.blockStates[blockId] = input.active
+            end
+        end
+        while self.updateTicks >= 1 do
+            self:doUpdate()
+            self.updateTicks = self.updateTicks - 1
+        end
     end
 end
 
 function FastLogicRunner.doUpdate(self)
-    -- input
-    for blockId, input in pairs(self.inputBlocks) do
-        if sm.exists(input) then
-            self.blockStates[blockId] = input.active
-        end
-    end
     local lastBlockStates = {}
     for k, v in pairs(self.blockStates) do
         lastBlockStates[k] = v
@@ -212,12 +229,21 @@ function FastLogicRunner.doUpdate(self)
     end
     -- timer
     for blockId, block in pairs(self.timerBlocks) do
-        deque.push_back(block.data, lastBlockStates[block.input])
-        self.blockStates[blockId] = deque.pop_front(block.data)
+        local dequeObject = block.data
+        -- push back
+        dequeObject.back = dequeObject.back + 1
+        block.data[dequeObject.back] = lastBlockStates[block.input]
+        -- pop front
+        self.blockStates[blockId] = dequeObject[dequeObject.front]
+        dequeObject[dequeObject.front] = nil
+        dequeObject.front = dequeObject.front + 1
+
+        -- old
+        -- deque.push_back(block.data, lastBlockStates[block.input])
+        -- self.blockStates[blockId] = deque.pop_front(block.data)
     end
     -- light
     for blockId, input in pairs(self.lightBlocks) do
         self.blockStates[blockId] = lastBlockStates[input]
     end
 end
-

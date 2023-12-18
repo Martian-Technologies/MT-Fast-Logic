@@ -128,3 +128,11 @@ function table.lengthSumOfContainedElements(tbl)
     end
     return total
 end
+
+function  table.copy(tbl)
+    local newTable = {}
+    for key, value in pairs(tbl) do
+        newTable[key] = value
+    end
+    return newTable
+end

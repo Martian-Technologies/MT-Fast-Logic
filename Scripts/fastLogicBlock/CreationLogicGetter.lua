@@ -11,7 +11,13 @@ FastLogicRunner.allUUIDs = {
     "7cf717d7-d167-4f2d-a6e7-6b2c70aa3986",
     "ed27f5e2-cac5-4a32-a5d9-49f116acc6af",
     "695d66c8-b937-472d-8bc2-f3d72dd92879",
-    "add3acc6-a6fd-44e8-a384-a7a16ce13c81"
+    "add3acc6-a6fd-44e8-a384-a7a16ce13c81",
+    "8684ad89-94ad-4f46-b50e-c1aff63893f4",
+    "20dcd41c-0a11-4668-9b00-97f278ce21af",
+    "de018bc6-1db5-492c-bfec-045e63f9d64b",
+    "90fc3603-3544-4254-97ef-ea6723510961",
+    "cf46678b-c947-4267-ba85-f66930f5faa4",
+    "1d4793af-cb66-4628-804a-9d7404712643"
 }
 
 function FastLogicRunner.getBLockData(self, bodyToGetCreation)
@@ -54,19 +60,22 @@ function FastLogicRunner.doScanning(self)
         end
     else
         for blockId, blockData in pairs(self.allLogicDataTemp) do
-            blocksScannedThisTick = blocksScannedThisTick + 1
-            for i, id in pairs(blockData.outputs) do
+            --blocksScannedThisTick = blocksScannedThisTick + 1
+            local i = 1
+            while #blockData.outputs >= i do
+                local id = blockData.outputs[i]
                 if (self.allLogicData[id] ~= nil) then
                     self.allLogicData[id].inputs[#self.allLogicData[id].inputs + 1] = blockId
+                    i = i + 1
                 else
                     table.remove(blockData.outputs, i)
                     print("did not make data for block with id:", id, "  Deleting...")
                 end
             end
-            self.allLogicDataTemp[blockId] = nil
-            if (blocksScannedThisTick) == 2000 then
-                return nil
-            end
+            --self.allLogicDataTemp[blockId] = nil
+            --if (blocksScannedThisTick) == 2000 then
+            --return nil
+            -- end
         end
         self.isScanning = false
         return self.allLogicData
@@ -91,9 +100,19 @@ function FastLogicRunner.makeBlockData(self, block, shape)
     elseif (block.shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f") then -- vanilla timer
         blockData.type = "vanilla timer"
         blockData.ticks = block.controller.ticks + block.controller.seconds * 40
-    elseif (table.contains({ "1e8d93a4-506b-470d-9ada-9c0a321e2db5", "7cf717d7-d167-4f2d-a6e7-6b2c70aa3986", "add3acc6-a6fd-44e8-a384-a7a16ce13c81" }, block.shapeId)) then -- vanilla input
+    elseif (table.contains({
+            "1e8d93a4-506b-470d-9ada-9c0a321e2db5",
+            "7cf717d7-d167-4f2d-a6e7-6b2c70aa3986",
+            "add3acc6-a6fd-44e8-a384-a7a16ce13c81",
+            "8684ad89-94ad-4f46-b50e-c1aff63893f4",
+            "20dcd41c-0a11-4668-9b00-97f278ce21af",
+            "de018bc6-1db5-492c-bfec-045e63f9d64b",
+            "90fc3603-3544-4254-97ef-ea6723510961",
+            "cf46678b-c947-4267-ba85-f66930f5faa4",
+            "1d4793af-cb66-4628-804a-9d7404712643"
+        }, block.shapeId)) then                                                                                                     -- vanilla input
         blockData.type = "vanilla input"
-    elseif (table.contains({ "ed27f5e2-cac5-4a32-a5d9-49f116acc6af", "695d66c8-b937-472d-8bc2-f3d72dd92879" }, block.shapeId)) then                                         -- vanilla light
+    elseif (table.contains({ "ed27f5e2-cac5-4a32-a5d9-49f116acc6af", "695d66c8-b937-472d-8bc2-f3d72dd92879" }, block.shapeId)) then -- vanilla light
         blockData.type = "vanilla light"
     end
     -- set outputs

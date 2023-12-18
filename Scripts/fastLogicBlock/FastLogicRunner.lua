@@ -6,7 +6,7 @@ dofile "../util/util.lua"
 dofile "CreationLogicGetter.lua"
 dofile "LogicStateDisplayer.lua"
 
-local numberOfUpdatesPerTick = 10
+local numberOfUpdatesPerTick = 1
 
 function FastLogicRunner.server_onRefresh(self)
     self:refresh()

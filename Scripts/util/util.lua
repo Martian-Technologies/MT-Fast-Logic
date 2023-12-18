@@ -81,7 +81,7 @@ function table.containsWithOut(table, value, out)
     return false
 end
 
-function table.tostring(tbl)
+function table.toString(tbl)
     local result = "{"
     for k, v in pairs(tbl) do
         -- Check the key type (ignore any numerical keys - assume its an array)
@@ -111,4 +111,20 @@ function table.length(tbl)
        count = count + 1
     end
     return count
+end
+
+function table.getKeys(t)
+  local keys={}
+  for key,_ in pairs(t) do
+    table.insert(keys, key)
+  end
+  return keys
+end
+
+function table.lengthSumOfContainedElements(tbl)
+    local total = 0
+    for k, v in pairs(tbl) do
+        total = total + table.length(v)
+    end
+    return total
 end

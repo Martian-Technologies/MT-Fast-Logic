@@ -15,40 +15,64 @@ FastLogicRunner.allUUIDs = {
 }
 
 function FastLogicRunner.getBLockData(self, bodyToGetCreation)
-    local allLogicData = {}
-    local bodies = self:getTable(bodyToGetCreation).bodies
+    self.allLogicData = {}
+    self.allLogicDataTemp = {}
+    self.isScanning = true
+    self.scanningStep = 0
+    self.bodies = self:getTable(bodyToGetCreation).bodies
     local shapes = bodyToGetCreation:getCreationShapes()
-    local shapeIndex = 1
-    for body in values(bodies) do
-        for block in values(body.childs) do
-            if (block.controller ~= nil) then
-                for shape in values(shapes) do
-                    if (
-                            shape:getInteractable() ~= nil and
-                            shape:getInteractable():getId() == block.controller.id and
-                            table.contains(FastLogicRunner.allUUIDs, block.shapeId)
-                        ) then
+    self.shapes = {}
+    for shapeK, shape in pairs(shapes) do
+        if shape:getInteractable() ~= nil then
+            self.shapes[shape:getInteractable():getId()] = shape
+        end
+    end
+end
+
+function FastLogicRunner.doScanning(self)
+    local blocksScannedThisTick = 0
+    if self.scanningStep == 0 then
+        for bodyK, body in pairs(self.bodies) do
+            for blockK, block in pairs(body.childs) do
+                blocksScannedThisTick = blocksScannedThisTick + 1
+                if (block.controller ~= nil) then
+                    local shape = self.shapes[block.controller.id]
+                    if (table.contains(FastLogicRunner.allUUIDs, block.shapeId)) then
                         local blockData = self:makeBlockData(block, shape)
                         if (blockData.type ~= nil) then
-                            allLogicData[blockData.id] = blockData
+                            self.allLogicData[blockData.id] = blockData
+                            self.allLogicDataTemp[blockData.id] = blockData
                         end
-                        break
                     end
                 end
+                body.childs[blockK] = nil
+                if blocksScannedThisTick == 500 then
+                    return nil
+                end
+            end
+            self.bodies[bodyK] = nil
+        end
+    else
+        for blockId, blockData in pairs(self.allLogicDataTemp) do
+            blocksScannedThisTick = blocksScannedThisTick + 1
+            for i, id in pairs(blockData.outputs) do
+                if (self.allLogicData[id] ~= nil) then
+                    self.allLogicData[id].inputs[#self.allLogicData[id].inputs + 1] = blockId
+                else
+                    table.remove(blockData.outputs, i)
+                    print("did not make data for block with id:", id, "  Deleting...")
+                end
+            end
+            self.allLogicDataTemp[blockId] = nil
+            if (blocksScannedThisTick) == 2000 then
+                return nil
             end
         end
+        self.isScanning = false
+        return self.allLogicData
     end
-    for blockId, blockData in pairs(allLogicData) do
-        for i, id in pairs(blockData.outputs) do
-            if (allLogicData[id] ~= nil) then
-                allLogicData[id].inputs[#allLogicData[id].inputs + 1] = blockId
-            else
-                table.remove(blockData.outputs, i)
-                print("did not make data for block with id:", id, "  Deleting...")
-            end
-        end
-    end
-    return allLogicData
+    self.scanningStep = 1
+    return nil
 end
 
 function FastLogicRunner.makeBlockData(self, block, shape)

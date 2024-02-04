@@ -6,7 +6,7 @@ dofile "CreationLogicGetter.lua"
 dofile "LogicStateDisplayer.lua"
 dofile "BalancedLogicFinder.lua"
 
-local numberOfUpdatesPerTick = 5000
+local numberOfUpdatesPerTick = 8192
 
 local FastLogicRunner = FastLogicRunner
 local table = table
@@ -103,7 +103,7 @@ function FastLogicRunner.prepData(self)
         "norBlocks",
         "xnorBlocks",
     }
-    self.pathIndexs ={}
+    self.pathIndexs = {}
     for index, path in pairs(self.pathNames) do
         self.pathIndexs[path] = index
     end
@@ -143,13 +143,14 @@ function FastLogicRunner.prepData(self)
                     self.blockStates[id] = false
                     for i = 1, block.ticks - 1, 1 do
                         self.blockData.throughBlocks[id + i / (block.ticks + 1)] = id + (i + 1) / (block.ticks + 1)
-                        self.blockOutputs[id + i / (block.ticks + 1)] = {id + (i - 1) / (block.ticks + 1)}
+                        self.blockOutputs[id + i / (block.ticks + 1)] = { id + (i - 1) / (block.ticks + 1) }
                         self.runnableBlockPaths[id + i / (block.ticks + 1)] = "throughBlocks"
                         self.blockStates[id + i / (block.ticks + 1)] = false
                         self.countOfOnInputs[id + i / (block.ticks + 1)] = 0
                     end
                     self.blockData[id + block.ticks / (block.ticks + 1)] = block.inputs[1]
-                    self.blockOutputs[id + block.ticks / (block.ticks + 1)] = {id + (block.ticks - 1) / (block.ticks + 1)}
+                    self.blockOutputs[id + block.ticks / (block.ticks + 1)] = { id +
+                    (block.ticks - 1) / (block.ticks + 1) }
                     self.runnableBlockPaths[id + block.ticks / (block.ticks + 1)] = "throughBlocks"
                     self.blockStates[id + block.ticks / (block.ticks + 1)] = false
                     self.countOfOnInputs[id + block.ticks / (block.ticks + 1)] = 0
@@ -237,20 +238,19 @@ function FastLogicRunner.prepData(self)
         self.timerData[i] = {}
     end
     self.nextRunningBlocks = {}
-    self.runningBlocks = {}
-    self.runningBlockLengths = {}
-    for _, index in pairs(self.pathIndexs) do
-        self.runningBlocks[index] = {}
-        self.runningBlockLengths[index] = 0
-    end
     for id, path in pairs(self.runnableBlockPaths) do
         self.runnableBlockPathIds[id] = self.pathIndexs[path]
     end
-    for id, block in pairs(self.blockData) do
-        local pathId = self.runnableBlockPathIds[id]
-        self.runningBlockLengths[pathId] = self.runningBlockLengths[pathId] + 1
-        self.runningBlocks[pathId][self.runningBlockLengths[pathId]] = id
+    self.newBlockStates = {}
+    self.newBlockStatesLength = 0
+    for id, _ in pairs(self.blockStates) do
+        self.newBlockStatesLength = self.newBlockStatesLength + 1
+        self.newBlockStates[self.newBlockStatesLength] = id
     end
+    -- for id, state in pairs(self.blockStates) do
+    --     self.blockStates[id] = not state
+    -- end
+    self.blocksToRun = {}
     self:doUpdate()
 end
 
@@ -275,181 +275,204 @@ function FastLogicRunner.doUpdates(self)
         for blockId, data in pairs(self.inputBlocks) do
             local lastState = self.blockStates[blockId]
             if sm.exists(data) and (data.active ~= lastState) then
-                self.blockStates[blockId] = not lastState
-                local stateNumber = lastState and -1 or 1
-                for i = 1, self.numberOfBlockOutputs[blockId] do
-                    local idToRunNext = self.blockOutputs[blockId][i]
-                    self.countOfOnInputs[idToRunNext] = self.countOfOnInputs[idToRunNext] + stateNumber
-                    if self.nextRunningBlocks[idToRunNext] == nil then
-                        local pathId = self.runnableBlockPathIds[idToRunNext]
-                        local tableLenght = self.runningBlockLengths[pathId]
-                        self.runningBlocks[pathId][tableLenght + 1] = idToRunNext
-                        self.runningBlockLengths[pathId] = tableLenght + 1
-                        self.nextRunningBlocks[idToRunNext] = true
-                    end
-                end
+                self.newBlockStatesLength = self.newBlockStatesLength + 1
+                self.newBlockStates[self.newBlockStatesLength] = blockId
+                -- self.blockStates[blockId] = not lastState
+                -- local stateNumber = lastState and -1 or 1
+                -- for i = 1, self.numberOfBlockOutputs[blockId] do
+                --     local idToRunNext = self.blockOutputs[blockId][i]
+                --     self.countOfOnInputs[idToRunNext] = self.countOfOnInputs[idToRunNext] + stateNumber
+                --     if self.nextRunningBlocks[idToRunNext] == nil then
+                --         local pathId = self.runnableBlockPathIds[idToRunNext]
+                --         local tableLenght = self.runningBlockLengths[pathId]
+                --         self.runningBlocks[pathId][tableLenght + 1] = idToRunNext
+                --         self.runningBlockLengths[pathId] = tableLenght + 1
+                --         self.nextRunningBlocks[idToRunNext] = true
+                --     end
+                -- end
             end
         end
+        -- everything else
         while self.updateTicks >= 1 do
             self:doUpdate()
             self.updateTicks = self.updateTicks - 1
-            local sum = 0
-            for k, v in pairs(self.runningBlockLengths) do
-                sum = sum + v
-            end
-            if sum == 0 then
-                self.updateTicks = 0
-            end
+            -- local sum = 0
+            -- for k, v in pairs(self.runningBlockLengths) do
+            --     sum = sum + v
+            -- end
+            -- if sum == 0 then
+            --     self.updateTicks = 0
+            -- end
         end
     end
 end
 
+local allBlockFuncs =
+{
+    -- through
+    [3] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] == 1) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- nor through
+    end,
+    [4] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] == 0) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- and
+    end,
+    [6] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] == self.numberOfBlockInputs[blockId]) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- or
+    end,
+    [7] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] > 0) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- xor
+    end,
+    [8] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] % 2 == 1) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- nand
+    end,
+    [9] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] ~= self.numberOfBlockInputs[blockId]) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- nor
+    end,
+    [10] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] == 0) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- xnor
+    end,
+    [11] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        if (self.countOfOnInputs[blockId] % 2 == 0) ~= self.blockStates[blockId] then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        return newBlockStatesLength
+        -- timer
+    end,
+    [5] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        local block = self.blockData[blockId]
+        if (self.timerReadRow[block[2]]) ~= nil then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = blockId
+        end
+        if (self.countOfOnInputs[blockId] == 1) ~= block[5] then
+            block[5] = not block[5]
+            self.timerData[block[3]][block[2]] = true
+            block[4] = block[3]
+            self.nextRunningBlocks[blockId] = true
+        elseif block[4] > 1 then
+            block[4] = block[4] - 1
+            self.nextRunningBlocks[blockId] = true
+        end
+        return newBlockStatesLength
+        -- light
+    end,
+    [2] = function(self, blockId, newBlockStatesLength, newBlockStates)
+        self.blockStates[blockId] = self.blockStates[self.blockData[blockId]]
+        return newBlockStatesLength
+    end
+}
+
 function FastLogicRunner.doUpdate(self)
     -- uncomment to see how many blocks are running
-    --print(table.lengthSumOfContainedElements(self.runningBlocks))
-    --print(table.length(self.blockData))
-    --print(self.countOfOnInputs)
+    -- print(table.lengthSumOfContainedElements(self.runningBlocks))
+    -- print(table.length(self.blockData))
+    -- print(self.countOfOnInputs)
+    -- print(self.newBlockStates)
+    -- print(self.blockStates)
     -- if table.lengthSumOfContainedElements(self.runningBlocks) > 0 then
-    --print(self.runningBlocks)
+    -- print(self.runningBlocks)
     -- end
     -- for k,v in pairs(self.runningBlocks) do
     --     print(k .. ": " .. #v)
     -- end
     local newBlockStates = {}
     local newBlockStatesLength = 0
+    local runningBlocks = self.nextRunningBlocks
     self.nextRunningBlocks = {}
-    local runningBlocks = self.runningBlocks
-    local nextRunningBlocks = self.nextRunningBlocks
-    local runningBlockLengths = self.runningBlockLengths
     local countOfOnInputs = self.countOfOnInputs
     local runnableBlockPathIds = self.runnableBlockPathIds
     local numberOfBlockOutputs = self.numberOfBlockOutputs
     local numberOfBlockInputs = self.numberOfBlockInputs
     local blockStates = self.blockStates
     local blockOutputs = self.blockOutputs
-    -- through
-    local throughBlocks = runningBlocks[3]
-    for k=1, runningBlockLengths[3] do
-        local blockId = throughBlocks[k]
-        if (countOfOnInputs[blockId] == 1) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- nor through
-    local norThroughBlocks = runningBlocks[4]
-    for k=1, runningBlockLengths[4] do
-        local blockId = norThroughBlocks[k]
-        if (countOfOnInputs[blockId] == 0) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- and
-    local andBlocks = runningBlocks[6]
-    for k=1, runningBlockLengths[6] do
-        local blockId = andBlocks[k]
-        if (countOfOnInputs[blockId] == numberOfBlockInputs[blockId]) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- or
-    local orBlocks = runningBlocks[7]
-    for k=1, runningBlockLengths[7] do
-        local blockId = orBlocks[k]
-        if (countOfOnInputs[blockId] > 0) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- xor
-    local xorBlocks = runningBlocks[8]
-    for k=1, runningBlockLengths[8] do
-        local blockId = xorBlocks[k]
-        if (countOfOnInputs[blockId] % 2 == 1) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- nand
-    local nandBlocks = runningBlocks[9]
-    for k=1, runningBlockLengths[9] do
-        local blockId = nandBlocks[k]
-        if (countOfOnInputs[blockId] ~=  numberOfBlockInputs[blockId]) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- nor
-    local norBlocks = runningBlocks[10]
-    for k=1, runningBlockLengths[10] do
-        local blockId = norBlocks[k]
-        if (countOfOnInputs[blockId] == 0) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- xnor
-    local xnorBlocks = runningBlocks[11]
-    for k=1, runningBlockLengths[11] do
-        local blockId = xnorBlocks[k]
-        if (countOfOnInputs[blockId] % 2 == 0) ~= blockStates[blockId] then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-    end
-    -- timer
-    local timerReadRow = table.remove(self.timerData, 1)
+    local blocksToRun = self.blocksToRun
+    local blocksToRunLength = 0
+
+
+    -- all timer data shift
+    self.timerReadRow = table.remove(self.timerData, 1)
     self.timerData[#self.timerData + 1] = {}
-    local timerBlocks = runningBlocks[5]
-    for k=1, runningBlockLengths[5] do
-        local blockId = timerBlocks[k]
-        local block = self.blockData[blockId]
-        if (timerReadRow[block[2]]) ~= nil then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
-        if (countOfOnInputs[blockId] == 1) ~= block[5] then
-            block[5] = not block[5]
-            self.timerData[block[3]][block[2]] = true
-            block[4] = block[3]
-            nextRunningBlocks[blockId] = true
-        elseif block[4] > 1 then
-            block[4] = block[4] - 1
-            nextRunningBlocks[blockId] = true
-        end
+
+    for blockId, _ in pairs(runningBlocks) do
+        blocksToRunLength = blocksToRunLength + 1
+        blocksToRun[blocksToRunLength] = blockId
     end
-    -- light
-    local lightBlocks = runningBlocks[2]
-    for k=1, runningBlockLengths[2] do
-        local blockId = lightBlocks[k]
-        blockStates[blockId] = blockStates[self.blockData[blockId]]
-    end
-    -- create new list of runningBlockLengths
-    runningBlockLengths = {
-        [1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0,  [10] = 0,  [11] = 0
-    }
-    self.runningBlockLengths = runningBlockLengths
-    for id, _ in pairs(nextRunningBlocks) do
-        local pathId = runnableBlockPathIds[id]
-        runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
-        runningBlocks[pathId][runningBlockLengths[pathId]] = id
-    end
-    for i = 1, newBlockStatesLength do
-        local id = newBlockStates[i]
+    --     -- ========================== RUN BLOCKS ==========================
+    --     -- right now this is the only block that could run
+    --     local block = self.blockData[blockId]
+    --     if (timerReadRow[block[2]]) ~= nil then
+    --         newBlockStatesLength = newBlockStatesLength + 1
+    --         newBlockStates[newBlockStatesLength] = blockId
+    --     end
+    --     if (countOfOnInputs[blockId] == 1) ~= block[5] then
+    --         block[5] = not block[5]
+    --         self.timerData[block[3]][block[2]] = true
+    --         block[4] = block[3]
+    --         self.nextRunningBlocks[blockId] = true
+    --     elseif block[4] > 1 then
+    --         block[4] = block[4] - 1
+    --         self.nextRunningBlocks[blockId] = true
+    --     end
+    --     -- ========================== END RUN BLOCKS ==========================
+    -- end
+    for i = 1, self.newBlockStatesLength do
+        local id = self.newBlockStates[i]
         blockStates[id] = not blockStates[id]
         local stateNumber = blockStates[id] and 1 or -1
         local outputs = blockOutputs[id]
         for k = 1, numberOfBlockOutputs[id] do
-            local outputId = outputs[k]
-            countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
-            if nextRunningBlocks[outputId] == nil then
-                nextRunningBlocks[outputId] = true
-                local pathId = runnableBlockPathIds[outputId]
-                runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
-                runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
+            local blockId = outputs[k]
+            countOfOnInputs[blockId] = countOfOnInputs[blockId] + stateNumber
+            if runningBlocks[blockId] == nil then
+                runningBlocks[blockId] = true
+                blocksToRunLength = blocksToRunLength + 1
+                blocksToRun[blocksToRunLength] = blockId
             end
         end
     end
+    for i = 1, blocksToRunLength do
+        local blockId = blocksToRun[i]
+        -- ========================== RUN BLOCKS ==========================
+        -- local pathId = runnableBlockPathIds[blockId]
+        newBlockStatesLength = allBlockFuncs[runnableBlockPathIds[blockId]](self, blockId, newBlockStatesLength, newBlockStates)
+        -- ========================== END RUN BLOCKS ==========================
+    end
+    self.newBlockStatesLength = newBlockStatesLength
+    self.newBlockStates = newBlockStates
 end

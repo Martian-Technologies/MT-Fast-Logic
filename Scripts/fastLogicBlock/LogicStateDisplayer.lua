@@ -1,26 +1,20 @@
 dofile "../util/util.lua"
 
 function FastLogicRunner.updateDisplays(self)
-    local addIdsAndPositions = {}
+    local addData = {}
     local destroyIds = {}
     for id, block in pairs(self.data) do
         if (block.type == "vanilla light" or block.color == "420420") then
             local state = self.blockStates[id]
-            if (sm.exists(block.shape) and #addIdsAndPositions < 1000) then
+            if (sm.exists(block.shape) and #addData < 1000) then
                 local wantedDisplayPos = block.shape:getWorldPosition() + sm.vec3.new(0, 0, -0.4 / 4)
                 if (state and self.openDisplays[id] == nil) then
-                    addIdsAndPositions[#addIdsAndPositions + 1] = {
-                        pos = wantedDisplayPos,
-                        id = id
-                    }
+                    addData[#addData + 1] = self.createDataForDisplay(wantedDisplayPos, id, block)
                     self.openDisplays[id] = wantedDisplayPos
                 end
                 if (#destroyIds < 1000 and self.openDisplays[id] ~= nil and sm.vec3.length(self.openDisplays[id] - wantedDisplayPos) > 0.01) then
                     destroyIds[#destroyIds + 1] = id
-                    addIdsAndPositions[#addIdsAndPositions + 1] = {
-                        pos = wantedDisplayPos,
-                        id = id
-                    }
+                    addData[#addData + 1] = self.createDataForDisplay(wantedDisplayPos, id, block)
                     self.openDisplays[id] = wantedDisplayPos
                 end
             end
@@ -33,12 +27,24 @@ function FastLogicRunner.updateDisplays(self)
             self.openDisplays[id] = nil
         end
     end
-    self:displayStates(destroyIds, addIdsAndPositions)
+    self:displayStates(destroyIds, addData)
 end
 
-function FastLogicRunner.displayStates(self, destroyIds, positions)
+function FastLogicRunner.createDataForDisplay(pos, id, block)
+    local color = "00CCFF"
+    if block.type == "vanilla light" then
+        color = block.color
+    end
+    return {
+        pos = pos,
+        id = id,
+        color = color
+    }
+end
+
+function FastLogicRunner.displayStates(self, destroyIds, addData)
     self.network:sendToClients("clients_clearDisplays", destroyIds)
-    self.network:sendToClients("clients_displayStates", positions)
+    self.network:sendToClients("clients_displayStates", addData)
 end
 
 function FastLogicRunner.clients_clearDisplays(self, ids)
@@ -60,16 +66,16 @@ function FastLogicRunner.clients_clearDisplay(self, gui)
     self.displayGUIs[gui.id] = nil
 end
 
-function FastLogicRunner.clients_displayStates(self, positions)
-    for pos in values(positions) do
-        self:clients_displayState(pos)
+function FastLogicRunner.clients_displayStates(self, addData)
+    for data in values(addData) do
+        self:clients_displayState(data)
     end
 end
 
-function FastLogicRunner.clients_displayState(self, pos)
+function FastLogicRunner.clients_displayState(self, data)
     local gui = sm.gui.createNameTagGui()
-    gui:setText("Text", "[I]")
-    gui:setWorldPosition(pos.pos)
+    gui:setText("Text", "#" .. data.color .. "[I]")
+    gui:setWorldPosition(data.pos)
     gui:open()
-    self.displayGUIs[pos.id] = { gui = gui, id = pos.id }
+    self.displayGUIs[data.id] = { gui = gui, id = data.id }
 end

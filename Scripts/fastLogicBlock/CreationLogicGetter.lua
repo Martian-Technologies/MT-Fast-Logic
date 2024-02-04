@@ -17,7 +17,8 @@ FastLogicRunner.allUUIDs = {
     "de018bc6-1db5-492c-bfec-045e63f9d64b",
     "90fc3603-3544-4254-97ef-ea6723510961",
     "cf46678b-c947-4267-ba85-f66930f5faa4",
-    "1d4793af-cb66-4628-804a-9d7404712643"
+    "1d4793af-cb66-4628-804a-9d7404712643",
+    "31ada55e-7c79-4aee-86b6-809c0e5468df"
 }
 
 function FastLogicRunner.getBLockData(self, bodyToGetCreation)
@@ -112,7 +113,7 @@ function FastLogicRunner.makeBlockData(self, block, shape)
             "1d4793af-cb66-4628-804a-9d7404712643"
         }, block.shapeId)) then                                                                                                     -- vanilla input
         blockData.type = "vanilla input"
-    elseif (table.contains({ "ed27f5e2-cac5-4a32-a5d9-49f116acc6af", "695d66c8-b937-472d-8bc2-f3d72dd92879" }, block.shapeId)) then -- vanilla light
+    elseif (table.contains({ "ed27f5e2-cac5-4a32-a5d9-49f116acc6af", "695d66c8-b937-472d-8bc2-f3d72dd92879", "31ada55e-7c79-4aee-86b6-809c0e5468df" }, block.shapeId)) then -- vanilla light
         blockData.type = "vanilla light"
     end
     -- set outputs

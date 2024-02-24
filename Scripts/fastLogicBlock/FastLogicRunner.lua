@@ -5,10 +5,10 @@ dofile "../util/util.lua"
 dofile "CreationLogicGetter.lua"
 dofile "LogicStateDisplayer.lua"
 dofile "BalancedLogicFinder.lua"
+-- dofile "LogicOptimizer.lua"
 
-local numberOfUpdatesPerTick = 5000
 
-local FastLogicRunner = FastLogicRunner
+local numberOfUpdatesPerTick = 256
 local table = table
 local ipairs = ipairs
 local pairs = pairs
@@ -78,16 +78,37 @@ function FastLogicRunner.server_onFixedUpdate(self, timeStep)
 end
 
 function FastLogicRunner.prepData(self)
-    self.blockStates = {}
-    self.blockData = {}
-    self.runnableBlockPaths = {}
-    self.blockOutputs = {}
-    self.numberOfBlockInputs = {}
-    self.numberOfBlockOutputs = {}
-    self.inputBlocks = {}
-    self.countOfOnInputs = {}
+    -- setUpHassStuff
+    local allIds = {}
+    for id, _ in pairs(self.data) do
+        allIds[#allIds + 1] = id
+    end
+    local hashData = table.makeConstantKeysOnlyHash(allIds)
+    self.unhashedLookUp = hashData.unhashedLookUp
+    self.hashedLookUp = hashData.hashedLookUp
+    self.hashSize = hashData.size
+    local hashArrayValues = function(tbl)
+        local newTbl = {}
+        for key, value in pairs(tbl) do
+            newTbl[key] = self.hashedLookUp[value]
+        end
+        return newTbl
+    end
+    -- make arrays
+    self.blocksRan = 0
+    self.blocksForNextTick = 0
+    self.blocksKilled = 0
+    self.newIdIndex = 0
+    self.blockStates = table.makeArray(hashData.size)
+    self.blockInputs = table.makeArray(hashData.size)
+    self.runnableBlockPaths = table.makeArray(hashData.size)
+    self.blockOutputs = table.makeArray(hashData.size)
+    self.numberOfBlockInputs = table.makeArray(hashData.size)
+    self.numberOfBlockOutputs = table.makeArray(hashData.size)
+    self.inputBlocks = {} -- is hash
+    self.countOfOnInputs = table.makeArray(hashData.size)
     self.timerData = {}
-    self.runnableBlockPathIds = {}
+    self.runnableBlockPathIds = table.makeArray(hashData.size)
     local longestTimer = 0
     local toFixTimers = {}
     self.pathNames = {
@@ -103,7 +124,7 @@ function FastLogicRunner.prepData(self)
         "norBlocks",
         "xnorBlocks",
     }
-    self.pathIndexs ={}
+    self.pathIndexs = {}
     for index, path in pairs(self.pathNames) do
         self.pathIndexs[path] = index
     end
@@ -112,118 +133,108 @@ function FastLogicRunner.prepData(self)
     --{["inputBlocks"] = {}, ["lightBlocks"] = {}, ["throughBlocks"] = {}, ["norThroughBlocks"] = {}, ["timerBlocks"] = {},
     --["andBlocks"] = {}, ["orBlocks"] = {}, ["xorBlocks"] = {}, ["nandBlocks"] = {},  ["norBlocks"] = {},  ["xnorBlocks"] = {}}
     print("---")
-    for id, block in pairs(self.data) do
+    for unHashedId, block in pairs(self.data) do
+        local id = self.hashedLookUp[unHashedId]
         self.countOfOnInputs[id] = 0
         if (block.type == "vanilla input" and (#block.outputs > 0 or block.color == "420420")) then
             self.inputBlocks[id] = block.shape:getInteractable()
-            self.blockOutputs[id] = block.outputs
+            self.blockOutputs[id] = hashArrayValues(block.outputs)
             self.runnableBlockPaths[id] = "inputBlocks"
             self.blockStates[id] = false
         elseif (block.type == "vanilla light") then
             if (#block.inputs == 0) then
                 self.blockStates[id] = true
             else
-                self.blockData[id] = block.inputs[1]
+                self.blockInputs[id] = self.hashedLookUp[block.inputs[1]]
                 self.runnableBlockPaths[id] = "lightBlocks"
                 self.blockStates[id] = false
             end
         elseif (block.type == "vanilla timer") then
             if (#block.inputs == 0) then
                 self.blockStates[id] = false
-            elseif (#block.outputs > 0 or block.color == "420420") then
+            else
                 if block.ticks == 0 then
-                    self.blockData[id] = block.inputs[1]
-                    self.blockOutputs[id] = block.outputs
+                    self.blockInputs[id] = self.hashedLookUp[block.inputs[1]]
+                    self.blockOutputs[id] = hashArrayValues(block.outputs)
                     self.runnableBlockPaths[id] = "throughBlocks"
                     self.blockStates[id] = false
-                elseif (block.ticks <= 1) then
-                    self.blockData[id] = id + 1 / (block.ticks + 1)
-                    self.blockOutputs[id] = block.outputs
-                    self.runnableBlockPaths[id] = "throughBlocks"
-                    self.blockStates[id] = false
-                    for i = 1, block.ticks - 1, 1 do
-                        self.blockData.throughBlocks[id + i / (block.ticks + 1)] = id + (i + 1) / (block.ticks + 1)
-                        self.blockOutputs[id + i / (block.ticks + 1)] = {id + (i - 1) / (block.ticks + 1)}
-                        self.runnableBlockPaths[id + i / (block.ticks + 1)] = "throughBlocks"
-                        self.blockStates[id + i / (block.ticks + 1)] = false
-                        self.countOfOnInputs[id + i / (block.ticks + 1)] = 0
-                    end
-                    self.blockData[id + block.ticks / (block.ticks + 1)] = block.inputs[1]
-                    self.blockOutputs[id + block.ticks / (block.ticks + 1)] = {id + (block.ticks - 1) / (block.ticks + 1)}
-                    self.runnableBlockPaths[id + block.ticks / (block.ticks + 1)] = "throughBlocks"
-                    self.blockStates[id + block.ticks / (block.ticks + 1)] = false
-                    self.countOfOnInputs[id + block.ticks / (block.ticks + 1)] = 0
-                    toFixTimers[id] = block
+                    -- elseif (block.ticks <= 1) then
+                    --     self.blockInputs[id] = id + 1 / (block.ticks + 1)
+                    --     self.blockOutputs[id] = hashArrayValues(block.outputs)
+                    --     self.runnableBlockPaths[id] = "throughBlocks"
+                    --     self.blockStates[id] = false
+                    --     for i = 1, block.ticks - 1, 1 do
+                    --         self.blockInputs.throughBlocks[id + i / (block.ticks + 1)] = id + (i + 1) / (block.ticks + 1)
+                    --         self.blockOutputs[id + i / (block.ticks + 1)] = { id + (i - 1) / (block.ticks + 1) }
+                    --         self.runnableBlockPaths[id + i / (block.ticks + 1)] = "throughBlocks"
+                    --         self.blockStates[id + i / (block.ticks + 1)] = false
+                    --         self.countOfOnInputs[id + i / (block.ticks + 1)] = 0
+                    --     end
+                    --     self.blockInputs[id + block.ticks / (block.ticks + 1)] = block.inputs[1]
+                    --     self.blockOutputs[id + block.ticks / (block.ticks + 1)] = { id +
+                    --     (block.ticks - 1) / (block.ticks + 1) }
+                    --     self.runnableBlockPaths[id + block.ticks / (block.ticks + 1)] = "throughBlocks"
+                    --     self.blockStates[id + block.ticks / (block.ticks + 1)] = false
+                    --     self.countOfOnInputs[id + block.ticks / (block.ticks + 1)] = 0
+                    --     toFixTimers[id] = block
                 else
                     timerIndex = timerIndex + 1
-                    self.blockData[id] = { block.inputs[1], timerIndex, block.ticks, block.ticks, false }
-                    self.blockOutputs[id] = block.outputs
+                    self.blockInputs[id] = { self.hashedLookUp[block.inputs[1]], timerIndex, block.ticks, block.ticks, false }
+                    self.blockOutputs[id] = hashArrayValues(block.outputs)
                     self.runnableBlockPaths[id] = "timerBlocks"
                     self.blockStates[id] = false
                     if block.ticks > longestTimer then
                         longestTimer = block.ticks
                     end
                 end
-            else
-                for _, inputId in pairs(block.inputs) do
-                    for k, outputId in pairs(self.data[inputId].outputs) do
-                        if outputId == id then
-                            table.remove(self.data[inputId].outputs, k)
-                        end
-                    end
-                end
             end
         elseif (block.type == "vanilla logic") then
-            if (#block.inputs == 0) then
+            if #block.inputs == 0 then
+                self.blockInputs[id] = {}
+                self.numberOfBlockInputs[id] = -1
+                self.runnableBlockPaths[id] = "throughBlocks"
+                self.blockOutputs[id] = hashArrayValues(block.outputs)
                 self.blockStates[id] = false
-            elseif (#block.outputs > 0 or block.color == "420420") then
+            else
                 if (#block.inputs == 1) then
                     if (block.mode >= 3) then
-                        self.blockData[id] = block.inputs[1]
+                        self.blockInputs[id] = self.hashedLookUp[block.inputs[1]]
                         self.runnableBlockPaths[id] = "norThroughBlocks"
                     else
-                        self.blockData[id] = block.inputs[1]
+                        self.blockInputs[id] = self.hashedLookUp[block.inputs[1]]
                         self.runnableBlockPaths[id] = "throughBlocks"
                     end
                 else
                     if (block.mode == 0) then
-                        self.blockData[id] = block.inputs
+                        self.blockInputs[id] = hashArrayValues(block.inputs)
                         self.runnableBlockPaths[id] = "andBlocks"
                         self.numberOfBlockInputs[id] = #block.inputs
                     elseif (block.mode == 1) then
-                        self.blockData[id] = block.inputs
+                        self.blockInputs[id] = hashArrayValues(block.inputs)
                         self.runnableBlockPaths[id] = "orBlocks"
                     elseif (block.mode == 2) then
-                        self.blockData[id] = block.inputs
+                        self.blockInputs[id] = hashArrayValues(block.inputs)
                         self.runnableBlockPaths[id] = "xorBlocks"
                         --end
                     elseif (block.mode == 3) then
-                        self.blockData[id] = block.inputs
+                        self.blockInputs[id] = hashArrayValues(block.inputs)
                         self.runnableBlockPaths[id] = "nandBlocks"
                         self.numberOfBlockInputs[id] = #block.inputs
                     elseif (block.mode == 4) then
-                        self.blockData[id] = block.inputs
+                        self.blockInputs[id] = hashArrayValues(block.inputs)
                         self.runnableBlockPaths[id] = "norBlocks"
                     elseif (block.mode == 5) then
-                        self.blockData[id] = block.inputs
+                        self.blockInputs[id] = hashArrayValues(block.inputs)
                         self.runnableBlockPaths[id] = "xnorBlocks"
                     end
                 end
-                self.blockOutputs[id] = block.outputs
+                self.blockOutputs[id] = hashArrayValues(block.outputs)
                 self.blockStates[id] = false
-            else
-                for _, inputId in pairs(block.inputs) do
-                    for k, outputId in pairs(self.data[inputId].outputs) do
-                        if outputId == id then
-                            table.remove(self.data[inputId].outputs, k)
-                        end
-                    end
-                end
             end
         end
     end
     for id, block in pairs(toFixTimers) do
-        local inputBlockOutputs = self.blockOutputs[block.inputs[1]]
+        local inputBlockOutputs = self.blockOutputs[self.hashedLookUp[block.inputs[1]]]
         for i, inputBlockOutputId in pairs(inputBlockOutputs) do
             if inputBlockOutputId == id then
                 inputBlockOutputs[i] = id + block.ticks / (block.ticks + 1)
@@ -239,36 +250,34 @@ function FastLogicRunner.prepData(self)
     self.nextRunningBlocks = {}
     self.runningBlocks = {}
     self.runningBlockLengths = {}
-    for _, index in pairs(self.pathIndexs) do
-        self.runningBlocks[index] = {}
-        self.runningBlockLengths[index] = 0
-    end
     for id, path in pairs(self.runnableBlockPaths) do
         self.runnableBlockPathIds[id] = self.pathIndexs[path]
     end
-    for id, block in pairs(self.blockData) do
-        local pathId = self.runnableBlockPathIds[id]
+    for _, pathId in pairs(self.pathIndexs) do
+        self.runningBlocks[pathId] = {}
+        self.runningBlockLengths[pathId] = 0
+    end
+    for id, pathId in pairs(self.runnableBlockPathIds) do
         self.runningBlockLengths[pathId] = self.runningBlockLengths[pathId] + 1
         self.runningBlocks[pathId][self.runningBlockLengths[pathId]] = id
     end
+
     self:doUpdate()
 end
 
-function FastLogicRunner.server_onProjectile(self)
-    -- print("-----------------------------")
-    -- local blockCounts = {}
-    -- for k, v in pairs(self.runnableBlockPaths) do
-    --     if blockCounts[v] == nil then
-    --         blockCounts[v] = 0
-    --     end
-    --     blockCounts[v] = blockCounts[v] + 1
-    -- end
-    -- print(blockCounts)
+function GetUnusedId(self)
+    self.newIdIndex = self.newIdIndex - 1
+    return self.newIdIndex
+end
 
+function FastLogicRunner.server_onProjectile(self)
     self:FindBalencedLogic()
 end
 
 function FastLogicRunner.doUpdates(self)
+    self.blocksRan = 0
+    self.blocksForNextTick = 0
+    self.blocksKilled = 0
     self.updateTicks = self.updateTicks + numberOfUpdatesPerTick
     if self.updateTicks >= 1 then
         -- input
@@ -301,22 +310,23 @@ function FastLogicRunner.doUpdates(self)
                 self.updateTicks = 0
             end
         end
+        -- light
+        local lightBlocks = self.runningBlocks[2]
+        for k = 1, self.runningBlockLengths[2] do
+            self.blocksRan = self.blocksRan + 1
+            local blockId = lightBlocks[k]
+            self.blockStates[blockId] = self.blockStates[self.blockInputs[blockId]]
+        end
     end
+    -- print("-")
+    -- print(self.blocksRan)
+    -- print(self.blocksForNextTick)
+    -- print(self.blocksKilled)
 end
 
 function FastLogicRunner.doUpdate(self)
-    -- uncomment to see how many blocks are running
-    --print(table.lengthSumOfContainedElements(self.runningBlocks))
-    --print(table.length(self.blockData))
-    --print(self.countOfOnInputs)
-    -- if table.lengthSumOfContainedElements(self.runningBlocks) > 0 then
-    --print(self.runningBlocks)
-    -- end
-    -- for k,v in pairs(self.runningBlocks) do
-    --     print(k .. ": " .. #v)
-    -- end
-    local newBlockStates = {}
     local newBlockStatesLength = 0
+    local newBlockStates = {}
     self.nextRunningBlocks = {}
     local runningBlocks = self.runningBlocks
     local nextRunningBlocks = self.nextRunningBlocks
@@ -326,10 +336,13 @@ function FastLogicRunner.doUpdate(self)
     local numberOfBlockOutputs = self.numberOfBlockOutputs
     local numberOfBlockInputs = self.numberOfBlockInputs
     local blockStates = self.blockStates
+    --print(self.blockStates)
     local blockOutputs = self.blockOutputs
+    local instantGateOutputs = self.instantGateOutputs
     -- through
     local throughBlocks = runningBlocks[3]
-    for k=1, runningBlockLengths[3] do
+    for k = 1, runningBlockLengths[3] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = throughBlocks[k]
         if (countOfOnInputs[blockId] == 1) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
@@ -338,7 +351,8 @@ function FastLogicRunner.doUpdate(self)
     end
     -- nor through
     local norThroughBlocks = runningBlocks[4]
-    for k=1, runningBlockLengths[4] do
+    for k = 1, runningBlockLengths[4] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = norThroughBlocks[k]
         if (countOfOnInputs[blockId] == 0) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
@@ -347,104 +361,106 @@ function FastLogicRunner.doUpdate(self)
     end
     -- and
     local andBlocks = runningBlocks[6]
-    for k=1, runningBlockLengths[6] do
+    local k = 1
+    while k <= runningBlockLengths[6] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = andBlocks[k]
         if (countOfOnInputs[blockId] == numberOfBlockInputs[blockId]) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
             newBlockStates[newBlockStatesLength] = blockId
         end
+        k = k + 1
     end
     -- or
     local orBlocks = runningBlocks[7]
-    for k=1, runningBlockLengths[7] do
+    k = 1
+    while k <= runningBlockLengths[7] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = orBlocks[k]
         if (countOfOnInputs[blockId] > 0) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
             newBlockStates[newBlockStatesLength] = blockId
         end
+        k = k + 1
     end
     -- xor
     local xorBlocks = runningBlocks[8]
-    for k=1, runningBlockLengths[8] do
+    for k = 1, runningBlockLengths[8] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = xorBlocks[k]
         if (countOfOnInputs[blockId] % 2 == 1) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
             newBlockStates[newBlockStatesLength] = blockId
         end
+        k = k + 1
     end
     -- nand
     local nandBlocks = runningBlocks[9]
-    for k=1, runningBlockLengths[9] do
+    k = 1
+    while k <= runningBlockLengths[9] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = nandBlocks[k]
-        if (countOfOnInputs[blockId] ~=  numberOfBlockInputs[blockId]) ~= blockStates[blockId] then
+        if (countOfOnInputs[blockId] ~= numberOfBlockInputs[blockId]) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
             newBlockStates[newBlockStatesLength] = blockId
         end
+        k = k + 1
     end
     -- nor
     local norBlocks = runningBlocks[10]
-    for k=1, runningBlockLengths[10] do
+    k = 1
+    while k <= runningBlockLengths[10] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = norBlocks[k]
         if (countOfOnInputs[blockId] == 0) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
             newBlockStates[newBlockStatesLength] = blockId
         end
+        k = k + 1
     end
     -- xnor
     local xnorBlocks = runningBlocks[11]
-    for k=1, runningBlockLengths[11] do
+    for k = 1, runningBlockLengths[11] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = xnorBlocks[k]
         if (countOfOnInputs[blockId] % 2 == 0) ~= blockStates[blockId] then
             newBlockStatesLength = newBlockStatesLength + 1
             newBlockStates[newBlockStatesLength] = blockId
         end
+        k = k + 1
     end
     -- timer
     local timerReadRow = table.remove(self.timerData, 1)
     self.timerData[#self.timerData + 1] = {}
     local timerBlocks = runningBlocks[5]
-    for k=1, runningBlockLengths[5] do
+    for k = 1, #timerReadRow do
+        newBlockStatesLength = newBlockStatesLength + 1
+        newBlockStates[newBlockStatesLength] = timerReadRow[k]
+    end
+    for k = 1, runningBlockLengths[5] do
+        self.blocksRan = self.blocksRan + 1
         local blockId = timerBlocks[k]
-        local block = self.blockData[blockId]
-        if (timerReadRow[block[2]]) ~= nil then
-            newBlockStatesLength = newBlockStatesLength + 1
-            newBlockStates[newBlockStatesLength] = blockId
-        end
+        local block = self.blockInputs[blockId]
         if (countOfOnInputs[blockId] == 1) ~= block[5] then
             block[5] = not block[5]
-            self.timerData[block[3]][block[2]] = true
-            block[4] = block[3]
-            nextRunningBlocks[blockId] = true
-        elseif block[4] > 1 then
-            block[4] = block[4] - 1
-            nextRunningBlocks[blockId] = true
+            self.timerData[block[3]][#self.timerData[block[3]] + 1] = blockId
         end
-    end
-    -- light
-    local lightBlocks = runningBlocks[2]
-    for k=1, runningBlockLengths[2] do
-        local blockId = lightBlocks[k]
-        blockStates[blockId] = blockStates[self.blockData[blockId]]
     end
     -- create new list of runningBlockLengths
     runningBlockLengths = {
-        [1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0,  [10] = 0,  [11] = 0
+        [1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0, [11] = 0
     }
     self.runningBlockLengths = runningBlockLengths
-    for id, _ in pairs(nextRunningBlocks) do
-        local pathId = runnableBlockPathIds[id]
-        runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
-        runningBlocks[pathId][runningBlockLengths[pathId]] = id
-    end
-    for i = 1, newBlockStatesLength do
-        local id = newBlockStates[i]
+    for k = 1, newBlockStatesLength do
+        local id = newBlockStates[k]
         blockStates[id] = not blockStates[id]
         local stateNumber = blockStates[id] and 1 or -1
         local outputs = blockOutputs[id]
         for k = 1, numberOfBlockOutputs[id] do
             local outputId = outputs[k]
             countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
-            if nextRunningBlocks[outputId] == nil then
+            if not nextRunningBlocks[outputId] then
+                self.blocksForNextTick = self.blocksForNextTick + 1
                 nextRunningBlocks[outputId] = true
                 local pathId = runnableBlockPathIds[outputId]
                 runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1

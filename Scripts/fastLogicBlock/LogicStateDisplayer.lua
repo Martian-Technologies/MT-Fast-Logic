@@ -5,18 +5,19 @@ function FastLogicRunner.updateDisplays(self)
     local destroyIds = {}
     for id, block in pairs(self.data) do
         if (block.type == "vanilla light" or block.color == "420420") then
-            local state = self.blockStates[id]
+            local state = self.blockStates[self.hashedLookUp[id]]
             if (sm.exists(block.shape) and #addData < 1000) then
                 local wantedDisplayPos = block.shape:getWorldPosition() + sm.vec3.new(0, 0, -0.4 / 4)
-                if (state and self.openDisplays[id] == nil) then
-                    addData[#addData + 1] = self.createDataForDisplay(wantedDisplayPos, id, block)
-                    self.openDisplays[id] = wantedDisplayPos
-                end
                 if (#destroyIds < 1000 and self.openDisplays[id] ~= nil and sm.vec3.length(self.openDisplays[id] - wantedDisplayPos) > 0.01) then
                     destroyIds[#destroyIds + 1] = id
                     addData[#addData + 1] = self.createDataForDisplay(wantedDisplayPos, id, block)
                     self.openDisplays[id] = wantedDisplayPos
+                
+                elseif (state and self.openDisplays[id] == nil) then
+                    addData[#addData + 1] = self.createDataForDisplay(wantedDisplayPos, id, block)
+                    self.openDisplays[id] = wantedDisplayPos
                 end
+                
             end
             if (self.openDisplays[id] ~= nil and (not state) and #destroyIds < 1000) then
                 destroyIds[#destroyIds + 1] = id

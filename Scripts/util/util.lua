@@ -62,8 +62,8 @@ function values(t)
     end
 end
 
-function table.contains(table, value)
-    for v in values(table) do
+function table.contains(tbl, value)
+    for v in values(tbl) do
         if (v == value) then
             return true
         end
@@ -71,14 +71,23 @@ function table.contains(table, value)
     return false
 end
 
-function table.containsWithOut(table, value, out)
-    for k, v in pairs(table) do
+function table.containsWithOut(tbl, value, out)
+    for k, v in pairs(tbl) do
         if (v == value) then
             out[0] = k
             return true
         end
     end
     return false
+end
+
+function table.find(tbl, value)
+    for k, v in ipairs(tbl) do
+        if (v == value) then
+            return k
+        end
+    end
+    return nil
 end
 
 function table.toString(tbl)
@@ -105,20 +114,24 @@ function table.toString(tbl)
     return result .. "}"
 end
 
+function table.removeValue(tbl, value)
+    return table.remove(tbl, table.find(tbl, value))
+end
+
 function table.length(tbl)
     local count = 0
     for _, _ in pairs(tbl) do
-       count = count + 1
+        count = count + 1
     end
     return count
 end
 
 function table.getKeys(t)
-  local keys={}
-  for key,_ in pairs(t) do
-    table.insert(keys, key)
-  end
-  return keys
+    local keys = {}
+    for key, _ in pairs(t) do
+        table.insert(keys, key)
+    end
+    return keys
 end
 
 function table.lengthSumOfContainedElements(tbl)
@@ -129,10 +142,105 @@ function table.lengthSumOfContainedElements(tbl)
     return total
 end
 
-function  table.copy(tbl)
+function table.sumOfContainedElements(tbl)
+    local sum = 0
+    for k, v in pairs(tbl) do
+        sum = sum + v
+    end
+    return sum
+end
+
+function table.copy(tbl)
     local newTable = {}
     for key, value in pairs(tbl) do
         newTable[key] = value
     end
     return newTable
+end
+
+function table.getKeysSortedByValue(tbl, sortFunction, validationFunction)
+    if validationFunction == nil then validationFunction = function(val) return true end end
+    local keys = {}
+    for key, _ in pairs(tbl) do
+        if (validationFunction(tbl[key])) then
+            table.insert(keys, key)
+        end
+    end
+
+    table.sort(keys, function(a, b)
+        return sortFunction(tbl[a], tbl[b])
+    end)
+
+    return keys
+end
+
+printOld = printOld or print
+local formater = {}
+function formater.getFormatedForPrint (val)
+    if type(val) == "number" then
+        return string.format("%.f", val)
+    elseif type(val) == "table" then
+        local i = 1
+        local str = "{"
+        for key, value in pairs(val) do
+            if (#str > 1) then
+                str = str .. ", "
+            end
+            if (key == i) then
+                i = i + 1
+                str = str .. formater.getFormatedForPrint(value)
+            else
+                str = str .. "[" .. formater.getFormatedForPrint(key) .. "] = " .. formater.getFormatedForPrint(value)
+            end
+        end
+        return  str .. "}"
+    elseif type(val) == "nil" then
+        return "nil"
+    elseif type(val) == "string" then
+        return val
+    elseif type(val) == "boolean" then
+        if val then
+            return "true"
+        end
+        return "false"
+    elseif type(val) == "Shape" then
+        return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId()) .. "}"
+    else
+        return type(val)
+    end
+end
+
+function print(val)
+    printOld(formater.getFormatedForPrint(val))
+end
+
+-- input the keys you want to be able to hash
+function table.makeConstantKeysOnlyHash(keys)
+    local unhashedLookUp = {}
+    local hashedLookUp = {}
+    for _, value in pairs(keys) do
+        hashedLookUp[value] = #unhashedLookUp+1
+        unhashedLookUp[#unhashedLookUp+1] = value
+    end
+    return {["hashedLookUp"] = hashedLookUp, ["unhashedLookUp"] = unhashedLookUp, ["size"] = #unhashedLookUp}
+end
+
+function table.addToConstantKeysOnlyHash(hashData, key)
+    if (hashData.hashedLookUp[key] ~= nil) then
+        return hashData.hashedLookUp[key]
+    end
+    hashData.hashedLookUp[key] = #hashData.unhashedLookUp+1
+    hashData.unhashedLookUp[#hashData.unhashedLookUp+1] = key
+    return #hashData.unhashedLookUp
+end
+
+function table.makeArray(size, val)
+    if val == nil then
+        val = false
+    end
+    local tbl = {}
+    for i = 1, size do
+        tbl[i] = val
+    end
+    return tbl
 end

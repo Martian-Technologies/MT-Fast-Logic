@@ -4,7 +4,7 @@ dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
 
 FastLight = table.deepCopyTo(BaseFastLogicBlock, (FastLight or class()))
-FastLight.maxParentCount = 1 -- infinite
+FastLight.maxParentCount = 1
 FastLight.maxChildCount = 0
 FastLight.connectionInput = sm.interactable.connectionType.logic
 FastLight.connectionOutput = nil
@@ -15,7 +15,6 @@ function FastLight.server_onCreate2(self)
     self.creation.FastLights[self.id] = self
     self.data = self.data or {}
     if self.storage:load() ~= nil then
-        print(self.storage:load())
         self.data.luminance = self.storage:load().luminance or 50
     else
         self.data.luminance = 50

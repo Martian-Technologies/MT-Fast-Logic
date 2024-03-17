@@ -65,6 +65,7 @@ function BaseFastLogicBlock.GetData(self)
             ["FastLogicRunner"] = FastLogicRunner.getNew(self.creationId),
             ["FastLogicGates"] = {},
             ["FastTimers"] = {},
+            ["EndTickButtons"] = {},
             ["FastLights"] = {},
             ["BlocksToScan"] = {},
             ["AllFastBlocks"] = {},

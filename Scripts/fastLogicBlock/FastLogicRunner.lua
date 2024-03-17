@@ -81,8 +81,10 @@ function FastLogicRunner.addAllNewBlocks(self)
             end
         elseif block.type == "Timer" then
             self:AddBlock("timerBlocks", id, inputs, outputs, block.interactable.active, block.data.time)
+        elseif block.type == "EndTickButton" then
+            self:AddBlock("EndTickButtons", id, inputs, {}, block.interactable.active)
         elseif block.type == "Light" then
-            self:AddBlock("lightBlocks", id, inputs, outputs, block.interactable.active)
+            self:AddBlock("lightBlocks", id, inputs, {}, block.interactable.active)
         end
     end
 end
@@ -172,7 +174,6 @@ function FastLogicRunner.makeDataArrays(self)
     self.blockOutputsHash = {}
     self.numberOfBlockInputs = table.makeArrayForHash(self.hashData)
     self.numberOfBlockOutputs = table.makeArrayForHash(self.hashData)
-    self.inputBlocks = {} -- is hash
     self.countOfOnInputs = table.makeArrayForHash(self.hashData)
     self.timerData = {}
     self.timerLengths = table.makeArrayForHash(self.hashData)
@@ -180,7 +181,7 @@ function FastLogicRunner.makeDataArrays(self)
     self.runnableBlockPathIds = table.makeArrayForHash(self.hashData)
     self.longestTimer = 0
     self.pathNames = {
-        "inputBlocks",
+        "EndTickButtons",
         "lightBlocks",
         "throughBlocks",
         "norThroughBlocks",
@@ -191,7 +192,6 @@ function FastLogicRunner.makeDataArrays(self)
         "nandBlocks",
         "norBlocks",
         "xnorBlocks",
-        ["vanilla input"] = "vanilla input"
     }
     self.pathIndexs = {}
     for index, path in pairs(self.pathNames) do
@@ -217,12 +217,29 @@ function FastLogicRunner.doUpdates(self)
     self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
     if self.updateTicks >= 1 then
         if self.blockCount > 0 then
+            local countOfOnInputs = self.countOfOnInputs
+            local blockStates = self.blockStates
+            local runningBlockLengths = self.runningBlockLengths
+            -- EndTickButtons
+            local EndTickButtons = self.blocksSortedByPath[self.pathIndexs["EndTickButtons"]]
+            for k = 1, #EndTickButtons do
+                local blockId = EndTickButtons[k]
+                if countOfOnInputs[blockId] > 0 then
+                    blockStates[blockId] = true
+                    if self.updateTicks >= 2 then
+                        runningBlockLengths[1] = 0
+                        self.updateTicks = 1
+                    end
+                else
+                    blockStates[blockId] = false
+                end
+            end
             -- other
             while self.updateTicks >= 2 do
-                self:doUpdate()
                 self.updateTicks = self.updateTicks - 1
+                self:doUpdate()
                 local sum = 0
-                for k, v in pairs(self.runningBlockLengths) do
+                for k, v in pairs(runningBlockLengths) do
                     sum = sum + v
                 end
                 if sum == 0 then
@@ -230,9 +247,7 @@ function FastLogicRunner.doUpdates(self)
                 end
             end
             -- light
-            local countOfOnInputs = self.countOfOnInputs
             local numberOfBlockInputs = self.numberOfBlockInputs
-            local blockStates = self.blockStates
             local lightBlocks = self.blocksSortedByPath[self.pathIndexs["lightBlocks"]]
             for k = 1, #lightBlocks do
                 local blockId = lightBlocks[k]
@@ -270,6 +285,23 @@ function FastLogicRunner.doUpdate(self)
     local timerInputStates = self.timerInputStates
     local blockOutputs = self.blockOutputs
     local instantGateOutputs = self.instantGateOutputs
+
+    -- EndTickButton
+    local EndTickButtons = runningBlocks[1]
+    for k = 1, runningBlockLengths[1] do
+        local blockId = EndTickButtons[k]
+        if countOfOnInputs[blockId] > 0 then
+            blockStates[blockId] = true
+            if self.updateTicks >= 2 then
+                self.nextRunningIndex = self.nextRunningIndex - 1
+                runningBlockLengths[1] = 0
+                self.updateTicks = 1
+                return
+            end
+        else
+            blockStates[blockId] = false
+        end
+    end
     -- through
     local throughBlocks = runningBlocks[3]
     for k = 1, runningBlockLengths[3] do

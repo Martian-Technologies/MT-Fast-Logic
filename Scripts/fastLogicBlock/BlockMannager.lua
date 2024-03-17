@@ -2,7 +2,7 @@ dofile "../util/util.lua"
 
 function FastLogicRunner.AddBlock(self, path, id, inputs, outputs, state, timerLength)
     -- path data
-    if type(path) == "string" and path ~= "vanilla input" then
+    if type(path) == "string" then
         path = self.pathIndexs[path]
     end
     self.runnableBlockPaths[id] = self.pathNames[path]
@@ -25,7 +25,6 @@ function FastLogicRunner.AddBlock(self, path, id, inputs, outputs, state, timerL
             path == self.pathIndexs["norThroughBlocks"] or
             path == self.pathIndexs["throughBlocks"] or
             path == self.pathIndexs["timerBlocks"] or
-            path == "vanilla input" or
             path == self.pathIndexs["lightBlocks"]
         ) then
         self.blockInputs[id] = false
@@ -44,7 +43,7 @@ function FastLogicRunner.AddBlock(self, path, id, inputs, outputs, state, timerL
     end
 
     -- outputs
-    if path ~= self.pathIndexs["lightBlocks"] then
+    if path ~= self.pathIndexs["lightBlocks"] or path ~= self.pathIndexs["EndTickButtons"] then
         if outputs ~= nil then
             if type(outputs) == "table" then
                 for _, v in pairs(outputs) do
@@ -101,7 +100,6 @@ function FastLogicRunner.RemoveBlock(self, id)
     self.countOfOnInputs[id] = false
     self.runnableBlockPaths[id] = false
     self.runnableBlockPathIds[id] = false
-    self.inputBlocks[id] = nil
     self.timerLengths[id] = false
     self.timerInputStates[id] = false
     self.blockCount = self.blockCount - 1
@@ -119,10 +117,7 @@ function FastLogicRunner.RemoveInput(self, id, idToDeconnect)
 end
 
 function FastLogicRunner.AddOutput(self, id, idToConnect)
-    if self.runnableBlockPathIds[idToConnect] == "vanilla input" then
-        self.inputBlocks[idToConnect] = id
-        self.numberOfBlockInputs[idToConnect] = 1
-    elseif self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToConnect] ~= false and not table.contains(self.blockOutputs[id], idToConnect) then
+    if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToConnect] ~= false and not table.contains(self.blockOutputs[id], idToConnect) then
         -- add outputs
         self.blockOutputs[id][#self.blockOutputs[id] + 1] = idToConnect
         self.blockOutputsHash[id][idToConnect] = true
@@ -159,10 +154,7 @@ function FastLogicRunner.AddOutput(self, id, idToConnect)
 end
 
 function FastLogicRunner.RemoveOutput(self, id, idToDeconnect)
-    if self.runnableBlockPathIds[idToDeconnect] == "vanilla input" then
-        self.inputBlocks[idToDeconnect] = false
-        self.numberOfBlockInputs[idToDeconnect] = 0
-    elseif self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToDeconnect] ~= false and table.removeValue(self.blockOutputs[id], idToDeconnect) ~= nil then
+    if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToDeconnect] ~= false and table.removeValue(self.blockOutputs[id], idToDeconnect) ~= nil then
         self.blockOutputsHash[id][idToDeconnect] = nil
         self.numberOfBlockOutputs[id] = self.numberOfBlockOutputs[id] - 1
         if type(self.blockInputs[idToDeconnect]) == "table" then

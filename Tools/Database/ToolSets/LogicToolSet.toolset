@@ -1,0 +1,15 @@
+{
+   "toolList" : [
+      {
+         "name" : "FastLogicRunner",
+         "previewRenderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "script" : {
+            "class" : "FastLogicRunnerRunner",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/fastLogicBlock/FastLogicRunnerRunner.lua"
+         },
+         "autoTool" : true,
+         "uuid" : "e8fc9d11-1a0b-4c0c-a189-388f1ffcc9c1"
+      }
+   ]
+}

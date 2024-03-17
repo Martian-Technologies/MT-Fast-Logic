@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="BackgroundEngineNoUpgrade" position_real="0.369792 0.209444 0.259896 0.459259" align="Center" name="MainPanel">
+        <Property key="NeedKey" value="false"/>
+        <Property key="NeedMouse" value="true"/>
+        <Property key="InheritsAlpha" value="false"/>
+        <Widget type="TextBox" skin="TextBox" position_real="0.0981964 0.100806 0.797595 0.0766129" name="Name">
+            <Property key="Caption" value="#{CONTROLLER_TIMER_TITLE}"/>
+            <Property key="FontName" value="SM_HeaderLarge_Wide"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.0981964 0.183468 0.797595 0.0584677" name="SubTitle">
+            <Property key="TextAlign" value="Center"/>
+            <Property key="TextColour" value="1 0.803922 0.247059"/>
+            <Property key="FontName" value="SM_SubHeader"/>
+            <Property key="Caption" value="#{CONTROLLER_TIMER_DELAY}"/>
+        </Widget>
+        <Widget type="Widget" skin="PanelEmpty" position_real="0.699399 0.270161 0.278557 0.572581" name="TickSlider">
+            <Property key="Range" value="40" />
+            <Property key="NeedKey" value="false"/>
+        </Widget>
+        <Widget type="Widget" skin="PanelEmpty" position_real="0.1200401 0.270161 0.278557 0.572581" name="SecondSlider">
+            <Property key="Range" value="60" />
+            <Property key="NeedKey" value="false"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.316633 0.467742 0.1002 0.0866935" name="SecondsText">
+            <Property key="FontName" value="SM_NumberHuge"/>
+            <Property key="Caption" value="60"/>
+            <Property key="TextAlign" value="Right Bottom"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.418838 0.481855 0.0460922 0.0645161">
+            <Property key="Caption" value="S"/>
+            <Property key="FontName" value="X_Interactable_Timer_TimeUnit"/>
+            <Property key="TextColour" value="0.592157 0.592157 0.592157"/>
+            <Property key="TextAlign" value="Left Bottom"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.611222 0.481855 0.0821643 0.0645161">
+            <Property key="Caption" value="MS"/>
+            <Property key="FontName" value="X_Interactable_Timer_TimeUnit"/>
+            <Property key="TextColour" value="0.592157 0.592157 0.592157"/>
+            <Property key="TextAlign" value="Right Bottom"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.460922 0.467742 0.148297 0.0866935" name="MillisecondsText">
+            <Property key="Caption" value="000"/>
+            <Property key="FontName" value="SM_NumberHuge"/>
+            <Property key="TextAlign" value="Right Bottom"/>
+        </Widget>
+        <Widget type="Widget" skin="WhiteSkin" position_real="0.316633 0.574597 0.358717 0.00201613">
+            <Property key="Colour" value="0.592157 0.592157 0.592157"/>
+            <Property key="Alpha" value="0.2"/>
+        </Widget>
+        <Widget type="Widget" skin="WhiteSkin" position_real="0.316633 0.645161 0.358717 0.00201613">
+            <Property key="Colour" value="0.592157 0.592157 0.592157"/>
+            <Property key="Alpha" value="0.2"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.316633 0.584677 0.358717 0.046371" name="TicksText">
+            <Property key="Caption" value="0123456789 #{CONTROLLER_TIMER_TICKS}"/>
+            <Property key="FontName" value="X_Interactable_Timer_TickCount"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.176353 0.850806 0.130261 0.0403226">
+            <Property key="TextColour" value="0.592157 0.592157 0.592157"/>
+            <Property key="Caption" value="#{CONTROLLER_TIMER_SECONDS}"/>
+            <Property key="FontName" value="SM_LabelTiny"/>
+            <Property key="TextAlign" value="HCenter Top"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.657315 0.850806 0.214429 0.0403226">
+            <Property key="TextColour" value="0.592157 0.592157 0.592157"/>
+            <Property key="Caption" value="#{CONTROLLER_TIMER_TICKS}"/>
+            <Property key="FontName" value="SM_LabelTiny"/>
+            <Property key="TextAlign" value="HCenter Top"/>
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings/>
+</MyGUI>

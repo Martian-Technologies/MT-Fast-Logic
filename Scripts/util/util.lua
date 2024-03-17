@@ -63,7 +63,7 @@ function values(t)
 end
 
 function table.contains(tbl, value)
-    for v in values(tbl) do
+    for _, v in ipairs(tbl) do
         if (v == value) then
             return true
         end
@@ -115,7 +115,9 @@ function table.toString(tbl)
 end
 
 function table.removeValue(tbl, value)
-    return table.remove(tbl, table.find(tbl, value))
+    local index = table.find(tbl, value)
+    if index == nil then return nil end
+    return table.remove(tbl, index)
 end
 
 function table.length(tbl)
@@ -158,6 +160,34 @@ function table.copy(tbl)
     return newTable
 end
 
+function table.deepCopy(tbl)
+    local newTable = {}
+    for key, value in pairs(tbl) do
+        if type(value) == "table" then
+            value = table.deepCopy(value)
+        end
+        newTable[key] = value
+    end
+    return newTable
+end
+
+function table.copyTo(tbl, newTable)
+    for key, value in pairs(tbl) do
+        newTable[key] = value
+    end
+    return newTable
+end
+
+function table.deepCopyTo(tbl, newTable)
+    for key, value in pairs(tbl) do
+        if type(value) == "table" then
+            value = table.deepCopy(value)
+        end
+        newTable[key] = value
+    end
+    return newTable
+end
+
 function table.getKeysSortedByValue(tbl, sortFunction, validationFunction)
     if validationFunction == nil then validationFunction = function(val) return true end end
     local keys = {}
@@ -176,7 +206,12 @@ end
 
 printOld = printOld or print
 local formater = {}
-function formater.getFormatedForPrint (val)
+function formater.getFormatedForPrint(val, depth)
+    depth = depth or 5
+    depth = depth - 1
+    if depth == 0 then
+        return "MAX DEPTH REACHED"
+    end
     if type(val) == "number" then
         return string.format("%.f", val)
     elseif type(val) == "table" then
@@ -188,14 +223,14 @@ function formater.getFormatedForPrint (val)
             end
             if (key == i) then
                 i = i + 1
-                str = str .. formater.getFormatedForPrint(value)
+                str = str .. formater.getFormatedForPrint(value, depth)
             else
-                str = str .. "[" .. formater.getFormatedForPrint(key) .. "] = " .. formater.getFormatedForPrint(value)
+                str = str .. "[" .. formater.getFormatedForPrint(key, depth) .. "] = " .. formater.getFormatedForPrint(value, depth)
             end
         end
-        return  str .. "}"
-    elseif type(val) == "nil" then
-        return "nil"
+        return str .. "}"
+    elseif type(val) == "del" then
+        return "del"
     elseif type(val) == "string" then
         return val
     elseif type(val) == "boolean" then
@@ -204,7 +239,7 @@ function formater.getFormatedForPrint (val)
         end
         return "false"
     elseif type(val) == "Shape" then
-        return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId()) .. "}"
+        return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId(), depth) .. "}"
     else
         return type(val)
     end
@@ -219,19 +254,47 @@ function table.makeConstantKeysOnlyHash(keys)
     local unhashedLookUp = {}
     local hashedLookUp = {}
     for _, value in pairs(keys) do
-        hashedLookUp[value] = #unhashedLookUp+1
-        unhashedLookUp[#unhashedLookUp+1] = value
+        hashedLookUp[value] = #unhashedLookUp + 1
+        unhashedLookUp[#unhashedLookUp + 1] = value
     end
-    return {["hashedLookUp"] = hashedLookUp, ["unhashedLookUp"] = unhashedLookUp, ["size"] = #unhashedLookUp}
+    return { ["hashedLookUp"] = hashedLookUp, ["unhashedLookUp"] = unhashedLookUp, ["size"] = #unhashedLookUp, ["tables"] = {}, ["tableFills"] = {}}
 end
 
 function table.addToConstantKeysOnlyHash(hashData, key)
     if (hashData.hashedLookUp[key] ~= nil) then
         return hashData.hashedLookUp[key]
     end
-    hashData.hashedLookUp[key] = #hashData.unhashedLookUp+1
-    hashData.unhashedLookUp[#hashData.unhashedLookUp+1] = key
-    return #hashData.unhashedLookUp
+    hashData.size = hashData.size + 1
+    hashData.hashedLookUp[key] = hashData.size
+    hashData.unhashedLookUp[hashData.size] = key
+    for i = 1, #hashData.tables do
+        if hashData.tables[i][hashData.size] == nil then
+            hashData.tables[i][hashData.size] = hashData.tableFills[i]
+        end
+    end
+    return hashData.size
+end
+
+function table.removeFromConstantKeysOnlyHash(hashData, key)
+    if (hashData.hashedLookUp[key] ~= nil) then
+        hashData.unhashedLookUp[hashData.hashedLookUp[key]] = "del"
+        hashData.hashedLookUp[key] = nil
+    end
+end
+
+function table.makeArrayForHash(hash, val)
+    local tbl = table.makeArray(hash.size, val)
+    hash.tables[#hash.tables+1] = tbl
+    hash.tableFills[#hash.tableFills+1] = val or false
+    return tbl
+end
+
+function table.hashArrayValues(hashData, tbl)
+    local newTbl = {}
+    for key, value in pairs(tbl) do
+        newTbl[key] = hashData.hashedLookUp[value]
+    end
+    return newTbl
 end
 
 function table.makeArray(size, val)
@@ -243,4 +306,8 @@ function table.makeArray(size, val)
         tbl[i] = val
     end
     return tbl
+end
+
+function string.replace_char(pos, str, r)
+    return str:sub(1, pos-1) .. r .. str:sub(pos+1)
 end

@@ -6,16 +6,106 @@
             "y" : 1,
             "z" : 1
          },
-         "color" : "FFFFFF",
-         "name" : "Fast Logic Runner",
+         "color" : "df7f01",
+         "name" : "Fast Logic Gate",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 2,
+            "density" : 3,
+            "durability" : 5,
+            "friction" : 2
+         },
+         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "rotationSet" : "PropYZ",
+         "scripted" : {
+            "classname" : "FastLogicGate",
+            "filename" : "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGate.lua"
+         },
+         "uuid" : "6a9dbff5-7562-4e9a-99ae-3590ece88112"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 2,
+            "z" : 1
+         },
+         "color" : "df7f01",
+         "name" : "Fast Timer",
+         "physicsMaterial" : "Mechanical",
+         "ratings" : {
+            "buoyancy" : 2,
+            "density" : 3,
+            "durability" : 5,
+            "friction" : 2
+         },
+         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_timer.rend",
+         "rotationSet" : "PropYZ",
+         "scripted" : {
+            "classname" : "FastTimer",
+            "filename" : "$CONTENT_DATA/Scripts/fastLogicBlocks/FastTimer.lua"
+         },
+         "uuid" : "db0bc11b-c083-4a6a-843f-73ac1033e6fe"
+      },
+      {
+         "box" : {
+            "x" : 6,
+            "y" : 1,
+            "z" : 6
+         },
+         "color" : "eeeeee",
+         "flammable" : false,
+         "name" : "Warehouse Square Light",
+         "physicsMaterial" : "Metal",
+         "ratings" : {
+            "buoyancy" : 3,
+            "density" : 5,
+            "durability" : 2,
+            "friction" : 5
+         },
+         "renderable" : {
+            "lodList" : [
+               {
+                  "mesh" : "$SURVIVAL_DATA/Objects/Mesh/lights/obj_light_arealight_off.fbx",
+                  "pose0" : "$SURVIVAL_DATA/Objects/Mesh/lights/obj_light_arealight_on.fbx",
+                  "subMeshMap" : {
+                     "arealight" : {
+                        "material" : "PoseAnimDifAsgNor",
+                        "textureList" : [
+                           "$SURVIVAL_DATA/Objects/Textures/lights/obj_light_arealight_dif.tga",
+                           "$SURVIVAL_DATA/Objects/Textures/lights/obj_light_arealight_asg.tga",
+                           "$SURVIVAL_DATA/Objects/Textures/lights/obj_light_arealight_nor.tga"
+                        ]
+                     },
+                     "beam" : {
+                        "material" : "PoseAnimLightCone",
+                        "textureList" : [
+                           "$GAME_DATA/Objects/Textures/lights/obj_light_headlightbeam_dif.tga",
+                           "",
+                           ""
+                        ]
+                     },
+                     "flare" : {
+                        "material" : "PoseAnimLightFlare",
+                        "textureList" : [
+                           "$GAME_DATA/Objects/Textures/lights/obj_light_headlightflare_dif.tga",
+                           "",
+                           ""
+                        ]
+                     }
+                  }
+               }
+            ]
+         },
+         "rotationSet" : "PropY",
+         "sticky" : "-Y",
+         "uuid" : "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b"
+      },
+      {
+         "name" : "del this block",
          "physicsMaterial" : "Default",
          "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
          "rotationSet" : "Default",
-         "scripted" : {
-            "classname" : "FastLogicRunner",
-            "filename" : "$CONTENT_DATA/Scripts/fastLogicBlock/FastLogicRunner.lua"
-         },
-         "showInInventory" : true,
+         "showInInventory" : false,
          "uuid" : "3706ba55-bd11-4053-b437-bbf2aff823b4"
       }
    ]

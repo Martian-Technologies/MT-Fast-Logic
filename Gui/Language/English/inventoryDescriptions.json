@@ -1,1 +1,10 @@
-{}
+{
+   "6a9dbff5-7562-4e9a-99ae-3590ece88112" : {
+      "description" : "To convert you need to place down a fast logic gate and shoot it with a spud.\\nTo convert back you use a hammer on a fast logic gate.",
+      "title" : "Fast Logic Gate"
+   },
+   "db0bc11b-c083-4a6a-843f-73ac1033e6fe" : {
+      "description" : "To convert you need to place down a fast logic gate and shoot it with a spud.\\nTo convert back you use a hammer on a fast logic gate.",
+      "title" : "Fast Timer"
+   }
+}

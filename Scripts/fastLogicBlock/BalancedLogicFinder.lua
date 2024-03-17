@@ -1,6 +1,7 @@
 dofile "../util/util.lua"
 
 function FastLogicRunner.FindBalencedLogic(self)
+    
     for id, block in ipairs(self.data) do
         local layerIndex = 1
         local layers = { { id } }

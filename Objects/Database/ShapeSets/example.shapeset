@@ -105,7 +105,7 @@
          "uuid" : "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b"
       },
       {
-         "color" : "df7f01",
+         "color" : "bb0000",
          "flammable" : true,
          "hull" : {
             "col" : "$GAME_DATA/Objects/Collision/obj_interactive_button.obj",

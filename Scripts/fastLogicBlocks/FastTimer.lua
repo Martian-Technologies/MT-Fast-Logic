@@ -4,6 +4,8 @@ dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
 
 FastTimer = table.deepCopyTo(BaseFastLogicBlock, (FastTimer or class()))
+FastTimer.maxParentCount = 1 -- infinite
+FastTimer.maxChildCount = -1  -- infinite
 
 function FastTimer.server_onCreate2(self)
     self.type = "Timer"

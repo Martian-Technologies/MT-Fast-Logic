@@ -6,5 +6,9 @@
    "db0bc11b-c083-4a6a-843f-73ac1033e6fe" : {
       "description" : "To convert you need to place down a fast logic gate and shoot it with a spud.\\nTo convert back you use a hammer on a fast logic gate.",
       "title" : "Fast Timer"
+   },
+   "dcb72c88-76cc-4fb2-87b7-b8a6b83f898" : {
+      "description" : "To convert you need to place down a fast logic gate and shoot it with a spud.\\nTo convert back you use a hammer on a fast logic gate.",
+      "title" : "Fast Warehouse Square Light"
    }
 }

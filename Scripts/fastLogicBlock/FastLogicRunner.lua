@@ -67,20 +67,22 @@ function FastLogicRunner.addAllNewBlocks(self)
         local outputs = table.hashArrayValues(self.hashData, block:getChildIds())
         if block.type == "LogicGate" then
             if (block.data.mode == 0) then
-                self:AddBLock("andBlocks", id, inputs, outputs, block.interactable.active)
+                self:AddBlock("andBlocks", id, inputs, outputs, block.interactable.active)
             elseif (block.data.mode == 1) then
-                self:AddBLock("orBlocks", id, inputs, outputs, block.interactable.active)
+                self:AddBlock("orBlocks", id, inputs, outputs, block.interactable.active)
             elseif (block.data.mode == 2) then
-                self:AddBLock("xorBlocks", id, inputs, outputs, block.interactable.active)
+                self:AddBlock("xorBlocks", id, inputs, outputs, block.interactable.active)
             elseif (block.data.mode == 3) then
-                self:AddBLock("nandBlocks", id, inputs, outputs, block.interactable.active)
+                self:AddBlock("nandBlocks", id, inputs, outputs, block.interactable.active)
             elseif (block.data.mode == 4) then
-                self:AddBLock("norBlocks", id, inputs, outputs, block.interactable.active)
+                self:AddBlock("norBlocks", id, inputs, outputs, block.interactable.active)
             elseif (block.data.mode == 5) then
-                self:AddBLock("xnorBlocks", id, inputs, outputs, block.interactable.active)
+                self:AddBlock("xnorBlocks", id, inputs, outputs, block.interactable.active)
             end
         elseif block.type == "Timer" then
-            self:AddBLock("timerBlocks", id, inputs, outputs, block.interactable.active, block.data.time)
+            self:AddBlock("timerBlocks", id, inputs, outputs, block.interactable.active, block.data.time)
+        elseif block.type == "Light" then
+            self:AddBlock("lightBlocks", id, inputs, outputs, block.interactable.active)
         end
     end
 end
@@ -199,62 +201,13 @@ function FastLogicRunner.makeDataArrays(self)
     self.nextRunningIndex = 1
     self.runningBlocks = {}
     self.runningBlockLengths = {}
+    self.blocksSortedByPath = {}
     for _, pathId in pairs(self.pathIndexs) do
         self.runningBlocks[pathId] = {}
         self.runningBlockLengths[pathId] = 0
+        self.blocksSortedByPath[pathId] = {}
     end
     self:UpdateLongestTimer()
-end
-
--- function FastLogicRunner.prepData(self)
---     self:makeDataArrays()
---     for unHashedId, block in pairs(self.data) do
---         local id = self.hashedLookUp[unHashedId]
---         self.countOfOnInputs[id] = 0
---         if (block.type == "vanilla input") then
---             self:AddBLock("vanilla input", id, block.shape:getInteractable(), hashArrayValues(block.outputs))
---         elseif (block.type == "vanilla light") then
---             self:AddBLock("lightBlocks", id, self.hashedLookUp[block.inputs[1]])
---         elseif (block.type == "vanilla timer") then
---             if block.ticks == 0 then
---                 self:AddBLock("throughBlocks", id, self.hashedLookUp[block.inputs[1]], hashArrayValues(block.outputs))
---             else
---                 self:AddBLock("timerBlocks", id, self.hashedLookUp[block.inputs[1]], hashArrayValues(block.outputs), block.ticks)
---             end
---         elseif (block.type == "vanilla logic") then
---             if #block.inputs == 0 then
---                 self:AddBLock("throughBlocks", id, self.hashedLookUp[block.inputs[1]], hashArrayValues(block.outputs))
---             else
---                 if (#block.inputs == 1) then
---                     if (block.mode >= 3) then
---                         self:AddBLock("norThroughBlocks", id, self.hashedLookUp[block.inputs[1]], hashArrayValues(block.outputs))
---                     else
---                         self:AddBLock("throughBlocks", id, self.hashedLookUp[block.inputs[1]], hashArrayValues(block.outputs))
---                     end
---                 else
---                     if (block.mode == 0) then
---                         self:AddBLock("andBlocks", id, hashArrayValues(block.inputs), hashArrayValues(block.outputs))
---                     elseif (block.data.mode == 1) then
---                         self:AddBLock("orBlocks", id, hashArrayValues(block.inputs), hashArrayValues(block.outputs))
---                     elseif (block.data.mode == 2) then
---                         self:AddBLock("xorBlocks", id, hashArrayValues(block.inputs), hashArrayValues(block.outputs))
---                     elseif (block.data.mode == 3) then
---                         self:AddBLock("nandBlocks", id, hashArrayValues(block.inputs), hashArrayValues(block.outputs))
---                     elseif (block.data.mode == 4) then
---                         self:AddBLock("norBlocks", id, hashArrayValues(block.inputs), hashArrayValues(block.outputs))
---                     elseif (block.data.mode == 5) then
---                         self:AddBLock("xnorBlocks", id, hashArrayValues(block.inputs), hashArrayValues(block.outputs))
---                     end
---                 end
---             end
---         end
---     end
---     self:doUpdate()
--- end
-
-function GetUnusedId(self)
-    self.newIdIndex = self.newIdIndex - 1
-    return self.newIdIndex
 end
 
 function FastLogicRunner.doUpdates(self)
@@ -264,7 +217,8 @@ function FastLogicRunner.doUpdates(self)
     self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
     if self.updateTicks >= 1 then
         if self.blockCount > 0 then
-            while self.updateTicks >= 1 do
+            -- other
+            while self.updateTicks >= 2 do
                 self:doUpdate()
                 self.updateTicks = self.updateTicks - 1
                 local sum = 0
@@ -275,13 +229,20 @@ function FastLogicRunner.doUpdates(self)
                     self.updateTicks = 0
                 end
             end
-        end
-        -- light
-        local lightBlocks = self.runningBlocks[2]
-        for k = 1, self.runningBlockLengths[2] do
-            -- self.blocksRan = self.blocksRan + 1
-            local blockId = lightBlocks[k]
-            self.blockStates[blockId] = self.blockStates[self.blockInputs[blockId]]
+            -- light
+            local countOfOnInputs = self.countOfOnInputs
+            local numberOfBlockInputs = self.numberOfBlockInputs
+            local blockStates = self.blockStates
+            local lightBlocks = self.blocksSortedByPath[self.pathIndexs["lightBlocks"]]
+            for k = 1, #lightBlocks do
+                local blockId = lightBlocks[k]
+                blockStates[blockId] = countOfOnInputs[blockId] > 0 or numberOfBlockInputs[blockId] == -1
+            end
+            -- lastTick
+            if self.updateTicks >= 1 then
+                self:doUpdate()
+                self.updateTicks = self.updateTicks - 1
+            end
         end
     end
 end

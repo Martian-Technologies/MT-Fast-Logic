@@ -7,8 +7,8 @@ BaseFastLogicBlock.maxParentCount = -1 -- infinite
 BaseFastLogicBlock.maxChildCount = -1  -- infinite
 BaseFastLogicBlock.connectionInput = sm.interactable.connectionType.logic
 BaseFastLogicBlock.connectionOutput = sm.interactable.connectionType.logic
-BaseFastLogicBlock.colorNormal = sm.color.new(0x005555ff)
-BaseFastLogicBlock.colorHighlight = sm.color.new(0xff0000ff)
+BaseFastLogicBlock.colorNormal = sm.color.new(0x21c0d1ff)
+BaseFastLogicBlock.colorHighlight = sm.color.new(0x69d9dbff)
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.FastLogicBlockLookUp = sm.MTFastLogic.FastLogicBlockLookUp or {}
@@ -65,6 +65,7 @@ function BaseFastLogicBlock.GetData(self)
             ["FastLogicRunner"] = FastLogicRunner.getNew(self.creationId),
             ["FastLogicGates"] = {},
             ["FastTimers"] = {},
+            ["FastLights"] = {},
             ["BlocksToScan"] = {},
             ["AllFastBlocks"] = {},
             ["AllNonFastBlocks"] = {},

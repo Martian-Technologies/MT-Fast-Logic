@@ -1,12 +1,13 @@
 dofile "../util/util.lua"
 
-function FastLogicRunner.AddBLock(self, path, id, inputs, outputs, state, timerLength)
+function FastLogicRunner.AddBlock(self, path, id, inputs, outputs, state, timerLength)
     -- path data
     if type(path) == "string" and path ~= "vanilla input" then
         path = self.pathIndexs[path]
     end
     self.runnableBlockPaths[id] = self.pathNames[path]
     self.runnableBlockPathIds[id] = path
+    self.blocksSortedByPath[path][#self.blocksSortedByPath[path]+1] = id
 
     -- init data
     -- self.displayedBlockStates[id] = self.creation.AllFastBlocks[self.unhashedLookUp[id]].state
@@ -88,6 +89,7 @@ function FastLogicRunner.RemoveBlock(self, id)
         end
     end
     self:RemoveBlockFromUpdate(id)
+    table.removeValue(self.blocksSortedByPath[self.runnableBlockPathIds[id]], id)
     self.scanNext[id] = nil
     self.blockStates[id] = false
     self.blockInputs[id] = false

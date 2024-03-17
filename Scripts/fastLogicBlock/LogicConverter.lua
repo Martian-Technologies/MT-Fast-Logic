@@ -37,8 +37,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.mode = nil
                     jsontable.bodies[i].childs[j].controller.active = nil
                     --print(jsontable.bodies[i].childs[j])
-                end
-                if jsontable.bodies[i].childs[j].shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f" then --Vanilla Timer
+                elseif jsontable.bodies[i].childs[j].shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f" then --Vanilla Timer
                     --print(jsontable.bodies[i].childs[j])
                     jsontable.bodies[i].childs[j].shapeId = "db0bc11b-c083-4a6a-843f-73ac1033e6fe"
 
@@ -78,7 +77,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                         end
                     end
 
-                    --print(childdata)
                     local newchilddata = childdata
                     bincount = 1
                     for k = #childdata, 1, -1 do
@@ -94,24 +92,40 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                         newchilddata = string.replace_char(k, newchilddata, char)
                     end
 
-                    --print(newchilddata)
-
-                    -- Check for differences between newchilddata and childdata
-                    --[[local tempstring = ""
-                    for i = 1, #newchilddata do
-                        if string.sub(newchilddata, i, i) ~= string.sub(childdata, i, i) then
-                            tempstring = tempstring .. "^"
-                        else
-                            tempstring = tempstring .. " "
-                        end
-                    end
-                    print(tempstring)]]
                     jsontable.bodies[i].childs[j].controller.data = newchilddata
                     jsontable.bodies[i].childs[j].controller.active = nil
                     jsontable.bodies[i].childs[j].controller.seconds = nil
                     jsontable.bodies[i].childs[j].controller.ticks = nil
-                    --print(jsontable.bodies[i].childs[j])
-                    --print()
+                elseif jsontable.bodies[i].childs[j].shapeId == "5e3dff9b-2450-44ae-ad46-d2f6b5148cbf" then --Vanilla Warehouse Square Light
+                    jsontable.bodies[i].childs[j].shapeId = "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b"
+                    -- print(jsontable.bodies[i].childs[j].controller.luminance)
+                    -- print(jsontable.bodies[i].childs[j].controller)
+                    local childdata = nil
+                    local luminance = jsontable.bodies[i].childs[j].controller.luminance
+                    if luminance == 10 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgK"
+                    elseif luminance == 20 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgU"
+                    elseif luminance == 30 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQge"
+                    elseif luminance == 40 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgo"
+                    elseif luminance == 50 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgy"
+                    elseif luminance == 60 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQg8"
+                    elseif luminance == 70 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhG"
+                    elseif luminance == 80 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhQ"
+                    elseif luminance == 90 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQha"
+                    elseif luminance == 100 then
+                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhk"
+                    end
+                    jsontable.bodies[i].childs[j].controller.data = childdata
+                    jsontable.bodies[i].childs[j].controller.coneAngle = nil
+                    jsontable.bodies[i].childs[j].controller.luminance = nil
                 end
             end
         end
@@ -137,7 +151,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     elseif childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgF" then
                         mode = 5
                     else
-                        sm.gui.chatMessage("#ff0000Fatal error while converting Fast Gates, please send a screenshot of this to ItchyTrack") -- #ff0000Fatal error while converting QGates, please send a screenshot of this to HerrVincling :)
+                        sm.gui.chatMessage("#ff0000Fatal error while converting Fast Gates, please send a screenshot of this to ItchyTrack")
                         sm.gui.chatMessage(childdata)
                         return
                     end
@@ -146,8 +160,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.active = false
                     jsontable.bodies[i].childs[j].controller.data = nil
                     --print(jsontable.bodies[i].childs[j])
-                end
-                if jsontable.bodies[i].childs[j].shapeId == "db0bc11b-c083-4a6a-843f-73ac1033e6fe" then --fasttimer
+                elseif jsontable.bodies[i].childs[j].shapeId == "db0bc11b-c083-4a6a-843f-73ac1033e6fe" then --fasttimer
                     --print(jsontable.bodies[i].childs[j])
                     -- LOTS of base64 converting and extracting corresponding bits of seconds & ticks
 
@@ -229,14 +242,14 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                         end
                         ticks = ticks - 16 --remove Offset --used to be -16
                     else
-                        sm.gui.chatMessage("#ff0000Fatal error while converting QTimers, please send a screenshot of this to HerrVincling :)")
+                        sm.gui.chatMessage("#ff0000Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
                         sm.gui.chatMessage(childdata)
                         return
                     end
 
                     --print(seconds, ticks)
                     if (seconds < 0) or (seconds > 59) or (ticks < 0) or (ticks > 40) then
-                        sm.gui.chatMessage("#ff0000Fatal error while converting QTimers, please send a screenshot of this to HerrVincling :)")
+                        sm.gui.chatMessage("#ff0000Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
                         sm.gui.chatMessage(childdata .. " " .. seconds .. " " .. ticks)
                         return
                     end
@@ -246,6 +259,36 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.seconds = seconds
                     jsontable.bodies[i].childs[j].controller.ticks = ticks
                     --print(jsontable.bodies[i].childs[j])
+                elseif jsontable.bodies[i].childs[j].shapeId == "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b" then --Fast Warehouse Square Light
+                    jsontable.bodies[i].childs[j].shapeId = "5e3dff9b-2450-44ae-ad46-d2f6b5148cbf"
+                    -- print(";;")
+                    -- print(jsontable.bodies[i].childs[j].controller)
+
+                    local luminance = 50
+                    local childdata = jsontable.bodies[i].childs[j].controller.data
+                    if childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgK" then
+                        luminance = 10
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgU" then
+                        luminance = 20
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQge" then
+                        luminance = 30
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgo" then
+                        luminance = 40
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgy" then
+                        luminance = 50
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQg8" then
+                        luminance = 60
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhG" then
+                        luminance = 70
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhQ" then
+                        luminance = 80
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQha" then
+                        luminance = 90
+                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhk" then
+                        luminance = 100
+                    end
+                    jsontable.bodies[i].childs[j].controller.luminance = luminance
+                    jsontable.bodies[i].childs[j].controller.data = nil
                 end
             end
         end

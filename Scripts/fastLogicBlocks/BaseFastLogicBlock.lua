@@ -7,8 +7,8 @@ BaseFastLogicBlock.maxParentCount = -1 -- infinite
 BaseFastLogicBlock.maxChildCount = -1  -- infinite
 BaseFastLogicBlock.connectionInput = sm.interactable.connectionType.logic
 BaseFastLogicBlock.connectionOutput = sm.interactable.connectionType.logic
-BaseFastLogicBlock.colorNormal = sm.color.new(0x21c0d1ff)
-BaseFastLogicBlock.colorHighlight = sm.color.new(0x69d9dbff)
+BaseFastLogicBlock.colorNormal = sm.color.new(0x5612CCff)
+BaseFastLogicBlock.colorHighlight = sm.color.new(0xA530C2ff)
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.FastLogicBlockLookUp = sm.MTFastLogic.FastLogicBlockLookUp or {}

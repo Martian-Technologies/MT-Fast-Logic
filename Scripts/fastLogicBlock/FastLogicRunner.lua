@@ -107,9 +107,11 @@ function FastLogicRunner.update(self)
     for id, data in pairs(self.creation.AllNonFastBlocks) do
         if sm.exists(data.interactable) then
             if data.currentState ~= data.interactable.active then
-                data.currentState = not data.currentState
+                data.currentState = data.interactable.active
                 local stateNumber = data.currentState and 1 or -1
-                for _, outputId in ipairs(data.outputs) do
+                local i = 1
+                while i <= #data.outputs do
+                    local outputId = data.outputs[i]
                     if type(self.countOfOnInputs[outputId]) == "number" then
                         self.countOfOnInputs[outputId] = self.countOfOnInputs[outputId] + stateNumber
                         if self.countOfOnInputs[outputId] < 0 then
@@ -122,9 +124,11 @@ function FastLogicRunner.update(self)
                                 self.creation.AllNonFastBlocks[id] = nil
                             else
                                 table.removeValue(self.creation.AllNonFastBlocks[id].outputs, outputId)
+                                i = i - 1
                             end
                         end
                     end
+                    i = i + 1
                 end
             end
         end

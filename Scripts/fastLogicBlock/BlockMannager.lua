@@ -99,6 +99,7 @@ function FastLogicRunner.RemoveBlock(self, id)
     self.numberOfBlockOutputs[id] = false
     self.countOfOnInputs[id] = false
     self.runnableBlockPaths[id] = false
+    self.nextRunningBlocks[id] = false
     self.runnableBlockPathIds[id] = false
     self.timerLengths[id] = false
     self.timerInputStates[id] = false

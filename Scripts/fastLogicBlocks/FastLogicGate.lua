@@ -91,6 +91,6 @@ function FastLogicGate.server_saveMode(self, mode)
         self.data.mode = mode
         self.network:setClientData({ mode = self.data.mode })
         self.storage:save({ mode = self.data.mode })
-        self:RescanSelf()
+        self:rescanSelf()
     end
 end

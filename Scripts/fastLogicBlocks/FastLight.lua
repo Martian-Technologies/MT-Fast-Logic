@@ -92,7 +92,4 @@ function FastLight.server_saveLuminance(self, luminance)
     self.data.luminance = luminance
     self.network:setClientData({ luminance = self.data.luminance })
     self.storage:save({ luminance = self.data.luminance })
-    -- print("...")
-    -- print(self.data.luminance)
-    -- print(self.storage:load())
 end

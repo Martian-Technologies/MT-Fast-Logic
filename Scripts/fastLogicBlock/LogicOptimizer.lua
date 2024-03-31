@@ -34,13 +34,10 @@
 --             table.sort(blockInputs[id], function(a, b) return a > b end)
 --         end
 --         local madeChange = true
---         --print(self.pathNames[typeId])
---         --print(#sortedInputIds)
 --         local blocksMessedWith = {}
 --         local i22 = 0
 --         while madeChange do
 --             i22 = i22 + 1
---             --print("---------- looping ----------")
 --             madeChange = false
 --             table.sort(
 --                 sortedInputIds,
@@ -136,7 +133,6 @@
 --                             end
 --                         end
 --                         --table.remove(containsInputScoreKeys, inputStrIndex)
---                         --print("madeChange" .. containsInputScores[inputStr])
 --                         madeChange = true
 --                         self.instantGateOutputs[id] = {}
 --                         local isNotType = table.contains({ 9, 10, 11 }, self.runnableBlockPathIds[id])
@@ -167,7 +163,6 @@
 --                 end
 --                 if (table.length(blockThatShareInputs) >= 3 and #toRemap > 2) then
 --                     madeChange = true
---                     --print("madeChange2" .. containsInputScores[inputStr])
 --                     local newBlockId = GetUnusedId(self)
 
 --                     self.countOfOnInputs[newBlockId] = 0

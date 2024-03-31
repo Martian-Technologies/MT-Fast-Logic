@@ -1,23 +1,23 @@
 dofile "../util/util.lua"
 
-function FastLogicRunner.FindBalencedLogic(self)
+function FastLogicRunner.findBalencedLogic(self)
     
     for id, block in ipairs(self.data) do
         local layerIndex = 1
         local layers = { { id } }
         local blockLayerLookup = {[id] = 1}
-        while self:GetParentLayer(layers, blockLayerLookup, layerIndex) do
+        while self:getParentLayer(layers, blockLayerLookup, layerIndex) do
             layerIndex = layerIndex + 1
         end
         layerIndex = layerIndex - 1
     end
 end
 
-function FastLogicRunner.BalencedLogicChecker()
+function FastLogicRunner.balencedLogicChecker()
     
 end
 
-function FastLogicRunner.GetParentLayer(self, layers, blockLayerLookup, layerIndex)
+function FastLogicRunner.getParentLayer(self, layers, blockLayerLookup, layerIndex)
     local layer = layers[layerIndex]
     if layers[layerIndex + 1] == nil then
         layers[layerIndex + 1] = {}
@@ -38,12 +38,12 @@ function FastLogicRunner.GetParentLayer(self, layers, blockLayerLookup, layerInd
         end
     end
     if callGetChild then
-        self:GetChildLayer(layers, blockLayerLookup, layerIndex + 1)
+        self:getChildLayer(layers, blockLayerLookup, layerIndex + 1)
     end
     return true
 end
 
-function FastLogicRunner.GetChildLayer(self, layers, blockLayerLookup, layerIndex)
+function FastLogicRunner.getChildLayer(self, layers, blockLayerLookup, layerIndex)
     if layerIndex <= 1 then return end
     local layer = layers[layerIndex]
     local childLayer = layers[layerIndex - 1]
@@ -62,7 +62,7 @@ function FastLogicRunner.GetChildLayer(self, layers, blockLayerLookup, layerInde
         end
     end
     if (callRec) then
-        self:GetChildLayer(layers, blockLayerLookup, layerIndex - 1)
-        self:GetParentLayer(layers, blockLayerLookup, layerIndex - 1)
+        self:getChildLayer(layers, blockLayerLookup, layerIndex - 1)
+        self:getParentLayer(layers, blockLayerLookup, layerIndex - 1)
     end
 end

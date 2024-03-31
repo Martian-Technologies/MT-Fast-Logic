@@ -294,11 +294,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
         end
     end
 
-    --QGate  6a9dbff5-7562-4e9a-99ae-3590ece88112
-    --VGate  9f0f56e8-2c31-4d83-996c-d00a9b296c3f
-    --QTimer db0bc11b-c083-4a6a-843f-73ac1033e6fe
-    --VTimer 8f7fd0e7-c46e-4944-a414-7ce2437bb30f
-
     -- removing old body & spawning the new one
     local worldpos = body.worldPosition
     local worldrot = body.worldRotation

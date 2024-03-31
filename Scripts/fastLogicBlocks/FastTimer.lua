@@ -105,5 +105,5 @@ function FastTimer.server_saveTime(self, data)
     self.data.time = data.seconds * 40 + data.ticks
     self.network:setClientData({ticks = self.ticks, seconds = self.seconds})
     self.storage:save({ticks = self.ticks, seconds = self.seconds})
-    self.FastLogicRunner:ChangeTimerTime(self.FastLogicRunner.hashedLookUp[self.id], self.data.time)
+    self.FastLogicRunner:internalChangeTimerTime(self.FastLogicRunner.hashedLookUp[self.id], self.data.time)
 end

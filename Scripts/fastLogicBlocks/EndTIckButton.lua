@@ -26,13 +26,8 @@ function EndTickButton.client_onDestroy2(self)
 end
 
 function EndTickButton.client_onInteract(self, character, state)
-    local id = self.FastLogicRunner.hashedLookUp[self.id]
-    if state then
-        self.FastLogicRunner.countOfOnInputs[id] = self.FastLogicRunner.countOfOnInputs[id] + 1
-    else
-        self.FastLogicRunner.countOfOnInputs[id] = self.FastLogicRunner.countOfOnInputs[id] - 1
-    end
-    self.FastLogicRunner:AddBlockToUpdate(id)
+    self.FastLogicRunner:externalChangeNonFastOnInput(self.id, state and 1 or 0)
+    self.FastLogicRunner:externalAddBlockToUpdate(self.id)
 end
 
 function EndTickButton.client_updateTexture(self)

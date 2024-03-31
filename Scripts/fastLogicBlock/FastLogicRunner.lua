@@ -5,7 +5,6 @@ FastLogicRunner = FastLogicRunner or {}
 dofile "../util/util.lua"
 dofile "CreationLogicGetter.lua"
 dofile "BlockMannager.lua"
-dofile "LogicStateDisplayer.lua"
 dofile "BalancedLogicFinder.lua"
 -- dofile "LogicOptimizer.lua"
 
@@ -21,142 +20,12 @@ function FastLogicRunner.getNew(creationId)
     return new
 end
 
-function FastLogicRunner.rescan(self)
-    self.data = "new"
-    self:refresh()
-end
-
-function FastLogicRunner.refresh(self)
-    self.scanNext = self.scanNext or {}
-    self.blockCount = self.blockCount or 0
-    self.isEmpty = self.isEmpty or false
+function FastLogicRunner.init(self)
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.numberOfUpdatesPerTick = self.numberOfUpdatesPerTick or 1
     self.updateTicks = self.updateTicks or 0
-    self.tickType = self.tickType or 1
-    self.displayedBlockStates = self.displayedBlockStates or {}
     if self.hashData == nil then
         self:makeDataArrays()
-    end
-    if (self.data == "new") then
-        print("Scanning Started")
-        -- self:sendMessageToAll("Scanning Started")
-        for id, block in pairs(self.creation.FastLogicGates) do
-            self:getBLockData(block.interactable:getBody())
-            goto gotData
-        end
-        for id, block in pairs(self.creation.FastTimers) do
-            self:getBLockData(block.interactable:getBody())
-            goto gotData
-        end
-        ::gotData::
-    end
-    print("reloaded")
-end
-
-function FastLogicRunner.sendMessageToAll(self, message)
-    sm.MTFastLogic.FastLogicRunnerRunner.network:sendToClients("client_sendMessage", message)
-end
-
-function FastLogicRunner.addAllNewBlocks(self)
-    for i = 1, #self.creation.BlocksToScan do
-        local block = self.creation.BlocksToScan[i]
-        table.addToConstantKeysOnlyHash(self.hashData, block.id)
-        local id = self.hashedLookUp[block.id]
-        local inputs = table.hashArrayValues(self.hashData, block:getParentIds())
-        local outputs = table.hashArrayValues(self.hashData, block:getChildIds())
-        if block.type == "LogicGate" then
-            if (block.data.mode == 0) then
-                self:AddBlock("andBlocks", id, inputs, outputs, block.interactable.active)
-            elseif (block.data.mode == 1) then
-                self:AddBlock("orBlocks", id, inputs, outputs, block.interactable.active)
-            elseif (block.data.mode == 2) then
-                self:AddBlock("xorBlocks", id, inputs, outputs, block.interactable.active)
-            elseif (block.data.mode == 3) then
-                self:AddBlock("nandBlocks", id, inputs, outputs, block.interactable.active)
-            elseif (block.data.mode == 4) then
-                self:AddBlock("norBlocks", id, inputs, outputs, block.interactable.active)
-            elseif (block.data.mode == 5) then
-                self:AddBlock("xnorBlocks", id, inputs, outputs, block.interactable.active)
-            end
-        elseif block.type == "Timer" then
-            self:AddBlock("timerBlocks", id, inputs, outputs, block.interactable.active, block.data.time)
-        elseif block.type == "EndTickButton" then
-            self:AddBlock("EndTickButtons", id, inputs, {}, block.interactable.active)
-        elseif block.type == "Light" then
-            self:AddBlock("lightBlocks", id, inputs, {}, block.interactable.active)
-        end
-    end
-end
-
-function FastLogicRunner.update(self)
-    self:addAllNewBlocks()
-    self.creation.BlocksToScan = {}
-    if not sm.exists(self.creation.body) or self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
-        print("body updated")
-        self.creation.lastBodyUpdate = sm.game.getCurrentTick()
-        for _, v in pairs(self.creation.AllFastBlocks) do
-            v:PreUpdate()
-        end
-    else
-        for id, rId in pairs(self.scanNext) do
-            self.creation.AllFastBlocks[rId]:PreUpdate()
-        end
-    end
-    self.scanNext = {}
-    for id, data in pairs(self.creation.AllNonFastBlocks) do
-        if sm.exists(data.interactable) then
-            if data.currentState ~= data.interactable.active then
-                data.currentState = data.interactable.active
-                local stateNumber = data.currentState and 1 or -1
-                local i = 1
-                while i <= #data.outputs do
-                    local outputId = data.outputs[i]
-                    if type(self.countOfOnInputs[outputId]) == "number" then
-                        self.countOfOnInputs[outputId] = self.countOfOnInputs[outputId] + stateNumber
-                        if self.countOfOnInputs[outputId] < 0 then
-                            self.countOfOnInputs[outputId] = 0
-                        end
-                        self:AddBlockToUpdate(outputId)
-                    else
-                        if table.contains(self.creation.AllNonFastBlocks[id].outputs, outputId) then
-                            if #self.creation.AllNonFastBlocks[id].outputs == 1 then
-                                self.creation.AllNonFastBlocks[id] = nil
-                            else
-                                table.removeValue(self.creation.AllNonFastBlocks[id].outputs, outputId)
-                                i = i - 1
-                            end
-                        end
-                    end
-                    i = i + 1
-                end
-            end
-        end
-    end
-    self:doUpdates()
-    if self.isEmpty then
-        sm.MTFastLogic.Creations[self.creationId] = nil
-    end
-    local changed = false
-    local numberofc = 0
-    -- print(self.displayedBlockStates)
-    -- print(self.blockStates)
-    for i = 1, #self.blockStates do
-        if self.displayedBlockStates[i] ~= self.blockStates[i] then
-            if (self.creation.AllFastBlocks[self.unhashedLookUp[i]] ~= nil) then
-                self.displayedBlockStates[i] = self.blockStates[i]
-                if self.creation.AllFastBlocks[self.unhashedLookUp[i]]:UpdateState(self.blockStates[i]) then
-                    numberofc = numberofc + 1
-                    changed = true
-                end
-            end
-        end
-        if numberofc > 10000 then
-            break
-        end
-    end
-    if changed then
-        self.creation.lastBodyUpdate = sm.game.getCurrentTick()
     end
 end
 
@@ -172,6 +41,7 @@ function FastLogicRunner.makeDataArrays(self)
     self.newIdIndex = 0
     self.blockStates = table.makeArrayForHash(self.hashData)
     self.blockInputs = table.makeArrayForHash(self.hashData)
+    self.lastBlockStates = table.makeArrayForHash(self.hashData, 0)
     self.blockInputsHash = {}
     self.runnableBlockPaths = table.makeArrayForHash(self.hashData)
     self.blockOutputs = table.makeArrayForHash(self.hashData)
@@ -211,66 +81,92 @@ function FastLogicRunner.makeDataArrays(self)
         self.runningBlockLengths[pathId] = 0
         self.blocksSortedByPath[pathId] = {}
     end
-    self:UpdateLongestTimer()
+    self:updateLongestTimer()
 end
 
-function FastLogicRunner.doUpdates(self)
+function FastLogicRunner.update(self)
     self.blocksRan = 0
     self.blocksForNextTick = 0
     self.blocksKilled = 0
     self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
     if self.updateTicks >= 1 then
-        if self.blockCount > 0 then
-            local countOfOnInputs = self.countOfOnInputs
-            local blockStates = self.blockStates
-            local runningBlockLengths = self.runningBlockLengths
-            -- EndTickButtons
-            local EndTickButtons = self.blocksSortedByPath[self.pathIndexs["EndTickButtons"]]
-            for k = 1, #EndTickButtons do
-                local blockId = EndTickButtons[k]
-                if countOfOnInputs[blockId] > 0 then
-                    blockStates[blockId] = true
-                    if self.updateTicks >= 2 then
-                        runningBlockLengths[1] = 0
-                        self.updateTicks = 1
-                    end
+        local countOfOnInputs = self.countOfOnInputs
+        local blockStates = self.blockStates
+        local runningBlocks = self.runningBlocks
+        local runningBlockLengths = self.runningBlockLengths
+        local nextRunningBlocks = self.nextRunningBlocks
+        --make sure all blocks are not broken
+        for pathId = 1, #runningBlocks do
+            local i = 1
+            while i <= runningBlockLengths[pathId] do
+                local id = runningBlocks[pathId][i]
+                if countOfOnInputs[id] == false then
+                    nextRunningBlocks[id] = false
+                    table.remove(runningBlocks[pathId], i)
+                    runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1
                 else
-                    blockStates[blockId] = false
+                    i = i + 1
                 end
             end
-            -- other
-            while self.updateTicks >= 2 do
-                self.updateTicks = self.updateTicks - 1
-                self:doUpdate()
-                local sum = 0
-                for k, v in pairs(runningBlockLengths) do
-                    sum = sum + v
+        end
+
+        -- EndTickButtons
+        local EndTickButtons = self.blocksSortedByPath[self.pathIndexs["EndTickButtons"]]
+        for k = 1, #EndTickButtons do
+            local blockId = EndTickButtons[k]
+            if countOfOnInputs[blockId] > 0 then
+                blockStates[blockId] = true
+                if self.updateTicks >= 2 then
+                    runningBlockLengths[1] = 0
+                    self.updateTicks = 1
                 end
-                if sum == 0 then
-                    self.updateTicks = 0
-                end
+            else
+                blockStates[blockId] = false
             end
-            -- light
-            local numberOfBlockInputs = self.numberOfBlockInputs
-            local lightBlocks = self.blocksSortedByPath[self.pathIndexs["lightBlocks"]]
-            for k = 1, #lightBlocks do
-                local blockId = lightBlocks[k]
-                blockStates[blockId] = countOfOnInputs[blockId] > 0 or numberOfBlockInputs[blockId] == -1
+        end
+        -- other
+        while self.updateTicks >= 2 do
+            self.updateTicks = self.updateTicks - 1
+            self:doUpdate()
+            local sum = 0
+            for k, v in pairs(runningBlockLengths) do
+                sum = sum + v
             end
-            -- lastTick
-            if self.updateTicks >= 1 then
-                self:doUpdate()
-                self.updateTicks = self.updateTicks - 1
+            if sum == 0 then
+                self.updateTicks = 0
             end
+        end
+        -- light
+        local numberOfBlockInputs = self.numberOfBlockInputs
+        local lightBlocks = self.blocksSortedByPath[self.pathIndexs["lightBlocks"]]
+        for k = 1, #lightBlocks do
+            local blockId = lightBlocks[k]
+            blockStates[blockId] = countOfOnInputs[blockId] > 0 or numberOfBlockInputs[blockId] == -1
+        end
+        -- lastTick
+        if self.updateTicks >= 1 then
+            self:doUpdate()
+            self.updateTicks = self.updateTicks - 1
         end
     end
 end
 
+function FastLogicRunner.getUpdatedIds(self)
+    local changed = {}
+    local blockStates = self.blockStates
+    local lastBlockStates = self.lastBlockStates
+    for i = 1, #blockStates do
+        if lastBlockStates[i] ~= blockStates[i] then
+            lastBlockStates[i] = blockStates[i]
+            changed[#changed+1] = i
+        end
+    end
+    return changed
+end
+
+
+
 function FastLogicRunner.doUpdate(self)
-    -- print(self.blockOutputs)
-    -- print(self.numberOfBlockInputs)
-    -- print(self.countOfOnInputs)
-    -- print(self.blockStates)
     local newBlockStatesLength = 0
     local newBlockStates = {}
     local runningBlocks = self.runningBlocks
@@ -409,10 +305,13 @@ function FastLogicRunner.doUpdate(self)
     end
     local timerReadRow = table.remove(timerData, 1)
     for k = 1, #timerReadRow do
-        newBlockStatesLength = newBlockStatesLength + 1
-        newBlockStates[newBlockStatesLength] = timerReadRow[k]
+        if numberOfBlockOutputs[timerReadRow[k]] ~= false then
+            newBlockStatesLength = newBlockStatesLength + 1
+            newBlockStates[newBlockStatesLength] = timerReadRow[k]
+        end
     end
     -- create new list of runningBlockLengths
+    local runningBlockLengthsOld = runningBlockLengths
     runningBlockLengths = {
         [1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0, [11] = 0
     }

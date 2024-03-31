@@ -213,7 +213,8 @@ function formater.getFormatedForPrint(val, depth)
         return "MAX DEPTH REACHED"
     end
     if type(val) == "number" then
-        return string.format("%.f", val)
+        val = math.floor(val * 100 + 0.5) / 100
+        return tostring(val)
     elseif type(val) == "table" then
         local i = 1
         local str = "{"
@@ -240,6 +241,11 @@ function formater.getFormatedForPrint(val, depth)
         return "false"
     elseif type(val) == "Shape" then
         return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId(), depth) .. "}"
+    elseif type(val) == "Vec3" then
+        return "Vec3 <" ..
+        formater.getFormatedForPrint(val.x, depth) ..", " ..
+        formater.getFormatedForPrint(val.y, depth) .. ", "..
+        formater.getFormatedForPrint(val.z, depth) .. ">"
     else
         return type(val)
     end

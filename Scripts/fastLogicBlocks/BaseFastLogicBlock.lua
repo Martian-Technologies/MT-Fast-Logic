@@ -1,4 +1,4 @@
-print("loading BaseFastLogicBlock")
+-- print("loading BaseFastLogicBlock")
 
 dofile "../util/util.lua"
 BaseFastLogicBlock = {}
@@ -12,9 +12,15 @@ BaseFastLogicBlock.colorHighlight = sm.color.new(0xA530C2ff)
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.FastLogicBlockLookUp = sm.MTFastLogic.FastLogicBlockLookUp or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
-
+sm.MTFastLogic.BlocksToGetData = sm.MTFastLogic.BlocksToGetData or {}
 function BaseFastLogicBlock.getCreationId(self)
-    return self.shape:getBody():getId()
+    local id = 10000000000
+    for _, body in pairs(self.shape:getBody():getCreationBodies()) do
+        if id > body:getId() then
+            id = body:getId()
+        end
+    end
+    return id
 end
 
 function BaseFastLogicBlock.rescanSelf(self)
@@ -31,7 +37,7 @@ function BaseFastLogicBlock.deepRescanSelf(self)
     self.FastLogicRunner = nil
     self.creation = nil
     self.creationId = nil
-    self:getData()
+    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData+1] = self
 end
 
 function BaseFastLogicBlock.getParentIds(self)
@@ -72,12 +78,17 @@ function BaseFastLogicBlock.getData(self)
         self.creation.BlocksToScan[#self.creation.BlocksToScan + 1] = self
         sm.MTFastLogic.FastLogicBlockLookUp[self.id] = self
     end
+    self:getData2()
+end
+
+function BaseFastLogicBlock.getData2(self)
+    -- your code
 end
 
 function BaseFastLogicBlock.server_onCreate(self)
     self.isFastLogic = true
     self.type = nil
-    self:getData()
+    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData+1] = self
     self:server_onCreate2()
 end
 

@@ -1,4 +1,4 @@
-print("loading FastLogicRealBlockMannager")
+-- print("loading FastLogicRealBlockMannager")
 
 
 dofile "../util/util.lua"

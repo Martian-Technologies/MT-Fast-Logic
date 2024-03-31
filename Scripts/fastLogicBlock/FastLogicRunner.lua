@@ -1,4 +1,4 @@
-print("loading FastLogicRunner")
+-- print("loading FastLogicRunner")
 
 FastLogicRunner = FastLogicRunner or {}
 

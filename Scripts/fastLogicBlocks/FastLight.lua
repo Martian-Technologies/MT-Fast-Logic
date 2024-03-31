@@ -1,4 +1,4 @@
-print("loading FastLight")
+-- print("loading FastLight")
 
 dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
@@ -10,9 +10,12 @@ FastLight.connectionInput = sm.interactable.connectionType.logic
 FastLight.connectionOutput = nil
 FastLight.poseWeightCount = 1
 
+function FastLight.getData2(self)
+    self.creation.FastLights[self.id] = self
+end
+
 function FastLight.server_onCreate2(self)
     self.type = "Light"
-    self.creation.FastLights[self.id] = self
     self.data = self.data or {}
     if self.storage:load() ~= nil then
         self.data.luminance = self.storage:load().luminance or 50

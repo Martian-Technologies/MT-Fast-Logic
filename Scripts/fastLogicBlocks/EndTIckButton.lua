@@ -1,4 +1,4 @@
-print("loading EndTickButton")
+-- print("loading EndTickButton")
 
 dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
@@ -10,9 +10,13 @@ EndTickButton.connectionInput = sm.interactable.connectionType.logic
 EndTickButton.connectionOutput = nil
 EndTickButton.poseWeightCount = 1
 
+function EndTickButton.getData2(self)
+    self.creation.EndTickButtons[self.id] = self
+end
+
 function EndTickButton.server_onCreate2(self)
     self.type = "EndTickButton"
-    self.creation.EndTickButtons[self.id] = self
+    
 end
 
 function EndTickButton.server_onDestroy2(self)

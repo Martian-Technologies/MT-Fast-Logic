@@ -1,4 +1,4 @@
-print("loading FastLogicAllBlockMannager")
+-- print("loading FastLogicAllBlockMannager")
 
 FastLogicAllBlockMannager = FastLogicAllBlockMannager or {}
 

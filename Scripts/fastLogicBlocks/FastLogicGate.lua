@@ -1,14 +1,17 @@
-print("loading FastLogicGate")
+-- print("loading FastLogicGate")
 
 dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
 
 FastLogicGate = table.deepCopyTo(BaseFastLogicBlock, (FastLogicGate or class()))
 
+function FastLogicGate.getData2(self)
+    self.creation.FastLogicGates[self.id] = self
+end
+
 function FastLogicGate.server_onCreate2(self)
     self.type = "LogicGate"
-    self.creation.FastLogicGates[self.id] = self
-    self.data = {}
+    self.data = self.data or {}
     if self.storage:load() ~= nil then
         self.data.mode = self.storage:load().mode or 0
     else

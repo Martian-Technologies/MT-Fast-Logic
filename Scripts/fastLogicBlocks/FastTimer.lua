@@ -1,4 +1,4 @@
-print("loading FastTimer")
+-- print("loading FastTimer")
 
 dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
@@ -7,10 +7,14 @@ FastTimer = table.deepCopyTo(BaseFastLogicBlock, (FastTimer or class()))
 FastTimer.maxParentCount = 1 -- infinite
 FastTimer.maxChildCount = -1  -- infinite
 
+function FastTimer.getData2(self)
+    self.creation.FastTimers[self.id] = self
+end
+
 function FastTimer.server_onCreate2(self)
     self.type = "Timer"
     self.creation.FastTimers[self.id] = self
-    self.data = {}
+    self.data = self.data or {}
     if self.storage:load() ~= nil then
         local data = self.storage:load()
         self.ticks = data.ticks

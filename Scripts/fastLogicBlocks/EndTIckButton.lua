@@ -16,7 +16,6 @@ end
 
 function EndTickButton.server_onCreate2(self)
     self.type = "EndTickButton"
-    
 end
 
 function EndTickButton.server_onDestroy2(self)

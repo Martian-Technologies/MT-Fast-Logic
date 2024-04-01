@@ -13,7 +13,6 @@ end
 
 function FastTimer.server_onCreate2(self)
     self.type = "Timer"
-    self.creation.FastTimers[self.id] = self
     self.data = self.data or {}
     if self.storage:load() ~= nil then
         local data = self.storage:load()

@@ -82,3 +82,31 @@ function FastLogicRunnerRunner.client_updateTextures(self, changedIds)
         end
     end
 end
+
+ -- wantedType = "toSilicon" or "toFastLogic"
+ -- localLocations shoud be in blocks not meters
+ function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocations)
+    local creationId = self:getCreationId(body)
+    local creation = sm.MTFastLogic.Creations[creationId]
+    if creation == nil then return end
+    local allBlockMannager = creation.FastLogicAllBlockMannager
+    local blocksToConvert = {}
+    for i = 1, #localLocations do
+        local keyPos = (
+            tostring(math.floor(localLocations[i].x)) .. "," ..
+            tostring(math.floor(localLocations[i].y)) .. "," ..
+            tostring(math.floor(localLocations[i].z))
+        )
+        local blocks = allBlockMannager.locationCash[keyPos]
+        if blocks ~= nil then
+            for i = 1, #blocks do
+                blocksToConvert[#blocksToConvert+1] = blocks[i]
+            end
+        end
+    end
+    if wantedType == "toSilicon" then
+        SiliconConverter.convertToSilicon(creationId, blocksToConvert)
+    elseif wantedType == "toFastLogic" then
+        SiliconConverter.convertFromSilicon(creationId, body, blocksToConvert)
+    end
+end

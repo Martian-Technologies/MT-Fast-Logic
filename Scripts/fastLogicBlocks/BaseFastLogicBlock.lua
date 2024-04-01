@@ -99,7 +99,9 @@ end
 function BaseFastLogicBlock.server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.id] = nil
     self.creation.AllFastBlocks[self.id] = nil
-    self.FastLogicAllBlockMannager:removeBlock(self.id) -- remove
+    if self.removeAllData then
+        self.FastLogicAllBlockMannager:removeBlock(self.id) -- remove
+    end
     self:server_onDestroy2()
 end
 
@@ -168,4 +170,11 @@ end
 
 function BaseFastLogicBlock.client_sendMessage(self, message)
     sm.gui.chatMessage(message)
+end
+
+function BaseFastLogicBlock.remove(self, removeAllData)
+    if removeAllData == false then
+        self.removeAllData = false
+    end
+    self.shape:destroyShape()
 end

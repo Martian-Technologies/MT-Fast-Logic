@@ -1,4 +1,23 @@
 {
+   "blockList" : [
+      {
+			"uuid": "772eccc1-7a99-42ef-9957-6e19977a545f",
+			"name": "Silicon",
+			"dif": "$SURVIVAL_DATA/Objects/Textures/Blocks/blk_plastic_dif.tga",
+			"asg": "$SURVIVAL_DATA/Objects/Textures/Blocks/blk_plastic_asg.tga",
+			"nor": "$SURVIVAL_DATA/Objects/Textures/Blocks/blk_plastic_nor.tga",
+			"tiling": 4,
+			"color": "7f7f7f",
+			"physicsMaterial": "Plastic",
+			"ratings": {
+				"density": 4,
+				"durability": 2,
+				"friction": 4,
+				"buoyancy": 7
+			},
+			"flammable": false
+		}
+   ],
    "partList" : [
       {
          "box" : {

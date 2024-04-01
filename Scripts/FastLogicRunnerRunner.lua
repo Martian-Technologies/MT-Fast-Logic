@@ -13,10 +13,12 @@ sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
     if self.run then
-        for i = 1, #sm.MTFastLogic.BlocksToGetData do
-            sm.MTFastLogic.BlocksToGetData[i]:getData()
+        if sm.MTFastLogic.BlocksToGetData ~= nil then
+            for i = 1, #sm.MTFastLogic.BlocksToGetData do
+                sm.MTFastLogic.BlocksToGetData[i]:getData()
+            end
+            sm.MTFastLogic.BlocksToGetData = {}
         end
-        sm.MTFastLogic.BlocksToGetData = {}
         self.changedIdsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
             v.FastLogicRealBlockMannager:update()

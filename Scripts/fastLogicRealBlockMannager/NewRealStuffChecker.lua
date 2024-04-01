@@ -40,7 +40,7 @@ function FastLogicRealBlockMannager.checForBodyUpdate(self)
     end
 
     for id, block in pairs(scanNext) do
-        if self.creationId ~= block:getCreationId() then
+        if self.creationId ~= sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(block.shape:getBody()) then
             block:deepRescanSelf()
         else
             local id = block.id

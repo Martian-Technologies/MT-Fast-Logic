@@ -13,15 +13,6 @@ sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.FastLogicBlockLookUp = sm.MTFastLogic.FastLogicBlockLookUp or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 sm.MTFastLogic.BlocksToGetData = sm.MTFastLogic.BlocksToGetData or {}
-function BaseFastLogicBlock.getCreationId(self)
-    local id = 10000000000
-    for _, body in pairs(self.shape:getBody():getCreationBodies()) do
-        if id > body:getId() then
-            id = body:getId()
-        end
-    end
-    return id
-end
 
 function BaseFastLogicBlock.rescanSelf(self)
     self.activeInputs = {}
@@ -63,7 +54,7 @@ end
 function BaseFastLogicBlock.getData(self)
     self.state = self.state or nil
     self.activeInputs = {}
-    self.creationId = self:getCreationId()
+    self.creationId = sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(self.shape:getBody())
     self.id = self.interactable:getId()
     if (sm.MTFastLogic.Creations[self.creationId] == nil) then
         sm.MTFastLogic.FastLogicRunnerRunner:MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)

@@ -83,6 +83,16 @@ function FastLogicRunnerRunner.client_updateTextures(self, changedIds)
     end
 end
 
+function FastLogicRunnerRunner.getCreationId(self, body)
+    local id = body:getId()
+    for _, b in pairs(body:getCreationBodies()) do
+        if id > b:getId() then
+            id = b:getId()
+        end
+    end
+    return id
+end
+
  -- wantedType = "toSilicon" or "toFastLogic"
  -- localLocations shoud be in blocks not meters
  function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocations)

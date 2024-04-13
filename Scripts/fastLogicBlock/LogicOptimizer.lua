@@ -1,205 +1,41 @@
--- dofile "../util/util.lua"
+dofile "../util/util.lua"
 
--- function FastLogicRunner.OptimizeLogic(self)
---     --print("Optimizing Logic")
---     -- get runnableBlocks
---     local runnableBlocks = {}
---     for _, pathId in pairs(self.pathIndexs) do
---         runnableBlocks[pathId] = {}
---     end
---     for id, pathId in pairs(self.runnableBlockPathIds) do
---         runnableBlocks[pathId][#runnableBlocks[pathId] + 1] = id
---     end
---     -- OptimizeSameBlockType
---     for _, pathId in pairs(self.pathIndexs) do
---         self:OptimizeSameBlockType(runnableBlocks[pathId], pathId)
---     end
--- end
 
--- function FastLogicRunner.OptimizeSameBlockType(self, blocksSameType, typeId)
---     if (not table.contains({ 1, 2, 3, 4, 5, 8, 11 }, typeId)) then
---         local sortedInputIds = table.copy(blocksSameType)
---         local i = 1
---         while i <= #sortedInputIds do
---             local id = sortedInputIds[i]
---             if (#self.blockInputs[id] <= 1) then
---                 table.remove(sortedInputIds, i)
---             else
---                 i = i + 1
---             end
---         end
---         local blockInputs = {}
---         for id in values(sortedInputIds) do
---             blockInputs[id] = table.copy(self.blockInputs[id])
---             table.sort(blockInputs[id], function(a, b) return a > b end)
---         end
---         local madeChange = true
---         local blocksMessedWith = {}
---         local i22 = 0
---         while madeChange do
---             i22 = i22 + 1
---             madeChange = false
---             table.sort(
---                 sortedInputIds,
---                 function(a, b) return #blockInputs[a] > #blockInputs[b] end
---             )
---             local blocksWithInput = {}
---             for id in values(sortedInputIds) do
---                 for inputId in values(blockInputs[id]) do
---                     if blocksWithInput[inputId] == nil then
---                         blocksWithInput[inputId] = {}
---                     end
---                     blocksWithInput[inputId][#blocksWithInput[inputId] + 1] = id
---                 end
---             end
+function FastLogicRunner.optimizeLogic(self)
+    local blockInputs = self.blockInputs
+    local numberOfBlockInputs = self.numberOfBlockInputs
+    local numberOfStateChanges = self.numberOfStateChanges
+    local id = self.blocksOptimized
+    local target = math.min(id + math.ceil(#blockInputs / 80), #blockInputs)
+    if target < 1 then
+        id = target
+    else
+        while id < target do
+            id = id + 1
+            if blockInputs[id] ~= false and type(blockInputs[id]) == "table" then
+                local numberOfInputUpdates = {}
+                for i = 1, #blockInputs[id] do
+                    numberOfInputUpdates[blockInputs[id][i]] = numberOfStateChanges[blockInputs[id][i]] + i
+                end
+                local newBLockInputs = table.getKeysSortedByValue(numberOfInputUpdates, function(a, b) return a < b end)
+                for i = 1, numberOfBlockInputs[id] do
+                    if blockInputs[id][i] ~= newBLockInputs[i] then
+                        blockInputs[id] = newBLockInputs
+                        self:fixBlockInputData(id)
+                        break
+                    end
+                end
+            end
+        end
+    end
+    if id == #blockInputs then
+        for i = 1, #numberOfStateChanges do
+            if numberOfStateChanges[i] ~= false then
+                numberOfStateChanges[i] = numberOfStateChanges[i] * 0.4
+            end
+        end
+        id = - #blockInputs
+    end
 
---             local containsInputIds = {}
---             local containsInputInputs = {}
---             for _, id in ipairs(sortedInputIds) do
---                 local seenIds = {}
---                 for _, inputId in ipairs(blockInputs[id]) do
---                     for _, otherId in ipairs(blocksWithInput[inputId]) do
---                         if (otherId >= id) then goto skipId end
---                         if (seenIds[otherId] ~= nil) then
---                             goto skipId
---                         end
---                         if self.instantGateOutputs[otherId] ~= nil then
---                             goto skipId2
---                         end
---                         seenIds[otherId] = true
---                         local inputs1 = blockInputs[id]
---                         local blockId1 = id
---                         local inputs2 = blockInputs[otherId]
---                         local blockId2 = otherId
---                         if (#inputs1 < #inputs2) then
---                             inputs1 = inputs2
---                             blockId1 = blockId2
---                             inputs2 = blockInputs[id]
---                             blockId2 = id
---                         end
---                         local shared = {}
---                         for _, id1 in ipairs(inputs1) do
---                             for _, id2 in ipairs(inputs2) do
---                                 if id2 == id1 then
---                                     shared[#shared + 1] = id1
---                                     goto continue
---                                 elseif id1 > id2 then
---                                     goto continue
---                                 end
---                             end
---                             ::continue::
---                         end
---                         if (#shared > 1) then
---                             local inputStr = ""
---                             for i = 1, #shared do
---                                 inputStr = inputStr .. "," .. shared[i]
---                             end
---                             if (containsInputIds[inputStr] == nil) then
---                                 containsInputIds[inputStr] = { [id] = true, [otherId] = true }
---                                 containsInputInputs[inputStr] = shared
---                             else
---                                 containsInputIds[inputStr][id] = true
---                                 containsInputIds[inputStr][otherId] = true
---                             end
---                         end
---                         ::skipId::
---                     end
---                 end
---                 ::skipId2::
---             end
---             local containsInputScores = {}
---             for str, ids in pairs(containsInputIds) do
---                 containsInputScores[str] = #containsInputInputs[str]
---             end
---             local containsInputScoreKeys = table.getKeysSortedByValue(containsInputScores, function(a, b) return a > b end)
---             for inputStrIndex = 1, #containsInputScoreKeys do
---                 local inputStr = containsInputScoreKeys[inputStrIndex]
---                 if (containsInputScores[inputStr] < 4) then goto continue1 end
---                 local blockThatShareInputs = containsInputIds[inputStr]
---                 for id, _ in pairs(blockThatShareInputs) do
---                     if (blocksMessedWith[id] ~= nil) then
---                         blockThatShareInputs[id] = nil
---                     end
---                 end
---                 if (table.length(blockThatShareInputs) < 2) then
---                     goto continue1
---                 end
---                 local toRemap = containsInputInputs[inputStr]
---                 for id in pairs(blockThatShareInputs) do
---                     if (#toRemap == #blockInputs[id]) then
---                         for otherId in pairs(blockThatShareInputs) then
---                             if id ~= otherId then
-                                
---                             end
---                         end
---                         --table.remove(containsInputScoreKeys, inputStrIndex)
---                         madeChange = true
---                         self.instantGateOutputs[id] = {}
---                         local isNotType = table.contains({ 9, 10, 11 }, self.runnableBlockPathIds[id])
---                         for idToAddToInstantOutputs, _ in pairs(blockThatShareInputs) do
---                             if idToAddToInstantOutputs == id then goto continue2 end
---                             self.instantGateOutputs[id][#self.instantGateOutputs[id] + 1] = idToAddToInstantOutputs
---                             if isNotType then
---                                 self.countOfOnInputs[idToAddToInstantOutputs] = self.countOfOnInputs[idToAddToInstantOutputs] + 1
---                             end
---                             if (self.numberOfBlockInputs[idToAddToInstantOutputs] ~= false) then
---                                 self.numberOfBlockInputs[idToAddToInstantOutputs] = self.numberOfBlockInputs[idToAddToInstantOutputs] + 1
---                             end
---                             for i = 1, #toRemap do
---                                 local idToRemap = toRemap[i]
---                                 table.removeValue(self.blockOutputs[idToRemap], idToAddToInstantOutputs)
---                                 self.numberOfBlockOutputs[idToRemap] = self.numberOfBlockOutputs[idToRemap] - 1
---                                 table.removeValue(self.blockInputs[idToAddToInstantOutputs], idToRemap)
---                                 if (self.numberOfBlockInputs[idToAddToInstantOutputs] ~= false) then
---                                     self.numberOfBlockInputs[idToAddToInstantOutputs] = self.numberOfBlockInputs[idToAddToInstantOutputs] - 1
---                                 end
---                             end
---                             blocksMessedWith[idToAddToInstantOutputs] = true
---                             ::continue2::
-
---                         end
---                         goto continue1
---                     end
---                 end
---                 if (table.length(blockThatShareInputs) >= 3 and #toRemap > 2) then
---                     madeChange = true
---                     local newBlockId = GetUnusedId(self)
-
---                     self.countOfOnInputs[newBlockId] = 0
---                     self.blockStates[newBlockId] = false
---                     self.blockInputs[newBlockId] = table.copy(toRemap)
---                     self.numberOfBlockInputs[newBlockId] = #toRemap
---                     self.blockOutputs[newBlockId] = {}
---                     self.numberOfBlockOutputs[newBlockId] = 0
---                     self.instantGateOutputs[newBlockId] = {}
---                     for id, _ in pairs(blockThatShareInputs) do
---                         self.instantGateOutputs[newBlockId][#self.instantGateOutputs[newBlockId] + 1] = id
---                         if (table.contains({ 9, 10, 11 }, self.runnableBlockPathIds[id])) then
---                             self.countOfOnInputs[id] = self.countOfOnInputs[id] + 1
---                         end
---                         if (self.numberOfBlockInputs[id] ~= false) then
---                             self.numberOfBlockInputs[id] = self.numberOfBlockInputs[id] + 1
---                         end
---                         blocksMessedWith[id] = true
---                     end
---                     self.runnableBlockPathIds[newBlockId] = self.runnableBlockPathIds
---                         [self.instantGateOutputs[newBlockId][1]]
---                     for i = 1, #toRemap do
---                         local idToRemap = toRemap[i]
---                         for id, _ in pairs(blockThatShareInputs) do
---                             table.removeValue(self.blockOutputs[idToRemap], id)
---                             self.numberOfBlockOutputs[idToRemap] = self.numberOfBlockOutputs[idToRemap] - 1
---                             table.removeValue(self.blockInputs[id], idToRemap)
---                             if (self.numberOfBlockInputs[id] ~= false) then
---                                 self.numberOfBlockInputs[id] = self.numberOfBlockInputs[id] - 1
---                             end
---                         end
---                         self.blockOutputs[idToRemap][#self.blockOutputs[idToRemap] + 1] = newBlockId
---                         self.numberOfBlockOutputs[idToRemap] = self.numberOfBlockOutputs[idToRemap] + 1
---                     end
---                 end
---                 ::continue1::
---             end
---         end
---     end
--- end
+    self.blocksOptimized = id
+end

@@ -1,8 +1,10 @@
--- print("loading FastLogicRunnerRunner")
 dofile "fastLogicRealBlockMannager/FastLogicRealBlockMannager.lua"
 dofile "fastLogicAllBlockMannager/FastLogicAllBlockMannager.lua"
 dofile "fastLogicBlock/FastLogicRunner.lua"
 dofile "util/util.lua"
+dofile "silicon/SiliconConverter.lua"
+local SiliconConverter = SiliconConverter
+
 
 FastLogicRunnerRunner = FastLogicRunnerRunner or class()
 
@@ -12,6 +14,7 @@ sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
+    -- advPrint(sm.MTFastLogic, 4, 5)
     if self.run then
         if sm.MTFastLogic.BlocksToGetData ~= nil then
             for i = 1, #sm.MTFastLogic.BlocksToGetData do

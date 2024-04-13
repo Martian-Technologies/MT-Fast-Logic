@@ -1,4 +1,3 @@
--- print("loading BaseFastLogicBlock")
 
 dofile "../util/util.lua"
 BaseFastLogicBlock = {}
@@ -28,7 +27,7 @@ function BaseFastLogicBlock.deepRescanSelf(self)
     self.FastLogicRunner = nil
     self.creation = nil
     self.creationId = nil
-    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData+1] = self
+    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData + 1] = self
 end
 
 function BaseFastLogicBlock.getParentIds(self)
@@ -54,6 +53,7 @@ end
 function BaseFastLogicBlock.getData(self)
     self.state = self.state or nil
     self.activeInputs = {}
+    self.removeAllData = self.removeAllData or true
     self.creationId = sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(self.shape:getBody())
     self.id = self.interactable:getId()
     if (sm.MTFastLogic.Creations[self.creationId] == nil) then
@@ -79,7 +79,7 @@ end
 function BaseFastLogicBlock.server_onCreate(self)
     self.isFastLogic = true
     self.type = nil
-    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData+1] = self
+    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData + 1] = self
     self:server_onCreate2()
 end
 
@@ -161,6 +161,10 @@ end
 
 function BaseFastLogicBlock.client_sendMessage(self, message)
     sm.gui.chatMessage(message)
+end
+
+function BaseFastLogicBlock.getLocalCenter(self)
+    return self.shape:getLocalPosition() + (self.shape.xAxis + self.shape.yAxis + self.shape.zAxis) * 0.5
 end
 
 function BaseFastLogicBlock.remove(self, removeAllData)

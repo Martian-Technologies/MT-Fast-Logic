@@ -1,6 +1,3 @@
--- print("loading FastLogicRealBlockMannager")
-
-
 dofile "../util/util.lua"
 
 FastLogicRealBlockMannager = FastLogicRealBlockMannager or {}
@@ -21,6 +18,7 @@ function FastLogicRealBlockMannager.init(self)
     self.FastLogicAllBlockMannager = self.creation.FastLogicAllBlockMannager
     self.displayedBlockStates = {}
     self.blocksWithData = {}
+    self.scanNext = {}
 end
 
 function FastLogicRealBlockMannager.update(self)
@@ -41,6 +39,7 @@ end
 function FastLogicRealBlockMannager.addAllNewBlocks(self)
     for i = 1, #self.creation.BlocksToScan do
         self.FastLogicAllBlockMannager:addBlock(self.creation.BlocksToScan[i])
+        self.scanNext[self.creation.BlocksToScan[i].id] = self.creation.BlocksToScan[i]
     end
     self.creation.BlocksToScan = {}
 end

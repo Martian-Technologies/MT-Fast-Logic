@@ -1,5 +1,3 @@
--- print("loading EndTickButton")
-
 dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
 

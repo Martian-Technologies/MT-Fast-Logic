@@ -8,13 +8,10 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
     local body = data.body
     local wantedType = data.wantedType
     local jsontable = sm.creation.exportToTable(body, true, false) --'true, false' fix for qtimer reset bug?
-    --print(jsontable.bodies)
     if wantedType == "FastLogic" then
         for i = 1, #jsontable.bodies do
-            --print(jsontable.bodies[i].childs)
             for j = 1, #jsontable.bodies[i].childs do
                 if jsontable.bodies[i].childs[j].shapeId == "9f0f56e8-2c31-4d83-996c-d00a9b296c3f" then --Vanilla Gate
-                    --print(jsontable.bodies[i].childs[j])
                     jsontable.bodies[i].childs[j].shapeId = "6a9dbff5-7562-4e9a-99ae-3590ece88112"
 
                     local mode = jsontable.bodies[i].childs[j].controller.mode
@@ -36,9 +33,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.data = childdata
                     jsontable.bodies[i].childs[j].controller.mode = nil
                     jsontable.bodies[i].childs[j].controller.active = nil
-                    --print(jsontable.bodies[i].childs[j])
                 elseif jsontable.bodies[i].childs[j].shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f" then --Vanilla Timer
-                    --print(jsontable.bodies[i].childs[j])
                     jsontable.bodies[i].childs[j].shapeId = "db0bc11b-c083-4a6a-843f-73ac1033e6fe"
 
                     local childdata = "0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA"
@@ -46,9 +41,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     local bincount = 1
                     for k = #childdata, 1, -1 do
                         local char = string.sub(childdata, k, k)
-                        --print(char)
                         local index, _ = string.find(letters, char)
-                        --print(index)
                         for l = 0, 5 do
                             if bit.band(index, 2 ^ l) > 0 then
                                 binarr[bincount] = 1
@@ -98,8 +91,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.ticks = nil
                 elseif jsontable.bodies[i].childs[j].shapeId == "5e3dff9b-2450-44ae-ad46-d2f6b5148cbf" then --Vanilla Warehouse Square Light
                     jsontable.bodies[i].childs[j].shapeId = "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b"
-                    -- print(jsontable.bodies[i].childs[j].controller.luminance)
-                    -- print(jsontable.bodies[i].childs[j].controller)
                     local childdata = nil
                     local luminance = jsontable.bodies[i].childs[j].controller.luminance
                     if luminance == 10 then
@@ -133,7 +124,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
         for i = 1, #jsontable.bodies do
             for j = 1, #jsontable.bodies[i].childs do
                 if jsontable.bodies[i].childs[j].shapeId == "6a9dbff5-7562-4e9a-99ae-3590ece88112" then --fastgate
-                    --print(jsontable.bodies[i].childs[j])
                     jsontable.bodies[i].childs[j].shapeId = "9f0f56e8-2c31-4d83-996c-d00a9b296c3f"
 
                     local childdata = jsontable.bodies[i].childs[j].controller.data
@@ -159,28 +149,21 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.mode = mode
                     jsontable.bodies[i].childs[j].controller.active = false
                     jsontable.bodies[i].childs[j].controller.data = nil
-                    --print(jsontable.bodies[i].childs[j])
                 elseif jsontable.bodies[i].childs[j].shapeId == "db0bc11b-c083-4a6a-843f-73ac1033e6fe" then --fasttimer
-                    --print(jsontable.bodies[i].childs[j])
                     -- LOTS of base64 converting and extracting corresponding bits of seconds & ticks
 
                     local childdata = jsontable.bodies[i].childs[j].controller.data
 
-                    --print(childdata)
                     --WORKING 8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzCAAEAAAABXRpY2tzCAg
                     --WORKING 8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzCAAEAAAABXRpY2tzCBk
                     --NOT WORK 0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA
                     --NOT WORK 0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA
                     --childdata = string.sub(childdata, 1, -1)
-                    --print(childdata)
-                    --print(dec(childdata))
                     local binarr = {}
                     local bincount = 1
                     for k = #childdata, 1, -1 do
                         local char = string.sub(childdata, k, k)
-                        --print(char)
                         local index, _ = string.find(letters, char)
-                        --print(index)
                         for l = 0, 5 do
                             if bit.band(index, 2 ^ l) > 0 then
                                 binarr[bincount] = 1
@@ -191,14 +174,11 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                             end
                         end
                     end
-                    --print(#childdata, #binarr)
 
                     -- Everything in strings
                     local binstr = table.concat(binarr)
                     --local secondbinstr = string.sub(binstr, 5, 10)
                     --local tickbinstr = string.sub(binstr, 117, 122)
-                    --print(string.sub(binstr, 99, 104), string.sub(binstr, 3, 8))
-                    --print(binstr)
 
                     -- Everything in tables
                     local seconds
@@ -208,7 +188,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                         --8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzC_DAEAAAABXRpY2tzCCA
                         --8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzC_DsEAAAABXRpY2tzCCg
                         --identical_different
-                        --print('8B')
                         seconds = 0
                         for i = 99, 104 do                       -- used to be bits 5-10    |   99-104
                             if binarr[i] == 1 then
@@ -226,7 +205,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     elseif string.sub(childdata, 1, 33) == '0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzC' then
                         --0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzC_AAEAAAAB3NlY29uZHMIAA
                         --0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzC_CgEAAAAB3NlY29uZHMIOw
-                        --print('0E')
                         seconds = 0
                         for i = 5, 10 do                        -- used to be bits 5-10    |   99-104
                             if binarr[i] == 1 then
@@ -247,7 +225,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                         return
                     end
 
-                    --print(seconds, ticks)
                     if (seconds < 0) or (seconds > 59) or (ticks < 0) or (ticks > 40) then
                         sm.gui.chatMessage("#ff0000Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
                         sm.gui.chatMessage(childdata .. " " .. seconds .. " " .. ticks)
@@ -258,11 +235,8 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.active = false
                     jsontable.bodies[i].childs[j].controller.seconds = seconds
                     jsontable.bodies[i].childs[j].controller.ticks = ticks
-                    --print(jsontable.bodies[i].childs[j])
                 elseif jsontable.bodies[i].childs[j].shapeId == "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b" then --Fast Warehouse Square Light
                     jsontable.bodies[i].childs[j].shapeId = "5e3dff9b-2450-44ae-ad46-d2f6b5148cbf"
-                    -- print(";;")
-                    -- print(jsontable.bodies[i].childs[j].controller)
 
                     local luminance = 50
                     local childdata = jsontable.bodies[i].childs[j].controller.data
@@ -300,7 +274,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
     local world = body:getWorld()
 
     local shapes = body:getCreationShapes()
-    --print(shapes)
     for _, shape in pairs(shapes) do
         shape:destroyShape()
     end

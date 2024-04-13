@@ -1,5 +1,3 @@
--- print("loading FastTimer")
-
 dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
 

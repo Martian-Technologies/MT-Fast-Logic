@@ -32,7 +32,6 @@ end
 function FastLogicRealBlockMannager.checForBodyUpdate(self)
     local scanNext
     if not sm.exists(self.creation.body) or self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
-        print("body updated")
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()
         scanNext = self.creation.AllFastBlocks
     else
@@ -91,7 +90,7 @@ function FastLogicRealBlockMannager.checForBodyUpdate(self)
                     self.FastLogicRunner:externalRemoveNonFastConnection(id)
                 end
             end
-            local inputs = self.creation.blocks[id]
+            local inputs = self.creation.blocks[id].inputs
             for i = 0, #inputs do
                 if inputsHash[inputs[i]] == nil then
                     self.FastLogicAllBlockMannager:removeOutput(inputs[i], id)

@@ -206,30 +206,41 @@ end
 
 printOld = printOld or print
 local formater = {}
-function formater.getFormatedForPrint(val, depth)
+function formater.getFormatedForPrint(val, depth, maxTableLength)
     depth = depth or 5
     depth = depth - 1
-    if depth == 0 then
-        return "MAX DEPTH REACHED"
+    if depth == -1 then
+        return "MDR"
     end
     if type(val) == "number" then
         val = math.floor(val * 100 + 0.5) / 100
         return tostring(val)
     elseif type(val) == "table" then
+        if depth == 0 then
+            return "tbl"
+        end
         local i = 1
         local str = "{"
+        local count = 0
+        maxTableLength = maxTableLength or 100
         for key, value in pairs(val) do
+            if count > maxTableLength then
+                str = str .. "..."
+                break
+            end
+            count = count + 1
             if (#str > 1) then
                 str = str .. ", "
             end
             if (key == i) then
                 i = i + 1
-                str = str .. formater.getFormatedForPrint(value, depth)
+                str = str .. formater.getFormatedForPrint(value, depth, maxTableLength)
             else
-                str = str .. "[" .. formater.getFormatedForPrint(key, depth) .. "] = " .. formater.getFormatedForPrint(value, depth)
+                str = str .. "[" .. formater.getFormatedForPrint(key, depth, maxTableLength) .. "] = " .. formater.getFormatedForPrint(value, depth, maxTableLength)
             end
         end
         return str .. "}"
+        -- return depth
     elseif type(val) == "del" then
         return "del"
     elseif type(val) == "string" then
@@ -240,12 +251,12 @@ function formater.getFormatedForPrint(val, depth)
         end
         return "false"
     elseif type(val) == "Shape" then
-        return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId(), depth) .. "}"
+        return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId(), depth, maxTableLength) .. "}"
     elseif type(val) == "Vec3" then
         return "Vec3 <" ..
-        formater.getFormatedForPrint(val.x, depth) ..", " ..
-        formater.getFormatedForPrint(val.y, depth) .. ", "..
-        formater.getFormatedForPrint(val.z, depth) .. ">"
+        formater.getFormatedForPrint(val.x, depth, maxTableLength) ..", " ..
+        formater.getFormatedForPrint(val.y, depth, maxTableLength) .. ", "..
+        formater.getFormatedForPrint(val.z, depth, maxTableLength) .. ">"
     else
         return type(val)
     end
@@ -253,6 +264,10 @@ end
 
 function print(val)
     printOld(formater.getFormatedForPrint(val))
+end
+
+function advPrint(val, depth, maxTableLength)
+    printOld(formater.getFormatedForPrint(val, depth, maxTableLength))
 end
 
 -- input the keys you want to be able to hash

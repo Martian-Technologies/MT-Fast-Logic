@@ -1,5 +1,3 @@
--- print("loading FastLogicGate")
-
 dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
 

@@ -92,7 +92,7 @@ function FastLogicRealBlockMannager.checForBodyUpdate(self)
             end
             local inputs = self.creation.blocks[id].inputs
             for i = 0, #inputs do
-                if inputsHash[inputs[i]] == nil then
+                if inputsHash[inputs[i]] == nil and self.creation.blocks[inputs[i]] ~= nil and self.creation.blocks[inputs[i]].isSilicon == false then
                     self.FastLogicAllBlockMannager:removeOutput(inputs[i], id)
                 end
             end

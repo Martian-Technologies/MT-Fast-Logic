@@ -92,6 +92,8 @@ function BaseFastLogicBlock.server_onDestroy(self)
     self.creation.AllFastBlocks[self.id] = nil
     if self.removeAllData then
         self.FastLogicAllBlockMannager:removeBlock(self.id) -- remove
+    else
+        self.creation.blocks[self.id].isSilicon = true
     end
     self:server_onDestroy2()
 end

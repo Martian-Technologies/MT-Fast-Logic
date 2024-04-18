@@ -150,7 +150,7 @@ end
 
 function FastLogicRunner.internalRemoveOutput(self, id, idToDeconnect)
     if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToDeconnect] ~= false and table.removeValue(self.blockOutputs[id], idToDeconnect) ~= nil then
-        if table.contains(self.optimizedBlockOutputs[id], idToDeconnect) then
+        if self.optimizedBlockOutputsPosHash[id][idToDeconnect] ~= nil then
             local outputs = self.optimizedBlockOutputs[id]
             local outputsPosHash = self.optimizedBlockOutputsPosHash[id]
             local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
@@ -204,22 +204,27 @@ function FastLogicRunner.fixBlockInputData(self, id)
             -- update the inputs
             for i = 1, self.numberOfBlockInputs[id] do
                 local inputId = self.blockInputs[id][i]
+                if self.optimizedBlockOutputsPosHash[inputId][id] == nil then
+                    self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId] + 1
+                    self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = -1
+                end
                 if countedInputsHash[inputId] then
                     if not table.contains(self.optimizedBlockOutputs[inputId], id) then
-                        self.optimizedBlockOutputs[inputId][#self.optimizedBlockOutputs[inputId] + 1] = id
-                        self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId]
+                        self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
                     end
                 elseif table.contains(self.optimizedBlockOutputs[inputId], id) then
                     -- table.removeValue(self.optimizedBlockOutputs[inputId], id)
                     -- self.optimizedBlockOutputsPosHash[inputId][id] = nil
 
-                    local outputs = self.optimizedBlockOutputs[inputId]
-                    local outputsPosHash = self.optimizedBlockOutputsPosHash[inputId]
-                    local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                    outputs[outputsPosHash[id]] = otherId        -- set the pos of id in optimizedBlockOutputs to otherId
-                    outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                    outputsPosHash[otherId] = outputsPosHash[id] -- set otherId's pos to id's pos in posHash
-                    outputsPosHash[id] = nil                     -- remove id from posHash
+                    -- local outputs = self.optimizedBlockOutputs[inputId]
+                    -- local outputsPosHash = self.optimizedBlockOutputsPosHash[inputId]
+                    -- local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
+                    -- outputs[outputsPosHash[id]] = otherId        -- set the pos of id in optimizedBlockOutputs to otherId
+                    -- outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
+                    -- outputsPosHash[otherId] = outputsPosHash[id] -- set otherId's pos to id's pos in posHash
+                    -- outputsPosHash[id] = nil                     -- remove id from posHash
+
+                    self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = -1
                 end
             end
         end
@@ -243,22 +248,27 @@ function FastLogicRunner.fixBlockInputData(self, id)
             -- update the inputs
             for i = 1, self.numberOfBlockInputs[id] do
                 local inputId = self.blockInputs[id][i]
+                if self.optimizedBlockOutputsPosHash[inputId][id] == nil then
+                    self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId] + 1
+                    self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = -1
+                end
                 if countedInputsHash[inputId] then
                     if not table.contains(self.optimizedBlockOutputs[inputId], id) then
-                        self.optimizedBlockOutputs[inputId][#self.optimizedBlockOutputs[inputId] + 1] = id
-                        self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId]
+                        self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
                     end
                 elseif table.contains(self.optimizedBlockOutputs[inputId], id) then
                     -- table.removeValue(self.optimizedBlockOutputs[inputId], id)
                     -- self.optimizedBlockOutputsPosHash[inputId][id] = nil
 
-                    local outputs = self.optimizedBlockOutputs[inputId]
-                    local outputsPosHash = self.optimizedBlockOutputsPosHash[inputId]
-                    local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                    outputs[outputsPosHash[id]] = otherId        -- set the pos of id in optimizedBlockOutputs to otherId
-                    outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                    outputsPosHash[otherId] = outputsPosHash[id] -- set otherId's pos to id's pos in posHash
-                    outputsPosHash[id] = nil                     -- remove id from posHash
+                    -- local outputs = self.optimizedBlockOutputs[inputId]
+                    -- local outputsPosHash = self.optimizedBlockOutputsPosHash[inputId]
+                    -- local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
+                    -- outputs[outputsPosHash[id]] = otherId        -- set the pos of id in optimizedBlockOutputs to otherId
+                    -- outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
+                    -- outputsPosHash[otherId] = outputsPosHash[id] -- set otherId's pos to id's pos in posHash
+                    -- outputsPosHash[id] = nil                     -- remove id from posHash
+
+                    self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = -1
                 end
             end
         end
@@ -274,9 +284,12 @@ function FastLogicRunner.fixBlockInputData(self, id)
                 if self.blockStates[inputId] then
                     self.countOfOnInputs[id] = self.countOfOnInputs[id] + 1
                 end
+                if self.optimizedBlockOutputsPosHash[inputId][id] == nil then
+                    self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId] + 1
+                    self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = -1
+                end
                 if not table.contains(self.optimizedBlockOutputs[inputId], id) then
-                    self.optimizedBlockOutputs[inputId][#self.optimizedBlockOutputs[inputId] + 1] = id
-                    self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId]
+                    self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
                 end
             end
         end
@@ -289,8 +302,10 @@ function FastLogicRunner.fixBlockInputData(self, id)
             self.numberOfOptimizedInputs[id] = 1
             self.countOfOnInputs[id] = self.blockStates[inputId] and 1 or 0
             if not table.contains(self.optimizedBlockOutputs[inputId], id) then
-                self.optimizedBlockOutputs[inputId][#self.optimizedBlockOutputs[inputId] + 1] = id
-                self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId]
+                if self.optimizedBlockOutputsPosHash[inputId][id] == nil then
+                    self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId] + 1
+                end
+                self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
             end
         end
     end

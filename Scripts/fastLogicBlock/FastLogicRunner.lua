@@ -255,8 +255,8 @@ function FastLogicRunner.doUpdate(self)
         elseif countOfOnInputs[blockId] == numberOfOptimized then -- all optimizedInputs on
             numberOfOptimized = numberOfOptimized + 1
             local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-            optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
             while blockStates[blockInputs[blockId][numberOfOptimized]] do        -- while the top optimizedInput on
                 countOfOnInputs[blockId] = countOfOnInputs[blockId] + 1
                 if countOfOnInputs[blockId] == numberOfBlockInputs[blockId] then -- if that was the last input to turn on
@@ -268,8 +268,8 @@ function FastLogicRunner.doUpdate(self)
                 else
                     numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
                     inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-                    optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
                 end
             end
         else -- some optimizedInputs are off
@@ -278,25 +278,15 @@ function FastLogicRunner.doUpdate(self)
             if blockStates[inputId] then -- the top optimizedInput on
                 countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
                 numberOfOptimized = numberOfOptimized - 1
-                -- remove blockId from optimizedBlockOutputs (table.removeValue(optimizedBlockOutputs[inputId], blockId))
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+
+                -- remove from optimizedBlockOutputs
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
                 goto AND
             elseif countOfOnInputs[blockId] + 1 < numberOfOptimized then -- the top optimizedInput off
                 numberOfOptimized = numberOfOptimized - 1
+                
                 -- remove from optimizedBlockOutputs
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
                 goto AND
             end
 
@@ -328,8 +318,8 @@ function FastLogicRunner.doUpdate(self)
         elseif countOfOnInputs[blockId] == 0 then -- all optimizedInputs off
             numberOfOptimized = numberOfOptimized + 1
             local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-            optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
             while not blockStates[blockInputs[blockId][numberOfOptimized]] do -- while the top optimizedInput off
                 if numberOfOptimized == numberOfBlockInputs[blockId] then     -- if that was the last input to turn off
                     if (countOfOnOtherInputs[blockId] == 0) == blockStates[blockId] then
@@ -340,8 +330,8 @@ function FastLogicRunner.doUpdate(self)
                 else
                     numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
                     inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-                    optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
                 end
             end
             if blockStates[blockInputs[blockId][numberOfOptimized]] then
@@ -352,26 +342,16 @@ function FastLogicRunner.doUpdate(self)
             local inputId = blockInputs[blockId][numberOfOptimized]
             if not blockStates[inputId] then -- the top optimizedInput off
                 numberOfOptimized = numberOfOptimized - 1
+                
                 -- remove from optimizedBlockOutputs
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
                 goto OR
             elseif countOfOnInputs[blockId] > 1 then -- the top optimizedInput on
                 countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
                 numberOfOptimized = numberOfOptimized - 1
+                
                 -- remove from optimizedBlockOutputs
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
                 goto OR
             end
 
@@ -414,8 +394,8 @@ function FastLogicRunner.doUpdate(self)
         elseif countOfOnInputs[blockId] == numberOfOptimized then -- all optimizedInputs on
             numberOfOptimized = numberOfOptimized + 1
             local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-            optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
             while blockStates[blockInputs[blockId][numberOfOptimized]] do        -- while the top optimizedInput on
                 countOfOnInputs[blockId] = countOfOnInputs[blockId] + 1
                 if countOfOnInputs[blockId] == numberOfBlockInputs[blockId] then -- if that was the last input to turn off
@@ -427,8 +407,8 @@ function FastLogicRunner.doUpdate(self)
                 else
                     numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
                     inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-                    optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
                 end
             end
         else -- some optimizedInputs are off
@@ -437,25 +417,15 @@ function FastLogicRunner.doUpdate(self)
             if blockStates[inputId] then -- the top optimizedInput on
                 countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
                 numberOfOptimized = numberOfOptimized - 1
+                
                 -- remove from optimizedBlockOutputs
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
                 goto NAND
             elseif countOfOnInputs[blockId] + 1 < numberOfOptimized then -- the top optimizedInput off
                 numberOfOptimized = numberOfOptimized - 1
+                
                 -- remove from optimizedBlockOutputs
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
                 goto NAND
             end
 
@@ -487,8 +457,8 @@ function FastLogicRunner.doUpdate(self)
         elseif countOfOnInputs[blockId] == 0 then -- all optimizedInputs off
             numberOfOptimized = numberOfOptimized + 1
             local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-            optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
             while not blockStates[blockInputs[blockId][numberOfOptimized]] do -- while the top optimizedInput off
                 if numberOfOptimized == numberOfBlockInputs[blockId] then     -- if that was the last input to turn off
                     if (countOfOnOtherInputs[blockId] == 0) ~= blockStates[blockId] then
@@ -499,8 +469,8 @@ function FastLogicRunner.doUpdate(self)
                 else
                     numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
                     inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][#optimizedBlockOutputs[inputId] + 1] = blockId
-                    optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
+                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
+                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
                 end
             end
             if blockStates[blockInputs[blockId][numberOfOptimized]] then
@@ -511,26 +481,27 @@ function FastLogicRunner.doUpdate(self)
             local inputId = blockInputs[blockId][numberOfOptimized]
             if not blockStates[inputId] then -- the top optimizedInput off
                 numberOfOptimized = numberOfOptimized - 1
+                
                 -- remove from optimizedBlockOutputs
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+
+                -- table.removeValue(optimizedBlockOutputs[inputId], blockId) -- old 1
+
+                -- local outputs = optimizedBlockOutputs[inputId] -- old 2
+                -- local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
+                -- local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
+                -- outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
+                -- outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
+                -- outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
+                -- -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1 -- new
                 goto NOR
             elseif countOfOnInputs[blockId] > 1 then -- the top optimizedInput on
                 countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
                 numberOfOptimized = numberOfOptimized - 1
+                
                 -- remove from optimizedBlockOutputs
-                local outputs = optimizedBlockOutputs[inputId]
-                local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
+                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
                 goto NOR
             end
 
@@ -587,13 +558,15 @@ function FastLogicRunner.doUpdate(self)
         local outputs = optimizedBlockOutputs[id]
         for k = 1, #outputs do
             local outputId = outputs[k]
-            countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
-            if nextRunningBlocks[outputId] ~= nextRunningIndex then
-                -- self.blocksForNextTick = self.blocksForNextTick + 1
-                nextRunningBlocks[outputId] = nextRunningIndex
-                local pathId = runnableBlockPathIds[outputId]
-                runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
-                runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
+            if outputId ~= -1 then
+                countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
+                if nextRunningBlocks[outputId] ~= nextRunningIndex then
+                    -- self.blocksForNextTick = self.blocksForNextTick + 1
+                    nextRunningBlocks[outputId] = nextRunningIndex
+                    local pathId = runnableBlockPathIds[outputId]
+                    runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
+                    runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
+                end
             end
         end
     end

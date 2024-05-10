@@ -1,5 +1,8 @@
-dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
+local string = string
+local table = table
+
+dofile "BaseFastLogicBlock.lua"
 
 FastLight = table.deepCopyTo(BaseFastLogicBlock, (FastLight or class()))
 FastLight.maxParentCount = 1
@@ -9,23 +12,22 @@ FastLight.connectionOutput = nil
 FastLight.poseWeightCount = 1
 
 function FastLight.getData2(self)
-    self.creation.FastLights[self.id] = self
+    self.creation.FastLights[self.data.uuid] = self
 end
 
 function FastLight.server_onCreate2(self)
     self.type = "Light"
-    self.data = self.data or {}
     if self.storage:load() ~= nil then
         self.data.luminance = self.storage:load().luminance or 50
     else
         self.data.luminance = 50
     end
-    self:server_saveLuminance(self.data.luminance)
-    self.network:setClientData({ luminance = self.data.luminance })
+    self:server_saveLuminance(self.data)
+    self.network:setClientData(self.data)
 end
 
 function FastLight.server_onDestroy2(self)
-    self.creation.FastLights[self.id] = nil
+    self.creation.FastLights[self.data.uuid] = nil
 end
 
 function FastLight.client_onCreate2(self)
@@ -91,6 +93,6 @@ end
 
 function FastLight.server_saveLuminance(self, luminance)
     self.data.luminance = luminance
-    self.network:setClientData({ luminance = self.data.luminance })
-    self.storage:save({ luminance = self.data.luminance })
+    self.network:setClientData(self.data)
+    self.storage:save(self.data)
 end

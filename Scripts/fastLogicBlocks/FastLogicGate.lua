@@ -1,26 +1,28 @@
-dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
+local string = string
+local table = table
+
+dofile "BaseFastLogicBlock.lua"
 
 FastLogicGate = table.deepCopyTo(BaseFastLogicBlock, (FastLogicGate or class()))
 
 function FastLogicGate.getData2(self)
-    self.creation.FastLogicGates[self.id] = self
+    self.creation.FastLogicGates[self.data.uuid] = self
 end
 
 function FastLogicGate.server_onCreate2(self)
     self.type = "LogicGate"
-    self.data = self.data or {}
     if self.storage:load() ~= nil then
         self.data.mode = self.storage:load().mode or 0
     else
         self.data.mode = 0
     end
-    self.network:setClientData({ mode = self.data.mode })
-    self.storage:save({ mode = self.data.mode })
+    self.network:setClientData(self.data.mode)
+    self.storage:save(self.data)
 end
 
 function FastLogicGate.server_onDestroy2(self)
-    self.creation.FastLogicGates[self.id] = nil
+    self.creation.FastLogicGates[self.data.uuid] = nil
 end
 
 function FastLogicGate.client_onCreate2(self)
@@ -74,8 +76,8 @@ function FastLogicGate.client_onInteract(self, character, state)
     end
 end
 
-function FastLogicGate.client_onClientDataUpdate(self, data)
-    self.client_mode = data.mode
+function FastLogicGate.client_onClientDataUpdate(self, mode)
+    self.client_mode = mode
     self:client_updateTexture()
 end
 
@@ -90,8 +92,8 @@ end
 function FastLogicGate.server_saveMode(self, mode)
     if mode ~= self.data.mode then
         self.data.mode = mode
-        self.network:setClientData({ mode = self.data.mode })
-        self.storage:save({ mode = self.data.mode })
+        self.network:setClientData(self.data.mode)
+        self.storage:save(self.data)
         self:rescanSelf()
     end
 end

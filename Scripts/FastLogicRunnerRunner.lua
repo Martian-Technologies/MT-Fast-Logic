@@ -1,7 +1,10 @@
+dofile "util/util.lua"
+local string = string
+local table = table
+
 dofile "fastLogicRealBlockMannager/FastLogicRealBlockMannager.lua"
 dofile "fastLogicAllBlockMannager/FastLogicAllBlockMannager.lua"
 dofile "fastLogicBlock/FastLogicRunner.lua"
-dofile "util/util.lua"
 dofile "silicon/SiliconConverter.lua"
 local SiliconConverter = SiliconConverter
 
@@ -12,28 +15,78 @@ dofile "fastLogicRealBlockMannager/LogicConverter.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
+sm.MTFastLogic.NewBlockUuids = sm.MTFastLogic.NewBlockUuids or {}
+sm.MTFastLogic.WillBeSiliconBlocks = sm.MTFastLogic.WillBeSiliconBlocks or {}
+sm.MTFastLogic.BlocksToGetData = sm.MTFastLogic.BlocksToGetData or {}
+sm.MTFastLogic.SiliconBlocksToGetData = sm.MTFastLogic.SiliconBlocksToGetData or {}
+sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
-    -- advPrint(sm.MTFastLogic, 4, 5)
     if self.run then
-        if sm.MTFastLogic.BlocksToGetData ~= nil then
-            for i = 1, #sm.MTFastLogic.BlocksToGetData do
-                sm.MTFastLogic.BlocksToGetData[i]:getData()
+        -- bodiesToConvert
+        if self.bodiesToConvert ~= nil then
+            if self.bodiesToConvert[1] ~= nil then
+                for i = 1, #self.bodiesToConvert[1] do
+                    self:convertBodyInternal(self.bodiesToConvert[1][i].body, self.bodiesToConvert[1][i].wantedType)
+                end
             end
-            sm.MTFastLogic.BlocksToGetData = {}
+            self.bodiesToConvert[1] = self.bodiesToConvert[2]
+            self.bodiesToConvert[2] = {}
         end
-        self.changedIdsArray = {}
+        --WillBeSiliconBlocks
+        if sm.MTFastLogic.WillBeSiliconBlocks[1] ~= nil then
+            for i = 1, #sm.MTFastLogic.WillBeSiliconBlocks[1] do
+                local data = sm.MTFastLogic.WillBeSiliconBlocks[1][i]
+                sm.event.sendToInteractable(data.interactable, "addBlocks", data.uuids)
+            end
+        end
+        sm.MTFastLogic.WillBeSiliconBlocks[1] = sm.MTFastLogic.WillBeSiliconBlocks[2]
+        sm.MTFastLogic.WillBeSiliconBlocks[2] = {}
+        --BlocksToGetData
+        for i = 1, #sm.MTFastLogic.BlocksToGetData do
+            sm.MTFastLogic.BlocksToGetData[i]:getData()
+        end
+        sm.MTFastLogic.BlocksToGetData = {}
+        --SiliconBlocksToGetData
+        for i = 1, #sm.MTFastLogic.SiliconBlocksToGetData do
+            sm.MTFastLogic.SiliconBlocksToGetData[i]:getData()
+        end
+        sm.MTFastLogic.SiliconBlocksToGetData = {}
+        --SiliconBlocksToAddConnections
+        if sm.MTFastLogic.SiliconBlocksToAddConnections[1] ~= nil then
+            for i = 1, #sm.MTFastLogic.SiliconBlocksToAddConnections[1] do
+                sm.MTFastLogic.SiliconBlocksToAddConnections[1][i]:addConnections()
+            end
+        end
+        sm.MTFastLogic.SiliconBlocksToAddConnections[1] = sm.MTFastLogic.SiliconBlocksToAddConnections[2]
+        sm.MTFastLogic.SiliconBlocksToAddConnections[2] = {}
+        --NewBlockUuids
+        for k,v in pairs(sm.MTFastLogic.NewBlockUuids) do
+            if v[2] > 0 then
+                sm.MTFastLogic.NewBlockUuids[k] = nil
+            else
+                sm.MTFastLogic.NewBlockUuids[k][2] = sm.MTFastLogic.NewBlockUuids[k][2] + 1
+            end
+        end
+        self.changedUuidsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
             v.FastLogicRealBlockMannager:update()
         end
-        for i = 1, #self.changedIdsArray do
-            self.network:sendToClients("client_updateTextures", self.changedIdsArray[i])
+        for i = 1, #self.changedUuidsArray do
+            local changedUuidsArray = {}
+            for ii = 1, #self.changedUuidsArray[i] do
+                if  sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]] ~= nil then
+                    changedUuidsArray[ii] = sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].id
+                end
+            end
+            self.network:sendToClients("client_updateTextures", changedUuidsArray)
         end
     end
 end
 
 function FastLogicRunnerRunner.server_onCreate(self)
     if sm.isHost then
+        self.bodiesToConvert = {}
         sm.MTFastLogic.FastLogicRunnerRunner = self
         self.run = true
     else
@@ -46,19 +99,23 @@ end
 
 function FastLogicRunnerRunner.MakeCreationData(self, creationId, body, lastSeenSpeed)
     sm.MTFastLogic.Creations[creationId] = {
-        ["FastLogicRealBlockMannager"] = FastLogicRealBlockMannager.getNew(creationId),
-        ["FastLogicAllBlockMannager"] = FastLogicAllBlockMannager.getNew(creationId),
-        ["FastLogicRunner"] = FastLogicRunner.getNew(creationId),
-        ["FastLogicGates"] = {},
-        ["FastTimers"] = {},
-        ["EndTickButtons"] = {},
-        ["FastLights"] = {},
-        ["BlocksToScan"] = {},
-        ["AllFastBlocks"] = {},
-        ["AllNonFastBlocks"] = {},
-        ["body"] = body,
-        ["blocks"] = {},
-        ["lastBodyUpdate"] = 0
+        FastLogicRealBlockMannager = FastLogicRealBlockMannager.getNew(creationId),
+        FastLogicAllBlockMannager = FastLogicAllBlockMannager.getNew(creationId),
+        FastLogicRunner = FastLogicRunner.getNew(creationId),
+        FastLogicGates = {},
+        FastTimers = {},
+        EndTickButtons = {},
+        FastLights = {},
+        BlocksToScan = {},
+        AllFastBlocks = {},
+        AllNonFastBlocks = {},
+        SiliconBlocks = {},
+        body = body,
+        blocks = {},
+        uuids = {},
+        ids = {},
+        lastBodyUpdate = 0,
+        NewBlockUuids = {}
     }
     sm.MTFastLogic.Creations[creationId].FastLogicRealBlockMannager:init()
     sm.MTFastLogic.Creations[creationId].FastLogicAllBlockMannager:init()
@@ -68,18 +125,17 @@ function FastLogicRunnerRunner.MakeCreationData(self, creationId, body, lastSeen
     end
 end
 
-
 function FastLogicRunnerRunner.server_onrefresh(self)
     self:server_onCreate()
 end
 
 function FastLogicRunnerRunner.client_sendMessage(self, message)
-    sm.gui.chatMessage( message )
+    sm.gui.chatMessage(message)
 end
 
 function FastLogicRunnerRunner.client_updateTextures(self, changedIds)
     for i = 1, #changedIds do
-        local block = sm.MTFastLogic.FastLogicBlockLookUp[changedIds[i]]
+        local block = sm.MTFastLogic.client_FastLogicBlockLookUp[changedIds[i]]
         if block ~= nil then
             block:client_updateTexture()
         end
@@ -96,30 +152,26 @@ function FastLogicRunnerRunner.getCreationId(self, body)
     return id
 end
 
- -- wantedType = "toSilicon" or "toFastLogic"
- -- localLocations shoud be in blocks not meters
- function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocations)
+-- wantedType = "toSilicon" or "toFastLogic"
+-- localLocations shoud be in blocks not meters
+function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocations)
     local creationId = self:getCreationId(body)
     local creation = sm.MTFastLogic.Creations[creationId]
     if creation == nil then return end
     local allBlockMannager = creation.FastLogicAllBlockMannager
     local blocksToConvert = {}
     for i = 1, #localLocations do
-        local keyPos = (
-            tostring(math.floor(localLocations[i].x)) .. "," ..
-            tostring(math.floor(localLocations[i].y)) .. "," ..
-            tostring(math.floor(localLocations[i].z))
-        )
+        local keyPos = string.vecToString(localLocations[i])
         local blocks = allBlockMannager.locationCash[keyPos]
         if blocks ~= nil then
             for i = 1, #blocks do
-                blocksToConvert[#blocksToConvert+1] = blocks[i]
+                blocksToConvert[#blocksToConvert + 1] = blocks[i]
             end
         end
     end
     if wantedType == "toSilicon" then
         SiliconConverter.convertToSilicon(creationId, blocksToConvert)
     elseif wantedType == "toFastLogic" then
-        SiliconConverter.convertFromSilicon(creationId, body, blocksToConvert)
+        SiliconConverter.convertFromSilicon(creationId, blocksToConvert)
     end
 end

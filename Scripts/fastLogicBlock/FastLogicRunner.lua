@@ -1,6 +1,9 @@
+dofile "../util/util.lua"
+local string = string
+local table = table
+
 FastLogicRunner = FastLogicRunner or {}
 
-dofile "../util/util.lua"
 dofile "BlockMannager.lua"
 dofile "BalancedLogicFinder.lua"
 dofile "LogicOptimizer.lua"
@@ -22,6 +25,7 @@ function FastLogicRunner.init(self)
     self.numberOfUpdatesPerTick = self.numberOfUpdatesPerTick or 1
     self.updateTicks = self.updateTicks or 0
     self.blocksOptimized = self.blocksOptimized or 0
+    self.blocksToAddInputs = {}
     if self.hashData == nil then
         self:makeDataArrays()
     end
@@ -89,6 +93,13 @@ function FastLogicRunner.makeDataArrays(self)
 end
 
 function FastLogicRunner.update(self)
+    -- print(self.blockStates)
+    -- print(self.blockInputs)
+    -- print(self.blockOutputs)
+    for i = 1, #self.blocksToAddInputs do
+        self:externalAddInput(self.blocksToAddInputs[i][1], self.blocksToAddInputs[i][2])
+    end
+    self.blocksToAddInputs = {}
     self:optimizeLogic()
     self.blocksRan = 0
     self.blocksForNextTick = 0
@@ -482,18 +493,6 @@ function FastLogicRunner.doUpdate(self)
             if not blockStates[inputId] then -- the top optimizedInput off
                 numberOfOptimized = numberOfOptimized - 1
                 
-                -- remove from optimizedBlockOutputs
-
-                -- table.removeValue(optimizedBlockOutputs[inputId], blockId) -- old 1
-
-                -- local outputs = optimizedBlockOutputs[inputId] -- old 2
-                -- local outputsPosHash = optimizedBlockOutputsPosHash[inputId]
-                -- local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                -- outputs[outputsPosHash[blockId]] = otherId        -- set the pos of blockId in optimizedBlockOutputs to otherId
-                -- outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                -- outputsPosHash[otherId] = outputsPosHash[blockId] -- set otherId's pos to blockId's pos in posHash
-                -- -- outputsPosHash[blockId] = nil                     -- remove blockId from posHash
-
                 optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1 -- new
                 goto NOR
             elseif countOfOnInputs[blockId] > 1 then -- the top optimizedInput on
@@ -558,6 +557,13 @@ function FastLogicRunner.doUpdate(self)
         local outputs = optimizedBlockOutputs[id]
         for k = 1, #outputs do
             local outputId = outputs[k]
+            if (outputId == nil) then
+                print(id)
+                print(stateNumber)
+                print(self.unhashedLookUp[id])
+                print(self.creation.blocks[self.unhashedLookUp[id]])
+                print(outputs)
+            end
             if outputId ~= -1 then
                 countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
                 if nextRunningBlocks[outputId] ~= nextRunningIndex then

@@ -1,20 +1,21 @@
 dofile "../util/util.lua"
-
+local string = string
+local table = table
 
 function FastLogicRealBlockMannager.updateDisplay(self, blockToUpdate)
     local numberOfChanges = 0
     local blocks = self.creation.blocks
     local displayedStates = self.displayedBlockStates
     local fastBlocks = self.creation.AllFastBlocks
-    local changedIdsArray = sm.MTFastLogic.FastLogicRunnerRunner.changedIdsArray
-    local changedIds = {}
+    local changedUuidsArray = sm.MTFastLogic.FastLogicRunnerRunner.changedUuidsArray
+    local changedUuids = {}
     for i = 1, #blockToUpdate do
-        local id = blockToUpdate[i]
-        local block = fastBlocks[id]
+        local uuid = blockToUpdate[i]
+        local block = fastBlocks[uuid]
         if block ~= nil then
-            local state = blocks[id].state
-            if displayedStates[id] ~= state then
-                displayedStates[id] = state
+            local state = blocks[uuid].state
+            if displayedStates[uuid] ~= state then
+                displayedStates[uuid] = state
                 if block.interactable.active ~= state or block.state ~= state then
                     block.interactable.active = state
                     block.state = state
@@ -24,18 +25,18 @@ function FastLogicRealBlockMannager.updateDisplay(self, blockToUpdate)
                         block.interactable.power = 0
                     end
                     numberOfChanges = numberOfChanges + 1
-                    changedIds[numberOfChanges] = id
+                    changedUuids[numberOfChanges] = uuid
                 end
             end
         end
-        if numberOfChanges > 5000 then
-            changedIdsArray[#changedIdsArray + 1] = changedIds
-            changedIds = {}
+        if numberOfChanges > 1000 then
+            changedUuidsArray[#changedUuidsArray + 1] = changedUuids
+            changedUuids = {}
             numberOfChanges = 0
         end
     end
     if numberOfChanges > 0 then
-        changedIdsArray[#changedIdsArray + 1] = changedIds
+        changedUuidsArray[#changedUuidsArray + 1] = changedUuids
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()
     end
 end

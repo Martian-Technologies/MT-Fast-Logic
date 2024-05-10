@@ -1,4 +1,6 @@
 dofile "../util/util.lua"
+local string = string
+local table = table
 
 FastLogicRealBlockMannager = FastLogicRealBlockMannager or {}
 
@@ -38,8 +40,24 @@ end
 
 function FastLogicRealBlockMannager.addAllNewBlocks(self)
     for i = 1, #self.creation.BlocksToScan do
-        self.FastLogicAllBlockMannager:addBlock(self.creation.BlocksToScan[i])
-        self.scanNext[self.creation.BlocksToScan[i].id] = self.creation.BlocksToScan[i]
+        local block = self.creation.BlocksToScan[i]
+        if block.isFastLogic == true then
+            self.FastLogicAllBlockMannager:addBlock(block)
+            self.scanNext[block.data.uuid] = block
+        elseif block.isSilicon == true then
+            for _, siliconBlock in ipairs(block.data.blocks) do
+                self.FastLogicAllBlockMannager:addSiliconBlock(
+                    siliconBlock.type,
+                    siliconBlock.uuid,
+                    siliconBlock.pos,
+                    siliconBlock.rot,
+                    siliconBlock.inputs,
+                    siliconBlock.outputs,
+                    siliconBlock.state,
+                    siliconBlock.timerLength
+                )
+            end
+        end
     end
     self.creation.BlocksToScan = {}
 end

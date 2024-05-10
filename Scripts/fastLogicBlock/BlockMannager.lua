@@ -1,4 +1,6 @@
 dofile "../util/util.lua"
+local string = string
+local table = table
 
 function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state, timerLength)
     -- path data
@@ -25,7 +27,6 @@ function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state
     self.numberOfOptimizedInputs[id] = 0
     self.optimizedBlockOutputs[id] = {}
     self.optimizedBlockOutputsPosHash[id] = {}
-
     if (
             path == self.pathIndexs["norThroughBlocks"] or
             path == self.pathIndexs["throughBlocks"] or
@@ -131,7 +132,7 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect)
                 self.numberOfBlockInputs[idToConnect] = self.numberOfBlockInputs[idToConnect] + 1
             end
         elseif self.blockInputs[idToConnect] ~= id then      --if the block it is outputting too has one input
-            local LL = {2,3}
+            local LL = { 2, 3 }
             if (self.blockInputs[idToConnect] ~= false) then --if there is already a block connected to that input
                 self:internalRemoveOutput(self.blockInputs[idToConnect], idToConnect)
                 -- print("WARNING: in addblock when creating block output confilct found (removing connection), line 139")
@@ -142,6 +143,7 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect)
         end
 
         -- update states
+        self:fixBlockOutputData(id)
         self:fixBlockInputData(idToConnect)
 
         self:internalAddBlockToUpdate(idToConnect)
@@ -173,6 +175,7 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDeconnect)
             self.numberOfBlockInputs[idToDeconnect] = 0
         end
 
+        self:fixBlockOutputData(id)
         self:fixBlockInputData(idToDeconnect)
 
         -- OLD update states
@@ -180,6 +183,36 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDeconnect)
         --     self.countOfOnInputs[idToDeconnect] = self.countOfOnInputs[idToDeconnect] - 1
         --     self:internalAddBlockToUpdate(idToDeconnect)
         -- end
+    end
+end
+
+function FastLogicRunner.fixBlockOutputData(self, id)
+    local usedPosHash = {}
+    local optimizedOutputs = self.optimizedBlockOutputs[id]
+    for inputId, index in pairs(self.optimizedBlockOutputsPosHash[id]) do
+        usedPosHash[index] = inputId
+        if optimizedOutputs[index] == nil or (optimizedOutputs[index] ~= inputId and optimizedOutputs[index] ~= -1) then
+            optimizedOutputs[index] = -1
+        end
+    end
+    local i = 1
+    while i <= #optimizedOutputs do
+        if (
+                usedPosHash[i] == nil or
+                self.countOfOnInputs[usedPosHash[i]] == nil or
+                self.countOfOnInputs[usedPosHash[i]] == false or
+                self.blockOutputsHash[id][usedPosHash[i]] == nil
+            ) then
+            usedPosHash[i] = usedPosHash[#optimizedOutputs]
+            usedPosHash[#optimizedOutputs] = nil
+
+            local otherId = optimizedOutputs[#optimizedOutputs] -- get the top item on optimizedBlockOutputs
+            optimizedOutputs[i] = otherId                       -- set the pos i in optimizedBlockOutputs to otherId
+            optimizedOutputs[#optimizedOutputs] = nil           -- sets the top item on optimizedBlockOutputs to nil
+            self.optimizedBlockOutputsPosHash[id][otherId] = i  -- set otherId's pos to i in posHash
+        else
+            i = i + 1
+        end
     end
 end
 
@@ -350,40 +383,40 @@ end
 
 --------------------------------------------------------
 
-function FastLogicRunner.externalAddNonFastConnection(self, id)
-    id = self.hashedLookUp[id]
+function FastLogicRunner.externalAddNonFastConnection(self, uuid)
+    local id = self.hashedLookUp[uuid]
     if id ~= nil then
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] + 1
         self:internalAddBlockToUpdate(id)
     end
 end
 
-function FastLogicRunner.externalRemoveNonFastConnection(self, id)
-    id = self.hashedLookUp[id]
+function FastLogicRunner.externalRemoveNonFastConnection(self, uuid)
+    local id = self.hashedLookUp[uuid]
     if id ~= nil then
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] - 1
         self:internalAddBlockToUpdate(id)
     end
 end
 
-function FastLogicRunner.externalAddNonFastOnInput(self, id)
-    id = self.hashedLookUp[id]
+function FastLogicRunner.externalAddNonFastOnInput(self, uuid)
+    local id = self.hashedLookUp[uuid]
     if id ~= nil then
         self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] + 1
         self:internalAddBlockToUpdate(id)
     end
 end
 
-function FastLogicRunner.externalRemoveNonFastOnInput(self, id)
-    id = self.hashedLookUp[id]
+function FastLogicRunner.externalRemoveNonFastOnInput(self, uuid)
+    local id = self.hashedLookUp[uuid]
     if id ~= nil then
         self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] - 1
         self:internalAddBlockToUpdate(id)
     end
 end
 
-function FastLogicRunner.externalChangeNonFastOnInput(self, id, amount)
-    id = self.hashedLookUp[id]
+function FastLogicRunner.externalChangeNonFastOnInput(self, uuid, amount)
+    local id = self.hashedLookUp[uuid]
     if id ~= nil then
         self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] + amount
         self:internalAddBlockToUpdate(id)
@@ -391,53 +424,72 @@ function FastLogicRunner.externalChangeNonFastOnInput(self, id, amount)
 end
 
 function FastLogicRunner.externalAddBlock(self, block)
-    if self.hashedLookUp[block.id] == nil then
-        table.addToConstantKeysOnlyHash(self.hashData, block.id)
-        local id = self.hashedLookUp[block.id]
+    if self.hashedLookUp[block.uuid] == nil then
+        table.addToConstantKeysOnlyHash(self.hashData, block.uuid)
+        local id = self.hashedLookUp[block.uuid]
         local inputs = table.hashArrayValues(self.hashData, block.inputs)
         local outputs = table.hashArrayValues(self.hashData, block.outputs)
         self:internalAddBlock(block.type, id, inputs, outputs, block.state, block.timerLength)
+        local missingInputs = table.getMissingHashValues(self.hashData, block.inputs)
+        for i = 1, #missingInputs do
+            self.blocksToAddInputs[#self.blocksToAddInputs + 1] = { block.uuid, missingInputs[i] }
+        end
+        local missingOutputs = table.getMissingHashValues(self.hashData, block.outputs)
+        for i = 1, #missingOutputs do
+            self.blocksToAddInputs[#self.blocksToAddInputs + 1] = { missingOutputs[i], block.uuid }
+        end
     end
 end
 
-function FastLogicRunner.externalRemoveBlock(self, id)
-    if self.hashedLookUp[id] ~= nil then
-        self:internalRemoveBlock(self.hashedLookUp[id])
+function FastLogicRunner.externalRemoveBlock(self, uuid)
+    local id = self.hashedLookUp[uuid]
+    if id ~= nil then
+        self:internalRemoveBlock(id)
     end
 end
 
-function FastLogicRunner.externalAddInput(self, id, idToConnect)
-    if self.hashedLookUp[id] ~= nil and self.hashedLookUp[idToConnect] ~= nil then
-        self:internalAddInput(self.hashedLookUp[id], self.hashedLookUp[idToConnect])
+function FastLogicRunner.externalAddInput(self, uuid, uuidToConnect)
+    local id = self.hashedLookUp[uuid]
+    local idToConnect = self.hashedLookUp[uuidToConnect]
+    if id ~= nil and idToConnect ~= nil then
+        self:internalAddInput(id, idToConnect)
     end
 end
 
-function FastLogicRunner.externalRemoveInput(self, id, idToDeconnect)
-    if self.hashedLookUp[id] ~= nil and self.hashedLookUp[idToDeconnect] ~= nil then
-        self:internalRemoveInput(self.hashedLookUp[id], self.hashedLookUp[idToDeconnect])
+function FastLogicRunner.externalRemoveInput(self, uuid, uuidToDeconnect)
+    local id = self.hashedLookUp[uuid]
+    local idToDeconnect = self.hashedLookUp[uuidToDeconnect]
+    if id ~= nil and idToDeconnect ~= nil then
+        self:internalRemoveInput(id, idToDeconnect)
     end
 end
 
-function FastLogicRunner.externalAddOutput(self, id, idToConnect)
-    if self.hashedLookUp[id] ~= nil and self.hashedLookUp[idToConnect] ~= nil then
-        self:internalAddOutput(self.hashedLookUp[id], self.hashedLookUp[idToConnect])
+function FastLogicRunner.externalAddOutput(self, uuid, uuidToConnect)
+    local id = self.hashedLookUp[uuid]
+    local idToConnect = self.hashedLookUp[uuidToConnect]
+    if id ~= nil and idToConnect ~= nil then
+        self:internalAddOutput(id, idToConnect)
     end
 end
 
-function FastLogicRunner.externalRemoveOutput(self, id, idToDeconnect)
-    if self.hashedLookUp[id] ~= nil and self.hashedLookUp[idToDeconnect] ~= nil then
-        self:internalRemoveOutput(self.hashedLookUp[id], self.hashedLookUp[idToDeconnect])
+function FastLogicRunner.externalRemoveOutput(self, uuid, uuidToDeconnect)
+    local id = self.hashedLookUp[uuid]
+    local idToDeconnect = self.hashedLookUp[uuidToDeconnect]
+    if id ~= nil and idToDeconnect ~= nil then
+        self:internalRemoveOutput(id, idToDeconnect)
     end
 end
 
-function FastLogicRunner.externalAddBlockToUpdate(self, id)
-    if self.hashedLookUp[id] ~= nil then
-        self:internalAddBlockToUpdate(self.hashedLookUp[id])
+function FastLogicRunner.externalAddBlockToUpdate(self, uuid)
+    local id = self.hashedLookUp[uuid]
+    if id ~= nil then
+        self:internalAddBlockToUpdate(id)
     end
 end
 
-function FastLogicRunner.externalRemoveBlockFromUpdate(self, id)
-    if self.hashedLookUp[id] ~= nil then
-        self:internalRemoveBlockFromUpdate(self.hashedLookUp[id])
+function FastLogicRunner.externalRemoveBlockFromUpdate(self, uuid)
+    local id = self.hashedLookUp[uuid]
+    if id ~= nil then
+        self:internalRemoveBlockFromUpdate(id)
     end
 end

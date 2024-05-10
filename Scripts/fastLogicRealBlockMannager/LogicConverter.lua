@@ -1,12 +1,35 @@
 -- quickGateConverter.lua by HerrVincling
 -- moddifed
 dofile "../util/util.lua"
+local string = string
+local table = table
 
 local letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 function FastLogicRunnerRunner.server_convertBody(self, data)
-    --"FastLogic" or "Vanilla"
+    --"FastLogic" or "VanillaLogic"
     local body = data.body
     local wantedType = data.wantedType
+    if wantedType == "VanillaLogic" then
+        local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(data.body)]
+        if creation ~= nil then
+            local i = 0
+            for _, block in pairs(creation.AllFastBlocks) do
+                i = i + 1
+                local s = sm.event.sendToInteractable(block.interactable, "removeUuidData")
+                if s == false then
+                end
+            end
+            if sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2] == nil then
+                sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2] = {}
+            end
+            sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2][#sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2]+1] = data
+        end
+    else
+        sm.MTFastLogic.FastLogicRunnerRunner:convertBodyInternal(body, wantedType)
+    end
+end
+
+function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
     local jsontable = sm.creation.exportToTable(body, true, false) --'true, false' fix for qtimer reset bug?
     if wantedType == "FastLogic" then
         for i = 1, #jsontable.bodies do
@@ -124,8 +147,6 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
         for i = 1, #jsontable.bodies do
             for j = 1, #jsontable.bodies[i].childs do
                 if jsontable.bodies[i].childs[j].shapeId == "6a9dbff5-7562-4e9a-99ae-3590ece88112" then --fastgate
-                    jsontable.bodies[i].childs[j].shapeId = "9f0f56e8-2c31-4d83-996c-d00a9b296c3f"
-
                     local childdata = jsontable.bodies[i].childs[j].controller.data
                     local mode
                     if childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgA" then
@@ -143,9 +164,10 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     else
                         sm.gui.chatMessage("#ff0000Fatal error while converting Fast Gates, please send a screenshot of this to ItchyTrack")
                         sm.gui.chatMessage(childdata)
-                        return
+                        goto continue
                     end
 
+                    jsontable.bodies[i].childs[j].shapeId = "9f0f56e8-2c31-4d83-996c-d00a9b296c3f"
                     jsontable.bodies[i].childs[j].controller.mode = mode
                     jsontable.bodies[i].childs[j].controller.active = false
                     jsontable.bodies[i].childs[j].controller.data = nil
@@ -264,6 +286,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
                     jsontable.bodies[i].childs[j].controller.luminance = luminance
                     jsontable.bodies[i].childs[j].controller.data = nil
                 end
+                ::continue::
             end
         end
     end

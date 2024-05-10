@@ -6,28 +6,27 @@ FastTimer.maxParentCount = 1 -- infinite
 FastTimer.maxChildCount = -1  -- infinite
 
 function FastTimer.getData2(self)
-    self.creation.FastTimers[self.id] = self
+    self.creation.FastTimers[self.data.uuid] = self
 end
 
 function FastTimer.server_onCreate2(self)
     self.type = "Timer"
-    self.data = self.data or {}
     if self.storage:load() ~= nil then
         local data = self.storage:load()
-        self.ticks = data.ticks
-        self.seconds = data.seconds
-        self.data.time = self.ticks + self.seconds * 40
+        self.data.ticks = data.ticks or 0
+        self.data.seconds = data.seconds or 0
+        self.time = self.data.ticks + self.data.seconds * 40
     else
-        self.ticks = 0
-        self.seconds = 0
-        self.data.time = 0
+        self.data.ticks = 0
+        self.data.seconds = 0
+        self.time = 0
     end
-    self.network:setClientData({ticks = self.ticks, seconds = self.seconds})
-    self.storage:save({ticks = self.ticks, seconds = self.seconds})
+    self.network:setClientData({ticks = self.data.ticks, seconds = self.data.seconds})
+    self.storage:save(self.data)
 end
 
 function FastTimer.server_onDestroy2(self)
-    self.creation.FastTimers[self.id] = nil
+    self.creation.FastTimers[self.data.uuid] = nil
 end
 
 function FastTimer.client_onCreate2(self)
@@ -101,10 +100,11 @@ function FastTimer.client_updateTexture(self)
 end
 
 function FastTimer.server_saveTime(self, data)
-    self.ticks = data.ticks
-    self.seconds = data.seconds
-    self.data.time = data.seconds * 40 + data.ticks
-    self.network:setClientData({ticks = self.ticks, seconds = self.seconds})
-    self.storage:save({ticks = self.ticks, seconds = self.seconds})
-    self.FastLogicRunner:internalChangeTimerTime(self.FastLogicRunner.hashedLookUp[self.id], self.data.time)
+    
+    self.data.ticks = data.ticks
+    self.data.seconds = data.seconds
+    self.time = data.seconds * 40 + data.ticks
+    self.network:setClientData({ticks = self.data.ticks, seconds = self.data.seconds})
+    self.storage:save(self.data)
+    self.FastLogicRunner:internalChangeTimerTime(self.FastLogicRunner.hashedLookUp[self.data.uuid], self.time)
 end

@@ -1,8 +1,11 @@
 dofile "../util/util.lua"
+local string = string
+local table = table
+
 dofile "../fastLogicBlock/FastLogicRunner.lua"
 
 function FastLogicRealBlockMannager.checkForNewInputs(self)
-    for id, data in pairs(self.creation.AllNonFastBlocks) do
+    for uuid, data in pairs(self.creation.AllNonFastBlocks) do
         if sm.exists(data.interactable) then
             if data.currentState ~= data.interactable.active then
                 data.currentState = data.interactable.active
@@ -15,7 +18,7 @@ function FastLogicRealBlockMannager.checkForNewInputs(self)
                     else
                         if table.contains(data.outputs, outputId) then
                             if #data.outputs == 1 then
-                                self.creation.AllNonFastBlocks[id] = nil
+                                self.creation.AllNonFastBlocks[uuid] = nil
                             else
                                 table.removeValue(data.outputs, outputId)
                                 i = i - 1
@@ -34,69 +37,80 @@ function FastLogicRealBlockMannager.checForBodyUpdate(self)
     if not sm.exists(self.creation.body) or self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()
         scanNext = self.creation.AllFastBlocks
+        self:scanSiliconBlocks()
     else
         scanNext = self.scanNext
     end
 
-    for id, block in pairs(scanNext) do
+    for uuid, block in pairs(scanNext) do
         if self.creationId ~= sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(block.shape:getBody()) then
             block:deepRescanSelf()
         else
-            local id = block.id
-            -- self.FastLogicRunner:externalAddBlockToUpdate(id)
+            -- self.FastLogicRunner:externalAddBlockToUpdate(uuid)
             local inputs = block.interactable:getParents()
             local inputsHash = {}
             for _, v in pairs(inputs) do
                 local inputId = v:getId()
+                local inputUuid = self.creation.uuids[inputId]
                 inputsHash[inputId] = true
-                if self.creation.AllFastBlocks[inputId] ~= nil then
-                    self.FastLogicAllBlockMannager:addOutput(inputId, id)
+                if inputUuid ~= nil then
+                    self.FastLogicAllBlockMannager:addOutput(inputUuid, uuid)
                 else
                     local currentState = v.active
                     if self.creation.AllNonFastBlocks[inputId] == nil then
                         self.creation.AllNonFastBlocks[inputId] = { ["interactable"] = v, ["currentState"] = currentState, ["outputs"] = {} }
                     end
-                    if not table.contains(self.creation.AllNonFastBlocks[inputId].outputs, id) then
-                        self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] = id
+                    if not table.contains(self.creation.AllNonFastBlocks[inputId].outputs, uuid) then
+                        self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] = uuid
                     end
                     local activeInput = block.activeInputs[inputId]
                     if (activeInput == nil) then
-                        self.FastLogicRunner:externalAddNonFastConnection(id)
+                        self.FastLogicRunner:externalAddNonFastConnection(uuid)
                         if currentState then
-                            self.FastLogicRunner:externalAddNonFastOnInput(id)
+                            self.FastLogicRunner:externalAddNonFastOnInput(uuid)
                             block.activeInputs[inputId] = true
                         else
                             block.activeInputs[inputId] = false
                         end
                     elseif activeInput ~= currentState then
                         block.activeInputs[inputId] = currentState
-                        self.FastLogicRunner:externalAddBlockToUpdate(id)
+                        self.FastLogicRunner:externalAddBlockToUpdate(uuid)
                     end
                 end
             end
             for k, state in pairs(block.activeInputs) do
                 if inputsHash[k] == nil then
-                    if table.contains(self.creation.AllNonFastBlocks[k].outputs, id) then
+                    if table.contains(self.creation.AllNonFastBlocks[k].outputs, uuid) then
                         if self.creation.AllNonFastBlocks[k].currentState then
-                            self.FastLogicRunner:externalRemoveNonFastOnInput(id)
+                            self.FastLogicRunner:externalRemoveNonFastOnInput(uuid)
                         end
                         if #self.creation.AllNonFastBlocks[k].outputs == 1 then
                             self.creation.AllNonFastBlocks[k] = nil
                         else
-                            table.removeValue(self.creation.AllNonFastBlocks[k].outputs, id)
+                            table.removeValue(self.creation.AllNonFastBlocks[k].outputs, uuid)
                         end
                     end
                     block.activeInputs[k] = nil
-                    self.FastLogicRunner:externalRemoveNonFastConnection(id)
+                    self.FastLogicRunner:externalRemoveNonFastConnection(uuid)
                 end
             end
-            local inputs = self.creation.blocks[id].inputs
+            local inputs = self.creation.blocks[uuid].inputs
             for i = 0, #inputs do
-                if inputsHash[inputs[i]] == nil and self.creation.blocks[inputs[i]] ~= nil and self.creation.blocks[inputs[i]].isSilicon == false then
-                    self.FastLogicAllBlockMannager:removeOutput(inputs[i], id)
+                local inputUuid = inputs[i]
+                if inputsHash[self.creation.ids[inputUuid]] == nil and self.creation.blocks[inputUuid] ~= nil and self.creation.blocks[inputUuid].isSilicon == false then
+                    self.FastLogicAllBlockMannager:removeOutput(inputUuid, uuid)
                 end
             end
+            -- self.FastLogicAllBlockMannager:doFixOnBlock(uuid)
         end
     end
     self.scanNext = {}
+end
+
+function FastLogicRealBlockMannager.scanSiliconBlocks(self)
+    for uuid, block in pairs(self.creation.SiliconBlocks) do
+        if self.creationId ~= sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(block.shape:getBody()) then
+            block:deepRescanSelf()
+        end
+    end
 end

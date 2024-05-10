@@ -21,6 +21,7 @@ function FastLogicRunner.optimizeLogic(self)
                 for i = 1, numberOfBlockInputs[id] do
                     if blockInputs[id][i] ~= newBLockInputs[i] then
                         blockInputs[id] = newBLockInputs
+                        -- self:fixBlockOutputData(id)
                         self:fixBlockInputData(id)
                         break
                     end

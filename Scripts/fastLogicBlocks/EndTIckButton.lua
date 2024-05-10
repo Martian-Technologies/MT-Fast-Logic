@@ -1,5 +1,8 @@
-dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
+local string = string
+local table = table
+
+dofile "BaseFastLogicBlock.lua"
 
 EndTickButton = table.deepCopyTo(BaseFastLogicBlock, (EndTickButton or class()))
 EndTickButton.maxParentCount = -1 -- infinite
@@ -9,7 +12,7 @@ EndTickButton.connectionOutput = nil
 EndTickButton.poseWeightCount = 1
 
 function EndTickButton.getData2(self)
-    self.creation.EndTickButtons[self.id] = self
+    self.creation.EndTickButtons[self.data.uuid] = self
 end
 
 function EndTickButton.server_onCreate2(self)
@@ -17,7 +20,7 @@ function EndTickButton.server_onCreate2(self)
 end
 
 function EndTickButton.server_onDestroy2(self)
-    self.creation.EndTickButtons[self.id] = nil
+    self.creation.EndTickButtons[self.data.uuid] = nil
 end
 
 function EndTickButton.client_onCreate2(self)
@@ -27,8 +30,8 @@ function EndTickButton.client_onDestroy2(self)
 end
 
 function EndTickButton.client_onInteract(self, character, state)
-    self.FastLogicRunner:externalChangeNonFastOnInput(self.id, state and 1 or 0)
-    self.FastLogicRunner:externalAddBlockToUpdate(self.id)
+    self.FastLogicRunner:externalChangeNonFastOnInput(self.data.uuid, state and 1 or 0)
+    self.FastLogicRunner:externalAddBlockToUpdate(self.data.uuid)
 end
 
 function EndTickButton.client_updateTexture(self)

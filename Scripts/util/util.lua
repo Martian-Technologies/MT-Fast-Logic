@@ -1,5 +1,8 @@
+local random = math.random
 -- deque class --
 deque = {}
+local deque = deque
+
 if true then
     function deque.new()
         return { front = 0, back = -1 }
@@ -236,7 +239,9 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
                 i = i + 1
                 str = str .. formater.getFormatedForPrint(value, depth, maxTableLength)
             else
-                str = str .. "[" .. formater.getFormatedForPrint(key, depth, maxTableLength) .. "] = " .. formater.getFormatedForPrint(value, depth, maxTableLength)
+                str = str ..
+                    "[" ..
+                    formater.getFormatedForPrint(key, depth, maxTableLength) .. "] = " .. formater.getFormatedForPrint(value, depth, maxTableLength)
             end
         end
         return str .. "}"
@@ -254,9 +259,9 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
         return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId(), depth, maxTableLength) .. "}"
     elseif type(val) == "Vec3" then
         return "Vec3 <" ..
-        formater.getFormatedForPrint(val.x, depth, maxTableLength) ..", " ..
-        formater.getFormatedForPrint(val.y, depth, maxTableLength) .. ", "..
-        formater.getFormatedForPrint(val.z, depth, maxTableLength) .. ">"
+            formater.getFormatedForPrint(val.x, depth, maxTableLength) .. ", " ..
+            formater.getFormatedForPrint(val.y, depth, maxTableLength) .. ", " ..
+            formater.getFormatedForPrint(val.z, depth, maxTableLength) .. ">"
     else
         return type(val)
     end
@@ -278,7 +283,7 @@ function table.makeConstantKeysOnlyHash(keys)
         hashedLookUp[value] = #unhashedLookUp + 1
         unhashedLookUp[#unhashedLookUp + 1] = value
     end
-    return { ["hashedLookUp"] = hashedLookUp, ["unhashedLookUp"] = unhashedLookUp, ["size"] = #unhashedLookUp, ["tables"] = {}, ["tableFills"] = {}}
+    return { ["hashedLookUp"] = hashedLookUp, ["unhashedLookUp"] = unhashedLookUp, ["size"] = #unhashedLookUp, ["tables"] = {}, ["tableFills"] = {} }
 end
 
 function table.addToConstantKeysOnlyHash(hashData, key)
@@ -305,15 +310,28 @@ end
 
 function table.makeArrayForHash(hash, val)
     local tbl = table.makeArray(hash.size, val)
-    hash.tables[#hash.tables+1] = tbl
-    hash.tableFills[#hash.tableFills+1] = val or false
+    hash.tables[#hash.tables + 1] = tbl
+    hash.tableFills[#hash.tableFills + 1] = val or false
     return tbl
 end
 
 function table.hashArrayValues(hashData, tbl)
     local newTbl = {}
     for key, value in pairs(tbl) do
-        newTbl[key] = hashData.hashedLookUp[value]
+        local hashed = hashData.hashedLookUp[value]
+        if hashed ~= nil then
+            newTbl[key] = hashed
+        end
+    end
+    return newTbl
+end
+
+function table.getMissingHashValues(hashData, tbl)
+    local newTbl = {}
+    for _, value in pairs(tbl) do
+        if hashData.hashedLookUp[value] == nil then
+            newTbl[#newTbl + 1] = value
+        end
     end
     return newTbl
 end
@@ -330,5 +348,84 @@ function table.makeArray(size, val)
 end
 
 function string.replace_char(pos, str, r)
-    return str:sub(1, pos-1) .. r .. str:sub(pos+1)
+    return str:sub(1, pos - 1) .. r .. str:sub(pos + 1)
+end
+
+local i = 0
+function string.uuid()
+    --     local template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+    --     return string.gsub(template, '[xy]', function(c)
+    --         local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
+    --         return string.format('%x', v)
+    --     end)
+    i = i + 1
+    return i;
+end
+
+function string.vecToString(vec, sep)
+    if sep == nil then
+        sep = ","
+    end
+    return (
+        tostring(math.floor(vec.x)) .. sep ..
+        tostring(math.floor(vec.y)) .. sep ..
+        tostring(math.floor(vec.z))
+    )
+end
+
+function string.stringToVec(str, sep)
+    if sep == nil then
+        sep = ","
+    end
+    local comps = string.split(str, sep)
+    return sm.vec3.new(
+        tonumber(comps[1]),
+        tonumber(comps[2]),
+        tonumber(comps[3])
+    )
+end
+
+function string.split(inputstr, sep)
+    sep=sep or '%s'
+    local t={}
+    for field,s in string.gmatch(inputstr, "([^"..sep.."]*)("..sep.."?)") do
+        table.insert(t,field)
+        if s=="" then
+            return t
+        end
+    end
+end
+
+sm.MTUtil = {}
+function sm.MTUtil.getOffset(rot)
+    local xAxisSimple = rot.xAxis.x + rot.xAxis.y * 2 + rot.xAxis.z * 3
+	local zAxisSimple = rot.zAxis.x + rot.zAxis.y * 2 + rot.zAxis.z * 3
+	
+	local offset = sm.vec3.new(0,0,0)
+	
+	if  (zAxisSimple ==  2 and (xAxisSimple == -1 or xAxisSimple == -3)) or
+		(zAxisSimple ==  3 and (xAxisSimple ==  2 or xAxisSimple == -1)) or
+		(zAxisSimple == -1 and (xAxisSimple ~= 1 and xAxisSimple ~= -1)) or
+		(zAxisSimple == -2 and (xAxisSimple ==  3 or xAxisSimple == -1)) or
+		(zAxisSimple == -3 and (xAxisSimple == -1 or xAxisSimple == -2)) then
+			offset.x = -1
+	end
+	
+	if  (zAxisSimple ==  1 and (xAxisSimple ==  3 or xAxisSimple == -2)) or
+		(zAxisSimple ==  3 and (xAxisSimple == -1 or xAxisSimple == -2)) or
+		(zAxisSimple == -1 and (xAxisSimple == -2 or xAxisSimple == -3)) or
+		(zAxisSimple == -2 and (xAxisSimple ~= 2 and xAxisSimple ~= -2)) or
+		(zAxisSimple == -3 and (xAxisSimple ==  1 or xAxisSimple == -2)) then
+			offset.y = -1 
+	end                   
+	                      
+	if  (zAxisSimple ==  1 and (xAxisSimple == -2 or xAxisSimple == -3)) or
+		(zAxisSimple ==  2 and (xAxisSimple ==  1 or xAxisSimple == -3)) or
+		(zAxisSimple == -1 and (xAxisSimple ==  2 or xAxisSimple == -3)) or
+		(zAxisSimple == -2 and (xAxisSimple == -1 or xAxisSimple == -3)) or
+		(zAxisSimple == -3 and (xAxisSimple ~= 3 and xAxisSimple ~= -3)) then
+			offset.z = -1
+	end
+
+    return offset
 end

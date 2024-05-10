@@ -20,6 +20,24 @@
             <Index name="d8b529ad-3865-40fa-b798-cb2868e5dc4d">
                 <Frame point="384 0"/>
             </Index>
+            <Index name="3706ba55-bd11-4053-b437-bbf2aff823b4">
+                <Frame point="0 96"/>
+            </Index>
+            <Index name="e6011dc4-8842-4d94-a196-0c7386065ab6">
+                <Frame point="96 96"/>
+            </Index>
+            <Index name="195aa046-017a-4f0b-809c-98ed141955fb">
+                <Frame point="192 96"/>
+            </Index>
+            <Index name="d576a4c9-e6bc-46c0-9230-f92967cc39b6">
+                <Frame point="288 96"/>
+            </Index>
+            <Index name="f590d9d1-179d-49ff-86ab-7f74a730e243">
+                <Frame point="384 96"/>
+            </Index>
+            <Index name="f0e1640f-7406-4232-b1d9-8c1a41b53958">
+                <Frame point="0 192"/>
+            </Index>
         </Group>
     </Resource>
 </MyGUI>

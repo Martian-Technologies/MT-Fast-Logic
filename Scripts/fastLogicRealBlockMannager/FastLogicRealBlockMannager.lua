@@ -7,6 +7,9 @@ FastLogicRealBlockMannager = FastLogicRealBlockMannager or {}
 dofile "DisplayCode.lua"
 dofile "NewRealStuffChecker.lua"
 
+sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.dataToSet = sm.MTFastLogic.dataToSet or {}
+
 function FastLogicRealBlockMannager.getNew(creationId)
     local new = table.deepCopy(FastLogicRealBlockMannager)
     new.getNew = nil
@@ -51,8 +54,8 @@ function FastLogicRealBlockMannager.addAllNewBlocks(self)
                     siliconBlock.uuid,
                     siliconBlock.pos,
                     siliconBlock.rot,
-                    siliconBlock.inputs,
-                    siliconBlock.outputs,
+                    table.copy(siliconBlock.inputs),
+                    table.copy(siliconBlock.outputs),
                     siliconBlock.state,
                     siliconBlock.timerLength
                 )
@@ -60,4 +63,43 @@ function FastLogicRealBlockMannager.addAllNewBlocks(self)
         end
     end
     self.creation.BlocksToScan = {}
+end
+
+function FastLogicRealBlockMannager.createPartWithData(self, block, body)
+    local rot = {xAxis=block.rot[1], yAxis=block.rot[2], zAxis=block.rot[3]}
+    local pos = block.pos - (block.rot[1] + block.rot[2] + block.rot[3]) * 0.5-- + sm.MTUtil.getOffset(rot)
+    local shape = body:createPart(sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88112"), pos, block.rot[3], block.rot[1], true)
+    shape.color = sm.color.new(block.color)
+    sm.MTFastLogic.dataToSet[shape:getInteractable().id] = table.deepCopy(block)
+end
+
+local typeToNumber = {
+    andBlocks=0,
+    orBlocks=1,
+    xorBlocks=2,
+    nandBlocks=3,
+    norBlocks=4,
+    xnorBlocks=5,
+}
+
+function FastLogicRealBlockMannager.setData(self, uuid, data)
+    local block = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
+    block.data.uuid = data.uuid
+    sm.MTFastLogic.FastLogicBlockLookUp[uuid] = nil
+    sm.MTFastLogic.FastLogicBlockLookUp[block.data.uuid] = block
+    for _,v in pairs(data.inputs) do
+        local inputBlock = sm.MTFastLogic.FastLogicBlockLookUp[v]
+        if inputBlock ~= nil then
+            inputBlock.interactable:connect(block.interactable)
+        end
+    end
+    for _,v in pairs(data.outputs) do
+        local outputBlock = sm.MTFastLogic.FastLogicBlockLookUp[v]
+        if outputBlock ~= nil then
+            block.interactable:connect(outputBlock.interactable)
+        end
+    end
+    sm.event.sendToInteractable(block.interactable, "server_saveMode", {typeToNumber[data.type], false})
+    block.data.mode = typeToNumber[data.type]
+    block:getData()
 end

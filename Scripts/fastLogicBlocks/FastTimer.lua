@@ -100,11 +100,10 @@ function FastTimer.client_updateTexture(self)
 end
 
 function FastTimer.server_saveTime(self, data)
-    
     self.data.ticks = data.ticks
     self.data.seconds = data.seconds
     self.time = data.seconds * 40 + data.ticks
     self.network:setClientData({ticks = self.data.ticks, seconds = self.data.seconds})
     self.storage:save(self.data)
-    self.FastLogicRunner:internalChangeTimerTime(self.FastLogicRunner.hashedLookUp[self.data.uuid], self.time)
+    self.FastLogicRunner:externalChangeTimerTime(self.data.uuid, self.time)
 end

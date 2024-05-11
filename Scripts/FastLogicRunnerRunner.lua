@@ -20,6 +20,7 @@ sm.MTFastLogic.WillBeSiliconBlocks = sm.MTFastLogic.WillBeSiliconBlocks or {}
 sm.MTFastLogic.BlocksToGetData = sm.MTFastLogic.BlocksToGetData or {}
 sm.MTFastLogic.SiliconBlocksToGetData = sm.MTFastLogic.SiliconBlocksToGetData or {}
 sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {}
+sm.MTFastLogic.dataToSet = sm.MTFastLogic.dataToSet or {}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
     if self.run then
@@ -44,7 +45,14 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         sm.MTFastLogic.WillBeSiliconBlocks[2] = {}
         --BlocksToGetData
         for i = 1, #sm.MTFastLogic.BlocksToGetData do
-            sm.MTFastLogic.BlocksToGetData[i]:getData()
+            local block = sm.MTFastLogic.BlocksToGetData[i]
+            if sm.MTFastLogic.dataToSet[block.interactable.id] ~= nil then
+                local creation = sm.MTFastLogic.Creations[self:getCreationId(block.shape.body)]
+                creation.FastLogicRealBlockMannager:setData(block.data.uuid, sm.MTFastLogic.dataToSet[block.interactable.id])
+                sm.MTFastLogic.dataToSet[block.interactable.id] = nil
+            else
+                block:getData()
+            end
         end
         sm.MTFastLogic.BlocksToGetData = {}
         --SiliconBlocksToGetData

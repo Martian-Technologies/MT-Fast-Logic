@@ -161,8 +161,9 @@ function BaseFastLogicBlock.client_onTinker(self, character, state)
 end
 
 function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    local targetBody = self.shape:getBody()
-    sm.MTFastLogic.FastLogicRunnerRunner:server_convertBody({ body = targetBody, wantedType = "FastLogic" })
+    print(self.shape:getLocalPosition())
+    --local targetBody = self.shape:getBody()
+    --sm.MTFastLogic.FastLogicRunnerRunner:server_convertBody({ body = targetBody, wantedType = "FastLogic" })
 end
 
 function BaseFastLogicBlock.server_onMelee(self, position, attacker, damage, power, direction, normal)

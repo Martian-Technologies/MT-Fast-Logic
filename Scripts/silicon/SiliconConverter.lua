@@ -5,7 +5,7 @@ local table = table
 SiliconConverter = SiliconConverter or {}
 
 sm.MTFastLogic = sm.MTFastLogic or {}
-sm.MTFastLogic.WillBeSiliconBlocks = sm.MTFastLogic.WillBeSiliconBlocks or {{}, {}}
+sm.MTFastLogic.WillBeSiliconBlocks = sm.MTFastLogic.WillBeSiliconBlocks or { {}, {} }
 
 local blockUuids = {
     ["1x1x1"] = "3706ba55-bd11-4053-b437-bbf2aff823b4",
@@ -23,12 +23,12 @@ local blockUuids = {
     ["8x8x4"] = "f0e2828f-8888-4444-b1d9-8a3c45b63898",
 }
 local rotations = {
-    xyz = {xAxis=sm.vec3.new(1, 0, 0), zAxis=sm.vec3.new(0, 0, 1)},
-    xzy = {xAxis=sm.vec3.new(0, 0, 1), zAxis=sm.vec3.new(0, 1, 0)},
-    yxz = {xAxis=sm.vec3.new(0, -1, 0), zAxis=sm.vec3.new(0, 0, -1)},
-    yzx = {xAxis=sm.vec3.new(0, 0, 1), zAxis=sm.vec3.new(1, 0, 0)},
-    zxy = {xAxis=sm.vec3.new(0, 1, 0), zAxis=sm.vec3.new(1, 0, 0)},
-    zyx = {xAxis=sm.vec3.new(0, 0, 1), zAxis=sm.vec3.new(1, 0, 0)}
+    yzx = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 1, 0) },
+    zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
+    zyx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(-1, 0, 0) },
+    xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
+    xzy = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
+    yxz = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(0, 0, -1) },
 }
 
 function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for FastLogicGates
@@ -38,9 +38,15 @@ function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for F
     for _, uuid in ipairs(blockUuids) do
         local block = blocks[uuid]
         if not block.isSilicon then
+            for k, v in pairs(sm.MTFastLogic.FastLogicBlockLookUp[uuid].interactable:getChildren()) do
+                if v ~= nil and creation.uuids[v.id] == nil then
+                    goto continue
+                end
+            end
             if creation.AllFastBlocks[uuid].type == "LogicGate" and table.length(creation.AllFastBlocks[uuid].activeInputs) == 0 then
                 blocksPosHash[string.vecToString(block.pos)] = uuid
             end
+            ::continue::
         end
     end
     if table.length(blocksPosHash) == 0 then return end
@@ -53,7 +59,7 @@ function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for F
             siliconBlocksToMake[i].bestRot.xAxis,
             true
         )
-        sm.MTFastLogic.WillBeSiliconBlocks[2][#sm.MTFastLogic.WillBeSiliconBlocks[2]+1] = {
+        sm.MTFastLogic.WillBeSiliconBlocks[2][#sm.MTFastLogic.WillBeSiliconBlocks[2] + 1] = {
             interactable = newShape:getInteractable(),
             uuids = siliconBlocksToMake[i].uuids
         }
@@ -70,22 +76,22 @@ function SiliconConverter.getAreas(posHash)
     for k, _ in pairs(posHash) do
         local pos = string.stringToVec(k)
         if cornerPos == nil or pos.x < cornerPos.x or (
-            pos.x == cornerPos.x and (pos.y < cornerPos.y or
-                (pos.y == cornerPos.y and pos.z < cornerPos.z)
-            )
-        ) then
+                pos.x == cornerPos.x and (pos.y < cornerPos.y or
+                    (pos.y == cornerPos.y and pos.z < cornerPos.z)
+                )
+            ) then
             cornerPos = pos
         end
     end
     local x = cornerPos.x
-    while posHash[string.vecToString(sm.vec3.new(x+1, cornerPos.y, cornerPos.z))] ~= nil do
+    while posHash[string.vecToString(sm.vec3.new(x + 1, cornerPos.y, cornerPos.z))] ~= nil do
         x = x + 1
         if x > 1000 then break end
     end
     local y = cornerPos.y
-    while posHash[string.vecToString(sm.vec3.new(x, y+1, cornerPos.z))] ~= nil do
+    while posHash[string.vecToString(sm.vec3.new(x, y + 1, cornerPos.z))] ~= nil do
         for x1 = cornerPos.x, x do
-            if posHash[string.vecToString(sm.vec3.new(x1, y+1, cornerPos.z))] == nil then
+            if posHash[string.vecToString(sm.vec3.new(x1, y + 1, cornerPos.z))] == nil then
                 goto skipY
             end
         end
@@ -94,10 +100,10 @@ function SiliconConverter.getAreas(posHash)
     end
     ::skipY::
     local z = cornerPos.z
-    while posHash[string.vecToString(sm.vec3.new(x, y, z+1))] ~= nil do
+    while posHash[string.vecToString(sm.vec3.new(x, y, z + 1))] ~= nil do
         for x1 = cornerPos.x, x do
             for y1 = cornerPos.y, y do
-                if posHash[string.vecToString(sm.vec3.new(x1, y1, z+1))] == nil then
+                if posHash[string.vecToString(sm.vec3.new(x1, y1, z + 1))] == nil then
                     goto skipZ
                 end
             end
@@ -108,30 +114,29 @@ function SiliconConverter.getAreas(posHash)
     ::skipZ::
 
     local rotations = {
-        yzx = {xAxis=sm.vec3.new(0, 0, 1), zAxis=sm.vec3.new(0, 1, 0)},
-        --zxy = {xAxis=sm.vec3.new(0, 1, 0), zAxis=sm.vec3.new(1, 0, 0)},
-        zyx = {xAxis=sm.vec3.new(0, 0, 1), zAxis=sm.vec3.new(-1, 0, 0)},
-        xyz = {xAxis=sm.vec3.new(1, 0, 0), zAxis=sm.vec3.new(0, 0, 1)},
-        --xzy = {xAxis=sm.vec3.new(0, 0, 1), zAxis=sm.vec3.new(0, 1, 0)},
-        --yxz = {xAxis=sm.vec3.new(0, 1, 0), zAxis=sm.vec3.new(0, 0, -1)},
+        yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
+        zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
+        zyx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(-1, 0, 0) },
+        xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
+        xzy = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, -1, 0) },
+        yxz = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(0, 0, -1) },
     }
 
     local bestArea = nil
     local bestScore = nil
     local bestUuid = nil
     local bestRot = nil
-    local xSize = x-cornerPos.x+1
-    local ySize = y-cornerPos.y+1
-    local zSize = z-cornerPos.z+1
+    local xSize = x - cornerPos.x + 1
+    local ySize = y - cornerPos.y + 1
+    local zSize = z - cornerPos.z + 1
     for name, uuid in pairs(blockUuids) do
         local vec = string.stringToVec(name, "x")
-        local vec = {x=vec.x, y=vec.y, z=vec.z}
+        vec = { x = vec.x, y = vec.y, z = vec.z }
         local score = vec.x * vec.y * vec.z
-        for k,rot in pairs(rotations) do
-            if vec[string.sub(k, 1, 1)] <= x-cornerPos.x+1 and vec[string.sub(k, 2, 2)] <= y-cornerPos.y+1 and vec[string.sub(k, 3, 3)] <= z-cornerPos.z+1 then
+        for k, rot in pairs(rotations) do
+            if vec[string.sub(k, 1, 1)] <= x - cornerPos.x + 1 and vec[string.sub(k, 2, 2)] <= y - cornerPos.y + 1 and vec[string.sub(k, 3, 3)] <= z - cornerPos.z + 1 then
                 if bestScore == nil or score > bestScore then
-                    -- print(k)
-                    bestArea = {vec[string.sub(k, 1, 1)], vec[string.sub(k, 2, 2)], vec[string.sub(k, 3, 3)]}
+                    bestArea = { vec[string.sub(k, 1, 1)], vec[string.sub(k, 2, 2)], vec[string.sub(k, 3, 3)] }
                     bestScore = score
                     bestUuid = uuid
                     bestRot = rot
@@ -147,17 +152,17 @@ function SiliconConverter.getAreas(posHash)
     y = bestArea[2] + cornerPos.y - 1
     z = bestArea[3] + cornerPos.z - 1
 
-    local areas = {{
+    local areas = { {
         uuids = {},
         uuid = bestUuid,
         pos = cornerPos,
         bestRot = bestRot
-    }}
+    } }
 
     for x1 = cornerPos.x, x do
         for y1 = cornerPos.y, y do
             for z1 = cornerPos.z, z do
-                areas[1].uuids[#areas[1].uuids+1] = posHash[string.vecToString(sm.vec3.new(x1, y1, z1))]
+                areas[1].uuids[#areas[1].uuids + 1] = posHash[string.vecToString(sm.vec3.new(x1, y1, z1))]
                 posHash[string.vecToString(sm.vec3.new(x1, y1, z1))] = nil
             end
         end
@@ -165,7 +170,7 @@ function SiliconConverter.getAreas(posHash)
     if table.length(posHash) > 0 then
         local areas2 = SiliconConverter.getAreas(posHash)
         for i = 1, #areas2 do
-            areas[#areas+1] = areas2[i]
+            areas[#areas + 1] = areas2[i]
         end
     end
     return areas
@@ -175,21 +180,22 @@ function SiliconConverter.convertFromSilicon(creationId, blockUuids) -- only for
     local creation = sm.MTFastLogic.Creations[creationId]
     local allBlockMannager = creation.FastLogicAllBlockMannager
     local blocks = creation.blocks
-    local siliconBlock = {}
+    local siliconBlocks = {}
     for _, uuid in ipairs(blockUuids) do
-        if block.isSilicon then
-            siliconBlock[#siliconBlock+1] = creation.SiliconBlocks[block.siliconBlockId]
+        if blocks[uuid].isSilicon then
+            siliconBlocks[#siliconBlocks + 1] = creation.SiliconBlocks[blocks[uuid].siliconBlockId]
         end
     end
 
-    for _, siliconBlock in pairs(siliconBlock) do
+    for _, siliconBlock in pairs(siliconBlocks) do
         for i = 1, #siliconBlock.data.blocks do
             local siliconData = siliconBlock.data.blocks[i]
-            local block = blocks[siliconBlock.uuid]
+            local block = blocks[siliconData.uuid]
+            if block ~= nil and block.isSilicon then
+                block.isSilicon = false
+                creation.FastLogicRealBlockMannager:createPartWithData(block, siliconBlock.shape.body)
+            end
         end
-        local block = blocks[uuid]
-            block.isSilicon = false
-            creation.FastLogicRealBlockMannager:createPartWithData(block)
-            creation.FastLogicAllBlockMannager:removeBlock(uuid)
+        siliconBlock:remove(false)
     end
 end

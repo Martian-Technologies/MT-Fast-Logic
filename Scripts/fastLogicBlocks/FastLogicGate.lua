@@ -89,11 +89,18 @@ function FastLogicGate.client_updateTexture(self)
     end
 end
 
-function FastLogicGate.server_saveMode(self, mode)
-    if mode ~= self.data.mode then
-        self.data.mode = mode
-        self.network:setClientData(self.data.mode)
-        self.storage:save(self.data)
+function FastLogicGate.server_saveMode(self, mode, rescanSelf)
+    if type(mode) == "table" then
+        rescanSelf = mode[2]
+        mode = mode[1]
+    end
+    
+    self.data.mode = mode
+    self.network:setClientData(self.data.mode)
+    self.storage:save(self.data)
+    if rescanSelf ~= false then
         self:rescanSelf()
     end
+    -- if mode ~= self.data.mode then
+    -- end
 end

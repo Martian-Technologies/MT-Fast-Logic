@@ -40,7 +40,7 @@ function FastLogicAllBlockMannager.update(self)
             end
         end
     end
-    if table.length(self.blocks) == 0 then
+    if table.length(self.blocks) == 0 and table.length(self.creation.SiliconBlocks) == 0 then
         sm.MTFastLogic.Creations[self.creationId] = nil
     end
     return realBlocksToUpdate
@@ -48,36 +48,36 @@ end
 
 function FastLogicAllBlockMannager.addBlock(self, block)
     if self.blocks[block.data.uuid] ~= nil then
-        self:removeBlock(block.data.uuid)
+        return
     end
     local pos = block:getLocalCenter()
     local rot = { block.shape.xAxis, block.shape.yAxis, block.shape.zAxis }
     if block.type == "LogicGate" then
         if (block.data.mode == 0) then
-            self:makeBlockData("andBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, false, false)
+            self:makeBlockData("andBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
         elseif (block.data.mode == 1) then
-            self:makeBlockData("orBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, false, false)
+            self:makeBlockData("orBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
         elseif (block.data.mode == 2) then
-            self:makeBlockData("xorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, false, false)
+            self:makeBlockData("xorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
         elseif (block.data.mode == 3) then
-            self:makeBlockData("nandBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, false, false)
+            self:makeBlockData("nandBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
         elseif (block.data.mode == 4) then
-            self:makeBlockData("norBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, false, false)
+            self:makeBlockData("norBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
         elseif (block.data.mode == 5) then
-            self:makeBlockData("xnorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, false, false)
+            self:makeBlockData("xnorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
         end
     elseif block.type == "Timer" then
-        self:makeBlockData("timerBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, false, block.time, false)
+        self:makeBlockData("timerBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, block.time, false)
     elseif block.type == "EndTickButton" then
-        self:makeBlockData("EndTickButtons", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, false, false)
+        self:makeBlockData("EndTickButtons", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), false, false)
     elseif block.type == "Light" then
-        self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, false, false)
+        self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), false, false)
     end
 end
 
-function FastLogicAllBlockMannager.addSiliconBlock(self, type, uuid, pos, rot, inputs, outputs, state, timerLength, siliconBlockId)
+function FastLogicAllBlockMannager.addSiliconBlock(self, type, uuid, pos, rot, inputs, outputs, state, color, siliconBlockId)
     if self.blocks[uuid] == nil then
-        self:makeBlockData(type, uuid, pos, rot, inputs, outputs, state, true, timerLength, siliconBlockId)
+        self:makeBlockData(type, uuid, pos, rot, inputs, outputs, state, color, true, nil, siliconBlockId)
     end
 end
 
@@ -109,10 +109,16 @@ end
 
 function FastLogicAllBlockMannager.addOutput(self, uuid, uuidToConnect)
     if self.blocks[uuid] ~= nil and self.blocks[uuidToConnect] ~= nil then
+        if self.blocks[uuid].isSilicon then
+            self.creation.SiliconBlocks[self.blocks[uuid].siliconBlockId]:addOutput(uuid, uuidToConnect)
+        end
+        if self.blocks[uuidToConnect].isSilicon then
+            self.creation.SiliconBlocks[self.blocks[uuidToConnect].siliconBlockId]:addOutput(uuid, uuidToConnect)
+        end
         if not table.contains(self.blocks[uuid].outputs, uuidToConnect) then
             self.blocks[uuid].outputs[#self.blocks[uuid].outputs + 1] = uuidToConnect
         end
-        if not table.contains(self.blocks[uuidToConnect].outputs, uuid) then
+        if not table.contains(self.blocks[uuidToConnect].inputs, uuid) then
             self.blocks[uuidToConnect].inputs[#self.blocks[uuidToConnect].inputs + 1] = uuid
         end
         self.FastLogicRunner:externalAddOutput(uuid, uuidToConnect)
@@ -137,11 +143,27 @@ function FastLogicAllBlockMannager.removeOutput(self, uuid, uuidToDeconnect)
     end
 end
 
-function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, isSilicon, timerLength, siliconBlockId)
+function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, color, isSilicon, timerLength, siliconBlockId)
     sm.MTFastLogic.UsedUuids[uuid] = true
     local keyPos = string.vecToString(pos)
     if self.locationCash[keyPos] == nil then
         self.locationCash[keyPos] = {}
+    end
+    local betterInputs = {}
+    local betterInputsHash = {}
+    for i = 1, #inputs do
+        if betterInputsHash[inputs[i]] == nil then
+            betterInputsHash[inputs[i]] = true
+            betterInputs[#betterInputs+1] = inputs[i]
+        end
+    end
+    local betterOutputs = {}
+    local betterOutputsHash = {}
+    for i = 1, #outputs do
+        if betterOutputsHash[outputs[i]] == nil then
+            betterOutputsHash[outputs[i]] = true
+            betterOutputs[#betterOutputs+1] = outputs[i]
+        end
     end
     self.locationCash[keyPos][#self.locationCash[keyPos] + 1] = uuid
     self.blocks[uuid] = {
@@ -149,10 +171,11 @@ function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inp
         uuid = uuid,
         pos = pos,
         rot = rot,
-        inputs = table.copy(inputs),
-        outputs = table.copy(outputs),
+        inputs = betterInputs,
+        outputs = betterOutputs,
         state = state,
         timerLength = timerLength,
+        color = color,
         isSilicon = isSilicon,
         siliconBlockId = siliconBlockId
     }

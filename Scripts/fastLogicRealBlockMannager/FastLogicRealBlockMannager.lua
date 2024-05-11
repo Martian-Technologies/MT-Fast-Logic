@@ -99,7 +99,7 @@ function FastLogicRealBlockMannager.setData(self, uuid, data)
             block.interactable:connect(outputBlock.interactable)
         end
     end
-    sm.event.sendToInteractable(block.interactable, "server_saveMode", {typeToNumber[data.type], false})
+    sm.event.sendToInteractable(block.interactable, "server_saveMode", typeToNumber[data.type])
     block.data.mode = typeToNumber[data.type]
     block:getData()
 end

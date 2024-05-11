@@ -17,11 +17,11 @@ sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 sm.MTFastLogic.BlocksToGetData = sm.MTFastLogic.BlocksToGetData or {}
 sm.MTFastLogic.NewBlockUuids = sm.MTFastLogic.NewBlockUuids or {}
 
-function BaseFastLogicBlock.rescanSelf(self)
-    self.activeInputs = {}
-    self.FastLogicAllBlockMannager:removeBlock(self.data.uuid)
-    self.creation.BlocksToScan[#self.creation.BlocksToScan + 1] = self
-end
+-- function BaseFastLogicBlock.rescanSelf(self)
+--     self.activeInputs = {}
+--     self.creation.FastLogicAllBlockMannager:removeBlock(self.data.uuid)
+--     self.creation.BlocksToScan[#self.creation.BlocksToScan + 1] = self
+-- end
 
 function BaseFastLogicBlock.deepRescanSelf(self)
     self.lastSeenSpeed = self.FastLogicRunner.numberOfUpdatesPerTick

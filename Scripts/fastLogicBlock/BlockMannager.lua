@@ -409,6 +409,27 @@ function FastLogicRunner.internalChangeTimerTime(self, id, time)
     end
 end
 
+function FastLogicRunner.internalChangeBlockType(self, id, path)
+    if type(path) == "string" then
+        path = self.pathIndexs[type]
+    end
+    local oldPath = self.runnableBlockPathIds[id]
+    
+    if oldPath ~= path then
+        -- remove old
+        table.removeValue(self.blocksSortedByPath[oldPath], id)
+
+        -- add new
+        self.runnableBlockPaths[id] = self.pathNames[path]
+        self.runnableBlockPathIds[id] = path
+        self.blocksSortedByPath[path][#self.blocksSortedByPath[path] + 1] = id
+        
+        self:fixBlockOutputData(id)
+        self:fixBlockInputData(id)
+    end
+end
+
+
 --------------------------------------------------------
 
 function FastLogicRunner.externalAddNonFastConnection(self, uuid)
@@ -522,7 +543,13 @@ function FastLogicRunner.externalRemoveBlockFromUpdate(self, uuid)
 end
 
 function FastLogicRunner.externalChangeTimerTime(self, uuid, time)
-    if self.FastLogicRunner.hashedLookUp[self.data.uuid] ~= nil then
-        self:internalChangeTimerTime(self.FastLogicRunner.hashedLookUp[self.data.uuid], time)
+    if self.hashedLookUp[uuid] ~= nil then
+        self:internalChangeTimerTime(self.hashedLookUp[uuid], time)
+    end
+end
+
+function FastLogicRunner.externalChangeBlockType(self, uuid, type)
+    if self.hashedLookUp[uuid] ~= nil then
+        self:internalChangeBlockType(self.hashedLookUp[uuid], type)
     end
 end

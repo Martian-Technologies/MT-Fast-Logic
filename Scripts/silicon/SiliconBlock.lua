@@ -27,14 +27,6 @@ local uuidToSize = {
     ["f0e2828f-8888-4444-b1d9-8a3c45b63898"] = {8, 8, 4},
 }
 
-function SiliconBlock.rescanSelf(self)
-    for _, block in ipairs(self.data.blocks) do
-        -- self.FastLogicAllBlockMannager:removeBlock(block.uuid)
-        sm.MTFastLogic.UsedUuids[block.uuid] = nil
-    end
-    self.creation.BlocksToScan[#self.creation.BlocksToScan + 1] = self
-end
-
 function SiliconBlock.deepRescanSelf(self)
     for _, block in ipairs(self.data.blocks) do
         sm.MTFastLogic.UsedUuids[block.uuid] = nil
@@ -226,9 +218,6 @@ function SiliconBlock.server_onrefresh(self)
 end
 
 function SiliconBlock.server_saveBlocks(self, blocks, rescan)
-    if rescan ~= false then
-        -- self:rescanSelf()
-    end
     self.data.blocks = blocks
     self.storage:save(self:compressBlocks())
 end

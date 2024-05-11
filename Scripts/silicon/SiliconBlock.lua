@@ -12,19 +12,19 @@ sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAdd
 sm.MTFastLogic.NewBlockUuids = sm.MTFastLogic.NewBlockUuids or {}
 
 local uuidToSize = {
-    ["3706ba55-bd11-4053-b437-bbf2aff823b4"] = {1, 1, 1},
-    ["f0e1640f-7776-4232-b1d9-8c1a41b53958"] = {2, 1, 1},
-    ["f0e2828f-7776-4232-b1d9-8a3c45b63898"] = {3, 1, 1},
-    ["f0e1640f-7406-1984-b1d9-8c1a41b53958"] = {4, 1, 1},
-    ["f0e1640f-7406-4232-b1d9-8c1a41b53958"] = {8, 1, 1},
-    ["f3e2828f-1212-1111-b1d4-8d3c45b63000"] = {1, 1, 1},
-    ["f590d9d1-179d-49ff-86ab-7f74a730e243"] = {2, 2, 1},
-    ["d576a4c9-e6bc-46c0-9230-f92967cc39b6"] = {4, 4, 1},
-    ["195aa046-017a-4f0b-809c-98ed141955fb"] = {8, 8, 1},
-    ["f0e2828f-1234-4321-b1d9-8a3c45b63898"] = {16, 16, 1},
-    ["f3e2828f-1241-1412-b1f2-8d3c45b63000"] = {12, 4, 1},
-    ["e6011dc4-8842-4d94-a196-0c7386065ab6"] = {2, 2, 2},
-    ["f0e2828f-8888-4444-b1d9-8a3c45b63898"] = {8, 8, 4},
+    ["3706ba55-bd11-4053-b437-bbf2aff823b4"] = { 1, 1, 1 },
+    ["f0e1640f-7776-4232-b1d9-8c1a41b53958"] = { 2, 1, 1 },
+    ["f0e2828f-7776-4232-b1d9-8a3c45b63898"] = { 3, 1, 1 },
+    ["f0e1640f-7406-1984-b1d9-8c1a41b53958"] = { 4, 1, 1 },
+    ["f0e1640f-7406-4232-b1d9-8c1a41b53958"] = { 8, 1, 1 },
+    ["f3e2828f-1212-1111-b1d4-8d3c45b63000"] = { 1, 1, 1 },
+    ["f590d9d1-179d-49ff-86ab-7f74a730e243"] = { 2, 2, 1 },
+    ["d576a4c9-e6bc-46c0-9230-f92967cc39b6"] = { 4, 4, 1 },
+    ["195aa046-017a-4f0b-809c-98ed141955fb"] = { 8, 8, 1 },
+    ["f0e2828f-1234-4321-b1d9-8a3c45b63898"] = { 16, 16, 1 },
+    ["f3e2828f-1241-1412-b1f2-8d3c45b63000"] = { 12, 4, 1 },
+    ["e6011dc4-8842-4d94-a196-0c7386065ab6"] = { 2, 2, 2 },
+    ["f0e2828f-8888-4444-b1d9-8a3c45b63898"] = { 8, 8, 4 },
 }
 
 function SiliconBlock.deepRescanSelf(self)
@@ -41,7 +41,7 @@ function SiliconBlock.deepRescanSelf(self)
 end
 
 function SiliconBlock.getData(self)
-    local axes = {x=self.shape.xAxis, y=self.shape.yAxis, z=self.shape.zAxis}
+    local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
     self.creationId = sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(self.shape:getBody())
     self.id = self.interactable:getId()
     if (sm.MTFastLogic.Creations[self.creationId] == nil) then
@@ -64,7 +64,7 @@ function SiliconBlock.getData(self)
                 while sm.MTFastLogic.UsedUuids[block.uuid] ~= nil do
                     block.uuid = string.uuid()
                 end
-                sm.MTFastLogic.NewBlockUuids[oldUuid] = {block.uuid, 0}
+                sm.MTFastLogic.NewBlockUuids[oldUuid] = { block.uuid, 0 }
             end
             local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
             -- local axes = {x=block.rot[1], y=block.rot[2], z=block.rot[3]}
@@ -72,10 +72,10 @@ function SiliconBlock.getData(self)
         end
     end
     self:server_saveBlocks(self.data.blocks)
-    if  sm.MTFastLogic.SiliconBlocksToAddConnections[2] == nil then
+    if sm.MTFastLogic.SiliconBlocksToAddConnections[2] == nil then
         sm.MTFastLogic.SiliconBlocksToAddConnections[2] = {}
     end
-    sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2]+1] = self
+    sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2] + 1] = self
 end
 
 function SiliconBlock.addConnections(self)
@@ -103,11 +103,11 @@ function SiliconBlock.addOutput(self, uuid, uuidToConnect)
     for i = 1, #self.data.blocks do
         if self.data.blocks[i].uuid == uuid and not table.contains(self.data.blocks[i].outputs, uuidToConnect) then
             changed = true
-            self.data.blocks[i].outputs[#self.data.blocks[i].outputs+1] = uuidToConnect
+            self.data.blocks[i].outputs[#self.data.blocks[i].outputs + 1] = uuidToConnect
         end
         if self.data.blocks[i].uuid == uuidToConnect and not table.contains(self.data.blocks[i].inputs, uuid) then
             changed = true
-            self.data.blocks[i].inputs[#self.data.blocks[i].inputs+1] = uuid
+            self.data.blocks[i].inputs[#self.data.blocks[i].inputs + 1] = uuid
         end
     end
     if changed then
@@ -193,7 +193,6 @@ function SiliconBlock.addBlocks(self, uuids, creation)
         self:server_saveBlocks(blocks, false)
     end
 end
-
 -- function SiliconBlock.removeBlocks(self, uuids)
 --     if type(uuids) == "number" then
 --         uuids = {uuids}
@@ -223,21 +222,21 @@ function SiliconBlock.server_saveBlocks(self, blocks, rescan)
 end
 
 local typeToNumber = {
-    andBlocks=0,
-    orBlocks=1,
-    xorBlocks=2,
-    nandBlocks=3,
-    norBlocks=4,
-    xnorBlocks=5,
+    andBlocks = 0,
+    orBlocks = 1,
+    xorBlocks = 2,
+    nandBlocks = 3,
+    norBlocks = 4,
+    xnorBlocks = 5,
 }
 
 local numberToType = {
-    [0]="andBlocks",
-    [1]="orBlocks",
-    [2]="xorBlocks",
-    [3]="nandBlocks",
-    [4]="norBlocks",
-    [5]="xnorBlocks",
+    [0] = "andBlocks",
+    [1] = "orBlocks",
+    [2] = "xorBlocks",
+    [3] = "nandBlocks",
+    [4] = "norBlocks",
+    [5] = "xnorBlocks",
 }
 
 local rotationToNumber = {
@@ -268,30 +267,30 @@ local rotationToNumber = {
 }
 
 local numberToRotation = {
-    [1] = {sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0)},
-    [2] = {sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1)},
-    [3] = {sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0)},
-    [4] = {sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1)},
-    [5] = {sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0)},
-    [6] = {sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0)},
-    [7] = {sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0)},
-    [8] = {sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0)},
-    [9] = {sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0)},
-    [10] = {sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0)},
-    [11] = {sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0)},
-    [12] = {sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0)},
-    [13] = {sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0)},
-    [14] = {sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0)},
-    [15] = {sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1)},
-    [16] = {sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1)},
-    [17] = {sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1)},
-    [18] = {sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1)},
-    [19] = {sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0)},
-    [20] = {sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0)},
-    [21] = {sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0)},
-    [22] = {sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0)},
-    [23] = {sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1)},
-    [24] = {sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1)},
+    [1] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0) },
+    [2] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1) },
+    [3] = { sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0) },
+    [4] = { sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1) },
+    [5] = { sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0) },
+    [6] = { sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0) },
+    [7] = { sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0) },
+    [8] = { sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0) },
+    [9] = { sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0) },
+    [10] = { sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0) },
+    [11] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0) },
+    [12] = { sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0) },
+    [13] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0) },
+    [14] = { sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0) },
+    [15] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1) },
+    [16] = { sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1) },
+    [17] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1) },
+    [18] = { sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1) },
+    [19] = { sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0) },
+    [20] = { sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0) },
+    [21] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0) },
+    [22] = { sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0) },
+    [23] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1) },
+    [24] = { sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1) },
 }
 
 function SiliconBlock.compressBlocks(self)
@@ -316,8 +315,9 @@ function SiliconBlock.compressBlocks(self)
                 end
             end
         end
-        local rotNumber = rotationToNumber[tostring(block.rot[1].x) .. tostring(block.rot[1].y) .. tostring(block.rot[1].z) .. tostring(block.rot[3].x) .. tostring(block.rot[3].y) .. tostring(block.rot[3].z)]
-        blocks[(block.pos.x-0.5) + (block.pos.y-0.5)*self.size[1] + (block.pos.z-0.5)*self.size[2]*self.size[1]+1] = {
+        local rotNumber = rotationToNumber
+        [tostring(block.rot[1].x) .. tostring(block.rot[1].y) .. tostring(block.rot[1].z) .. tostring(block.rot[3].x) .. tostring(block.rot[3].y) .. tostring(block.rot[3].z)]
+        blocks[(block.pos.x - 0.5) + (block.pos.y - 0.5) * self.size[1] + (block.pos.z - 0.5) * self.size[2] * self.size[1] + 1] = {
             rotNumber * 6 + typeToNumber[block.type],
             block.uuid,
             inputs,
@@ -326,10 +326,10 @@ function SiliconBlock.compressBlocks(self)
         }
     end
     local colorIndexHash = {}
-    for color,index in pairs(colorHash) do
+    for color, index in pairs(colorHash) do
         colorIndexHash[index] = color
     end
-    return {blocks, colorIndexHash}
+    return { blocks, colorIndexHash }
 end
 
 function SiliconBlock.decompressBlockData(self, blockData)
@@ -360,23 +360,57 @@ function SiliconBlock.decompressBlockData(self, blockData)
 end
 
 function SiliconBlock.toLocalPosAndRot(self, pos, rot)
-    local axes = {x=self.shape.xAxis, y=self.shape.yAxis, z=self.shape.zAxis}
-    pos = pos - self.shape.localPosition-- - sm.MTUtil.getOffset(block.rot)
+    local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
+    pos = pos - self.shape.localPosition -- - sm.MTUtil.getOffset(block.rot)
     pos = sm.vec3.new(
-        pos.x*axes.x.x + pos.y*axes.x.y + pos.z*axes.x.z,
-        pos.x*axes.y.x + pos.y*axes.y.y + pos.z*axes.y.z,
-        pos.x*axes.z.x + pos.y*axes.z.y + pos.z*axes.z.z
+        pos.x * axes.x.x + pos.y * axes.x.y + pos.z * axes.x.z,
+        pos.x * axes.y.x + pos.y * axes.y.y + pos.z * axes.y.z,
+        pos.x * axes.z.x + pos.y * axes.z.y + pos.z * axes.z.z
     )
+    rot = {
+        sm.vec3.new(
+            rot[1].x * axes.x.x + rot[1].y * axes.x.y + rot[1].z * axes.x.z,
+            rot[1].x * axes.y.x + rot[1].y * axes.y.y + rot[1].z * axes.y.z,
+            rot[1].x * axes.z.x + rot[1].y * axes.z.y + rot[1].z * axes.z.z
+        ),
+        sm.vec3.new(
+            rot[2].x * axes.x.x + rot[2].y * axes.x.y + rot[2].z * axes.x.z,
+            rot[2].x * axes.y.x + rot[2].y * axes.y.y + rot[2].z * axes.y.z,
+            rot[2].x * axes.z.x + rot[2].y * axes.z.y + rot[2].z * axes.z.z
+        ),
+        sm.vec3.new(
+            rot[3].x * axes.x.x + rot[3].y * axes.x.y + rot[3].z * axes.x.z,
+            rot[3].x * axes.y.x + rot[3].y * axes.y.y + rot[3].z * axes.y.z,
+            rot[3].x * axes.z.x + rot[3].y * axes.z.y + rot[3].z * axes.z.z
+        )
+    }
     return pos, rot
 end
 
 function SiliconBlock.toBodyPosAndRot(self, pos, rot)
-    local axes = {x=self.shape.xAxis, y=self.shape.yAxis, z=self.shape.zAxis}
+    local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
     pos = sm.vec3.new(
-        pos.x*axes.x.x + pos.y*axes.y.x + pos.z*axes.z.x,
-        pos.x*axes.x.y + pos.y*axes.y.y + pos.z*axes.z.y,
-        pos.x*axes.x.z + pos.y*axes.y.z + pos.z*axes.z.z
+        pos.x * axes.x.x + pos.y * axes.y.x + pos.z * axes.z.x,
+        pos.x * axes.x.y + pos.y * axes.y.y + pos.z * axes.z.y,
+        pos.x * axes.x.z + pos.y * axes.y.z + pos.z * axes.z.z
     )
+    rot = {
+        sm.vec3.new(
+            rot[1].x * axes.x.x + rot[1].y * axes.y.x + rot[1].z * axes.z.x,
+            rot[1].x * axes.x.y + rot[1].y * axes.y.y + rot[1].z * axes.z.y,
+            rot[1].x * axes.x.z + rot[1].y * axes.y.z + rot[1].z * axes.z.z
+        ),
+        sm.vec3.new(
+            rot[2].x * axes.x.x + rot[2].y * axes.y.x + rot[2].z * axes.z.x,
+            rot[2].x * axes.x.y + rot[2].y * axes.y.y + rot[2].z * axes.z.y,
+            rot[2].x * axes.x.z + rot[2].y * axes.y.z + rot[2].z * axes.z.z
+        ),
+        sm.vec3.new(
+            rot[3].x * axes.x.x + rot[3].y * axes.y.x + rot[3].z * axes.z.x,
+            rot[3].x * axes.x.y + rot[3].y * axes.y.y + rot[3].z * axes.z.y,
+            rot[3].x * axes.x.z + rot[3].y * axes.y.z + rot[3].z * axes.z.z
+        )
+    }
     pos = pos + self.shape.localPosition
     return pos, rot
 end

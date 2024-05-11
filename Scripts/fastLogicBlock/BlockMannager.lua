@@ -411,10 +411,10 @@ end
 
 function FastLogicRunner.internalChangeBlockType(self, id, path)
     if type(path) == "string" then
-        path = self.pathIndexs[type]
+        path = self.pathIndexs[path]
     end
     local oldPath = self.runnableBlockPathIds[id]
-    
+
     if oldPath ~= path then
         -- remove old
         table.removeValue(self.blocksSortedByPath[oldPath], id)
@@ -423,7 +423,7 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
         self.runnableBlockPaths[id] = self.pathNames[path]
         self.runnableBlockPathIds[id] = path
         self.blocksSortedByPath[path][#self.blocksSortedByPath[path] + 1] = id
-        
+
         self:fixBlockOutputData(id)
         self:fixBlockInputData(id)
     end

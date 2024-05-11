@@ -38,6 +38,27 @@
             <Index name="f0e1640f-7406-4232-b1d9-8c1a41b53958">
                 <Frame point="0 192"/>
             </Index>
+            <Index name="f0e1640f-7406-1984-b1d9-8c1a41b53958">
+                <Frame point="96 192"/>
+            </Index>
+            <Index name="f0e1640f-7776-4232-b1d9-8c1a41b53958">
+                <Frame point="192 192"/>
+            </Index>
+            <Index name="f0e2828f-7776-4232-b1d9-8a3c45b63898">
+                <Frame point="288 192"/>
+            </Index>
+            <Index name="f0e2828f-1234-4321-b1d9-8a3c45b63898">
+                <Frame point="384 192"/>
+            </Index>
+            <Index name="f0e2828f-8888-4444-b1d9-8a3c45b63898">
+                <Frame point="0 288"/>
+            </Index>
+            <Index name="f3e2828f-1212-1111-b1d4-8d3c45b63000">
+                <Frame point="96 288"/>
+            </Index>
+            <Index name="f3e2828f-1241-1412-b1f2-8d3c45b63000">
+                <Frame point="192 288"/>
+            </Index>
         </Group>
     </Resource>
 </MyGUI>

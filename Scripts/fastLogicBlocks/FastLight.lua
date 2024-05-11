@@ -22,8 +22,8 @@ function FastLight.server_onCreate2(self)
     else
         self.data.luminance = 50
     end
-    self:server_saveLuminance(self.data)
-    self.network:setClientData(self.data)
+    self:server_saveLuminance(self.data.luminance)
+    -- self.network:setClientData(self.data)
 end
 
 function FastLight.server_onDestroy2(self)

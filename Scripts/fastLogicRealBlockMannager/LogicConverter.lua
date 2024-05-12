@@ -162,8 +162,8 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
                     elseif childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgF" then
                         mode = 5
                     else
-                        sm.gui.chatMessage("#ff0000Fatal error while converting Fast Gates, please send a screenshot of this to ItchyTrack")
-                        sm.gui.chatMessage(childdata)
+                        -- sm.gui.chatMessage("#ff0000Fatal error while converting Fast Gates, please send a screenshot of this to ItchyTrack")
+                        -- sm.gui.chatMessage(childdata)
                         goto continue
                     end
 
@@ -242,9 +242,9 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
                         end
                         ticks = ticks - 16 --remove Offset --used to be -16
                     else
-                        sm.gui.chatMessage("#ff0000Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
-                        sm.gui.chatMessage(childdata)
-                        return
+                        -- sm.gui.chatMessage("#ff0000Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
+                        -- sm.gui.chatMessage(childdata)
+                        goto continue
                     end
 
                     if (seconds < 0) or (seconds > 59) or (ticks < 0) or (ticks > 40) then
@@ -282,6 +282,10 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
                         luminance = 90
                     elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhk" then
                         luminance = 100
+                    else
+                        -- sm.gui.chatMessage("#ff0000Fatal error while converting Fast Warehouse Square Lights, please send a screenshot of this to ItchyTrack")
+                        -- sm.gui.chatMessage(childdata)
+                        goto continue
                     end
                     jsontable.bodies[i].childs[j].controller.luminance = luminance
                     jsontable.bodies[i].childs[j].controller.data = nil

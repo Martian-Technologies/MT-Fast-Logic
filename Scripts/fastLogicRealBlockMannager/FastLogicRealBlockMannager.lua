@@ -97,6 +97,8 @@ function FastLogicRealBlockMannager.setData(self, uuid, data)
         local outputBlock = sm.MTFastLogic.FastLogicBlockLookUp[v]
         if outputBlock ~= nil then
             block.interactable:connect(outputBlock.interactable)
+        elseif self.creation.blocks[v].isSilicon == true then
+            sm.event.sendToInteractable(self.creation.SiliconBlocks[self.creation.blocks[v].siliconBlockId].interactable, "server_resave")
         end
     end
     sm.event.sendToInteractable(block.interactable, "server_saveMode", typeToNumber[data.type])

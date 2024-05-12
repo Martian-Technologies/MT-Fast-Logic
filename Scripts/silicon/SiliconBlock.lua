@@ -190,7 +190,7 @@ function SiliconBlock.addBlocks(self, uuids, creation)
                 -- timerLength = block.timerLength,
             }
         end
-        self:server_saveBlocks(blocks, false)
+        self:server_saveBlocks(blocks)
     end
 end
 -- function SiliconBlock.removeBlocks(self, uuids)
@@ -216,8 +216,12 @@ function SiliconBlock.server_onrefresh(self)
     self:server_onCreate()
 end
 
-function SiliconBlock.server_saveBlocks(self, blocks, rescan)
+function SiliconBlock.server_saveBlocks(self, blocks)
     self.data.blocks = blocks
+    self.storage:save(self:compressBlocks())
+end
+
+function SiliconBlock.server_resave(self)
     self.storage:save(self:compressBlocks())
 end
 

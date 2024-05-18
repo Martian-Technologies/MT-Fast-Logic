@@ -99,6 +99,10 @@ function FastLogicAllBlockMannager.removeBlock(self, uuid)
     self.blocks[uuid] = nil
 end
 
+function FastLogicAllBlockMannager.setColor(self, uuid, colorStr)
+    self.blocks[uuid].color = colorStr
+end
+
 function FastLogicAllBlockMannager.addInput(self, uuid, uuidToConnect)
     self:addOutput(uuidToConnect, uuid)
 end

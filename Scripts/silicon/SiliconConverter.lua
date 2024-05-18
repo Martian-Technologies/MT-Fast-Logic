@@ -23,7 +23,7 @@ local blockUuids = {
     ["8x8x4"] = "f0e2828f-8888-4444-b1d9-8a3c45b63898",
 }
 local rotations = {
-    yzx = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 1, 0) },
+    yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
     zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
     zyx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(-1, 0, 0) },
     xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
@@ -113,14 +113,14 @@ function SiliconConverter.getAreas(posHash)
     end
     ::skipZ::
 
-    local rotations = {
-        yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
-        zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
-        zyx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(-1, 0, 0) },
-        xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
-        xzy = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, -1, 0) },
-        yxz = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(0, 0, -1) },
-    }
+    -- local rotations = {
+    --     yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
+    --     zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
+    --     zyx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(-1, 0, 0) },
+    --     xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
+    --     xzy = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, -1, 0) },
+    --     yxz = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(0, 0, -1) },
+    -- }
 
     local bestArea = nil
     local bestScore = nil
@@ -136,6 +136,7 @@ function SiliconConverter.getAreas(posHash)
         for k, rot in pairs(rotations) do
             if vec[string.sub(k, 1, 1)] <= x - cornerPos.x + 1 and vec[string.sub(k, 2, 2)] <= y - cornerPos.y + 1 and vec[string.sub(k, 3, 3)] <= z - cornerPos.z + 1 then
                 if bestScore == nil or score > bestScore then
+                    -- print(k)
                     bestArea = { vec[string.sub(k, 1, 1)], vec[string.sub(k, 2, 2)], vec[string.sub(k, 3, 3)] }
                     bestScore = score
                     bestUuid = uuid

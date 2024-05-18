@@ -38,7 +38,9 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         if sm.MTFastLogic.WillBeSiliconBlocks[1] ~= nil then
             for i = 1, #sm.MTFastLogic.WillBeSiliconBlocks[1] do
                 local data = sm.MTFastLogic.WillBeSiliconBlocks[1][i]
-                sm.event.sendToInteractable(data.interactable, "addBlocks", data.uuids)
+                if not sm.event.sendToInteractable(data.interactable, "addBlocks", data.uuids) then
+                    sm.MTFastLogic.WillBeSiliconBlocks[2][#sm.MTFastLogic.WillBeSiliconBlocks[2]+1] = data
+                end
             end
         end
         sm.MTFastLogic.WillBeSiliconBlocks[1] = sm.MTFastLogic.WillBeSiliconBlocks[2]
@@ -46,7 +48,7 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         --BlocksToGetData
         for i = 1, #sm.MTFastLogic.BlocksToGetData do
             local block = sm.MTFastLogic.BlocksToGetData[i]
-            if sm.MTFastLogic.dataToSet[block.interactable.id] ~= nil then
+            if block ~= nil and block.interactable ~= nil and sm.MTFastLogic.dataToSet[block.interactable.id] ~= nil then
                 local creation = sm.MTFastLogic.Creations[self:getCreationId(block.shape.body)]
                 creation.FastLogicRealBlockMannager:setData(block.data.uuid, sm.MTFastLogic.dataToSet[block.interactable.id])
                 sm.MTFastLogic.dataToSet[block.interactable.id] = nil

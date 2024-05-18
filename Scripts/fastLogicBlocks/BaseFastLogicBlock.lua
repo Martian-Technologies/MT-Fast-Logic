@@ -24,10 +24,12 @@ sm.MTFastLogic.NewBlockUuids = sm.MTFastLogic.NewBlockUuids or {}
 -- end
 
 function BaseFastLogicBlock.deepRescanSelf(self)
-    self.lastSeenSpeed = self.FastLogicRunner.numberOfUpdatesPerTick
+    if self.creation ~= nil then
+        self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
+        self.creation.FastLogicAllBlockMannager:removeBlock(self.data.uuid)
+        self.creation.AllFastBlocks[self.data.uuid] = nil
+    end
     self.activeInputs = {}
-    self.FastLogicAllBlockMannager:removeBlock(self.data.uuid)
-    self.creation.AllFastBlocks[self.data.uuid] = nil
     self.FastLogicRunner = nil
     self.creation = nil
     self.creationId = nil
@@ -115,6 +117,11 @@ end
 
 function BaseFastLogicBlock.server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
+    if self.creation == nil then
+        print("-----------------wtf-----------------")
+        print(self)
+        return
+    end
     self.creation.AllFastBlocks[self.data.uuid] = nil
     if self.removeAllData then
         self.FastLogicAllBlockMannager:removeBlock(self.data.uuid) -- remove

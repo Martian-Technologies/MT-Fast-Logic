@@ -46,6 +46,7 @@ function FastLogicRealBlockMannager.checForBodyUpdate(self)
         if self.creationId ~= sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(block.shape:getBody()) then
             block:deepRescanSelf()
         else
+            self.FastLogicAllBlockMannager:setColor(uuid, block.shape.color:getHexStr())
             -- self.FastLogicRunner:externalAddBlockToUpdate(uuid)
             local inputs = block.interactable:getParents()
             local inputsHash = {}

@@ -93,9 +93,6 @@ function FastLogicRunner.makeDataArrays(self)
 end
 
 function FastLogicRunner.update(self)
-    -- print(self.blockStates)
-    -- print(self.blockInputs)
-    -- print(self.blockOutputs)
     for i = 1, #self.blocksToAddInputs do
         self:externalAddInput(self.blocksToAddInputs[i][1], self.blocksToAddInputs[i][2])
     end

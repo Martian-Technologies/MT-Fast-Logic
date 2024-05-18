@@ -5,7 +5,7 @@
          "color" : "7f7f7f",
          "dif" : "$SURVIVAL_DATA/Objects/Textures/Blocks/blk_plastic_dif.tga",
          "flammable" : false,
-         "name" : "Silicon",
+         "name" : "LSilicon",
          "nor" : "$SURVIVAL_DATA/Objects/Textures/Blocks/blk_plastic_nor.tga",
          "physicsMaterial" : "Plastic",
          "ratings" : {
@@ -158,7 +158,7 @@
          },
          "name" : "Silicon1x1x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block1x1x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -175,7 +175,7 @@
          },
          "name" : "Silicon2x2x2",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block2x2x2.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -192,7 +192,7 @@
          },
          "name" : "Silicon8x8x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block8x8x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -209,7 +209,7 @@
          },
          "name" : "Silicon4x4x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block4x4x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -226,7 +226,7 @@
          },
          "name" : "Silicon2x2x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block2x2x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -243,7 +243,7 @@
          },
          "name" : "Silicon8x1x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block8x1x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -260,7 +260,7 @@
          },
          "name" : "Silicon4x1x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block4x1x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -277,7 +277,7 @@
          },
          "name" : "Silicon2x1x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block2x1x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -294,7 +294,7 @@
          },
          "name" : "Silicon3x1x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block3x1x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -311,7 +311,7 @@
          },
          "name" : "Silicon16x16x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block16x16x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -328,7 +328,7 @@
          },
          "name" : "Silicon8x8x4",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block8x8x4.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -345,7 +345,7 @@
          },
          "name" : "Silicon12x1x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block12x1x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",
@@ -362,7 +362,7 @@
          },
          "name" : "Silicon12x4x1",
          "physicsMaterial" : "Default",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+         "renderable" : "$CONTENT_DATA/Renderable/Rends/block12x4x1.rend",
          "rotationSet" : "Default",
          "scripted" : {
             "classname" : "SiliconBlock",

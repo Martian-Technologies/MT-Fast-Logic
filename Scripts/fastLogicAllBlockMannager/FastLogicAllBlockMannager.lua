@@ -112,38 +112,46 @@ function FastLogicAllBlockMannager.removeInput(self, uuid, uuidToDeconnect)
 end
 
 function FastLogicAllBlockMannager.addOutput(self, uuid, uuidToConnect)
-    if self.blocks[uuid] ~= nil and self.blocks[uuidToConnect] ~= nil then
+    if self.blocks[uuid] ~= nil and self.blocks[uuidToConnect] ~= nil and
+    (self.blocks[uuid].outputHash[uuidToConnect] == nil or self.blocks[uuidToConnect].inputHash[uuid] == nil) then
         if self.blocks[uuid].isSilicon then
             self.creation.SiliconBlocks[self.blocks[uuid].siliconBlockId]:addOutput(uuid, uuidToConnect)
         end
         if self.blocks[uuidToConnect].isSilicon then
             self.creation.SiliconBlocks[self.blocks[uuidToConnect].siliconBlockId]:addOutput(uuid, uuidToConnect)
         end
-        if not table.contains(self.blocks[uuid].outputs, uuidToConnect) then
+        if self.blocks[uuid].outputHash[uuidToConnect] == nil then
             self.blocks[uuid].outputs[#self.blocks[uuid].outputs + 1] = uuidToConnect
+            self.blocks[uuid].outputHash[uuidToConnect] = true
         end
-        if not table.contains(self.blocks[uuidToConnect].inputs, uuid) then
+        if self.blocks[uuidToConnect].inputHash[uuid] == nil then
             self.blocks[uuidToConnect].inputs[#self.blocks[uuidToConnect].inputs + 1] = uuid
+            self.blocks[uuidToConnect].inputHash[uuid] = true
         end
         self.FastLogicRunner:externalAddOutput(uuid, uuidToConnect)
-        self:doFixOnBlock(uuid)
-        self:doFixOnBlock(uuidToConnect)
+        -- self:doFixOnBlock(uuid)
+        -- self:doFixOnBlock(uuidToConnect)
     end
 end
 
 function FastLogicAllBlockMannager.removeOutput(self, uuid, uuidToDeconnect)
-    if self.blocks[uuid] ~= nil then
-        table.removeValue(self.blocks[uuid].outputs, uuidToDeconnect)
-    end
-    if self.blocks[uuidToDeconnect] ~= nil then
-        table.removeValue(self.blocks[uuidToDeconnect].inputs, uuid)
-    end
-    self.FastLogicRunner:externalRemoveOutput(uuid, uuidToDeconnect)
-    if self.blocks[uuid] ~= nil then
-        self:doFixOnBlock(uuid)
-    end
-    if self.blocks[uuidToDeconnect] ~= nil then
-        self:doFixOnBlock(uuidToDeconnect)
+    if self.blocks[uuid] ~= nil and self.blocks[uuidToDeconnect] ~= nil and
+        (self.blocks[uuidToDeconnect].inputHash[uuid] ~= nil or self.blocks[uuid].outputHash[uuidToDeconnect] ~= nil) then
+        if self.blocks[uuid].outputHash[uuidToDeconnect] ~= nil then
+            table.removeValue(self.blocks[uuid].outputs, uuidToDeconnect)
+            self.blocks[uuid].outputHash[uuidToDeconnect] = nil
+        end
+        if self.blocks[uuidToDeconnect].inputHash[uuid] ~= nil then
+            table.removeValue(self.blocks[uuidToDeconnect].inputs, uuid)
+            self.blocks[uuidToDeconnect].inputHash[uuid] = nil
+        end
+        self.FastLogicRunner:externalRemoveOutput(uuid, uuidToDeconnect)
+        -- if self.blocks[uuid] ~= nil then
+        --     self:doFixOnBlock(uuid)
+        -- end
+        -- if self.blocks[uuidToDeconnect] ~= nil then
+        --     self:doFixOnBlock(uuidToDeconnect)
+        -- end
     end
 end
 
@@ -176,7 +184,9 @@ function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inp
         pos = pos,
         rot = rot,
         inputs = betterInputs,
+        inputHash = betterInputsHash,
         outputs = betterOutputs,
+        outputHash = betterOutputsHash,
         state = state,
         timerLength = timerLength,
         color = color,

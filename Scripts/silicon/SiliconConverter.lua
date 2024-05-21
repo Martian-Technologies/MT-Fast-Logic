@@ -20,7 +20,7 @@ local blockUuids = {
     ["16x16x1"] = "f0e2828f-1234-4321-b1d9-8a3c45b63898",
     ["12x4x1"] = "f3e2828f-1241-1412-b1f2-8d3c45b63000",
     ["2x2x2"] = "e6011dc4-8842-4d94-a196-0c7386065ab6",
-    -- ["8x8x4"] = "f0e2828f-8888-4444-b1d9-8a3c45b63898",
+    ["8x8x4"] = "f0e2828f-8888-4444-b1d9-8a3c45b63898",
 }
 local rotations = {
     yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },

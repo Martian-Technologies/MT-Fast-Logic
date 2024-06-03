@@ -14,7 +14,6 @@ function FastLogicRunner.optimizeLogic(self)
         id = target
     else
         while id < target do
-            -- print(id)
             id = id + 1
             if blockInputs[id] ~= false and blockInputs[id] ~= nil then
                 local blockType = self.runnableBlockPathIds[id]
@@ -27,7 +26,6 @@ function FastLogicRunner.optimizeLogic(self)
                 -- "norBlocks",        -- 13
                 -- "nor2Blocks",       -- 14
                 -- ordering inputs
-                -- print(blockType)
                 if blockType == 6 or blockType == 7 or blockType == 8 or blockType == 9 or blockType == 11 or blockType == 12 or blockType == 13 or blockType == 14 then
                     local numberOfInputUpdates = {}
                     for i = 1, #blockInputs[id] do

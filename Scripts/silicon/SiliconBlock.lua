@@ -137,13 +137,31 @@ function SiliconBlock.server_onDestroy(self)
 end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    -- print(self.creation.FastLogicRunner)
-    print("-----=====-----")
-    -- print(self.data.blocks)
-    print(self.storage:load())
-    print(self:compressBlocks())
-    print("--")
-    print(self:decompressBlockData(self:compressBlocks()))
+
+end
+
+function SiliconBlock.client_onTinker(self, character, state)
+    if state then
+        self.network:sendToServer("server_changeSpeed", character:isCrouching())
+    end
+end
+
+function SiliconBlock.server_changeSpeed(self, isCrouching)
+    if isCrouching then
+        self.creation.FastLogicRunner.numberOfUpdatesPerTick = self.creation.FastLogicRunner.numberOfUpdatesPerTick / 2
+    else
+        self.creation.FastLogicRunner.numberOfUpdatesPerTick = self.creation.FastLogicRunner.numberOfUpdatesPerTick * 2
+    end
+
+    self:sendMessageToAll("UpdatesPerTick = " .. tostring(self.creation.FastLogicRunner.numberOfUpdatesPerTick))
+end
+
+function SiliconBlock.sendMessageToAll(self, message)
+    self.network:sendToClients("client_sendMessage", message)
+end
+
+function SiliconBlock.client_sendMessage(self, message)
+    sm.gui.chatMessage(message)
 end
 
 function SiliconBlock.addBlocks(self, uuids, creation)

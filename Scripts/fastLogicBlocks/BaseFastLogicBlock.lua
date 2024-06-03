@@ -118,8 +118,6 @@ end
 function BaseFastLogicBlock.server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
     if self.creation == nil then
-        print("-----------------wtf-----------------")
-        print(self)
         return
     end
     self.creation.AllFastBlocks[self.data.uuid] = nil

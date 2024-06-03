@@ -206,13 +206,15 @@ function FastLogicRunner.fixBlockOutputData(self, id)
                 self.countOfOnInputs[usedPosHash[i]] == false or
                 self.blockOutputsHash[id][usedPosHash[i]] == nil
             ) then
+            self.optimizedBlockOutputsPosHash[id][usedPosHash[i]] = nil -- set usedPosHash[i]'s pos to nil in posHash
             usedPosHash[i] = usedPosHash[#optimizedOutputs]
             usedPosHash[#optimizedOutputs] = nil
 
-            local otherId = optimizedOutputs[#optimizedOutputs] -- get the top item on optimizedBlockOutputs
-            optimizedOutputs[i] = otherId                       -- set the pos i in optimizedBlockOutputs to otherId
-            optimizedOutputs[#optimizedOutputs] = nil           -- sets the top item on optimizedBlockOutputs to nil
-            self.optimizedBlockOutputsPosHash[id][otherId] = i  -- set otherId's pos to i in posHash
+            local otherId = optimizedOutputs[#optimizedOutputs]         -- get the top item on optimizedBlockOutputs
+            optimizedOutputs[i] = otherId                               -- set the pos i in optimizedBlockOutputs to otherId
+            optimizedOutputs[#optimizedOutputs] = nil                   -- sets the top item on optimizedBlockOutputs to nil
+            self.optimizedBlockOutputsPosHash[id][otherId] = i          -- set otherId's pos to i in posHash
+            
         else
             i = i + 1
         end
@@ -403,16 +405,12 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
 end
 
 function FastLogicRunner.makeBlockAlt(self, id, blockType)
-    -- print(id)
-    -- print({ self.runningBlocks[6], self.runningBlocks[7] })
-    -- print({ self.runningBlockLengths[6], self.runningBlockLengths[7]})
     local oldType = self.runnableBlockPathIds[id]
 
     if type(blockType) == "string" then
         blockType = self.pathIndexs[blockType]
     end
     if self.altBlockData[id] == blockType then
-        -- print("hmm")
         self:revertBlockType(id)
     elseif oldType ~= blockType then
         if self.altBlockData[id] == false then
@@ -441,8 +439,6 @@ function FastLogicRunner.makeBlockAlt(self, id, blockType)
         self:fixBlockOutputData(id)
         self:fixBlockInputData(id)
     end
-    -- print({ self.runningBlocks[6], self.runningBlocks[7] })
-    -- print({ self.runningBlockLengths[6], self.runningBlockLengths[7]})
 end
 
 function FastLogicRunner.revertBlockType(self, id)

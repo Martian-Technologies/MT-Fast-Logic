@@ -35,6 +35,7 @@ function FastLogicRealBlockMannager.updateDisplay(self, blockToUpdate)
             numberOfChanges = 0
         end
     end
+    -- print(changedUuidsArray)
     if numberOfChanges > 0 then
         changedUuidsArray[#changedUuidsArray + 1] = changedUuids
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()

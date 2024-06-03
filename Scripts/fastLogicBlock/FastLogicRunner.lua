@@ -152,7 +152,6 @@ function FastLogicRunner.update(self)
             self.updateTicks = self.updateTicks - 1
             self:doUpdate()
             sum = 0
-            -- print(self.runningBlockLengths)
             for i = 1, #self.runningBlockLengths do
                 sum = sum + self.runningBlockLengths[i]
             end
@@ -619,13 +618,6 @@ function FastLogicRunner.doUpdate(self)
         local outputs = optimizedBlockOutputs[id]
         for k = 1, #outputs do
             local outputId = outputs[k]
-            if (outputId == nil) then
-                print(id)
-                print(stateNumber)
-                print(self.unhashedLookUp[id])
-                print(self.creation.blocks[self.unhashedLookUp[id]])
-                print(outputs)
-            end
             if outputId ~= -1 then
                 countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
                 if nextRunningBlocks[outputId] ~= nextRunningIndex then

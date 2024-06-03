@@ -1,6 +1,8 @@
 dofile "../util/util.lua"
 local string = string
 local table = table
+local type = type
+local pairs = pairs
 
 SiliconConverter = SiliconConverter or {}
 
@@ -25,10 +27,10 @@ local blockUuids = {
 local rotations = {
     yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
     zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
-    zyx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(-1, 0, 0) },
+    zyx = { xAxis = sm.vec3.new(0, 0, -1), zAxis = sm.vec3.new(1, 0, 0) },
     xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
-    xzy = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, -1, 0) },
-    yxz = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(0, 0, -1) },
+    xzy = { xAxis = sm.vec3.new(-1, 0, 0), zAxis = sm.vec3.new(0, 1, 0) },
+    yxz = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(0, 0, 1) },
 }
 
 function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for FastLogicGates
@@ -113,14 +115,14 @@ function SiliconConverter.getAreas(posHash)
     end
     ::skipZ::
 
-    -- local rotations = {
-    --     yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
-    --     zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
-    --     zyx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(-1, 0, 0) },
-    --     xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
-    --     xzy = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, -1, 0) },
-    --     yxz = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(0, 0, -1) },
-    -- }
+    local rotations = {
+        yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
+        zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
+        zyx = { xAxis = sm.vec3.new(0, 0, -1), zAxis = sm.vec3.new(1, 0, 0) },
+        xyz = { xAxis = sm.vec3.new(1, 0, 0), zAxis = sm.vec3.new(0, 0, 1) },
+        xzy = { xAxis = sm.vec3.new(-1, 0, 0), zAxis = sm.vec3.new(0, 1, 0) },
+        yxz = { xAxis = sm.vec3.new(0, -1, 0), zAxis = sm.vec3.new(0, 0, 1) },
+    }
 
     local bestArea = nil
     local bestScore = nil
@@ -153,10 +155,27 @@ function SiliconConverter.getAreas(posHash)
     y = bestArea[2] + cornerPos.y - 1
     z = bestArea[3] + cornerPos.z - 1
 
+    local offset = sm.vec3.new(0, 0, 0)
+    if bestRot.xAxis.x == -1 then
+        offset.x = offset.x + bestArea[1] - 1
+    elseif bestRot.xAxis.y == -1 then
+        offset.y = offset.y + bestArea[2] - 1
+    elseif bestRot.xAxis.z == -1 then
+        offset.z = offset.z + bestArea[3] - 1
+    end
+
+    if bestRot.zAxis.x == -1 then
+        offset.x = offset.x + bestArea[1] - 1
+    elseif bestRot.zAxis.y == -1 then
+        offset.y = offset.y + bestArea[2] - 1
+    elseif bestRot.zAxis.z == -1 then
+        offset.z = offset.z + bestArea[3] - 1
+    end
+
     local areas = { {
         uuids = {},
         uuid = bestUuid,
-        pos = cornerPos,
+        pos = cornerPos + offset,
         bestRot = bestRot
     } }
 

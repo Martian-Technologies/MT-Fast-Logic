@@ -1,6 +1,8 @@
 dofile "util/util.lua"
 local string = string
 local table = table
+local type = type
+local pairs = pairs
 
 dofile "fastLogicRealBlockMannager/FastLogicRealBlockMannager.lua"
 dofile "fastLogicAllBlockMannager/FastLogicAllBlockMannager.lua"

@@ -1,20 +1,23 @@
 dofile "../util/util.lua"
 local string = string
 local table = table
+local type = type
+local pairs = pairs
 
 function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state, timerLength)
     -- path data
     if type(path) == "string" then
         path = self.pathIndexs[path]
     end
-    self.runnableBlockPaths[id] = self.pathNames[path]
+    local pathName = self.pathNames[path]
+    self.runnableBlockPaths[id] = pathName
     self.runnableBlockPathIds[id] = path
     self.blocksSortedByPath[path][#self.blocksSortedByPath[path] + 1] = id
 
     -- init data
     -- self.displayedBlockStates[id] = self.creation.AllFastBlocks[self.unhashedLookUp[id]].state
     self.blockStates[id] = false
-    self.blockInputs[id] = false
+    self.blockInputs[id] = {}
     self.blockInputsHash[id] = {}
     self.blockOutputs[id] = {}
     self.blockOutputsHash[id] = {}
@@ -27,53 +30,42 @@ function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state
     self.numberOfOptimizedInputs[id] = 0
     self.optimizedBlockOutputs[id] = {}
     self.optimizedBlockOutputsPosHash[id] = {}
-    if (
-            path == self.pathIndexs["norThroughBlocks"] or
-            path == self.pathIndexs["throughBlocks"] or
-            path == self.pathIndexs["timerBlocks"] or
-            path == self.pathIndexs["lightBlocks"]
-        ) then
-        self.blockInputs[id] = false
-    else
-        self.blockInputs[id] = {}
-    end
 
-    if inputs ~= nil then
-        if type(inputs) == "table" then
-            for i = 1, #inputs do
-                if inputs[i] ~= nil then
-                    self:internalAddOutput(inputs[i], id, false)
-                    self:fixBlockOutputData(inputs[i])
-                end
+    if type(inputs) == "table" then
+        for i = 1, #inputs do
+            if inputs[i] ~= nil then
+                self:internalAddOutput(inputs[i], id, false)
+                self:fixBlockOutputData(inputs[i])
             end
-        else
-            self:internalAddOutput(inputs, id, false)
-            self:fixBlockOutputData(inputs)
         end
+    elseif inputs ~= nil then
+        self:internalAddOutput(inputs, id, false)
+        self:fixBlockOutputData(inputs)
     end
     self:fixBlockInputData(id)
+    self:shouldBeThroughBlock(id)
 
     -- outputs
-    if path ~= self.pathIndexs["lightBlocks"] or path ~= self.pathIndexs["EndTickButtons"] then
-        if outputs ~= nil then
-            if type(outputs) == "table" then
-                for i = 1, #outputs do
-                    if outputs[i] ~= nil then
-                        self:internalAddOutput(id, outputs[i], false)
-                        self:fixBlockInputData(outputs[i])
-                        self:internalAddBlockToUpdate(outputs[i])
-                    end
+    if pathName ~= "lightBlocks" or pathName ~= "EndTickButtons" then
+        if type(outputs) == "table" then
+            for i = 1, #outputs do
+                if outputs[i] ~= nil then
+                    self:internalAddOutput(id, outputs[i], false)
+                    self:fixBlockInputData(outputs[i])
+                    self:shouldBeThroughBlock(outputs[i])
+                    self:internalAddBlockToUpdate(outputs[i])
                 end
-            else
-                self:internalAddOutput(id, outputs, false)
-                self:fixBlockInputData(outputs)
-                self:internalAddBlockToUpdate(outputs)
             end
+        elseif outputs ~= nil then
+            self:internalAddOutput(id, outputs, false)
+            self:fixBlockInputData(outputs)
+            self:shouldBeThroughBlock(outputs)
+            self:internalAddBlockToUpdate(outputs)
         end
     end
     self:fixBlockOutputData(id)
 
-    if path == self.pathIndexs["timerBlocks"] then
+    if pathName == "timerBlocks" then
         self.timerLengths[id] = timerLength + 1
         self.timerInputStates[id] = false
         self:updateLongestTimer()
@@ -86,16 +78,11 @@ end
 function FastLogicRunner.internalRemoveBlock(self, id)
     local inputs = self.blockInputs[id]
     if inputs ~= false then
-        if (type(inputs) == "number") then
-            self:internalRemoveOutput(inputs, id, false)
-            self:fixBlockOutputData(inputs)
-        else
-            local inputId = inputs[1]
-            while inputId ~= nil do
-                self:internalRemoveOutput(inputId, id, false)
-                self:fixBlockOutputData(inputId)
-                inputId = inputs[1]
-            end
+        local inputId = inputs[1]
+        while inputId ~= nil do
+            self:internalRemoveOutput(inputId, id, false)
+            self:fixBlockOutputData(inputId)
+            inputId = inputs[1]
         end
     end
     local outputs = self.blockOutputs[id]
@@ -104,10 +91,12 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         while outputId ~= nil do
             self:internalRemoveOutput(id, outputId, false)
             self:fixBlockInputData(outputId)
+            self:shouldBeThroughBlock(outputId)
             self:internalAddBlockToUpdate(outputId)
             outputId = outputs[1]
         end
     end
+    self:clearTimerData(id)
     self:internalRemoveBlockFromUpdate(id)
     table.removeValue(self.blocksSortedByPath[self.runnableBlockPathIds[id]], id)
     self.numberOfStateChanges[id] = false
@@ -129,6 +118,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     self.numberOfOptimizedInputs[id] = false
     self.optimizedBlockOutputs[id] = false
     self.optimizedBlockOutputsPosHash[id] = false
+    self.altBlockData[id] = false
 
     table.removeFromConstantKeysOnlyHash(self.hashData, self.unhashedLookUp[id])
 end
@@ -148,27 +138,17 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect, withFixes)
         self.blockOutputsHash[id][idToConnect] = true
         self.numberOfBlockOutputs[id] = self.numberOfBlockOutputs[id] + 1
         -- inputs
-        if type(self.blockInputs[idToConnect]) == "table" then --if the block it is outputting too has a input table
-            if not table.contains(self.blockInputs[idToConnect], id) then
-                self.blockInputs[idToConnect][#self.blockInputs[idToConnect] + 1] = id
-                self.blockInputsHash[idToConnect][id] = true
-                self.numberOfBlockInputs[idToConnect] = self.numberOfBlockInputs[idToConnect] + 1
-            end
-        elseif self.blockInputs[idToConnect] ~= id then      --if the block it is outputting too has one input
-            local LL = { 2, 3 }
-            if (self.blockInputs[idToConnect] ~= false) then --if there is already a block connected to that input
-                self:internalRemoveOutput(self.blockInputs[idToConnect], idToConnect)
-                -- print("WARNING: in addblock when creating block output confilct found (removing connection), line 139")
-            end
-            self.blockInputs[idToConnect] = id
+        if not table.contains(self.blockInputs[idToConnect], id) then
+            self.blockInputs[idToConnect][#self.blockInputs[idToConnect] + 1] = id
             self.blockInputsHash[idToConnect][id] = true
-            self.numberOfBlockInputs[idToConnect] = 1
+            self.numberOfBlockInputs[idToConnect] = self.numberOfBlockInputs[idToConnect] + 1
         end
 
         -- update states
         if withFixes ~= false then
             self:fixBlockOutputData(id)
             self:fixBlockInputData(idToConnect)
+            self:shouldBeThroughBlock(idToConnect)
             self:internalAddBlockToUpdate(idToConnect)
         end
     end
@@ -188,20 +168,15 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDeconnect, withFixes
 
         self.blockOutputsHash[id][idToDeconnect] = nil
         self.numberOfBlockOutputs[id] = self.numberOfBlockOutputs[id] - 1
-        if type(self.blockInputs[idToDeconnect]) == "table" then
-            if table.removeValue(self.blockInputs[idToDeconnect], id) ~= nil then
-                self.blockInputsHash[idToDeconnect][id] = nil
-                self.numberOfBlockInputs[idToDeconnect] = self.numberOfBlockInputs[idToDeconnect] - 1
-            end
-        else
-            self.blockInputs[idToDeconnect] = false
+        if table.removeValue(self.blockInputs[idToDeconnect], id) ~= nil then
             self.blockInputsHash[idToDeconnect][id] = nil
-            self.numberOfBlockInputs[idToDeconnect] = 0
+            self.numberOfBlockInputs[idToDeconnect] = self.numberOfBlockInputs[idToDeconnect] - 1
         end
 
         if withFixes ~= false then
             self:fixBlockOutputData(id)
             self:fixBlockInputData(idToDeconnect)
+            self:shouldBeThroughBlock(idToDeconnect)
             self:internalAddBlockToUpdate(idToDeconnect)
         end
 
@@ -245,7 +220,8 @@ function FastLogicRunner.fixBlockOutputData(self, id)
 end
 
 function FastLogicRunner.fixBlockInputData(self, id)
-    if table.contains({ 6, 9 }, self.runnableBlockPathIds[id]) then -- all on blocks
+    local path = self.runnableBlockPathIds[id]
+    if runnableBlockPathIds == 7 or runnableBlockPathIds == 12 then -- all on blocks
         if self.numberOfBlockInputs[id] == 0 then
             self.numberOfOptimizedInputs[id] = 0
             self.countOfOnInputs[id] = 0
@@ -274,22 +250,11 @@ function FastLogicRunner.fixBlockInputData(self, id)
                         self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
                     end
                 elseif table.contains(self.optimizedBlockOutputs[inputId], id) then
-                    -- table.removeValue(self.optimizedBlockOutputs[inputId], id)
-                    -- self.optimizedBlockOutputsPosHash[inputId][id] = nil
-
-                    -- local outputs = self.optimizedBlockOutputs[inputId]
-                    -- local outputsPosHash = self.optimizedBlockOutputsPosHash[inputId]
-                    -- local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                    -- outputs[outputsPosHash[id]] = otherId        -- set the pos of id in optimizedBlockOutputs to otherId
-                    -- outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                    -- outputsPosHash[otherId] = outputsPosHash[id] -- set otherId's pos to id's pos in posHash
-                    -- outputsPosHash[id] = nil                     -- remove id from posHash
-
                     self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = -1
                 end
             end
         end
-    elseif table.contains({ 7, 10 }, self.runnableBlockPathIds[id]) then -- all off blocks
+    elseif runnableBlockPathIds == 9 or runnableBlockPathIds == 14 then -- all off blocks
         if self.numberOfBlockInputs[id] == 0 then
             self.numberOfOptimizedInputs[id] = 0
             self.countOfOnInputs[id] = 0
@@ -318,22 +283,11 @@ function FastLogicRunner.fixBlockInputData(self, id)
                         self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
                     end
                 elseif table.contains(self.optimizedBlockOutputs[inputId], id) then
-                    -- table.removeValue(self.optimizedBlockOutputs[inputId], id)
-                    -- self.optimizedBlockOutputsPosHash[inputId][id] = nil
-
-                    -- local outputs = self.optimizedBlockOutputs[inputId]
-                    -- local outputsPosHash = self.optimizedBlockOutputsPosHash[inputId]
-                    -- local otherId = outputs[#outputs]                 -- get the top item on optimizedBlockOutputs
-                    -- outputs[outputsPosHash[id]] = otherId        -- set the pos of id in optimizedBlockOutputs to otherId
-                    -- outputs[#outputs] = nil                           -- sets the top item on optimizedBlockOutputs to nil
-                    -- outputsPosHash[otherId] = outputsPosHash[id] -- set otherId's pos to id's pos in posHash
-                    -- outputsPosHash[id] = nil                     -- remove id from posHash
-
                     self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = -1
                 end
             end
         end
-    elseif type(self.blockInputs[id]) == "table" then -- other
+    else -- other
         if self.numberOfBlockInputs[id] == 0 then
             self.numberOfOptimizedInputs[id] = 0
             self.countOfOnInputs[id] = 0
@@ -352,21 +306,6 @@ function FastLogicRunner.fixBlockInputData(self, id)
                 if not table.contains(self.optimizedBlockOutputs[inputId], id) then
                     self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
                 end
-            end
-        end
-    else
-        if self.numberOfBlockInputs[id] == 0 then
-            self.numberOfOptimizedInputs[id] = 0
-            self.countOfOnInputs[id] = 0
-        else
-            local inputId = self.blockInputs[id]
-            self.numberOfOptimizedInputs[id] = 1
-            self.countOfOnInputs[id] = self.blockStates[inputId] and 1 or 0
-            if not table.contains(self.optimizedBlockOutputs[inputId], id) then
-                if self.optimizedBlockOutputsPosHash[inputId][id] == nil then
-                    self.optimizedBlockOutputsPosHash[inputId][id] = #self.optimizedBlockOutputs[inputId] + 1
-                end
-                self.optimizedBlockOutputs[inputId][self.optimizedBlockOutputsPosHash[inputId][id]] = id
             end
         end
     end
@@ -402,14 +341,37 @@ function FastLogicRunner.updateLongestTimer(self)
     end
 end
 
+function FastLogicRunner.clearTimerData(self, id)
+    for i = 1, #self.timerData do
+        for ii = 1, #self.timerData[i] do
+            if self.timerData[i][ii] == id then
+                table.remove(self.timerData[i], ii)
+            end
+        end
+    end
+    if self.timerInputStates[id] ~= self.blockStates[id] then
+        self.blockStates[id] = not self.blockStates[id]
+        local stateNumber = self.blockStates[id] and 1 or -1
+        for i = 1, #self.blockOutputs[id] do
+            local outputId = self.blockOutputs[id][i]
+            self:internalAddBlockToUpdate(outputId)
+            self.countOfOnInputs[outputId] = self.countOfOnInputs[outputId] + stateNumber
+        end
+    end
+end
+
 function FastLogicRunner.internalChangeTimerTime(self, id, time)
     if self.timerLengths[id] ~= time + 1 then
+        self:revertBlockType(id)
+        self:clearTimerData(id)
         self.timerLengths[id] = time + 1
         self:updateLongestTimer()
+        self:shouldBeThroughBlock(id)
     end
 end
 
 function FastLogicRunner.internalChangeBlockType(self, id, path)
+    self.altBlockData[id] = false
     if type(path) == "string" then
         path = self.pathIndexs[path]
     end
@@ -423,12 +385,112 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
         self.runnableBlockPaths[id] = self.pathNames[path]
         self.runnableBlockPathIds[id] = path
         self.blocksSortedByPath[path][#self.blocksSortedByPath[path] + 1] = id
+        if self.nextRunningBlocks[id] == self.nextRunningIndex then
+            for i = 1, self.runningBlockLengths[oldPath] do
+                if (self.runningBlocks[oldPath][i] == id) then
+                    table.remove(self.runningBlocks[oldPath], i)
+                    self.runningBlockLengths[oldPath] = self.runningBlockLengths[oldPath] - 1
+                    self.runningBlockLengths[path] = self.runningBlockLengths[path] + 1
+                    self.runningBlocks[path][self.runningBlockLengths[path]] = id
+                    break
+                end
+            end
+        end
 
         self:fixBlockOutputData(id)
         self:fixBlockInputData(id)
     end
 end
 
+function FastLogicRunner.makeBlockAlt(self, id, blockType)
+    -- print(id)
+    -- print({ self.runningBlocks[6], self.runningBlocks[7] })
+    -- print({ self.runningBlockLengths[6], self.runningBlockLengths[7]})
+    local oldType = self.runnableBlockPathIds[id]
+
+    if type(blockType) == "string" then
+        blockType = self.pathIndexs[blockType]
+    end
+    if self.altBlockData[id] == blockType then
+        -- print("hmm")
+        self:revertBlockType(id)
+    elseif oldType ~= blockType then
+        if self.altBlockData[id] == false then
+            self.altBlockData[id] = self.runnableBlockPathIds[id]
+        end
+        -- remove old
+        table.removeValue(self.blocksSortedByPath[oldType], id)
+
+        -- add new
+        self.runnableBlockPaths[id] = self.pathNames[blockType]
+        self.runnableBlockPathIds[id] = blockType
+        self.blocksSortedByPath[blockType][#self.blocksSortedByPath[blockType] + 1] = id
+        if self.nextRunningBlocks[id] == self.nextRunningIndex then
+            for i = 1, self.runningBlockLengths[oldType] do
+                if (self.runningBlocks[oldType][i] == id) then
+                    table.remove(self.runningBlocks[oldType], i)
+                    self.runningBlockLengths[oldType] = self.runningBlockLengths[oldType] - 1
+                    self.runningBlockLengths[blockType] = self.runningBlockLengths[blockType] + 1
+                    self.runningBlocks[blockType][self.runningBlockLengths[blockType]] = id
+                    break
+                end
+            end
+        end
+
+
+        self:fixBlockOutputData(id)
+        self:fixBlockInputData(id)
+    end
+    -- print({ self.runningBlocks[6], self.runningBlocks[7] })
+    -- print({ self.runningBlockLengths[6], self.runningBlockLengths[7]})
+end
+
+function FastLogicRunner.revertBlockType(self, id)
+    if self.altBlockData[id] ~= false then
+        local blockType = self.altBlockData[id]
+        local oldType = self.runnableBlockPathIds[id]
+        if oldType ~= blockType then
+            -- remove old
+            table.removeValue(self.blocksSortedByPath[oldType], id)
+
+            -- add new
+            self.runnableBlockPaths[id] = self.pathNames[blockType]
+            self.runnableBlockPathIds[id] = blockType
+            self.blocksSortedByPath[blockType][#self.blocksSortedByPath[blockType] + 1] = id
+            if self.nextRunningBlocks[id] == self.nextRunningIndex then
+                for i = 1, self.runningBlockLengths[oldType] do
+                    if (self.runningBlocks[oldType][i] == id) then
+                        table.remove(self.runningBlocks[oldType], i)
+                        self.runningBlockLengths[oldType] = self.runningBlockLengths[oldType] - 1
+                        self.runningBlockLengths[blockType] = self.runningBlockLengths[blockType] + 1
+                        self.runningBlocks[blockType][self.runningBlockLengths[blockType]] = id
+                        break
+                    end
+                end
+            end
+            self:fixBlockOutputData(id)
+            self:fixBlockInputData(id)
+        end
+    end
+end
+
+function FastLogicRunner.shouldBeThroughBlock(self, id)
+    if self.numberOfBlockInputs[id] + self.numberOfOtherInputs[id] <= 1 then
+        if self.runnableBlockPathIds[id] >= 11 then    -- nand nor xnor
+            self:makeBlockAlt(id, 4)
+        elseif self.runnableBlockPathIds[id] >= 6 then -- and or xor
+            self:makeBlockAlt(id, 3)
+        elseif self.runnableBlockPathIds[id] == 5 then -- timer
+            if self.timerLengths[id] == 1 then
+                self:makeBlockAlt(id, 3)
+            else
+                self:revertBlockType(id)
+            end
+        end
+    else
+        self:revertBlockType(id)
+    end
+end
 
 --------------------------------------------------------
 
@@ -436,6 +498,7 @@ function FastLogicRunner.externalAddNonFastConnection(self, uuid)
     local id = self.hashedLookUp[uuid]
     if id ~= nil then
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] + 1
+        self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)
     end
 end
@@ -444,6 +507,7 @@ function FastLogicRunner.externalRemoveNonFastConnection(self, uuid)
     local id = self.hashedLookUp[uuid]
     if id ~= nil then
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] - 1
+        self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)
     end
 end

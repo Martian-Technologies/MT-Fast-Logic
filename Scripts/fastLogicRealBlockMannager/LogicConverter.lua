@@ -3,6 +3,8 @@
 dofile "../util/util.lua"
 local string = string
 local table = table
+local type = type
+local pairs = pairs
 
 local letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 function FastLogicRunnerRunner.server_convertBody(self, data)

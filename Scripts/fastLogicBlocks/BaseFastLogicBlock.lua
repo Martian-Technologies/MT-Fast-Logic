@@ -168,6 +168,12 @@ function BaseFastLogicBlock.client_onTinker(self, character, state)
 end
 
 function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
+    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[self.FastLogicRunner.hashedLookUp[self.data.uuid]]])
+    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[self.FastLogicRunner.hashedLookUp[self.data.uuid]]])
+    for k,path in pairs(self.FastLogicRunner.pathIndexs) do
+        print(self.FastLogicRunner.pathNames[path])
+        print(#self.FastLogicRunner.blocksSortedByPath[path])
+    end
     -- print(self.shape:getLocalPosition())
     --local targetBody = self.shape:getBody()
     --sm.MTFastLogic.FastLogicRunnerRunner:server_convertBody({ body = targetBody, wantedType = "FastLogic" })

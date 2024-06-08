@@ -6,10 +6,13 @@ local pairs = pairs
 
 function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state, timerLength)
     -- path data
+    local pathName
     if type(path) == "string" then
-        path = self.pathIndexs[path]
+        pathName = path
+        path = self.pathIndexs[pathName]
+    else
+        pathName = self.pathNames[path]
     end
-    local pathName = self.pathNames[path]
     self.runnableBlockPaths[id] = pathName
     self.runnableBlockPathIds[id] = path
     self.blocksSortedByPath[path][#self.blocksSortedByPath[path] + 1] = id
@@ -30,47 +33,56 @@ function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state
     self.numberOfOptimizedInputs[id] = 0
     self.optimizedBlockOutputs[id] = {}
     self.optimizedBlockOutputsPosHash[id] = {}
-
-    if type(inputs) == "table" then
-        for i = 1, #inputs do
-            if inputs[i] ~= nil then
-                self:internalAddOutput(inputs[i], id, false)
-                self:fixBlockOutputData(inputs[i])
-            end
+    if pathName == "multiBlocks" then
+        if type(inputs) == "number" then
+            inputs = {inputs}
+        elseif inputs == nil then
+            inputs = {}
         end
-    elseif inputs ~= nil then
-        self:internalAddOutput(inputs, id, false)
-        self:fixBlockOutputData(inputs)
-    end
-    self:fixBlockInputData(id)
-    self:shouldBeThroughBlock(id)
+        self.multiBlockData[id] = {0, {}, {}, {}, {}} -- id, all blocks, inputs, outputs, otherdata...
+    else
+        self.multiBlockData[id] = false
 
-    -- outputs
-    if pathName ~= "lightBlocks" or pathName ~= "EndTickButtons" then
-        if type(outputs) == "table" then
-            for i = 1, #outputs do
-                if outputs[i] ~= nil then
-                    self:internalAddOutput(id, outputs[i], false)
-                    self:fixBlockInputData(outputs[i])
-                    self:shouldBeThroughBlock(outputs[i])
-                    self:internalAddBlockToUpdate(outputs[i])
+        if type(inputs) == "table" then
+            for i = 1, #inputs do
+                if inputs[i] ~= nil then
+                    self:internalAddOutput(inputs[i], id, false)
+                    self:fixBlockOutputData(inputs[i])
                 end
             end
-        elseif outputs ~= nil then
-            self:internalAddOutput(id, outputs, false)
-            self:fixBlockInputData(outputs)
-            self:shouldBeThroughBlock(outputs)
-            self:internalAddBlockToUpdate(outputs)
+        elseif inputs ~= nil then
+            self:internalAddOutput(inputs, id, false)
+            self:fixBlockOutputData(inputs)
+        end
+        self:fixBlockInputData(id)
+        self:shouldBeThroughBlock(id)
+
+        -- outputs
+        if pathName ~= "lightBlocks" or pathName ~= "EndTickButtons" then
+            if type(outputs) == "table" then
+                for i = 1, #outputs do
+                    if outputs[i] ~= nil then
+                        self:internalAddOutput(id, outputs[i], false)
+                        self:fixBlockInputData(outputs[i])
+                        self:shouldBeThroughBlock(outputs[i])
+                        self:internalAddBlockToUpdate(outputs[i])
+                    end
+                end
+            elseif outputs ~= nil then
+                self:internalAddOutput(id, outputs, false)
+                self:fixBlockInputData(outputs)
+                self:shouldBeThroughBlock(outputs)
+                self:internalAddBlockToUpdate(outputs)
+            end
+        end
+        self:fixBlockOutputData(id)
+
+        if pathName == "timerBlocks" then
+            self.timerLengths[id] = timerLength + 1
+            self.timerInputStates[id] = false
+            self:updateLongestTimer()
         end
     end
-    self:fixBlockOutputData(id)
-
-    if pathName == "timerBlocks" then
-        self.timerLengths[id] = timerLength + 1
-        self.timerInputStates[id] = false
-        self:updateLongestTimer()
-    end
-
     -- add block to next update tick
     self:internalAddBlockToUpdate(id)
 end
@@ -119,8 +131,32 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     self.optimizedBlockOutputs[id] = false
     self.optimizedBlockOutputsPosHash[id] = false
     self.altBlockData[id] = false
+    self.multiBlockData[id] = false
 
     table.removeFromConstantKeysOnlyHash(self.hashData, self.unhashedLookUp[id])
+end
+
+function FastLogicRunner.internalFakeAddBlock(self, path, inputs, outputs, state, timerLength)
+    local newBlockId = table.addBlankToConstantKeysOnlyHash(self.hashData)
+    self:internalAddBlock(path, newBlockId, inputs, outputs, state, timerLength)
+    return newBlockId
+end
+
+function FastLogicRunner.internalAddMultiBlock(self, multiBlockType)
+    local multiBlockId =  self:internalFakeAddBlock(16, {}, {}, false, nil) -- 16 is the multiBlocks id
+    self.multiBlockData[multiBlockId][1] = multiBlockType
+    return multiBlockId
+end
+
+function FastLogicRunner.internalAddBlockToMultiBlock(self, id, multiBlockId, isInput, isOutput)
+    self.multiBlockData[id] = multiBlockId
+    self.multiBlockData[multiBlockId][2][#self.multiBlockData[multiBlockId][2]+1] = id
+    if isInput then
+        self.multiBlockData[multiBlockId][3][#self.multiBlockData[multiBlockId][3]+1] = id
+    end
+    if isOutput then
+        self.multiBlockData[multiBlockId][4][#self.multiBlockData[multiBlockId][4]+1] = id
+    end
 end
 
 function FastLogicRunner.internalAddInput(self, id, idToConnect, withFixes)
@@ -343,6 +379,15 @@ function FastLogicRunner.updateLongestTimer(self)
     end
 end
 
+function FastLogicRunner.updateLongestTimerToLength(self, length)
+    if length > self.longestTimer then
+        self.longestTimer = length
+    end
+    while #self.timerData < self.longestTimer + 1 do
+        self.timerData[#self.timerData + 1] = {}
+    end
+end
+
 function FastLogicRunner.clearTimerData(self, id)
     for i = 1, #self.timerData do
         for ii = 1, #self.timerData[i] do
@@ -472,15 +517,17 @@ end
 
 function FastLogicRunner.shouldBeThroughBlock(self, id)
     if self.numberOfBlockInputs[id] + self.numberOfOtherInputs[id] <= 1 then
-        if self.runnableBlockPathIds[id] >= 11 then    -- nand nor xnor
-            self:makeBlockAlt(id, 4)
-        elseif self.runnableBlockPathIds[id] >= 6 then -- and or xor
-            self:makeBlockAlt(id, 3)
-        elseif self.runnableBlockPathIds[id] == 5 then -- timer
-            if self.timerLengths[id] == 1 then
+        if self.runnableBlockPathIds[id] < 16 then
+            if self.runnableBlockPathIds[id] >= 11 then    -- nand nor xnor
+                self:makeBlockAlt(id, 4)
+            elseif self.runnableBlockPathIds[id] >= 6 then -- and or xor
                 self:makeBlockAlt(id, 3)
-            else
-                self:revertBlockType(id)
+            elseif self.runnableBlockPathIds[id] == 5 then -- timer
+                if self.timerLengths[id] == 1 then
+                    self:makeBlockAlt(id, 3)
+                else
+                    self:revertBlockType(id)
+                end
             end
         end
     else

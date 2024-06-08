@@ -301,6 +301,17 @@ function table.addToConstantKeysOnlyHash(hashData, key)
     return hashData.size
 end
 
+function table.addBlankToConstantKeysOnlyHash(hashData)
+    hashData.size = hashData.size + 1
+    hashData.unhashedLookUp[hashData.size] = false
+    for i = 1, #hashData.tables do
+        if hashData.tables[i][hashData.size] == nil then
+            hashData.tables[i][hashData.size] = hashData.tableFills[i]
+        end
+    end
+    return hashData.size
+end
+
 function table.removeFromConstantKeysOnlyHash(hashData, key)
     if (hashData.hashedLookUp[key] ~= nil) then
         hashData.unhashedLookUp[hashData.hashedLookUp[key]] = "del"

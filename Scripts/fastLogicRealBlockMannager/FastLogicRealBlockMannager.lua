@@ -31,7 +31,7 @@ end
 function FastLogicRealBlockMannager.update(self)
     -- check if body updated
     self:addAllNewBlocks()
-    self:checForBodyUpdate()
+    self:checkForBodyUpdate()
 
     -- check switches and other inputs
     self:checkForNewInputs()
@@ -68,8 +68,7 @@ function FastLogicRealBlockMannager.addAllNewBlocks(self)
 end
 
 function FastLogicRealBlockMannager.createPartWithData(self, block, body)
-    local rot = {xAxis=block.rot[1], yAxis=block.rot[2], zAxis=block.rot[3]}
-    local pos = block.pos - (block.rot[1] + block.rot[2] + block.rot[3]) * 0.5-- + sm.MTUtil.getOffset(rot)
+    local pos = block.pos - (block.rot[1] + block.rot[2] + block.rot[3]) * 0.5
     local shape = body:createPart(sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88112"), pos, block.rot[3], block.rot[1], true)
     shape.color = sm.color.new(block.color)
     sm.MTFastLogic.dataToSet[shape:getInteractable().id] = table.deepCopy(block)

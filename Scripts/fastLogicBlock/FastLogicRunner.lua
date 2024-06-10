@@ -40,9 +40,6 @@ function FastLogicRunner.makeDataArrays(self)
     self.hashedLookUp = self.hashData.hashedLookUp
     -- make arrays
     self.blocksRan = 0
-    self.blocksForNextTick = 0
-    self.blocksKilled = 0
-    self.newIdIndex = 0
     self.nextTimerOutputWait = 0
     self.blockStates = table.makeArrayForHash(self.hashData)
     self.blockInputs = table.makeArrayForHash(self.hashData)
@@ -145,8 +142,6 @@ function FastLogicRunner.update(self)
     self.blocksToAddInputs = {}
     self:optimizeLogic()
     self.blocksRan = 0
-    self.blocksForNextTick = 0
-    self.blocksKilled = 0
     self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
     if self.updateTicks >= 1 then
         local countOfOnInputs = self.countOfOnInputs
@@ -639,7 +634,7 @@ function FastLogicRunner.doUpdate(self)
             newBlockStatesLength = newBlockStatesLength + 1
             newBlockStates[newBlockStatesLength] = timerReadRow[k]
         elseif type(item[1]) == "boolean" then
-            if item[1] ~= blockStates[item[2]] then
+            if countOfOnInputs[item[2]] ~= false and item[1] ~= blockStates[item[2]] then
                 newBlockStatesLength = newBlockStatesLength + 1
                 newBlockStates[newBlockStatesLength] = item[2]
             end
@@ -663,6 +658,7 @@ function FastLogicRunner.doUpdate(self)
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -677,7 +673,8 @@ function FastLogicRunner.doUpdate(self)
             local multiBlockId = multiBlockData[blockId]
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
-                runningBlocks[runningMultiBlockLengths] = multiBlockId
+                runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -693,7 +690,8 @@ function FastLogicRunner.doUpdate(self)
             local multiBlockId = multiBlockData[blockId]
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
-                runningBlocks[runningMultiBlockLengths] = multiBlockId
+                runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -708,7 +706,8 @@ function FastLogicRunner.doUpdate(self)
             local multiBlockId = multiBlockData[blockId]
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
-                runningBlocks[runningMultiBlockLengths] = multiBlockId
+                runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -724,7 +723,8 @@ function FastLogicRunner.doUpdate(self)
             local multiBlockId = multiBlockData[blockId]
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
-                runningBlocks[runningMultiBlockLengths] = multiBlockId
+                runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -740,7 +740,8 @@ function FastLogicRunner.doUpdate(self)
             local multiBlockId = multiBlockData[blockId]
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
-                runningBlocks[runningMultiBlockLengths] = multiBlockId
+                runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -755,7 +756,8 @@ function FastLogicRunner.doUpdate(self)
             local multiBlockId = multiBlockData[blockId]
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
-                runningBlocks[runningMultiBlockLengths] = multiBlockId
+                runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -773,7 +775,8 @@ function FastLogicRunner.doUpdate(self)
             local multiBlockId = multiBlockData[blockId]
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
-                runningBlocks[runningMultiBlockLengths] = multiBlockId
+                runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+                nextRunningBlocks[multiBlockId] = lastRunningIndex
                 multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
@@ -801,9 +804,14 @@ function FastLogicRunner.doUpdate(self)
         -- run internal
         if multiData[1] == 1 then
             local outputId = multiData[4][1]
-            timerData[multiData[6]][#timerData[multiData[6]] + 1] = {blockStates[multiData[3][1]], multiData[4][1]}
-            nextTimerOutputWait = multiData[6] <= nextTimerOutputWait and multiData[6] + 1 or nextTimerOutputWait
+            timerData[multiData[7]][#timerData[multiData[7]] + 1] = {blockStates[multiData[3][1]], multiData[4][1]}
+            nextTimerOutputWait = multiData[7] <= nextTimerOutputWait and multiData[7] + 1 or nextTimerOutputWait
+        elseif multiData[1] == 2 then
+            local outputId = multiData[4][1]
+            timerData[multiData[7]][#timerData[multiData[7]] + 1] = {not blockStates[multiData[3][1]], multiData[4][1]}
+            nextTimerOutputWait = multiData[7] <= nextTimerOutputWait and multiData[7] + 1 or nextTimerOutputWait
         else
+            print("no runner for multi block with id: " .. tostring(multiData[1]))
             didNotRunInternal = true
         end
 
@@ -827,7 +835,6 @@ function FastLogicRunner.doUpdate(self)
     end
     runningBlockLengths[16] = 0
 
-
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
         numberOfStateChanges[id] = numberOfStateChanges[id] + 1
@@ -839,7 +846,6 @@ function FastLogicRunner.doUpdate(self)
             if outputId ~= -1 then
                 countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
                 if nextRunningBlocks[outputId] ~= nextRunningIndex then
-                    -- self.blocksForNextTick = self.blocksForNextTick + 1
                     nextRunningBlocks[outputId] = nextRunningIndex
                     local pathId = runnableBlockPathIds[outputId]
                     runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
@@ -848,4 +854,395 @@ function FastLogicRunner.doUpdate(self)
             end
         end
     end
+end
+
+-- assumes that the blocks are all make up a balenced circuit
+function FastLogicRunner.simulatedManyBalencedUpdates(self, blockIdsToInclude, listOfNumberOfTicksToRun, listOfInputStates)
+    -- setup vars
+    local blockInputs = self.blockInputs
+    local blockOutputs = self.blockOutputs
+    local numberOfBlockInputs = self.numberOfBlockInputs
+    local numberOfBlockOutputs = self.numberOfBlockOutputs
+    local runnableBlockPathIds = self.runnableBlockPathIds
+    local altBlockData = self.altBlockData
+    local timerLengths = self.timerLengths
+    local blockIdsToIncludeHash = {}
+    local allToUpdate = {}
+    local allToUpdateHash = {}
+    local allStates = {}
+    local allTimerData = {}
+    local allTimerDataHash = {}
+    local usingPathIds = {}
+    local maxTimerLenght = 0
+    for k = 1, #blockIdsToInclude do
+        local id = blockIdsToInclude[k]
+        blockIdsToIncludeHash[id] = true
+        if altBlockData[id] ~= nil then
+            usingPathIds[id] = altBlockData[id]
+        else
+            usingPathIds[id] = runnableBlockPathIds[id]
+        end
+        if runnableBlockPathIds[id] == 5 and maxTimerLenght < timerLengths[id] then
+            maxTimerLenght = timerLengths[id]
+        end
+    end
+
+    for j = 1, #listOfNumberOfTicksToRun do
+        local numberOfTicksToRun = listOfNumberOfTicksToRun[j]
+        local inputStates = listOfInputStates[j]
+        -- run
+        while #timerData < maxTimerLenght do
+            timerData[#timerData + 1 ] = {}
+        end
+        local states = {}
+        local toUpdateHash = {}
+        local toUpdate = {}
+        local timerData = {}
+
+        -- setup inputs
+        for i = 1, #blockIdsToInclude do
+            local id = blockIdsToInclude[i]
+            if inputStates[id] ~= nil then
+                states[id] = inputStates[id]
+                local outputs = blockOutputs[id]
+                for k = 1, #numberOfBlockOutputs[id] do
+                    local outputId = outputs[k]
+                    if outputId ~= -1 then
+                        if toUpdateHash[outputId] == nil then
+                            toUpdateHash[outputId] = true
+                            toUpdate[#toUpdate] = outputId
+                        end
+                    end
+                end
+            end
+        end
+        local timerReadRow = table.remove(timerData, 1)
+        for i = 1, #timerReadRow do
+            local item = timerReadRow[i]
+            local id = item[1]
+            states[id] = item[2]
+            -- tell outputs to update
+            local outputs = blockOutputs[id]
+            for i = 1, #numberOfBlockOutputs[id] do
+                local outputId = outputs[i]
+                if outputId ~= -1 then
+                    if toUpdateHash[outputId] == nil then
+                        toUpdateHash[outputId] = true
+                        toUpdate[#toUpdate] = outputId
+                    end
+                end
+            end
+        end
+
+        -- run ticks
+        local toUpdate2 = {}
+        for tick = 1, numberOfTicksToRun do
+            toUpdateHash = {}
+            for k = 1, #toUpdate do
+                local id = toUpdate[k]
+                if blockIdsToIncludeHash[id] == false then
+                    local path = usingPathIds[id]
+                    if path == 5 then -- timer
+                        timerData[timerLengths[id]][#timerData[timerLengths[id]]] = {id, states[blockInputs[id][1]]}
+                    else
+                        if path == 6 or path == 7 then -- and
+                        local state = true
+                        local inputs = blockInputs[id]
+                        for i = 1, numberOfBlockInputs[id] do
+                            if not states[inputs[i]] then
+                                state = false
+                                goto endAndLoop
+                            end
+                        end
+                        ::endAndLoop::
+                        states[id] = state
+                        elseif path == 8 or path == 9 then -- or
+                            local state = false
+                            local inputs = blockInputs[id]
+                            for i = 1, numberOfBlockInputs[id] do
+                                if states[inputs[i]] then
+                                    state = true
+                                    goto endOrLoop
+                                end
+                            end
+                            ::endOrLoop::
+                            states[id] = state
+                        elseif path == 10 then -- xor
+                            local state = false
+                            local inputs = blockInputs[id]
+                            for i = 1, numberOfBlockInputs[id] do
+                                if states[inputs[i]] then
+                                    state = not state
+                                end
+                            end
+                            states[id] = state
+                        elseif path == 11 or path == 12 then -- nand
+                            local state = false
+                            local inputs = blockInputs[id]
+                            for i = 1, numberOfBlockInputs[id] do
+                                if not states[inputs[i]] then
+                                    state = true
+                                    goto endNandLoop
+                                end
+                            end
+                            ::endNandLoop::
+                            states[id] = state
+                        elseif path == 13 or path == 14 then -- nor
+                            local state = true
+                            local inputs = blockInputs[id]
+                            for i = 1, numberOfBlockInputs[id] do
+                                if states[inputs[i]] then
+                                    state = false
+                                    goto endNorLoop
+                                end
+                            end
+                            ::endNorLoop::
+                            states[id] = state
+                        elseif path == 15 then -- xnor
+                            local state = true
+                            local inputs = blockInputs[id]
+                            for i = 1, numberOfBlockInputs[id] do
+                                if states[inputs[i]] then
+                                    state = not state
+                                end
+                            end
+                            states[id] = state
+                        end
+                        -- tell outputs to update
+                        local outputs = blockOutputs[id]
+                        for i = 1, #numberOfBlockOutputs[id] do
+                            local outputId = outputs[i]
+                            if outputId ~= -1 then
+                                if toUpdateHash[outputId] == nil then
+                                    toUpdateHash[outputId] = true
+                                    toUpdate2[#toUpdate] = outputId
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            local timerReadRow = table.remove(timerData, 1)
+            for i = 1, #timerReadRow do
+                local item = timerReadRow[i]
+                local id = item[1]
+                states[id] = item[2]
+                -- tell outputs to update
+                local outputs = blockOutputs[id]
+                for i = 1, #numberOfBlockOutputs[id] do
+                    local outputId = outputs[i]
+                    if outputId ~= -1 then
+                        if toUpdateHash[outputId] == nil then
+                            toUpdateHash[outputId] = true
+                            toUpdate2[#toUpdate] = outputId
+                        end
+                    end
+                end
+            end
+            toUpdate = toUpdate2
+            toUpdate2 = {}
+        end
+        -- end run
+        for k = 1, #blockIdsToInclude do
+            local id = blockIdsToInclude[k]
+            if states[id] ~= nil then
+                allStates[id] = states[id]
+            end
+        end
+        for k = 1, #timerData do
+            local data = timerData[k]
+            local timerHash = allTimerDataHash[k]
+            local timer = allTimerData[k]
+            for i = 1, #data do
+                id = data[i][1]
+                if timerHash[id] == nil then
+                    timer[#timer + 1] = data[i]
+                    timerHash[id] = #timer
+                else
+                    timer[timerHash[id]][2] = data[i][2]
+                end
+            end
+        end
+        for k = 1, #toUpdate do
+            local id = toUpdate[k]
+            if allToUpdateHash[id] == nil then
+                allToUpdate[#allToUpdate + 1] = id
+                allToUpdateHash[id] = true
+            end
+        end
+    end
+    return {allStates, allTimerData, allToUpdate}
+end
+
+function FastLogicRunner.simulatedBalencedUpdates(self, blockIdsToInclude, numberOfTicksToRun, inputStates)
+    local blockInputs = self.blockInputs
+    local blockOutputs = self.blockOutputs
+    local numberOfBlockInputs = self.numberOfBlockInputs
+    local numberOfBlockOutputs = self.numberOfBlockOutputs
+    local runnableBlockPathIds = self.runnableBlockPathIds
+    local altBlockData = self.altBlockData
+    local timerLengths = self.timerLengths
+    local usingPathIds = {}
+    local states = {}
+    local toUpdateHash = {}
+    local toUpdate = {}
+    
+    local timerData = {}
+
+    -- setup inputs
+    for i = 1, #blockIdsToInclude do
+        local id = blockIdsToInclude[i]
+        blockIdsToIncludeHash[id] = true
+        if altBlockData[id] ~= nil then
+            usingPathIds[id] = altBlockData[id]
+        else
+            usingPathIds[id] = runnableBlockPathIds[id]
+        end
+        if usingPathIds[id] == 5 then
+            while #timerData < timerLengths[id] do
+                timerData[#timerData + 1 ] = {}
+            end
+        end
+        if inputStates[id] ~= nil then
+            states[id] = inputStates[id]
+            local outputs = blockOutputs[id]
+            for k = 1, #numberOfBlockOutputs[id] do
+                local outputId = outputs[k]
+                if outputId ~= -1 then
+                    if toUpdateHash[outputId] == nil then
+                        toUpdateHash[outputId] = true
+                        toUpdate[#toUpdate] = outputId
+                    end
+                end
+            end
+        end
+    end
+    local timerReadRow = table.remove(timerData, 1)
+    for i = 1, #timerReadRow do
+        local item = timerReadRow[i]
+        local id = item[1]
+        states[id] = item[2]
+        -- tell outputs to update
+        local outputs = blockOutputs[id]
+        for i = 1, #numberOfBlockOutputs[id] do
+            local outputId = outputs[i]
+            if outputId ~= -1 then
+                if toUpdateHash[outputId] == nil then
+                    toUpdateHash[outputId] = true
+                    toUpdate[#toUpdate] = outputId
+                end
+            end
+        end
+    end
+
+    -- run ticks
+    local toUpdate2 = {}
+    for tick = 1, numberOfTicksToRun do
+        toUpdateHash = {}
+        for k = 1, #toUpdate do
+            local id = toUpdate[k]
+            if blockIdsToIncludeHash[id] == false then
+                local path = usingPathIds[id]
+                if path == 5 then -- timer
+                    timerData[timerLengths[id]][#timerData[timerLengths[id]]] = {id, states[blockInputs[id][1]]}
+                else
+                    if path == 6 or path == 7 then -- and
+                    local state = true
+                    local inputs = blockInputs[id]
+                    for i = 1, numberOfBlockInputs[id] do
+                        if not states[inputs[i]] then
+                            state = false
+                            goto endAndLoop
+                        end
+                    end
+                    ::endAndLoop::
+                    states[id] = state
+                    elseif path == 8 or path == 9 then -- or
+                        local state = false
+                        local inputs = blockInputs[id]
+                        for i = 1, numberOfBlockInputs[id] do
+                            if states[inputs[i]] then
+                                state = true
+                                goto endOrLoop
+                            end
+                        end
+                        ::endOrLoop::
+                        states[id] = state
+                    elseif path == 10 then -- xor
+                        local state = false
+                        local inputs = blockInputs[id]
+                        for i = 1, numberOfBlockInputs[id] do
+                            if states[inputs[i]] then
+                                state = not state
+                            end
+                        end
+                        states[id] = state
+                    elseif path == 11 or path == 12 then -- nand
+                        local state = false
+                        local inputs = blockInputs[id]
+                        for i = 1, numberOfBlockInputs[id] do
+                            if not states[inputs[i]] then
+                                state = true
+                                goto endNandLoop
+                            end
+                        end
+                        ::endNandLoop::
+                        states[id] = state
+                    elseif path == 13 or path == 14 then -- nor
+                        local state = true
+                        local inputs = blockInputs[id]
+                        for i = 1, numberOfBlockInputs[id] do
+                            if states[inputs[i]] then
+                                state = false
+                                goto endNorLoop
+                            end
+                        end
+                        ::endNorLoop::
+                        states[id] = state
+                    elseif path == 15 then -- xnor
+                        local state = true
+                        local inputs = blockInputs[id]
+                        for i = 1, numberOfBlockInputs[id] do
+                            if states[inputs[i]] then
+                                state = not state
+                            end
+                        end
+                        states[id] = state
+                    end
+                    -- tell outputs to update
+                    local outputs = blockOutputs[id]
+                    for i = 1, #numberOfBlockOutputs[id] do
+                        local outputId = outputs[i]
+                        if outputId ~= -1 then
+                            if toUpdateHash[outputId] == nil then
+                                toUpdateHash[outputId] = true
+                                toUpdate2[#toUpdate] = outputId
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        local timerReadRow = table.remove(timerData, 1)
+        for i = 1, #timerReadRow do
+            local item = timerReadRow[i]
+            local id = item[1]
+            states[id] = item[2]
+            -- tell outputs to update
+            local outputs = blockOutputs[id]
+            for i = 1, #numberOfBlockOutputs[id] do
+                local outputId = outputs[i]
+                if outputId ~= -1 then
+                    if toUpdateHash[outputId] == nil then
+                        toUpdateHash[outputId] = true
+                        toUpdate2[#toUpdate] = outputId
+                    end
+                end
+            end
+        end
+        toUpdate = toUpdate2
+        toUpdate2 = {}
+    end
+
+    return {states, timerData, toUpdate}
 end

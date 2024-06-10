@@ -1,4 +1,5 @@
 dofile "../util/util.lua"
+dofile "../CreationUtil.lua"
 local string = string
 local table = table
 
@@ -14,7 +15,7 @@ sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.FastLogicBlockLookUp = sm.MTFastLogic.FastLogicBlockLookUp or {}
 sm.MTFastLogic.client_FastLogicBlockLookUp = sm.MTFastLogic.client_FastLogicBlockLookUp or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
-sm.MTFastLogic.BlocksToGetData = sm.MTFastLogic.BlocksToGetData or {}
+-- sm.MTFastLogic.BlocksToGetData = sm.MTFastLogic.BlocksToGetData or {}
 sm.MTFastLogic.NewBlockUuids = sm.MTFastLogic.NewBlockUuids or {}
 
 -- function BaseFastLogicBlock.rescanSelf(self)
@@ -33,7 +34,8 @@ function BaseFastLogicBlock.deepRescanSelf(self)
     self.FastLogicRunner = nil
     self.creation = nil
     self.creationId = nil
-    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData + 1] = self
+    -- sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData + 1] = self
+    self:getData()
 end
 
 function BaseFastLogicBlock.getParentUuids(self)
@@ -62,9 +64,9 @@ function BaseFastLogicBlock.getData(self)
     self.state = self.state or nil
     self.activeInputs = {}
     self.removeAllData = self.removeAllData or true
-    self.creationId = sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(self.shape:getBody())
+    self.creationId = sm.MTFastLogic.CreationUtil.getCreationId(self.shape:getBody())
     if (sm.MTFastLogic.Creations[self.creationId] == nil) then
-        sm.MTFastLogic.FastLogicRunnerRunner:MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
+        sm.MTFastLogic.CreationUtil.MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
     end
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicRunner = self.creation.FastLogicRunner
@@ -89,7 +91,6 @@ function BaseFastLogicBlock.server_onCreate(self)
     self.isFastLogic = true
     self.type = nil
     self.id = self.interactable:getId()
-    sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData + 1] = self
     if self.storage:load() ~= nil then
         self.data = self.storage:load()
         if self.data.uuid == nil then
@@ -109,6 +110,8 @@ function BaseFastLogicBlock.server_onCreate(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
     self.storage:save(self.data)
     self:server_onCreate2()
+    -- sm.MTFastLogic.BlocksToGetData[#sm.MTFastLogic.BlocksToGetData + 1] = self
+    self:getData()
 end
 
 function BaseFastLogicBlock.server_onCreate2(self)
@@ -168,10 +171,10 @@ end
 function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
     print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[self.FastLogicRunner.hashedLookUp[self.data.uuid]]])
     print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[self.FastLogicRunner.hashedLookUp[self.data.uuid]]])
-    for k,path in pairs(self.FastLogicRunner.pathIndexs) do
-        print(self.FastLogicRunner.pathNames[path])
-        print(#self.FastLogicRunner.blocksSortedByPath[path])
-    end
+    -- for k,path in pairs(self.FastLogicRunner.pathIndexs) do
+    --     print(self.FastLogicRunner.pathNames[path])
+    --     print(#self.FastLogicRunner.blocksSortedByPath[path])
+    -- end
     -- print(self.shape:getLocalPosition())
     --local targetBody = self.shape:getBody()
     --sm.MTFastLogic.FastLogicRunnerRunner:server_convertBody({ body = targetBody, wantedType = "FastLogic" })

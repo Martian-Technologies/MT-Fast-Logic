@@ -196,3 +196,13 @@ function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inp
     self.FastLogicRunner:externalAddBlock(self.blocks[uuid])
     self:doFixOnBlock(uuid)
 end
+
+function FastLogicAllBlockMannager.changeBlockType(self, uuid, mode)
+    self.creation.FastLogicRunner:externalChangeBlockType(uuid, mode)
+    self.blocks[uuid].type = mode
+end
+
+function FastLogicAllBlockMannager.changeTimerTime(self, uuid, time)
+    self.creation.FastLogicRunner:externalChangeTimerTime(uuid, time)
+    self.blocks[uuid].timerLength = time
+end

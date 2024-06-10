@@ -191,6 +191,13 @@ function table.deepCopyTo(tbl, newTable)
     return newTable
 end
 
+function table.appendTable(tbl, tblToAppend)
+    for i = 1, #tblToAppend do
+        tbl[#tbl + 1] = tblToAppend[i]
+    end
+    return tbl
+end
+
 function table.getKeysSortedByValue(tbl, sortFunction, validationFunction)
     if validationFunction == nil then validationFunction = function(val) return true end end
     local keys = {}
@@ -362,15 +369,16 @@ function string.replace_char(pos, str, r)
     return str:sub(1, pos - 1) .. r .. str:sub(pos + 1)
 end
 
-local i = 0
+local uuidIndex = uuidIndex or 0
 function string.uuid()
     --     local template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
     --     return string.gsub(template, '[xy]', function(c)
     --         local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
     --         return string.format('%x', v)
     --     end)
-    i = i + 1
-    return i;
+    
+    uuidIndex = uuidIndex + 1
+    return uuidIndex;
 end
 
 function string.vecToString(vec, sep)

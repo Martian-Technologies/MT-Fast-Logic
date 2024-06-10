@@ -1,6 +1,7 @@
 -- quickGateConverter.lua by HerrVincling
 -- moddifed
 dofile "../util/util.lua"
+dofile "../CreationUtil.lua"
 local string = string
 local table = table
 local type = type
@@ -12,7 +13,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
     local body = data.body
     local wantedType = data.wantedType
     if wantedType == "VanillaLogic" then
-        local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(data.body)]
+        local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(data.body)]
         if creation ~= nil then
             local i = 0
             for _, block in pairs(creation.AllFastBlocks) do

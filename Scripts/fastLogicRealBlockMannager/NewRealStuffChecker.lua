@@ -1,4 +1,5 @@
 dofile "../util/util.lua"
+dofile "../CreationUtil.lua"
 local string = string
 local table = table
 local type = type
@@ -34,7 +35,7 @@ function FastLogicRealBlockMannager.checkForNewInputs(self)
     end
 end
 
-function FastLogicRealBlockMannager.checForBodyUpdate(self)
+function FastLogicRealBlockMannager.checkForBodyUpdate(self)
     local scanNext
     if not sm.exists(self.creation.body) or self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()
@@ -45,7 +46,7 @@ function FastLogicRealBlockMannager.checForBodyUpdate(self)
     end
 
     for uuid, block in pairs(scanNext) do
-        if self.creationId ~= sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(block.shape:getBody()) then
+        if self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then
             block:deepRescanSelf()
         else
             self.FastLogicAllBlockMannager:setColor(uuid, block.shape.color:getHexStr())

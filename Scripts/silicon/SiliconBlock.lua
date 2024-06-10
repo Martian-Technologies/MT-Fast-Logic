@@ -1,4 +1,5 @@
 dofile "../util/util.lua"
+dofile "../CreationUtil.lua"
 local string = string
 local table = table
 local type = type
@@ -43,11 +44,10 @@ function SiliconBlock.deepRescanSelf(self)
 end
 
 function SiliconBlock.getData(self)
-    local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
-    self.creationId = sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(self.shape:getBody())
+    self.creationId = sm.MTFastLogic.CreationUtil.getCreationId(self.shape:getBody())
     self.id = self.interactable:getId()
     if (sm.MTFastLogic.Creations[self.creationId] == nil) then
-        sm.MTFastLogic.FastLogicRunnerRunner:MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
+        sm.MTFastLogic.CreationUtil.MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
     end
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicAllBlockMannager = self.creation.FastLogicAllBlockMannager
@@ -69,7 +69,6 @@ function SiliconBlock.getData(self)
                 sm.MTFastLogic.NewBlockUuids[oldUuid] = { block.uuid, 0 }
             end
             local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
-            -- local axes = {x=block.rot[1], y=block.rot[2], z=block.rot[3]}
             self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, self.id)
         end
     end
@@ -137,7 +136,7 @@ function SiliconBlock.server_onDestroy(self)
 end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-
+    print(self.data.blocks)
 end
 
 function SiliconBlock.client_onTinker(self, character, state)
@@ -165,7 +164,6 @@ function SiliconBlock.client_sendMessage(self, message)
 end
 
 function SiliconBlock.addBlocks(self, uuids, creation)
-    local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
     if type(uuids) == "number" then
         uuids = { uuids }
     end
@@ -200,25 +198,6 @@ function SiliconBlock.addBlocks(self, uuids, creation)
         self:server_saveBlocks(blocks)
     end
 end
-
--- function SiliconBlock.removeBlocks(self, uuids)
---     if type(uuids) == "number" then
---         uuids = {uuids}
---     end
-
---     local blocks = self.data.blocks
---     for _, uuid in ipairs(uuids) do
---         sm.MTFastLogic.UsedUuids[uuid] = nil
---         for index, block in ipairs(blocks) do
---             if block.uuid == uuid then
---                 table.remove(blocks, index)
---                 break
---             end
---         end
---     end
-
---     self:server_saveBlocks(blocks)
--- end
 
 function SiliconBlock.server_onrefresh(self)
     self:server_onCreate()

@@ -7,7 +7,7 @@ local pairs = pairs
 SiliconConverter = SiliconConverter or {}
 
 sm.MTFastLogic = sm.MTFastLogic or {}
-sm.MTFastLogic.WillBeSiliconBlocks = sm.MTFastLogic.WillBeSiliconBlocks or { {}, {} }
+sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
 
 local blockUuids = {
     ["1x1x1"] = "3706ba55-bd11-4053-b437-bbf2aff823b4",
@@ -61,10 +61,7 @@ function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for F
             siliconBlocksToMake[i].bestRot.xAxis,
             true
         )
-        sm.MTFastLogic.WillBeSiliconBlocks[2][#sm.MTFastLogic.WillBeSiliconBlocks[2] + 1] = {
-            interactable = newShape:getInteractable(),
-            uuids = siliconBlocksToMake[i].uuids
-        }
+        sm.MTFastLogic.DataForSiliconBlocks[newShape:getInteractable():getId()] = siliconBlocksToMake[i].uuids
         for ii = 1, #siliconBlocksToMake[i].uuids do
             creation.blocks[siliconBlocksToMake[i].uuids[ii]].isSilicon = true
             creation.blocks[siliconBlocksToMake[i].uuids[ii]].siliconBlockId = newShape:getInteractable():getId()

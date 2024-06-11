@@ -1,4 +1,5 @@
 dofile "../util/util.lua"
+dofile "../CreationUtil.lua"
 local string = string
 local table = table
 local type = type
@@ -7,11 +8,10 @@ local pairs = pairs
 SiliconBlock = SiliconBlock or class()
 
 sm.MTFastLogic = sm.MTFastLogic or {}
-sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
+-- sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 sm.MTFastLogic.SiliconBlocks = sm.MTFastLogic.SiliconBlocks or {}
-sm.MTFastLogic.SiliconBlocksToGetData = sm.MTFastLogic.SiliconBlocksToGetData or {}
-sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {}
-sm.MTFastLogic.NewBlockUuids = sm.MTFastLogic.NewBlockUuids or {}
+sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
+sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
 
 local uuidToSize = {
     ["3706ba55-bd11-4053-b437-bbf2aff823b4"] = { 1, 1, 1 },
@@ -31,7 +31,7 @@ local uuidToSize = {
 
 function SiliconBlock.deepRescanSelf(self)
     for _, block in ipairs(self.data.blocks) do
-        sm.MTFastLogic.UsedUuids[block.uuid] = nil
+        -- sm.MTFastLogic.UsedUuids[block.uuid] = nil
         self.FastLogicAllBlockMannager:removeBlock(block.uuid)
     end
     self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
@@ -39,15 +39,14 @@ function SiliconBlock.deepRescanSelf(self)
     self.creation = nil
     self.creationId = nil
     self.FastLogicAllBlockMannager = nil
-    sm.MTFastLogic.SiliconBlocksToGetData[#sm.MTFastLogic.SiliconBlocksToGetData + 1] = self
+    self:getData()
 end
 
 function SiliconBlock.getData(self)
-    local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
-    self.creationId = sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(self.shape:getBody())
+    self.creationId = sm.MTFastLogic.CreationUtil.getCreationId(self.shape:getBody())
     self.id = self.interactable:getId()
     if (sm.MTFastLogic.Creations[self.creationId] == nil) then
-        sm.MTFastLogic.FastLogicRunnerRunner:MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
+        sm.MTFastLogic.CreationUtil.MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
     end
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicAllBlockMannager = self.creation.FastLogicAllBlockMannager
@@ -58,25 +57,23 @@ function SiliconBlock.getData(self)
         self.creation.BlocksToScan[#self.creation.BlocksToScan + 1] = self
         sm.MTFastLogic.SiliconBlocks[self.id] = self
     end
+    if sm.MTFastLogic.DataForSiliconBlocks[self.id] ~= nil then
+        self:addBlocks(sm.MTFastLogic.DataForSiliconBlocks[self.id])
+        sm.MTFastLogic.DataForSiliconBlocks[self.id] = nil
+    end
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
-        if self.creation.blocks[block.uuid] == nil then
-            if sm.MTFastLogic.UsedUuids[block.uuid] ~= nil then
-                local oldUuid = block.uuid
-                while sm.MTFastLogic.UsedUuids[block.uuid] ~= nil do
-                    block.uuid = string.uuid()
-                end
-                sm.MTFastLogic.NewBlockUuids[oldUuid] = { block.uuid, 0 }
-            end
-            local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
-            -- local axes = {x=block.rot[1], y=block.rot[2], z=block.rot[3]}
-            self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, self.id)
+        block.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(block.uuid, self.creationId)
+        for ii = 1, #block.inputs do
+            block.inputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.inputs[ii], self.creationId)
         end
+        for ii = 1, #block.outputs do
+            block.outputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.outputs[ii], self.creationId)
+        end
+        local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
+        self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, self.id)
     end
     self:server_saveBlocks(self.data.blocks)
-    if sm.MTFastLogic.SiliconBlocksToAddConnections[2] == nil then
-        sm.MTFastLogic.SiliconBlocksToAddConnections[2] = {}
-    end
     sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2] + 1] = self
 end
 
@@ -84,16 +81,10 @@ function SiliconBlock.addConnections(self)
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
         for ii = 1, #block.inputs do
-            if (sm.MTFastLogic.NewBlockUuids[block.inputs[ii]] ~= nil) then
-                block.inputs[ii] = sm.MTFastLogic.NewBlockUuids[block.inputs[ii]][1]
-            end
             self.FastLogicAllBlockMannager:addOutput(block.inputs[ii], block.uuid)
         end
 
         for ii = 1, #block.outputs do
-            if (sm.MTFastLogic.NewBlockUuids[block.outputs[ii]] ~= nil) then
-                block.outputs[ii] = sm.MTFastLogic.NewBlockUuids[block.outputs[ii]][1]
-            end
             self.FastLogicAllBlockMannager:addOutput(block.uuid, block.outputs[ii])
         end
     end
@@ -121,23 +112,24 @@ function SiliconBlock.server_onCreate(self)
     self.size = table.copy(uuidToSize[tostring(self.shape.shapeUuid)])
     self.isSilicon = true
     self.data = self.data or {}
-    sm.MTFastLogic.SiliconBlocksToGetData[#sm.MTFastLogic.SiliconBlocksToGetData + 1] = self
+    -- sm.MTFastLogic.SiliconBlocksToGetData[#sm.MTFastLogic.SiliconBlocksToGetData + 1] = self
     self.data.blocks = self:decompressBlockData(self.storage:load())
     self.storage:save(self:compressBlocks())
+    self:getData()
 end
 
 function SiliconBlock.server_onDestroy(self)
     self.creation.SiliconBlocks[self.id] = nil
     if self.removeData ~= false then
         for _, block in ipairs(self.data.blocks) do
-            sm.MTFastLogic.UsedUuids[block.uuid] = nil
+            -- sm.MTFastLogic.UsedUuids[block.uuid] = nil
             self.FastLogicAllBlockMannager:removeBlock(block.uuid)
         end
     end
 end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-
+    print(self.data.blocks)
 end
 
 function SiliconBlock.client_onTinker(self, character, state)
@@ -164,16 +156,11 @@ function SiliconBlock.client_sendMessage(self, message)
     sm.gui.chatMessage(message)
 end
 
-function SiliconBlock.addBlocks(self, uuids, creation)
-    local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
+function SiliconBlock.addBlocks(self, uuids)
     if type(uuids) == "number" then
         uuids = { uuids }
     end
     if #uuids > 0 then
-        if self.creation == nil then
-            self:getData()
-        end
-
         local blocks = self.data.blocks
         for _, uuid in ipairs(uuids) do
             local i = 1
@@ -200,25 +187,6 @@ function SiliconBlock.addBlocks(self, uuids, creation)
         self:server_saveBlocks(blocks)
     end
 end
-
--- function SiliconBlock.removeBlocks(self, uuids)
---     if type(uuids) == "number" then
---         uuids = {uuids}
---     end
-
---     local blocks = self.data.blocks
---     for _, uuid in ipairs(uuids) do
---         sm.MTFastLogic.UsedUuids[uuid] = nil
---         for index, block in ipairs(blocks) do
---             if block.uuid == uuid then
---                 table.remove(blocks, index)
---                 break
---             end
---         end
---     end
-
---     self:server_saveBlocks(blocks)
--- end
 
 function SiliconBlock.server_onrefresh(self)
     self:server_onCreate()

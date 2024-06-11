@@ -45,7 +45,11 @@ function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for F
                     goto continue
                 end
             end
-            if creation.AllFastBlocks[uuid].type == "LogicGate" and table.length(creation.AllFastBlocks[uuid].activeInputs) == 0 then
+            if (
+                creation.AllFastBlocks[uuid].type == "LogicGate" and
+                table.length(creation.AllFastBlocks[uuid].activeInputs) == 0 and
+                #creation.AllFastBlocks[uuid].shape:getJoints() == 0
+            ) then
                 blocksPosHash[string.vecToString(block.pos)] = uuid
             end
             ::continue::
@@ -199,7 +203,7 @@ function SiliconConverter.convertFromSilicon(creationId, blockUuids) -- only for
     local blocks = creation.blocks
     local siliconBlocks = {}
     for _, uuid in ipairs(blockUuids) do
-        if blocks[uuid].isSilicon then
+        if blocks[uuid].isSilicon and #creation.SiliconBlocks[blocks[uuid].siliconBlockId].shape:getJoints() == 0 then
             siliconBlocks[#siliconBlocks + 1] = creation.SiliconBlocks[blocks[uuid].siliconBlockId]
         end
     end

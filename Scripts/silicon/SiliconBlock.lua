@@ -354,9 +354,6 @@ function SiliconBlock.decompressBlockData(self, blockData)
 end
 
 function SiliconBlock.toLocalPosAndRot(self, pos, rot)
-    print("toLocalPosAndRot")
-    print(pos)
-    -- print(rot)
     local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
     pos = pos - self.shape.localPosition -- - sm.MTUtil.getOffset(block.rot)
     pos = sm.vec3.new(
@@ -381,15 +378,10 @@ function SiliconBlock.toLocalPosAndRot(self, pos, rot)
             rot[3].x * axes.z.x + rot[3].y * axes.z.y + rot[3].z * axes.z.z
         )
     }
-    print(pos)
-    -- print(rot)
     return pos, rot
 end
 
 function SiliconBlock.toBodyPosAndRot(self, pos, rot)
-    print("toBodyPosAndRot")
-    print(pos)
-    -- print(rot)
     local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
     pos = sm.vec3.new(
         pos.x * axes.x.x + pos.y * axes.y.x + pos.z * axes.z.x,
@@ -414,7 +406,6 @@ function SiliconBlock.toBodyPosAndRot(self, pos, rot)
         )
     }
     pos = pos + self.shape.localPosition
-    print(pos)
     return pos, rot
 end
 

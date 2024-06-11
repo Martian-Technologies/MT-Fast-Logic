@@ -113,7 +113,7 @@ end
 
 function FastLogicRealBlockMannager.scanSiliconBlocks(self)
     for uuid, block in pairs(self.creation.SiliconBlocks) do
-        if self.creationId ~= sm.MTFastLogic.FastLogicRunnerRunner:getCreationId(block.shape:getBody()) then
+        if self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then
             block:deepRescanSelf()
         end
     end

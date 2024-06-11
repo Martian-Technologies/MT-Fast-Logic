@@ -7,7 +7,6 @@ FastLogicAllBlockMannager = FastLogicAllBlockMannager or {}
 dofile "FastLogicAllBlockFixer.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
-sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 
 function FastLogicAllBlockMannager.getNew(creationId)
     local new = table.deepCopy(FastLogicAllBlockMannager)
@@ -156,7 +155,6 @@ function FastLogicAllBlockMannager.removeOutput(self, uuid, uuidToDeconnect)
 end
 
 function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, color, isSilicon, timerLength, siliconBlockId)
-    sm.MTFastLogic.UsedUuids[uuid] = true
     local keyPos = string.vecToString(pos)
     if self.locationCash[keyPos] == nil then
         self.locationCash[keyPos] = {}

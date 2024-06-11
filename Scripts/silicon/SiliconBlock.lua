@@ -19,7 +19,7 @@ local uuidToSize = {
     ["f0e2828f-7776-4232-b1d9-8a3c45b63898"] = { 3, 1, 1 },
     ["f0e1640f-7406-1984-b1d9-8c1a41b53958"] = { 4, 1, 1 },
     ["f0e1640f-7406-4232-b1d9-8c1a41b53958"] = { 8, 1, 1 },
-    ["f3e2828f-1212-1111-b1d4-8d3c45b63000"] = { 1, 1, 1 },
+    ["f3e2828f-1212-1111-b1d4-8d3c45b63000"] = { 12, 1, 1 },
     ["f590d9d1-179d-49ff-86ab-7f74a730e243"] = { 2, 2, 1 },
     ["d576a4c9-e6bc-46c0-9230-f92967cc39b6"] = { 4, 4, 1 },
     ["195aa046-017a-4f0b-809c-98ed141955fb"] = { 8, 8, 1 },
@@ -42,14 +42,17 @@ function SiliconBlock.deepRescanSelf(self)
     self:getData()
 end
 
-function SiliconBlock.getData(self)
+function SiliconBlock.getCreationData(self)
     self.creationId = sm.MTFastLogic.CreationUtil.getCreationId(self.shape:getBody())
-    self.id = self.interactable:getId()
     if (sm.MTFastLogic.Creations[self.creationId] == nil) then
         sm.MTFastLogic.CreationUtil.MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
     end
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicAllBlockMannager = self.creation.FastLogicAllBlockMannager
+end
+
+function SiliconBlock.getData(self)
+    self:getCreationData()
     if self.creation.SiliconBlocks[self.id] == nil then
         self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
         self.creation.lastBodyUpdate = 0
@@ -63,13 +66,6 @@ function SiliconBlock.getData(self)
     end
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
-        block.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(block.uuid, self.creationId)
-        for ii = 1, #block.inputs do
-            block.inputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.inputs[ii], self.creationId)
-        end
-        for ii = 1, #block.outputs do
-            block.outputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.outputs[ii], self.creationId)
-        end
         local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
         self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, self.id)
     end
@@ -109,11 +105,23 @@ function SiliconBlock.addOutput(self, uuid, uuidToConnect)
 end
 
 function SiliconBlock.server_onCreate(self)
+    self:getCreationData()
     self.size = table.copy(uuidToSize[tostring(self.shape.shapeUuid)])
     self.isSilicon = true
+    self.id = self.interactable:getId()
     self.data = self.data or {}
     -- sm.MTFastLogic.SiliconBlocksToGetData[#sm.MTFastLogic.SiliconBlocksToGetData + 1] = self
     self.data.blocks = self:decompressBlockData(self.storage:load())
+    for i = 1, #self.data.blocks do
+        local block = self.data.blocks[i]
+        block.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(block.uuid, self.creationId)
+        for ii = 1, #block.inputs do
+            block.inputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.inputs[ii], self.creationId)
+        end
+        for ii = 1, #block.outputs do
+            block.outputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.outputs[ii], self.creationId)
+        end
+    end
     self.storage:save(self:compressBlocks())
     self:getData()
 end
@@ -129,7 +137,7 @@ function SiliconBlock.server_onDestroy(self)
 end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    print(self.data.blocks)
+    -- advPrint(self., 3)
 end
 
 function SiliconBlock.client_onTinker(self, character, state)
@@ -346,6 +354,9 @@ function SiliconBlock.decompressBlockData(self, blockData)
 end
 
 function SiliconBlock.toLocalPosAndRot(self, pos, rot)
+    print("toLocalPosAndRot")
+    print(pos)
+    -- print(rot)
     local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
     pos = pos - self.shape.localPosition -- - sm.MTUtil.getOffset(block.rot)
     pos = sm.vec3.new(
@@ -370,10 +381,15 @@ function SiliconBlock.toLocalPosAndRot(self, pos, rot)
             rot[3].x * axes.z.x + rot[3].y * axes.z.y + rot[3].z * axes.z.z
         )
     }
+    print(pos)
+    -- print(rot)
     return pos, rot
 end
 
 function SiliconBlock.toBodyPosAndRot(self, pos, rot)
+    print("toBodyPosAndRot")
+    print(pos)
+    -- print(rot)
     local axes = { x = self.shape.xAxis, y = self.shape.yAxis, z = self.shape.zAxis }
     pos = sm.vec3.new(
         pos.x * axes.x.x + pos.y * axes.y.x + pos.z * axes.z.x,
@@ -398,6 +414,7 @@ function SiliconBlock.toBodyPosAndRot(self, pos, rot)
         )
     }
     pos = pos + self.shape.localPosition
+    print(pos)
     return pos, rot
 end
 

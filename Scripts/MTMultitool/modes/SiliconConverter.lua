@@ -1,6 +1,6 @@
-SiliconConverter = {}
+SiliconConverterTool = {}
 
-function SiliconConverter.inject(multitool)
+function SiliconConverterTool.inject(multitool)
     multitool.SiliconConverter = {}
     local self = multitool.SiliconConverter
     self.origin = nil
@@ -10,7 +10,7 @@ function SiliconConverter.inject(multitool)
     self.nametagUpdate = NametagManager.createController(multitool)
 end
 
-function SiliconConverter.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt_NOTUSED)
+function SiliconConverterTool.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt_NOTUSED)
     local self = multitool.SiliconConverter
     multitool.BlockSelector.enabled = false
 
@@ -141,7 +141,7 @@ function SiliconConverter.trigger(multitool, primaryState, secondaryState, force
                 wantedType = self.wantedType,
                 originBody = self.body
             })
-            SiliconConverter.cleanUp(multitool)
+            SiliconConverterTool.cleanUp(multitool)
         end
     end
     if secondaryState == 1 then
@@ -161,7 +161,7 @@ function SiliconConverter.trigger(multitool, primaryState, secondaryState, force
     end
 end
 
-function SiliconConverter.cleanUp(multitool)
+function SiliconConverterTool.cleanUp(multitool)
     local self = multitool.SiliconConverter
     self.origin = nil
     self.final = nil
@@ -169,7 +169,7 @@ function SiliconConverter.cleanUp(multitool)
     self.nametagUpdate(nil)
 end
 
-function SiliconConverter.cleanNametags(multitool)
+function SiliconConverterTool.cleanNametags(multitool)
     local self = multitool.SiliconConverter
     self.nametagUpdate(nil)
 end

@@ -194,7 +194,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             origin = selfData.toOrigin
             vecColor = colorOrder[math.fmod(selfData.nDimsTo, #colorOrder)]
         end
-        local closestDistance, closestPosition, nSteps = MathUtil.closestPassBetweenConinuousRayAndDiscreteRay(
+        local closestDistance, closestPosition, nSteps = MathUtil.closestPassBetweenContinuousRayAndDiscreteRay(
             sm.camera.getPosition(),
             sm.camera.getDirection(),
             origin:getWorldPosition(),

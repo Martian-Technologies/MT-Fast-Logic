@@ -87,7 +87,7 @@ function MTMultitool.client_onCreate(self)
     BackupEngine.inject(self)
 
     LogicConverter.inject(self)
-    SiliconConverter.inject(self)
+    SiliconConverterTool.inject(self)
     Settings.inject(self)
     ModeChanger.inject(self)
     VolumePlacer.inject(self)
@@ -184,7 +184,7 @@ function MTMultitool.client_onUpdate(self, dt)
         for _, modeIndex in pairs(MTMultitool.FastLogicModes) do
             if self.enabledModes[modeIndex] then
                 self.enabledModes[modeIndex] = false
-                SiliconConverter.cleanNametags(self)
+                SiliconConverterTool.cleanNametags(self)
             end
 		end
 	end
@@ -346,7 +346,7 @@ function MTMultitool.client_onUnequip(self, animate)
     --     func(self, animate)
     -- end
 	if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
-        SiliconConverter.cleanNametags(self)
+        SiliconConverterTool.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
 	elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
@@ -376,7 +376,7 @@ end
 
 function MTMultitool.client_onToggle(self)
     if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
-        SiliconConverter.cleanUp(self)
+        SiliconConverterTool.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
@@ -428,7 +428,7 @@ function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState,
 	if MTMultitool.internalModes[self.mode] == "LogicConverter" then
         LogicConverter.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then
-		SiliconConverter.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+		SiliconConverterTool.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
 	elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then

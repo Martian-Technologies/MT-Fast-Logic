@@ -39,7 +39,7 @@ function MathUtil.rayPointDistance(rayOrigin, rayDirection, point)
     end
 end
 
-function MathUtil.closestPassBetweenConinuousRayAndDiscreteRay(contRayOrigin, contRayDirection, discRayOrigin, discRayDelta)
+function MathUtil.closestPassBetweenContinuousRayAndDiscreteRay(contRayOrigin, contRayDirection, discRayOrigin, discRayDelta)
     local position = discRayOrigin
     local delta = discRayDelta
     local closestDistance = math.huge

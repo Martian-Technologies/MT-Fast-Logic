@@ -1,0 +1,19 @@
+{
+	"lodList": [{
+		"mesh": "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote.dae",
+		"includes" : ["POSITION", "UV0", "NORMAL", "TANGENTS", "BLEND_INDICES", "BLEND_WEIGHTS"],
+
+		"subMeshList" : [
+			{
+				"textureList": [
+						"$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote_dif.tga",
+						"$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote_asg.tga",
+						"$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote_nor.tga"
+				],
+				"color": "ffffff",
+				"material": "DifAsgNor"
+			}
+		],
+		"maxViewDistance": 1000.0
+	}]
+}

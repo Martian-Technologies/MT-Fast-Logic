@@ -1,0 +1,24 @@
+{
+	"lodList": [{
+		"mesh": "$GAME_DATA/Character/Char_Tools/Char_liftremote/Animations/ani_char_liftremote_position.dae",
+		"includes" : ["POSITION", "UV0", "NORMAL", "TANGENTS", "BLEND_INDICES", "BLEND_WEIGHTS"],
+		"animationList" : [
+			{ "name" : "weldtool_idle", 			"file" : "$GAME_DATA/Character/Char_Tools/Char_liftremote/Animations/ani_char_liftremote_fp_idle.dae" },
+
+			{ "name" : "weldtool_use_into", 		"file" : "$GAME_DATA/Character/Char_Tools/Char_liftremote/Animations/ani_char_liftremote_fp_idle.dae" },
+			{ "name" : "weldtool_use_idle", 		"file" : "$GAME_DATA/Character/Char_Tools/Char_liftremote/Animations/ani_char_liftremote_fp_idle.dae" },
+			{ "name" : "weldtool_use_exit", 		"file" : "$GAME_DATA/Character/Char_Tools/Char_weldtool/Animations/ani_char_weldtool_fp_use_exit.dae" },
+			{ "name" : "weldtool_use_error", 		"file" : "$GAME_DATA/Character/Char_Tools/Char_weldtool/Animations/ani_char_weldtool_fp_use_error.dae" },
+
+			{ "name" : "weldtool_pickup", 			"file" : "$GAME_DATA/Character/Char_Tools/Char_liftremote/Animations/ani_char_liftremote_fp_pickup.dae" },
+			{ "name" : "weldtool_putdown", 			"file" : "$GAME_DATA/Character/Char_Tools/Char_weldtool/Animations/ani_char_weldtool_fp_putdown.dae" },
+
+			{ "name" : "weldtool_use_lift_into", 		"file" : "$GAME_DATA/Character/Char_Tools/Char_weldtool/Animations/ani_char_weldtool_fp_use_lift_into.dae" },
+			{ "name" : "weldtool_use_lift_idle", 		"file" : "$GAME_DATA/Character/Char_Tools/Char_weldtool/Animations/ani_char_weldtool_fp_use_lift_idle.dae" },
+			{ "name" : "weldtool_use_lift_exit", 		"file" : "$GAME_DATA/Character/Char_Tools/Char_weldtool/Animations/ani_char_weldtool_fp_use_lift_exit.dae" }
+
+		],
+		
+		"maxViewDistance": 1000.0
+	}]
+}

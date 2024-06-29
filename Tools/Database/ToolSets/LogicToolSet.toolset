@@ -10,6 +10,17 @@
          },
          "autoTool" : true,
          "uuid" : "e8fc9d11-1a0b-4c0c-a189-388f1ffcc9c1"
+      },
+      {
+         "name" : "MT Multitool",
+         "previewRenderable" : "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote.rend",
+         "previewRotation" : [ -1, 0, 0, 0, 0, 1, 0, 1, 0 ],
+         "script" : {
+            "class" : "MTMultitool",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/MTMultitool/MTMultitool.lua"
+         },
+         "uuid" : "018e4ca0-c5be-7f80-a80f-259c5951594b"
       }
    ]
 }

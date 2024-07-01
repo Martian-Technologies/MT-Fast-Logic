@@ -69,7 +69,15 @@ end
 
 function FastLogicRealBlockMannager.createPartWithData(self, block, body)
     local pos = block.pos - (block.rot[1] + block.rot[2] + block.rot[3]) * 0.5
-    local shape = body:createPart(sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88112"), pos, block.rot[3], block.rot[1], true)
+    if block.connectionColorId == nil then
+        block.connectionColorId = 0
+    end
+
+    local blockId = table.afind(FastLogicAllBlockMannager.blockUuidToConnectionColorID, block.connectionColorId)
+    if blockId == nil then
+        blockId = table.afind(FastLogicAllBlockMannager.blockUuidToConnectionColorID, 0)
+    end
+    local shape = body:createPart(sm.uuid.new(blockId), pos, block.rot[3], block.rot[1], true)
     shape.color = sm.color.new(block.color)
     sm.MTFastLogic.dataToSet[shape:getInteractable().id] = table.deepCopy(block)
 end
@@ -85,23 +93,81 @@ local typeToNumber = {
 
 function FastLogicRealBlockMannager.setData(self, uuid, data)
     local block = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
+    print("checking uuid stuff")
+    print(block.data.uuid)
     block.data.uuid = data.uuid
+    print(block.data.uuid)
     sm.MTFastLogic.FastLogicBlockLookUp[uuid] = nil
     sm.MTFastLogic.FastLogicBlockLookUp[block.data.uuid] = block
-    for _,v in pairs(data.inputs) do
+    for _, v in pairs(data.inputs) do
         local inputBlock = sm.MTFastLogic.FastLogicBlockLookUp[v]
         if inputBlock ~= nil then
             inputBlock.interactable:connect(block.interactable)
         end
     end
-    for _,v in pairs(data.outputs) do
+    for _, v in pairs(data.outputs) do
         local outputBlock = sm.MTFastLogic.FastLogicBlockLookUp[v]
         if outputBlock ~= nil then
             block.interactable:connect(outputBlock.interactable)
         elseif self.creation.blocks[v] ~= nil and self.creation.blocks[v].isSilicon == true then
-            sm.event.sendToInteractable(self.creation.SiliconBlocks[self.creation.blocks[v].siliconBlockId].interactable, "server_resave")
+            sm.event.sendToInteractable(self.creation.SiliconBlocks[self.creation.blocks[v].siliconBlockId].interactable,
+                "server_resave")
+        end
+    end
+    local parents = data.nonFastLogicInputs
+    local children = data.nonFastLogicOutputs
+    if parents ~= nil then
+        for _, v in pairs(parents) do
+            if sm.exists(v) then
+                v:connect(block.interactable)
+                if self.creation.AllNonFastBlocks[v.id] ~= nil then
+                    if table.contains(self.creation.AllNonFastBlocks[v.id]["outputs"], block.data.uuid) then
+                        if block.activeInputs == nil then
+                            block.activeInputs = {}
+                        end
+                        block.activeInputs[v.id] = self.creation.AllNonFastBlocks[v.id]["currentState"]
+                    end
+                end
+            end
+        end
+    end
+    if children ~= nil then
+        for _, v in pairs(children) do
+            if sm.exists(v) then
+                block.interactable:connect(v)
+            end
         end
     end
     sm.event.sendToInteractable(block.interactable, "server_saveMode", typeToNumber[data.type])
     block.data.mode = typeToNumber[data.type]
+end
+
+function FastLogicRealBlockMannager.changeConnectionColor(self, id, connectionColorId)
+    local uuid = self.creation.uuids[id]
+    local block = self.creation.blocks[uuid]
+    local realBlock = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
+    if realBlock == nil then
+        print("Block not found ope")
+        advPrint(sm.MTFastLogic.FastLogicBlockLookUp, 2)
+        print(uuid)
+        print(id)
+    end
+    local body = realBlock.shape:getBody()
+    realBlock:remove(false)
+    local parents = realBlock.interactable:getParents()
+    local children = realBlock.interactable:getChildren()
+    local blockdata = {
+        type = block.type,
+        uuid = block.uuid,
+        pos = block.pos,
+        rot = block.rot,
+        inputs = table.copy(block.inputs),
+        outputs = table.copy(block.outputs),
+        state = block.state,
+        color = block.color,
+        connectionColorId = connectionColorId,
+        nonFastLogicInputs = parents,
+        nonFastLogicOutputs = children,
+    }
+    self.creation.FastLogicRealBlockMannager:createPartWithData(blockdata, body)
 end

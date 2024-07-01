@@ -15,15 +15,19 @@ function FastLogicRealBlockMannager.checkForNewInputs(self)
                 local stateNumber = data.currentState and 1 or -1
                 local i = 1
                 while i <= #data.outputs do
-                    local outputId = data.outputs[i]
-                    if type(self.creation.AllFastBlocks[outputId]) ~= nil then
-                        self.FastLogicRunner:externalChangeNonFastOnInput(outputId, stateNumber)
+                    local outputUuid = data.outputs[i]
+                    if type(self.creation.AllFastBlocks[outputUuid]) ~= nil then
+                        self.FastLogicRunner:externalChangeNonFastOnInput(outputUuid, stateNumber)
                     else
-                        if table.contains(data.outputs, outputId) then
+                        if table.contains(data.outputs, outputUuid) then
+                            self.FastLogicRunner:externalRemoveNonFastConnection(outputUuid)
+                            if data.currentState then
+                                self.FastLogicRunner:externalRemoveNonFastOnInput(outputUuid)
+                            end
                             if #data.outputs == 1 then
                                 self.creation.AllNonFastBlocks[uuid] = nil
                             else
-                                table.removeValue(data.outputs, outputId)
+                                table.removeValue(data.outputs, outputUuid)
                                 i = i - 1
                             end
                         end
@@ -62,10 +66,15 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
                 else
                     local currentState = v.active
                     if self.creation.AllNonFastBlocks[inputId] == nil then
-                        self.creation.AllNonFastBlocks[inputId] = { ["interactable"] = v, ["currentState"] = currentState, ["outputs"] = {} }
+                        self.creation.AllNonFastBlocks[inputId] = {
+                            ["interactable"] = v,
+                            ["currentState"] = currentState,
+                            ["outputs"] = {}
+                        }
                     end
                     if not table.contains(self.creation.AllNonFastBlocks[inputId].outputs, uuid) then
-                        self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] = uuid
+                        self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] =
+                            uuid
                     end
                     local activeInput = block.activeInputs[inputId]
                     if (activeInput == nil) then

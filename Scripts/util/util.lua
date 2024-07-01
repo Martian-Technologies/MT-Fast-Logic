@@ -93,6 +93,15 @@ function table.find(tbl, value)
     return nil
 end
 
+function table.afind(tbl, value) -- arbitrary find
+    for k, v in pairs(tbl) do
+        if (v == value) then
+            return k
+        end
+    end
+    return nil
+end
+
 function table.toString(tbl)
     local result = "{"
     for k, v in pairs(tbl) do

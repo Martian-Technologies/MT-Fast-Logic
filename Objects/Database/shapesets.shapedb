@@ -1,3 +1,7 @@
 {
-   "shapeSetList" : [ "$CONTENT_DATA/Objects/Database/ShapeSets/example.shapeset" ]
+    "shapeSetList": [
+        "$CONTENT_DATA/Objects/Database/ShapeSets/fastlogic.shapeset",
+        "$CONTENT_DATA/Objects/Database/ShapeSets/fastlogicgates.shapeset",
+        "$CONTENT_DATA/Objects/Database/ShapeSets/silicon.shapeset"
+    ]
 }

@@ -4,7 +4,7 @@ local table = table
 
 dofile "BaseFastLogicBlock.lua"
 
-FastLogicGate = table.deepCopyTo(BaseFastLogicBlock, (FastLogicGate or class()))
+FastLogicGate = table.deepCopyTo(BaseFastLogicBlock, (FastLogicGate or {}))
 
 function FastLogicGate.getData2(self)
     self.creation.FastLogicGates[self.data.uuid] = self

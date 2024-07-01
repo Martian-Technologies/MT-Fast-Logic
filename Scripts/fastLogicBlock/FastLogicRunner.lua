@@ -250,6 +250,7 @@ function FastLogicRunner.doUpdate(self)
     local optimizedBlockOutputsPosHash = self.optimizedBlockOutputsPosHash
     local nextTimerOutputWait = self.nextTimerOutputWait
     local multiBlockData = self.multiBlockData
+
     -- EndTickButton
     local someRunningBlocks = runningBlocks[1]
     for k = 1, runningBlockLengths[1] do

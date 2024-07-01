@@ -78,6 +78,9 @@ function BaseFastLogicBlock.getData(self)
         self.creation.BlocksToScan[#self.creation.BlocksToScan + 1] = self
         self.creation.uuids[self.id] = self.data.uuid
         self.creation.ids[self.data.uuid] = self.id
+        print("weewooweewoo")
+        print(self.id)
+        print(self.data.uuid)
     end
     self:getData2()
 end
@@ -92,6 +95,8 @@ function BaseFastLogicBlock.server_onCreate(self)
     self.isFastLogic = true
     self.type = nil
     self.id = self.interactable:getId()
+    print("oncreate")
+    print(self.id)
     if self.storage:load() ~= nil then
         self.data = self.storage:load()
         if self.data.uuid == nil then
@@ -102,6 +107,7 @@ function BaseFastLogicBlock.server_onCreate(self)
     else
         self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
     end
+    print(self.data.uuid)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
     self.storage:save(self.data)
     self:server_onCreate2()
@@ -114,14 +120,19 @@ end
 
 function BaseFastLogicBlock.server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
+    print("setting gate to nil")
+    print(self.data.uuid)
     if self.creation == nil then
         return
     end
+
+    self.creation.AllFastBlocks[self.data.uuid] = nil
+    self.creation.uuids[self.id] = nil
+    self.creation.ids[self.data.uuid] = nil
+
     self.creation.AllFastBlocks[self.data.uuid] = nil
     if self.removeAllData then
         self.FastLogicAllBlockMannager:removeBlock(self.data.uuid) -- remove
-    else
-        self.creation.blocks[self.data.uuid].isSilicon = true
     end
     self:server_onDestroy2()
 end

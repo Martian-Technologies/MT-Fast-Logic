@@ -67,7 +67,7 @@ function SiliconBlock.getData(self)
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
         local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
-        self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, self.id)
+        self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, block.connectionColorId, self.id)
     end
     self:server_saveBlocks(self.data.blocks)
     sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2] + 1] = self
@@ -188,7 +188,8 @@ function SiliconBlock.addBlocks(self, uuids)
                 inputs = table.copy(block.inputs),
                 outputs = table.copy(block.outputs),
                 state = block.state,
-                color = block.color
+                color = block.color,
+                connectionColorId = block.connectionColorId,
                 -- timerLength = block.timerLength,
             }
         end
@@ -314,7 +315,8 @@ function SiliconBlock.compressBlocks(self)
             block.uuid,
             inputs,
             block.outputs,
-            colorHash[block.color]
+            colorHash[block.color],
+            block.connectionColorId,
         }
     end
     local colorIndexHash = {}
@@ -346,7 +348,8 @@ function SiliconBlock.decompressBlockData(self, blockData)
                 inputs = block[3],
                 outputs = block[4],
                 state = false,
-                color = colorIndexHash[block[5]]
+                color = colorIndexHash[block[5]],
+                connectionColorId = block[6],
             }
         end
     end

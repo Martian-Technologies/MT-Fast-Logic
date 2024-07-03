@@ -145,6 +145,7 @@ end
 function FastLogicRealBlockMannager.changeConnectionColor(self, id, connectionColorId)
     local uuid = self.creation.uuids[id]
     local block = self.creation.blocks[uuid]
+    self.FastLogicAllBlockMannager:changeConnectionColor(uuid, connectionColorId)
     local realBlock = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
     if realBlock == nil then
         print("Block not found ope")

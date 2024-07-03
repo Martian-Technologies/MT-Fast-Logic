@@ -73,8 +73,7 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
                         }
                     end
                     if not table.contains(self.creation.AllNonFastBlocks[inputId].outputs, uuid) then
-                        self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] =
-                            uuid
+                        self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] = uuid
                     end
                     local activeInput = block.activeInputs[inputId]
                     if (activeInput == nil) then

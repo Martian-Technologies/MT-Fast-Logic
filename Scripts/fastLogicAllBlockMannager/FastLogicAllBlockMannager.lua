@@ -221,3 +221,7 @@ function FastLogicAllBlockMannager.changeTimerTime(self, uuid, time)
     self.creation.FastLogicRunner:externalChangeTimerTime(uuid, time)
     self.blocks[uuid].timerLength = time
 end
+
+function FastLogicAllBlockMannager.changeConnectionColor(self, uuid, connectionColorId)
+    self.blocks[uuid].connectionColorId = connectionColorId
+end

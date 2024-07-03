@@ -57,7 +57,7 @@ function FastLogicRunner.optimizeLogic(self)
                 end
 
                 -- multi blocks
-                -- self:findMultiBlocks(id)
+                self:findMultiBlocks(id)
             end
         end
     end
@@ -85,7 +85,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             if (
                 self.multiBlockData[blockToCheck] == false and
                 self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 15 and
-                self.numberOfBlockOutputs[blockToCheck] == 1
+                self.numberOfBlockOutputs[blockToCheck] + self.numberOfOtherInputs[blockToCheck] == 1
             ) then
                 blocks = table.appendTable({blockToCheck}, blocks)
                 goto checkInputAgain

@@ -23,6 +23,11 @@ FastLogicAllBlockMannager.blockUuidToConnectionColorID = {
     ["6a9dbff5-7562-4e9a-99ae-3590ece88123"] = 11,
 }
 
+FastLogicAllBlockMannager.fastLogicGateBlockUuids = {} -- only the keys from the above table
+for k, _ in pairs(FastLogicAllBlockMannager.blockUuidToConnectionColorID) do
+    table.insert(FastLogicAllBlockMannager.fastLogicGateBlockUuids, k)
+end
+
 function FastLogicAllBlockMannager.getNew(creationId)
     local new = table.deepCopy(FastLogicAllBlockMannager)
     new.getNew = nil

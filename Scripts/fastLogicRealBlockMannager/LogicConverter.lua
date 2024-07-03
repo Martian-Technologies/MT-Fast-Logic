@@ -150,7 +150,7 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
         for i = 1, #jsontable.bodies do
             for j = 1, #jsontable.bodies[i].childs do
                 -- if jsontable.bodies[i].childs[j].shapeId == "6a9dbff5-7562-4e9a-99ae-3590ece88112" then --fastgate
-                if table.contains(FastLogicAllBlockMannager.blockUuidToConnectionColorID, jsontable.bodies[i].childs[j].shapeId) then
+                if table.contains(FastLogicAllBlockMannager.fastLogicGateBlockUuids, jsontable.bodies[i].childs[j].shapeId) then
                     local childdata = jsontable.bodies[i].childs[j].controller.data
                     local mode
                     if childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgA" then

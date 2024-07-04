@@ -91,13 +91,8 @@ local typeToNumber = {
     xnorBlocks=5,
 }
 
-function FastLogicRealBlockMannager.setData(self, uuid, data)
-    local block = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
-    print("checking uuid stuff")
-    print(block.data.uuid)
+function FastLogicRealBlockMannager.setData(self, block, data)
     block.data.uuid = data.uuid
-    print(block.data.uuid)
-    sm.MTFastLogic.FastLogicBlockLookUp[uuid] = nil
     sm.MTFastLogic.FastLogicBlockLookUp[block.data.uuid] = block
     for _, v in pairs(data.inputs) do
         local inputBlock = sm.MTFastLogic.FastLogicBlockLookUp[v]

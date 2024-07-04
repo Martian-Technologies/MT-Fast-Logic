@@ -13,9 +13,9 @@ end
 function FastLogicGate.server_onCreate2(self)
     self.type = "LogicGate"
     if self.storage:load() ~= nil then
-        self.data.mode = self.storage:load().mode or 0
+        self.data.mode = self.storage:load().mode or (self.data.mode or 0)
     else
-        self.data.mode = 0
+        self.data.mode = self.data.mode or 0
     end
     self.network:setClientData(self.data.mode)
     self.storage:save(self.data)
@@ -77,6 +77,7 @@ function FastLogicGate.client_onInteract(self, character, state)
 end
 
 function FastLogicGate.client_onClientDataUpdate(self, mode)
+    print("mode")
     self.client_mode = mode
     self:client_updateTexture()
 end

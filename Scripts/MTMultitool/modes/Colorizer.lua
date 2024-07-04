@@ -153,7 +153,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
     end
     if MTMultitool.handleForceBuild(multitool, forceBuild) then
         self.color = self.color + 1
-        if self.color > 12 then
+        if self.color > 40 then
             self.color = 1
         end
     end

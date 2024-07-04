@@ -7,6 +7,8 @@ local pairs = pairs
 
 SiliconBlock = SiliconBlock or class()
 
+dofile "SiliconCompressor.lua"
+
 sm.MTFastLogic = sm.MTFastLogic or {}
 -- sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 sm.MTFastLogic.SiliconBlocks = sm.MTFastLogic.SiliconBlocks or {}
@@ -111,7 +113,7 @@ function SiliconBlock.server_onCreate(self)
     self.id = self.interactable:getId()
     self.data = self.data or {}
     -- sm.MTFastLogic.SiliconBlocksToGetData[#sm.MTFastLogic.SiliconBlocksToGetData + 1] = self
-    self.data.blocks = self:decompressBlockData(self.storage:load())
+    self.data.blocks = SiliconCompressor.decompressBlockData(self, self.storage:load())
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
         block.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(block.uuid, self.creationId)
@@ -122,7 +124,7 @@ function SiliconBlock.server_onCreate(self)
             block.outputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.outputs[ii], self.creationId)
         end
     end
-    self.storage:save(self:compressBlocks())
+    self.storage:save(SiliconCompressor.compressBlocks(self))
     self:getData()
 end
 
@@ -202,89 +204,17 @@ end
 
 function SiliconBlock.server_saveBlocks(self, blocks)
     self.data.blocks = blocks
-    self.storage:save(self:compressBlocks())
+    self.storage:save(SiliconCompressor.compressBlocks(self))
 end
 
 function SiliconBlock.server_resave(self)
-    self.storage:save(self:compressBlocks())
+    self.storage:save(SiliconCompressor.compressBlocks(self))
 end
 
 function SiliconBlock.remove(self, removeData)
     self.removeData = removeData
     self.shape:destroyPart()
 end
-
-local typeToNumber = {
-    andBlocks = 0,
-    orBlocks = 1,
-    xorBlocks = 2,
-    nandBlocks = 3,
-    norBlocks = 4,
-    xnorBlocks = 5,
-}
-
-local numberToType = {
-    [0] = "andBlocks",
-    [1] = "orBlocks",
-    [2] = "xorBlocks",
-    [3] = "nandBlocks",
-    [4] = "norBlocks",
-    [5] = "xnorBlocks",
-}
-
-local rotationToNumber = {
-    ["1000-10"] = 1,
-    ["10000-1"] = 2,
-    ["010-100"] = 3,
-    ["01000-1"] = 4,
-    ["001-100"] = 5,
-    ["0010-10"] = 6,
-    ["0-10100"] = 7,
-    ["00-1100"] = 8,
-    ["010100"] = 9,
-    ["001100"] = 10,
-    ["-100010"] = 11,
-    ["00-1010"] = 12,
-    ["100010"] = 13,
-    ["001010"] = 14,
-    ["-100001"] = 15,
-    ["0-10001"] = 16,
-    ["100001"] = 17,
-    ["010001"] = 18,
-    ["0-10-100"] = 19,
-    ["00-1-100"] = 20,
-    ["-1000-10"] = 21,
-    ["00-10-10"] = 22,
-    ["-10000-1"] = 23,
-    ["0-1000-1"] = 24,
-}
-
-local numberToRotation = {
-    [1] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0) },
-    [2] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1) },
-    [3] = { sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0) },
-    [4] = { sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1) },
-    [5] = { sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0) },
-    [6] = { sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0) },
-    [7] = { sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0) },
-    [8] = { sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0) },
-    [9] = { sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0) },
-    [10] = { sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0) },
-    [11] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0) },
-    [12] = { sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0) },
-    [13] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0) },
-    [14] = { sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0) },
-    [15] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1) },
-    [16] = { sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1) },
-    [17] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1) },
-    [18] = { sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1) },
-    [19] = { sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0) },
-    [20] = { sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0) },
-    [21] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0) },
-    [22] = { sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0) },
-    [23] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1) },
-    [24] = { sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1) },
-}
 
 function SiliconBlock.compressBlocks(self)
     if self.data.blocks == nil then return {} end

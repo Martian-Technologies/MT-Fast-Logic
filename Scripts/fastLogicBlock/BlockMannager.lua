@@ -165,11 +165,72 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     table.removeFromConstantKeysOnlyHash(self.hashData, self.unhashedLookUp[id])
 end
 
+function FastLogicRunner.internalSetBlockStates(self, idStatePairs)
+    local blocksToFixInputData = {}
+    for i = 1, #idStatePairs do
+        local id = idStatePairs[i][1]
+        self.blockStates[id] = idStatePairs[i][2]
+        for k = 1, #self.blockOutputs[id] do
+            blocksToFixInputData[self.blockOutputs[id][k]] = true
+        end
+    end
+    for id, _ in pairs(blocksToFixInputData) do
+        self:fixBlockInputData(id)
+    end
+end
+
 function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
+    -- multiData = [id, all blocks, inputs, outputs, score, otherdata...]
+    local runnableBlockPathIds = self.runnableBlockPathIds
+    local blockStates = self.blockStates
+    local timerData = self.timerData
     local multiData = self.multiBlockData[multiBlockId]
     if multiData[1] == nil then
+    elseif multiData[1] == 1 or multiData[1] == 2 then
+        local state = blockStates[multiData[3][1]]
+        -- print(state)
+        -- print(timerData)
+        -- print(multiData[2])
+        local endBlockId = multiData[4][1]
+        local idStatePairs = {}
+        print("-======-")
+        for i = 2, multiData[7] do
+            local id = multiData[2][i]
+            local timeDataAtTime = timerData[multiData[7]-i+2]
+            print(multiData[7]-i+2)
+            print(timerData)
+            for k = 1, #timeDataAtTime do
+                local item = timeDataAtTime[k]
+                if type(item) ~= "number" and type(item[1]) == "boolean" and item[2] == endBlockId then
+                    state = not state
+                    break
+                end
+            end
+            if self.nextRunningBlocks[id] == self.nextRunningIndex - 1 then
+                break
+            end
+            if runnableBlockPathIds[id] == 4 then
+                state = not state
+            elseif runnableBlockPathIds[id] ~= 3 then
+                print("this should never happen (internalGetMultiBlockInternalStates, multiData[1] = 1 or 2)")
+            end
+            print(state)
+            idStatePairs[#idStatePairs+1] = {id, state}
+            self:fixBlockInputData(id)
+        end
+        -- print("end")
+        for i = 1, multiData[7] do
+            local timeDataAtTime = timerData[i]
+            for k = 1, #timeDataAtTime do
+                local item = timeDataAtTime[k]
+                if type(item) ~= "number" and type(item[1]) == "boolean" and item[2] == endBlockId then
+                    table.remove(timeDataAtTime, k)
+                    break
+                end
+            end
+        end
+        self:internalSetBlockStates(idStatePairs)
     else
-        
     end
 end
 
@@ -180,13 +241,13 @@ function FastLogicRunner.internalFakeAddBlock(self, path, inputs, outputs, state
 end
 
 function FastLogicRunner.internalAddMultiBlock(self, multiBlockType)
-    local multiBlockId =  self:internalFakeAddBlock(16, {}, {}, false, nil) -- 16 is the multiBlocks id
+    local multiBlockId = self:internalFakeAddBlock(16, {}, {}, false, nil) -- 16 is the multiBlocks id
     self.multiBlockData[multiBlockId][1] = multiBlockType
     return multiBlockId
 end
 
 function FastLogicRunner.internalAddBlockToMultiBlock(self, id, multiBlockId, isInput, isOutput)
-    multiBlockData = self.multiBlockData
+    local multiBlockData = self.multiBlockData
     if multiBlockData[id] == false then
         multiBlockData[id] = multiBlockId
         multiBlockData[multiBlockId][2][#multiBlockData[multiBlockId][2]+1] = id
@@ -555,12 +616,15 @@ end
 
 function FastLogicRunner.revertBlockType(self, id)
     if self.altBlockData[id] ~= false then
+        -- remove from multi blocks
+        if self.multiBlockData[id] ~= false then
+            self:internalRemoveBlock(self.multiBlockData[id])
+        end
         local blockType = self.altBlockData[id]
         local oldType = self.runnableBlockPathIds[id]
         if oldType ~= blockType then
             -- remove old
             table.removeValue(self.blocksSortedByPath[oldType], id)
-
             -- add new
             self.runnableBlockPaths[id] = self.pathNames[blockType]
             self.runnableBlockPathIds[id] = blockType
@@ -722,8 +786,8 @@ function FastLogicRunner.externalChangeTimerTime(self, uuid, time)
     end
 end
 
-function FastLogicRunner.externalChangeBlockType(self, uuid, type)
+function FastLogicRunner.externalChangeBlockType(self, uuid, blockType)
     if self.hashedLookUp[uuid] ~= nil then
-        self:internalChangeBlockType(self.hashedLookUp[uuid], type)
+        self:internalChangeBlockType(self.hashedLookUp[uuid], blockType)
     end
 end

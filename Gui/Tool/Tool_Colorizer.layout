@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="BackgroundPopup" align="center" name="MainPanel" position_real="0.34375 0.3381945 0.3125 0.323611">
+        <Property key="NeedKey" value="false" />
+        <Property key="NeedMouse" value="true" />
+        <Property key="InheritsAlpha" value="false" />
+        <Widget type="TextBox" skin="TextBox" position_real="0.0825 0.141631 0.8325 0.141631">
+            <Property key="Caption" value="CONNECTION COLOR" />
+            <Property key="FontName" value="SM_HeaderLarge_Wide" />
+            <Property key="TextAlign" value="Center" />
+            <Property key="NeedKey" value="false" />
+            <Property key="NeedMouse" value="false" />
+        </Widget>
+        <Widget type="ItemBox" skin="InventoryItemBox2" name="ColorGrid" position_real="0.0825 0.283262 0.85 0.583691">
+            <Property key="NeedKey" value="false" />
+            <Property key="NeedDragDrop" value="false" />
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings />
+</MyGUI>

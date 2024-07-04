@@ -4,6 +4,7 @@ local table = table
 local type = type
 local pairs = pairs
 
+
 function FastLogicRunner.optimizeLogic(self)
     local blockInputs = self.blockInputs
     local numberOfBlockInputs = self.numberOfBlockInputs
@@ -57,7 +58,7 @@ function FastLogicRunner.optimizeLogic(self)
                 end
 
                 -- multi blocks
-                self:findMultiBlocks(id)
+                -- self:findMultiBlocks(id)
             end
         end
     end
@@ -82,19 +83,26 @@ function FastLogicRunner.findMultiBlocks(self, id)
         ::checkInputAgain::
         if self.numberOfBlockInputs[blocks[1]] == 1 then
             local blockToCheck = blockInputs[blocks[1]][1]
-            if (
-                self.multiBlockData[blockToCheck] == false and
-                self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 15 and
-                self.numberOfBlockOutputs[blockToCheck] + self.numberOfOtherInputs[blockToCheck] == 1
-            ) then
-                blocks = table.appendTable({blockToCheck}, blocks)
-                goto checkInputAgain
+            if not table.contains(blocks, blockToCheck) then
+                if (
+                    (not table.contains(blocks, blockToCheck)) and
+                    self.multiBlockData[blockToCheck] == false and
+                    self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 15 and
+                    self.numberOfBlockOutputs[blockToCheck] + self.numberOfOtherInputs[blockToCheck] == 1
+                ) then
+                    blocks = table.appendTable({blockToCheck}, blocks)
+                    goto checkInputAgain
+                end
             end
         end
         ::checkOutputAgain::
         if self.numberOfBlockOutputs[blocks[#blocks]] == 1 then
             local blockToCheck = blockOutputs[blocks[#blocks]][1]
-            if (self.multiBlockData[blockToCheck] == false and self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 5) then
+            if (
+                (not table.contains(blocks, blockToCheck)) and
+                self.multiBlockData[blockToCheck] == false and
+                self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 5
+            ) then
                 blocks[#blocks + 1] = blockToCheck
                 goto checkOutputAgain
             end
@@ -123,17 +131,16 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self:makeBlockAlt(blocks[1], self.toMultiBlockInput[self.runnableBlockPathIds[blocks[1]]])
             
             self:internalAddBlockToMultiBlock(blocks[1], multiBlockId, true, false)
-            self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
             self.multiBlockData[multiBlockId][7] = length
-
             for i = 2, #blocks-1 do
                 self:internalAddBlockToMultiBlock(blocks[i], multiBlockId, false, false)
             end
+            self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
 
             self:updateLongestTimerToLength(length)
-            print(isNot)
-            print(length)
-            print(blocks)
+            -- print(isNot)
+            -- print(length)
+            -- print(blocks)
         end
     end
 end

@@ -67,10 +67,6 @@ function BaseFastLogicBlock.getData(self)
     self.activeInputs = {}
     self.removeAllData = self.removeAllData or true
     self:getCreationData()
-    if sm.MTFastLogic.dataToSet[self.id] ~= nil then
-        self.creation.FastLogicRealBlockMannager:setData(self.data.uuid, sm.MTFastLogic.dataToSet[self.id])
-        sm.MTFastLogic.dataToSet[self.id] = nil
-    end
     if self.creation.AllFastBlocks[self.data.uuid] == nil then
         self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
         self.creation.lastBodyUpdate = 0
@@ -79,6 +75,7 @@ function BaseFastLogicBlock.getData(self)
         self.creation.uuids[self.id] = self.data.uuid
         self.creation.ids[self.data.uuid] = self.id
     end
+    sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
     self:getData2()
 end
 
@@ -92,15 +89,20 @@ function BaseFastLogicBlock.server_onCreate(self)
     self.isFastLogic = true
     self.type = nil
     self.id = self.interactable:getId()
-    if self.storage:load() ~= nil then
-        self.data = self.storage:load()
-        if self.data.uuid == nil then
-            self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
-        else
-            self.data.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(self.data.uuid, self.creationId)
-        end
+    if sm.MTFastLogic.dataToSet[self.id] ~= nil then
+        self.creation.FastLogicRealBlockMannager:setData(self, sm.MTFastLogic.dataToSet[self.id])
+        sm.MTFastLogic.dataToSet[self.id] = nil
     else
-        self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
+        if self.storage:load() ~= nil then
+            self.data = self.storage:load()
+            if self.data.uuid == nil then
+                self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
+            else
+                self.data.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(self.data.uuid, self.creationId)
+            end
+        else
+            self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
+        end
     end
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
     self.storage:save(self.data)
@@ -163,9 +165,14 @@ function BaseFastLogicBlock.client_onTinker(self, character, state)
 end
 
 function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[self.FastLogicRunner.hashedLookUp[self.data.uuid]]])
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[self.FastLogicRunner.hashedLookUp[self.data.uuid]]])
+    local runnrerId = self.FastLogicRunner.hashedLookUp[self.data.uuid]
+    print(self.FastLogicRunner.blockStates[runnrerId])
+    print(self.FastLogicRunner.countOfOnInputs[runnrerId])
+    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
+    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
+    print(runnrerId)
     print(self.data.uuid)
+    print(self.interactable.id)
 end
 
 -- function BaseFastLogicBlock.server_onMelee(self, position, attacker, damage, power, direction, normal)

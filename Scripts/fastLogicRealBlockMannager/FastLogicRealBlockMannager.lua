@@ -26,6 +26,7 @@ function FastLogicRealBlockMannager.init(self)
     self.displayedBlockStates = {}
     self.blocksWithData = {}
     self.scanNext = {}
+    self.needDisplayUpdate = {}
 end
 
 function FastLogicRealBlockMannager.update(self)
@@ -38,7 +39,8 @@ function FastLogicRealBlockMannager.update(self)
 
     -- run
     local updatedGates = self.FastLogicAllBlockMannager:update()
-
+    table.appendTable(updatedGates, self.needDisplayUpdate)
+    self.needDisplayUpdate = {}
     -- update states of fast gates
     self:updateDisplay(updatedGates)
 end
@@ -135,6 +137,8 @@ function FastLogicRealBlockMannager.setData(self, block, data)
     end
     sm.event.sendToInteractable(block.interactable, "server_saveMode", typeToNumber[data.type])
     block.data.mode = typeToNumber[data.type]
+    self.needDisplayUpdate[#self.needDisplayUpdate+1] = block.data.uuid
+    self.displayedBlockStates[block.data.uuid] = false
 end
 
 function FastLogicRealBlockMannager.changeConnectionColor(self, id, connectionColorId)

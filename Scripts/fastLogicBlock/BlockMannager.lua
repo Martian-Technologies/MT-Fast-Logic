@@ -190,7 +190,6 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
         end
     end
     if withUpdates ~= false then
-        print("updated things")
         for id, _ in pairs(blocksToFixInputData) do
             self:fixBlockInputData(id)
         end

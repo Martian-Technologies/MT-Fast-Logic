@@ -77,7 +77,6 @@ function FastLogicGate.client_onInteract(self, character, state)
 end
 
 function FastLogicGate.client_onClientDataUpdate(self, mode)
-    print("mode")
     self.client_mode = mode
     self:client_updateTexture()
 end

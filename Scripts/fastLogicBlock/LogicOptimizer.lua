@@ -39,8 +39,6 @@ function FastLogicRunner.optimizeLogic(self)
                     end
                     top = top / (math.floor(#newBLockInputs / 3) + 1)
                     if top / bottom > 1.2 then
-                        -- print(blockType)
-
                         if (blockType == 6 or blockType == 8 or blockType == 11 or blockType == 13) then
                             self:makeBlockAlt(id, blockType + 1)
                         end
@@ -154,9 +152,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
 
             self:updateLongestTimerToLength(length)
-            -- print("new line")
-            -- print(length)
-            -- print(blocks)
+            -- print("made line: lenght = " .. tostring(length))
         end
     end
 end

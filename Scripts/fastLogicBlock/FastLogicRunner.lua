@@ -232,7 +232,6 @@ function FastLogicRunner.doLastTickUpdates(self)
     for i = 1, #multiBlocks do
         local multiBlockId = multiBlocks[i]
         local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)
-        -- print(data)
         local idStatePairs = data[2]
         local lastIdStatePairs = data[1]
         if idStatePairs == nil then
@@ -243,8 +242,6 @@ function FastLogicRunner.doLastTickUpdates(self)
             local outputs = blockOutputs[lastIdStatePairs[j][1]]
             local state = lastIdStatePairs[j][2]
             for k = 1, #outputs do
-                -- print(blocks)
-                -- print(outputs[k])
                 if not table.contains(blocks, outputs[k]) then
                     blockStates[outputs[k]] = state
                 end

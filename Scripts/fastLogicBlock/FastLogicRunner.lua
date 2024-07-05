@@ -156,6 +156,7 @@ function FastLogicRunner.update(self)
             while i <= runningBlockLengths[pathId] do
                 local id = runningBlocks[pathId][i]
                 if countOfOnInputs[id] == false then
+                    -- print("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
                     nextRunningBlocks[id] = false
                     table.remove(runningBlocks[pathId], i)
                     runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1
@@ -164,17 +165,16 @@ function FastLogicRunner.update(self)
                 end
             end
         end
-
         -- EndTickButtons
         local EndTickButtons = self.blocksSortedByPath[self.pathIndexs["EndTickButtons"]]
         for k = 1, #EndTickButtons do
             local blockId = EndTickButtons[k]
             if countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0 then
                 blockStates[blockId] = true
-                if self.updateTicks >= 2 then
-                    runningBlockLengths[1] = 0
+                if self.updateTicks > 1 then
                     self.updateTicks = 1
                 end
+                runningBlockLengths[1] = 0
             else
                 blockStates[blockId] = false
             end
@@ -182,14 +182,14 @@ function FastLogicRunner.update(self)
         local sum = 0
         -- other
         while self.updateTicks >= 2 do
-            self.updateTicks = self.updateTicks - 1
             self:doUpdate()
+            self.updateTicks = self.updateTicks - 1
             sum = 0
             for i = 1, #self.runningBlockLengths do
                 sum = sum + self.runningBlockLengths[i]
             end
             if sum == 0 and self.nextTimerOutputWait > 10000000 then
-                self.updateTicks = 0
+                self.updateTicks = 1
             end
         end
         -- light
@@ -206,6 +206,7 @@ function FastLogicRunner.update(self)
             self:doUpdate()
             self.updateTicks = self.updateTicks - 1
         end
+        self:doLastTickUpdates()
     end
     -- print(self.blocksRan)
 end
@@ -221,6 +222,36 @@ function FastLogicRunner.getUpdatedIds(self)
         end
     end
     return changed
+end
+
+function FastLogicRunner.doLastTickUpdates(self)
+    local multiBlocks = self.blocksSortedByPath[16]
+    local blockOutputs = self.blockOutputs
+    local blockStates = self.blockStates
+    local multiBlockData = self.multiBlockData
+    for i = 1, #multiBlocks do
+        local multiBlockId = multiBlocks[i]
+        local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)
+        -- print(data)
+        local idStatePairs = data[2]
+        local lastIdStatePairs = data[1]
+        if idStatePairs == nil then
+            idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
+        end
+        local blocks = multiBlockData[multiBlockId][2]
+        for j = 1, #lastIdStatePairs do
+            local outputs = blockOutputs[lastIdStatePairs[j][1]]
+            local state = lastIdStatePairs[j][2]
+            for k = 1, #outputs do
+                -- print(blocks)
+                -- print(outputs[k])
+                if not table.contains(blocks, outputs[k]) then
+                    blockStates[outputs[k]] = state
+                end
+            end
+        end
+        self:internalSetBlockStates(idStatePairs, false)
+    end
 end
 
 function FastLogicRunner.doUpdate(self)
@@ -250,7 +281,6 @@ function FastLogicRunner.doUpdate(self)
     local optimizedBlockOutputsPosHash = self.optimizedBlockOutputsPosHash
     local nextTimerOutputWait = self.nextTimerOutputWait
     local multiBlockData = self.multiBlockData
-
     -- EndTickButton
     local someRunningBlocks = runningBlocks[1]
     for k = 1, runningBlockLengths[1] do
@@ -258,10 +288,10 @@ function FastLogicRunner.doUpdate(self)
         local blockId = someRunningBlocks[k]
         if countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0 then
             blockStates[blockId] = true
-            if self.updateTicks >= 2 then
+            if self.updateTicks > 1 then
+                self.updateTicks = 2
                 self.nextRunningIndex = lastRunningIndex
                 runningBlockLengths[1] = 0
-                self.updateTicks = 1
                 return
             end
         else
@@ -849,8 +879,10 @@ function FastLogicRunner.doUpdate(self)
                 if nextRunningBlocks[outputId] ~= nextRunningIndex then
                     nextRunningBlocks[outputId] = nextRunningIndex
                     local pathId = runnableBlockPathIds[outputId]
-                    runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
-                    runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
+                    if pathId ~= 2 then
+                        runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
+                        runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
+                    end
                 end
             end
         end

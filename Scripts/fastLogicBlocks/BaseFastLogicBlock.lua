@@ -74,9 +74,6 @@ function BaseFastLogicBlock.getData(self)
         self.creation.BlocksToScan[#self.creation.BlocksToScan + 1] = self
         self.creation.uuids[self.id] = self.data.uuid
         self.creation.ids[self.data.uuid] = self.id
-        print("weewooweewoo")
-        print(self.id)
-        print(self.data.uuid)
     end
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
     self:getData2()
@@ -107,7 +104,6 @@ function BaseFastLogicBlock.server_onCreate(self)
             self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
         end
     end
-    print(self.data.uuid)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
     self.storage:save(self.data)
     self:server_onCreate2()
@@ -120,8 +116,6 @@ end
 
 function BaseFastLogicBlock.server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
-    print("setting gate to nil")
-    print(self.data.uuid)
     if self.creation == nil then
         return
     end
@@ -177,11 +171,11 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     local runnrerId = self.FastLogicRunner.hashedLookUp[self.data.uuid]
     print(self.FastLogicRunner.blockStates[runnrerId])
     print(self.FastLogicRunner.countOfOnInputs[runnrerId])
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
-    print(runnrerId)
+    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
+    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
+    -- print(runnrerId)
     print(self.data.uuid)
-    print(self.interactable.id)
+    -- print(self.interactable.id)
 end
 
 -- function BaseFastLogicBlock.server_onMelee(self, position, attacker, damage, power, direction, normal)

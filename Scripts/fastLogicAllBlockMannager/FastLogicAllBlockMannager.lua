@@ -7,6 +7,7 @@ FastLogicAllBlockMannager = FastLogicAllBlockMannager or {}
 dofile "FastLogicAllBlockFixer.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 
 FastLogicAllBlockMannager.blockUuidToConnectionColorID = {
     ["6a9dbff5-7562-4e9a-99ae-3590ece88112"] = 0,
@@ -176,6 +177,7 @@ function FastLogicAllBlockMannager.removeOutput(self, uuid, uuidToDeconnect)
 end
 
 function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, isSilicon, timerLength, siliconBlockId)
+    sm.MTFastLogic.UsedUuids[uuid] = true
     local keyPos = string.vecToString(pos)
     if self.locationCash[keyPos] == nil then
         self.locationCash[keyPos] = {}

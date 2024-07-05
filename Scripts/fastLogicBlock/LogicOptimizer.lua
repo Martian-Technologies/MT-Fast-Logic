@@ -58,7 +58,7 @@ function FastLogicRunner.optimizeLogic(self)
                 end
 
                 -- multi blocks
-                -- self:findMultiBlocks(id)
+                self:findMultiBlocks(id)
             end
         end
     end
@@ -80,15 +80,21 @@ function FastLogicRunner.findMultiBlocks(self, id)
     -- line, id = 1 -- not line, id = 2
     if self.runnableBlockPathIds[id] == 3 and self.multiBlockData[id] == false then
         local blocks = { id }
+        local needsEndOfTick
         ::checkInputAgain::
-        if self.numberOfBlockInputs[blocks[1]] == 1 then
+        if self.numberOfBlockInputs[blocks[1]] == 1 and self.numberOfOtherInputs[blocks[1]] == 0 then
             local blockToCheck = blockInputs[blocks[1]][1]
             if not table.contains(blocks, blockToCheck) then
+                local lightCount = 0
+                for i=1, self.numberOfBlockOutputs[blockToCheck] do
+                    if self.runnableBlockPathIds[blockOutputs[blockToCheck][i]] == 2 then
+                        lightCount = lightCount + 1
+                    end
+                end
                 if (
-                    (not table.contains(blocks, blockToCheck)) and
                     self.multiBlockData[blockToCheck] == false and
-                    self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 15 and
-                    self.numberOfBlockOutputs[blockToCheck] + self.numberOfOtherInputs[blockToCheck] == 1
+                    self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 15 and self.runnableBlockPathIds[blockToCheck] ~= 5 and
+                    self.numberOfBlockOutputs[blockToCheck] == lightCount + 1
                 ) then
                     blocks = table.appendTable({blockToCheck}, blocks)
                     goto checkInputAgain
@@ -96,15 +102,25 @@ function FastLogicRunner.findMultiBlocks(self, id)
             end
         end
         ::checkOutputAgain::
-        if self.numberOfBlockOutputs[blocks[#blocks]] == 1 then
-            local blockToCheck = blockOutputs[blocks[#blocks]][1]
-            if (
-                (not table.contains(blocks, blockToCheck)) and
-                self.multiBlockData[blockToCheck] == false and
-                self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 5
-            ) then
-                blocks[#blocks + 1] = blockToCheck
-                goto checkOutputAgain
+        local lightCount = 0
+        local blockToCheck = nil
+        for i=1, self.numberOfBlockOutputs[blocks[#blocks]] do
+            if self.runnableBlockPathIds[blockOutputs[blocks[#blocks]][i]] == 2 then
+                lightCount = lightCount + 1
+            else
+                blockToCheck = blockOutputs[blocks[#blocks]][i]
+            end
+        end
+        if self.numberOfBlockOutputs[blocks[#blocks]] == lightCount + 1 then
+            -- local blockToCheck = blockOutputs[blocks[#blocks]][1]
+            if not table.contains(blocks, blockToCheck) then
+                if (
+                    self.multiBlockData[blockToCheck] == false and
+                    self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 4
+                ) then
+                    blocks[#blocks + 1] = blockToCheck
+                    goto checkOutputAgain
+                end
             end
         end
         ::checkCanBeInputAgain::
@@ -112,7 +128,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             table.remove(blocks, 1)
             goto checkCanBeInputAgain
         end
-        if #blocks >= 3 then
+        if #blocks >= 4 then
             local length = -1
             local isNot = false
             for i = 1, #blocks do
@@ -138,7 +154,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
 
             self:updateLongestTimerToLength(length)
-            -- print(isNot)
+            -- print("new line")
             -- print(length)
             -- print(blocks)
         end

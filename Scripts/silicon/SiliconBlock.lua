@@ -8,7 +8,6 @@ local pairs = pairs
 SiliconBlock = SiliconBlock or class()
 
 sm.MTFastLogic = sm.MTFastLogic or {}
--- sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 sm.MTFastLogic.SiliconBlocks = sm.MTFastLogic.SiliconBlocks or {}
 sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
 sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
@@ -31,7 +30,6 @@ local uuidToSize = {
 
 function SiliconBlock.deepRescanSelf(self)
     for _, block in ipairs(self.data.blocks) do
-        -- sm.MTFastLogic.UsedUuids[block.uuid] = nil
         self.FastLogicAllBlockMannager:removeBlock(block.uuid)
     end
     self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
@@ -130,7 +128,6 @@ function SiliconBlock.server_onDestroy(self)
     self.creation.SiliconBlocks[self.id] = nil
     if self.removeData ~= false then
         for _, block in ipairs(self.data.blocks) do
-            -- sm.MTFastLogic.UsedUuids[block.uuid] = nil
             self.FastLogicAllBlockMannager:removeBlock(block.uuid)
         end
     end

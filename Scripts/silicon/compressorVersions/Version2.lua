@@ -102,7 +102,8 @@ SiliconCompressor.Versions["a"].compressBlocks = function (siliconBlock)
             block.uuid,
             inputs,
             block.outputs,
-            colorHash[block.color]
+            colorHash[block.color],
+            block.connectionColorId or 25
         }
     end
     local colorIndexHash = {}

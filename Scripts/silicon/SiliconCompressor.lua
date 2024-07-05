@@ -2,7 +2,7 @@ SiliconCompressor = SiliconCompressor or {
     Versions = {}
 }
 
-dofile "compressorVersions/Version_default.lua"
+dofile "compressorVersions/Version_tagless.lua"
 dofile "compressorVersions/Version_a.lua"
 
 local highestVersion = "a"
@@ -12,7 +12,7 @@ function SiliconCompressor.decompressBlockData(siliconBlock, blockData)
     local firstChar = string.sub(blockData, 1, 1)
     local version = SiliconCompressor.Versions[firstChar]
     if version == nil then
-        version = SiliconCompressor.Versions["default"]
+        version = SiliconCompressor.Versions["tagless"]
     else
         blockData = string.sub(blockData, 2)
     end
@@ -21,7 +21,7 @@ end
 
 function SiliconCompressor.compressBlocks(siliconBlock)
     local dataString = SiliconCompressor.Versions[highestVersion].compressBlocks(siliconBlock)
-    if highestVersion ~= "default" then
+    if highestVersion ~= "tagless" then
         local data = highestVersion .. dataString
         return data
     end

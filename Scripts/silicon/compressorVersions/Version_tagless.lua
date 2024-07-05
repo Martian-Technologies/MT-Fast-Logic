@@ -1,4 +1,4 @@
-SiliconCompressor.Versions["default"] = {}
+SiliconCompressor.Versions["tagless"] = {}
 
 local numberToRotation = {
     [1] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0) },
@@ -72,7 +72,7 @@ local numberToType = {
     [5] = "xnorBlocks",
 }
 
-SiliconCompressor.Versions["default"].compressBlocks = function (siliconBlock)
+SiliconCompressor.Versions["tagless"].compressBlocks = function (siliconBlock)
     if siliconBlock.data.blocks == nil then return {} end
     local blocks = table.makeArray(siliconBlock.size[1] * siliconBlock.size[2] * siliconBlock.size[3])
     local colorHash = {}
@@ -110,7 +110,7 @@ SiliconCompressor.Versions["default"].compressBlocks = function (siliconBlock)
     return siliconBlock:tableToString({ blocks, colorIndexHash })
 end
 
-SiliconCompressor.Versions["default"].decompressBlockData = function(siliconBlock, blockData)
+SiliconCompressor.Versions["tagless"].decompressBlockData = function(siliconBlock, blockData)
     blockData = siliconBlock:stringToTable(blockData)
     if blockData == nil then return {} end
     local colorIndexHash = blockData[2]

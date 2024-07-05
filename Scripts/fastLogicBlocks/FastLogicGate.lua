@@ -96,7 +96,3 @@ function FastLogicGate.server_saveMode(self, mode)
     local modes = { "andBlocks", "orBlocks", "xorBlocks", "nandBlocks", "norBlocks", "xnorBlocks" }
     self.FastLogicAllBlockMannager:changeBlockType(self.data.uuid, modes[self.data.mode + 1])
 end
-
-function FastLogicGate.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    -- advPrint(self, 3)
-end

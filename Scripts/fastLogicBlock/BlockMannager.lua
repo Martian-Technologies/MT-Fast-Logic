@@ -92,6 +92,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         self:internalSetBlockStates(idStatePairs)
         -- clear anything to do with multiBlock in timerData
         local multiData = self.multiBlockData[id]
+        local endBlockId = multiData[4][1]
         local timerData = self.timerData
         for i = 1, multiData[7] do
             local timeDataAtTime = timerData[i]
@@ -206,16 +207,11 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
     if multiData[1] == nil then
     elseif multiData[1] == 1 or multiData[1] == 2 then
         local state = blockStates[multiData[3][1]]
-        -- print(state)
-        -- print(multiData[2])
         local endBlockId = multiData[4][1]
-        -- print("-======-")
         idStatePairs[#idStatePairs+1] = {multiData[3][1], state}
         for i = 2, multiData[7] do
             local id = multiData[2][i]
             local timeDataAtTime = timerData[multiData[7]-i+2]
-            -- print(multiData[7]-i+2)
-            -- print(timerData)
             for k = 1, #timeDataAtTime do
                 local item = timeDataAtTime[k]
                 if type(item) ~= "number" and type(item[1]) == "boolean" and item[2] == endBlockId then
@@ -233,12 +229,10 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
             elseif runnableBlockPathIds[id] ~= 3 then
                 print("this should never happen (internalGetMultiBlockInternalStates, multiData[1] = 1 or 2)")
             end
-            -- print(state)
             idStatePairs[#idStatePairs+1] = {id, state}
         end
     else
     end
-    -- print(idStatePairs)
     return idStatePairs
 end
 

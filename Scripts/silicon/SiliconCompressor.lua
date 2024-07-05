@@ -2,8 +2,8 @@ SiliconCompressor = SiliconCompressor or {
     Versions = {}
 }
 
-dofile "compressorVersions/Version1.lua"
-dofile "compressorVersions/Version2.lua"
+dofile "compressorVersions/Version_default.lua"
+dofile "compressorVersions/Version_a.lua"
 
 local highestVersion = "a"
 

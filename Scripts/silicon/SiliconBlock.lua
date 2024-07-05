@@ -7,6 +7,8 @@ local pairs = pairs
 
 SiliconBlock = SiliconBlock or class()
 
+dofile "SiliconCompressor.lua"
+
 sm.MTFastLogic = sm.MTFastLogic or {}
 -- sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 sm.MTFastLogic.SiliconBlocks = sm.MTFastLogic.SiliconBlocks or {}
@@ -111,7 +113,7 @@ function SiliconBlock.server_onCreate(self)
     self.id = self.interactable:getId()
     self.data = self.data or {}
     -- sm.MTFastLogic.SiliconBlocksToGetData[#sm.MTFastLogic.SiliconBlocksToGetData + 1] = self
-    self.data.blocks = self:decompressBlockData(self.storage:load())
+    self.data.blocks = SiliconCompressor.decompressBlockData(self, self.storage:load())
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
         block.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(block.uuid, self.creationId)
@@ -122,7 +124,7 @@ function SiliconBlock.server_onCreate(self)
             block.outputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.outputs[ii], self.creationId)
         end
     end
-    self.storage:save(self:compressBlocks())
+    self.storage:save(SiliconCompressor.compressBlocks(self))
     self:getData()
 end
 
@@ -202,155 +204,16 @@ end
 
 function SiliconBlock.server_saveBlocks(self, blocks)
     self.data.blocks = blocks
-    self.storage:save(self:compressBlocks())
+    self.storage:save(SiliconCompressor.compressBlocks(self))
 end
 
 function SiliconBlock.server_resave(self)
-    self.storage:save(self:compressBlocks())
+    self.storage:save(SiliconCompressor.compressBlocks(self))
 end
 
 function SiliconBlock.remove(self, removeData)
     self.removeData = removeData
     self.shape:destroyPart()
-end
-
-local typeToNumber = {
-    andBlocks = 0,
-    orBlocks = 1,
-    xorBlocks = 2,
-    nandBlocks = 3,
-    norBlocks = 4,
-    xnorBlocks = 5,
-}
-
-local numberToType = {
-    [0] = "andBlocks",
-    [1] = "orBlocks",
-    [2] = "xorBlocks",
-    [3] = "nandBlocks",
-    [4] = "norBlocks",
-    [5] = "xnorBlocks",
-}
-
-local rotationToNumber = {
-    ["1000-10"] = 1,
-    ["10000-1"] = 2,
-    ["010-100"] = 3,
-    ["01000-1"] = 4,
-    ["001-100"] = 5,
-    ["0010-10"] = 6,
-    ["0-10100"] = 7,
-    ["00-1100"] = 8,
-    ["010100"] = 9,
-    ["001100"] = 10,
-    ["-100010"] = 11,
-    ["00-1010"] = 12,
-    ["100010"] = 13,
-    ["001010"] = 14,
-    ["-100001"] = 15,
-    ["0-10001"] = 16,
-    ["100001"] = 17,
-    ["010001"] = 18,
-    ["0-10-100"] = 19,
-    ["00-1-100"] = 20,
-    ["-1000-10"] = 21,
-    ["00-10-10"] = 22,
-    ["-10000-1"] = 23,
-    ["0-1000-1"] = 24,
-}
-
-local numberToRotation = {
-    [1] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0) },
-    [2] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1) },
-    [3] = { sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0) },
-    [4] = { sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1) },
-    [5] = { sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0) },
-    [6] = { sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0) },
-    [7] = { sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0) },
-    [8] = { sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0), sm.vec3.new(1, 0, 0) },
-    [9] = { sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0) },
-    [10] = { sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0) },
-    [11] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, 1, 0) },
-    [12] = { sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0) },
-    [13] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, 1, 0) },
-    [14] = { sm.vec3.new(0, 0, 1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0) },
-    [15] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1) },
-    [16] = { sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1) },
-    [17] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, 1) },
-    [18] = { sm.vec3.new(0, 1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, 1) },
-    [19] = { sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(-1, 0, 0) },
-    [20] = { sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0) },
-    [21] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(0, -1, 0) },
-    [22] = { sm.vec3.new(0, 0, -1), sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0) },
-    [23] = { sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1) },
-    [24] = { sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1) },
-}
-
-function SiliconBlock.compressBlocks(self)
-    if self.data.blocks == nil then return {} end
-    local blocks = table.makeArray(self.size[1] * self.size[2] * self.size[3])
-    local colorHash = {}
-    local colorIndex = 1
-    for i = 1, #self.data.blocks do
-        local block = self.data.blocks[i]
-        if colorHash[block.color] == nil then
-            colorHash[block.color] = colorIndex
-            colorIndex = colorIndex + 1
-        end
-        local inputs = table.copy(block.inputs)
-        if self.creation ~= nil then
-            local j = 1
-            while j <= #inputs do
-                if self.creation.blocks[inputs[j]] ~= nil and self.creation.blocks[inputs[j]].isSilicon then
-                    table.remove(inputs, j)
-                else
-                    j = j + 1
-                end
-            end
-        end
-        local rotNumber = rotationToNumber[tostring(block.rot[1].x) .. tostring(block.rot[1].y) .. tostring(block.rot[1].z) .. tostring(block.rot[3].x) .. tostring(block.rot[3].y) .. tostring(block.rot[3].z)]
-        blocks[(block.pos.x - 0.5) + (block.pos.y - 0.5) * self.size[1] + (block.pos.z - 0.5) * self.size[2] * self.size[1] + 1] = {
-            rotNumber * 6 + typeToNumber[block.type],
-            block.uuid,
-            inputs,
-            block.outputs,
-            colorHash[block.color]
-        }
-    end
-    local colorIndexHash = {}
-    for color, index in pairs(colorHash) do
-        colorIndexHash[index] = color
-    end
-    return self:tableToString({ blocks, colorIndexHash })
-end
-
-function SiliconBlock.decompressBlockData(self, blockData)
-    if blockData == nil then return {} end
-    blockData = self:stringToTable(blockData)
-    if blockData == nil then return {} end
-    local colorIndexHash = blockData[2]
-    local onlyBlockData = blockData[1]
-    local blocks = {}
-    for i = 1, #onlyBlockData do
-        local block = onlyBlockData[i]
-        if block ~= nil and block ~= false then
-            blocks[#blocks + 1] = {
-                type = numberToType[math.fmod(block[1], 6)],
-                uuid = block[2],
-                pos = sm.vec3.new(
-                    math.fmod(i - 1, self.size[1]) + 0.5,
-                    math.floor(math.fmod(i - 1, self.size[2] * self.size[1]) / self.size[1]) + 0.5,
-                    math.floor((i - 1) / (self.size[2] * self.size[1])) + 0.5
-                ),
-                rot = numberToRotation[math.floor(block[1] / 6)],
-                inputs = block[3],
-                outputs = block[4],
-                state = false,
-                color = colorIndexHash[block[5]]
-            }
-        end
-    end
-    return blocks
 end
 
 function SiliconBlock.toLocalPosAndRot(self, pos, rot)
@@ -408,136 +271,3 @@ function SiliconBlock.toBodyPosAndRot(self, pos, rot)
     pos = pos + self.shape.localPosition
     return pos, rot
 end
-
-function SiliconBlock.tableToString(self, table)
-    local str = ""
-    local i = 1
-    for k, v in pairs(table) do
-        local needsKey = k == i
-        if type(v) == "table" then
-            v = "{" .. self:tableToString(v) .. "}"
-        elseif type(v) ~= "string" then
-            v = tostring(v)
-        else
-            if tonumber(v) ~= nil then
-                v = v .. "'"
-            end
-        end
-        if type(k) ~= "string" then
-            k = tostring(k)
-        else
-            if tonumber(k) ~= nil then
-                k = k .. "'"
-            end
-        end
-        if string.sub(str, -1, -1) ~= "}" and string.sub(str, -1, -1) ~= "'" and string.sub(v, 1, 1) ~= "{" and str ~= "" then
-            str = str .. "|"
-        end
-        if needsKey then
-            i = i + 1
-            str = str .. v
-        else
-            str = str .. k .. "]" .. v
-        end
-    end
-    -- if string.sub(str, -1, -1) == "}" then
-    --     str = string.sub(str, 1, -2)
-    -- end
-    return str--string.sub(str, 2, -1)
-end
-
-function SiliconBlock.stringToTable(self, str)
-    local tbl = {}
-    local chunk = ""
-    local gettingTableString = false
-    local key = 1
-    local isString = false
-    local countKey = true
-    local depth = 0
-    local stringIndex = 1
-    for c in str:gmatch "." do
-        ::again::
-        if gettingTableString then
-            if c == "{" then
-                depth = depth + 1
-                chunk = chunk .. c
-            elseif c == "}" then
-                if depth > 0 then
-                    depth = depth - 1
-                    chunk = chunk .. c
-                else
-                    chunk = self:stringToTable(chunk)
-                    gettingTableString = false
-                    c = "|"
-                    goto again
-                end
-            else
-                chunk = chunk .. c
-            end
-        else
-            local endChunk = false
-            if c == "|" then
-                endChunk = true
-            elseif c == "{" then
-                if chunk ~= "" then
-                    endChunk = true
-                end
-                gettingTableString = true
-            elseif c == "}" then
-                endChunk = true
-            elseif c == "]" then
-                if chunk == "" then
-                    key = key - 1
-                    chunk = tbl[key]
-                    tbl[key] = nil
-                    if tonumber(chunk) ~= nil then
-                        chunk = tonumber(chunk)
-                    end
-                end
-                key = chunk
-                chunk = ""
-                countKey = false
-            elseif c == "'" then
-                isString = true
-                endChunk = true
-            else
-                chunk = chunk .. c
-            end
-
-            if endChunk then
-                if tonumber(chunk) ~= nil and not isString then
-                    chunk = tonumber(chunk)
-                end
-                isString = false
-                if countKey ~= nil then
-                    if chunk ~= "" then
-                        tbl[key] = chunk
-                    end
-                    if c == "}" then
-                        tbl = { tbl }
-                    end
-                    if chunk ~= "" then
-                        if countKey == true then
-                            key = key + 1
-                        else
-                            countKey = nil
-                        end
-                    end
-                    chunk = ""
-                end
-            end
-        end
-        if stringIndex == #str then
-            if gettingTableString then
-                chunk = self:stringToTable(chunk)
-                gettingTableString = false
-            end
-            c = "|"
-            stringIndex = stringIndex + 1
-            goto again
-        end
-        stringIndex = stringIndex + 1
-    end
-    return tbl
-end
-

@@ -18,9 +18,9 @@ end
 function FastLight.server_onCreate2(self)
     self.type = "Light"
     if self.storage:load() ~= nil then
-        self.data.luminance = self.storage:load().luminance or 50
+        self.data.luminance = self.storage:load().luminance or (self.data.luminance or 50)
     else
-        self.data.luminance = 50
+        self.data.luminance = self.data.luminance or 50
     end
     self:server_saveLuminance(self.data.luminance)
     -- self.network:setClientData(self.data)

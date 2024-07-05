@@ -24,6 +24,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Settings.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/ModeChanger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/VolumePlacer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Merger.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Colorizer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/DecoderMaker.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SingleConnect.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SeriesConnect.lua")
@@ -46,6 +47,7 @@ MTMultitool.modes = {
     "Mode Changer",
     "Volume Placer",
     "Merger",
+    "Colorizer",
     "Decoder Maker",
     "Single",
     "Series",
@@ -61,6 +63,7 @@ MTMultitool.internalModes = {
     "ModeChanger",
     "VolumePlacer",
     "Merger",
+    "Colorizer",
     "DecoderMaker",
     "SingleConnect",
     "SeriesConnect",
@@ -92,6 +95,7 @@ function MTMultitool.client_onCreate(self)
     ModeChanger.inject(self)
     VolumePlacer.inject(self)
     Merger.inject(self)
+    Colorizer.inject(self)
     DecoderMaker.inject(self)
     SingleConnect.inject(self)
     SeriesConnect.inject(self)
@@ -114,6 +118,7 @@ function MTMultitool.client_onCreate(self)
     -- BlockSelector.client_onCreate()
     self.raycastMode = "DDA" -- connectionRaycast, blockRaycast, DDA
     self.enabledModes = {
+        true,
         true,
         true,
         true,
@@ -355,6 +360,8 @@ function MTMultitool.client_onUnequip(self, animate)
         VolumePlacer.cleanNametags(self)
 	elseif MTMultitool.internalModes[self.mode] == "Merger" then
 		Merger.cleanNametags(self)
+    elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
+        Colorizer.cleanNametags(self)
     end
 	BlockSelector.client_onUnequip(self)
     self.wantEquipped = false
@@ -383,6 +390,8 @@ function MTMultitool.client_onToggle(self)
         ModeChanger.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
+        Colorizer.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "VolumePlacer" then
         VolumePlacer.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "DecoderMaker" then
@@ -437,6 +446,8 @@ function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState,
         VolumePlacer.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+    elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
+        Colorizer.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "DecoderMaker" then
         DecoderMaker.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SingleConnect" then
@@ -482,6 +493,49 @@ function MTMultitool.server_convertBody(self, data)
     sm.MTFastLogic.FastLogicRunnerRunner.server_convertBody(self, data)
 end
 
+MTGateUUIDs = {
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88087"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88088"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88089"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88090"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88091"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88092"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88093"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88094"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88095"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88096"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88097"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88098"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88099"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88100"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88101"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88102"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88103"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88104"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88105"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88106"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88107"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88108"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88109"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88110"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88111"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88112"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88113"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88114"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88115"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88116"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88117"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88118"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88119"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88120"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88121"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88122"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88123"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88124"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88125"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88126"),
+}
+
 function MTMultitool.server_convertSilicon(self, data)
     local wantedType = data.wantedType
     local positions = {}
@@ -522,8 +576,7 @@ function MTMultitool.server_changeModes(self, data)
     local xMax = math.max(originLocal.x, finalLocal.x) - halfBlock
     local yMax = math.max(originLocal.y, finalLocal.y) - halfBlock
     local zMax = math.max(originLocal.z, finalLocal.z) - halfBlock
-    local voxelMap = MTMultitoolLib.getVoxelMap(body)
-    local MTGateUUID = sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88112")
+    local voxelMap = MTMultitoolLib.getVoxelMap(body, true)
     local VinclingUUID = sm.uuid.new("bc336a10-675a-4942-94ce-e83ecb4b501a")
     local VanillaGateUUID = sm.uuid.new("9f0f56e8-2c31-4d83-996c-d00a9b296c3f")
     local vanillaGateList = {}
@@ -535,7 +588,7 @@ function MTMultitool.server_changeModes(self, data)
                 if shape == nil then
                     goto continue
                 end
-                if shape.uuid == MTGateUUID then
+                if table.contains(MTGateUUIDs, shape.uuid) then
                     local interactable = shape:getInteractable()
                     if interactable ~= nil then
                         sm.event.sendToInteractable(interactable, "server_saveMode", mode - 1)
@@ -600,7 +653,7 @@ function MTMultitool.server_blockMerge(self, data)
     local xMax = math.max(originLocal.x, finalLocal.x) - halfBlock
     local yMax = math.max(originLocal.y, finalLocal.y) - halfBlock
     local zMax = math.max(originLocal.z, finalLocal.z) - halfBlock
-    local voxelMap = MTMultitoolLib.getVoxelMap(body)
+    local voxelMap = MTMultitoolLib.getVoxelMap(body, true)
     local deleteShapes = {}
     for i = x * 4, xMax * 4 do
         for j = y * 4, yMax * 4 do
@@ -678,4 +731,40 @@ end
 
 function MTMultitool.client_callCallCallbackFromServer(self, data)
     CallbackEngine.client_callCallCallbackFromServer(self, data)
+end
+
+function MTMultitool.server_recolor(self, data)
+    local colorId = data.mode
+    local originLocal = data.origin
+    local finalLocal = data.final
+    local body = data.body
+    local halfBlock = 0.125
+    local x = math.min(originLocal.x, finalLocal.x) - halfBlock
+    local y = math.min(originLocal.y, finalLocal.y) - halfBlock
+    local z = math.min(originLocal.z, finalLocal.z) - halfBlock
+    local xMax = math.max(originLocal.x, finalLocal.x) - halfBlock
+    local yMax = math.max(originLocal.y, finalLocal.y) - halfBlock
+    local zMax = math.max(originLocal.z, finalLocal.z) - halfBlock
+    local voxelMap = MTMultitoolLib.getVoxelMap(body, true)
+    local creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
+    local creation = sm.MTFastLogic.Creations[creationId]
+    for i = x * 4, xMax * 4 do
+        for j = y * 4, yMax * 4 do
+            for k = z * 4, zMax * 4 do
+                local indexString = i / 4 .. ";" .. j / 4 .. ";" .. k / 4
+                local shape = voxelMap[indexString]
+                if shape == nil then
+                    goto continue
+                end
+                -- if shape.uuid == MTGateUUID then
+                if table.contains(MTGateUUIDs, shape.uuid) then
+                    local interactable = shape:getInteractable()
+                    if interactable ~= nil then
+                        creation.FastLogicRealBlockMannager:changeConnectionColor(interactable.id, colorId)
+                    end
+                end
+                ::continue::
+            end
+        end
+    end
 end

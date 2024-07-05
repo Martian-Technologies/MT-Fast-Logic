@@ -55,6 +55,7 @@ end
 function CreationUtil.updateOldUuid(uuid, creationId)
     local creation = sm.MTFastLogic.Creations[creationId]
     if sm.MTFastLogic.UsedUuids[uuid] == nil or creation.blocks[uuid] ~= nil then
+        sm.MTFastLogic.UsedUuids[uuid] = true
         return uuid
     end
     local currentTick = sm.game.getCurrentTick()

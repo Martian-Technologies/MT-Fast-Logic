@@ -1,0 +1,924 @@
+{
+    "partList": [
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_0",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88087"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_1",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88088"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_2",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88089"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_3",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88090"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_4",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88091"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_5",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88092"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_6",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88093"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_7",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88094"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_8",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88095"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_9",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88096"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_10",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88097"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_11",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88098"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_12",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88099"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_13",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88100"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_14",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88101"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_15",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88102"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_16",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88103"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_17",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88104"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_18",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88105"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_19",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88106"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_20",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88107"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_21",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88108"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_22",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88109"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_23",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88110"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_24",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88111"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_25",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88112"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_26",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88113"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_27",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88114"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_28",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88115"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_29",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88116"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_30",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88117"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_31",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88118"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_32",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88119"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_33",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88120"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_34",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88121"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_35",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88122"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_36",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88123"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_37",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88124"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_38",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88125"
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Gate",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicGate_39",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88126"
+        }
+    ]
+}

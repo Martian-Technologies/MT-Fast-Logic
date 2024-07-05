@@ -4,7 +4,7 @@ local table = table
 
 dofile "BaseFastLogicBlock.lua"
 
-FastLogicGate = table.deepCopyTo(BaseFastLogicBlock, (FastLogicGate or class()))
+FastLogicGate = table.deepCopyTo(BaseFastLogicBlock, (FastLogicGate or {}))
 
 function FastLogicGate.getData2(self)
     self.creation.FastLogicGates[self.data.uuid] = self
@@ -13,9 +13,9 @@ end
 function FastLogicGate.server_onCreate2(self)
     self.type = "LogicGate"
     if self.storage:load() ~= nil then
-        self.data.mode = self.storage:load().mode or 0
+        self.data.mode = self.storage:load().mode or (self.data.mode or 0)
     else
-        self.data.mode = 0
+        self.data.mode = self.data.mode or 0
     end
     self.network:setClientData(self.data.mode)
     self.storage:save(self.data)
@@ -94,5 +94,5 @@ function FastLogicGate.server_saveMode(self, mode)
     self.network:setClientData(self.data.mode)
     self.storage:save(self.data)
     local modes = { "andBlocks", "orBlocks", "xorBlocks", "nandBlocks", "norBlocks", "xnorBlocks" }
-    self.FastLogicAllBlockMannager:changeBlockType(self.data.uuid, modes[self.data.mode+1])
+    self.FastLogicAllBlockMannager:changeBlockType(self.data.uuid, modes[self.data.mode + 1])
 end

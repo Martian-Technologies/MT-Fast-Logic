@@ -16,7 +16,7 @@ end
 
 local defaultSave = {
     modeStates = {
-        ["SiliconConverter"] = false,
+        -- ["SiliconConverter"] = false,
     },
     config = {},
     backups = {},

@@ -1,0 +1,303 @@
+{
+    "partList": [
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "name": "Silicon1x1x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block1x1x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "3706ba55-bd11-4053-b437-bbf2aff823b4",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 2,
+                "y": 2,
+                "z": 2
+            },
+            "name": "Silicon2x2x2",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block2x2x2.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "e6011dc4-8842-4d94-a196-0c7386065ab6",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 8,
+                "y": 8,
+                "z": 1
+            },
+            "name": "Silicon8x8x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block8x8x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "195aa046-017a-4f0b-809c-98ed141955fb",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 4,
+                "y": 4,
+                "z": 1
+            },
+            "name": "Silicon4x4x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block4x4x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "d576a4c9-e6bc-46c0-9230-f92967cc39b6",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 2,
+                "y": 2,
+                "z": 1
+            },
+            "name": "Silicon2x2x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block2x2x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f590d9d1-179d-49ff-86ab-7f74a730e243",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 8,
+                "y": 1,
+                "z": 1
+            },
+            "name": "Silicon8x1x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block8x1x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f0e1640f-7406-4232-b1d9-8c1a41b53958",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 4,
+                "y": 1,
+                "z": 1
+            },
+            "name": "Silicon4x1x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block4x1x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f0e1640f-7406-1984-b1d9-8c1a41b53958",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 2,
+                "y": 1,
+                "z": 1
+            },
+            "name": "Silicon2x1x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block2x1x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f0e1640f-7776-4232-b1d9-8c1a41b53958",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 3,
+                "y": 1,
+                "z": 1
+            },
+            "name": "Silicon3x1x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block3x1x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f0e2828f-7776-4232-b1d9-8a3c45b63898",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 16,
+                "y": 16,
+                "z": 1
+            },
+            "name": "Silicon16x16x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block16x16x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f0e2828f-1234-4321-b1d9-8a3c45b63898",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 8,
+                "y": 8,
+                "z": 4
+            },
+            "name": "Silicon8x8x4",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block8x8x4.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f0e2828f-8888-4444-b1d9-8a3c45b63898",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 12,
+                "y": 1,
+                "z": 1
+            },
+            "name": "Silicon12x1x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block12x1x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f3e2828f-1212-1111-b1d4-8d3c45b63000",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        },
+        {
+            "box": {
+                "x": 12,
+                "y": 4,
+                "z": 1
+            },
+            "name": "Silicon12x4x1",
+            "physicsMaterial": "Default",
+            "renderable": "$CONTENT_DATA/Renderable/Rends/block12x4x1.rend",
+            "rotationSet": "Default",
+            "scripted": {
+                "classname": "SiliconBlock",
+                "filename": "$CONTENT_DATA/Scripts/silicon/SiliconBlock.lua"
+            },
+            "showInInventory": false,
+            "uuid": "f3e2828f-1241-1412-b1f2-8d3c45b63000",
+            "ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+            }
+        }
+    ]
+}

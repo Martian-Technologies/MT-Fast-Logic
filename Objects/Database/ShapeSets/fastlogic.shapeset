@@ -1,0 +1,111 @@
+{
+    "partList": [
+        {
+            "box": {
+                "x": 1,
+                "y": 2,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Timer",
+            "physicsMaterial": "Mechanical",
+			"ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+			},
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_timer.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastTimer",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastTimer.lua"
+            },
+            "uuid": "db0bc11b-c083-4a6a-843f-73ac1033e6fe"
+        },
+        {
+            "box": {
+                "x": 6,
+                "y": 1,
+                "z": 6
+            },
+            "color": "eeeeee",
+            "flammable": false,
+            "name": "Fast Warehouse Square Light",
+            "physicsMaterial": "Metal",
+			"ratings": {
+				"density": 2,
+				"durability": 3,
+				"friction": 5,
+				"buoyancy": 2
+			},
+            "renderable": {
+                "lodList": [
+                    {
+                        "mesh": "$SURVIVAL_DATA/Objects/Mesh/lights/obj_light_arealight_off.fbx",
+                        "pose0": "$SURVIVAL_DATA/Objects/Mesh/lights/obj_light_arealight_on.fbx",
+                        "subMeshMap": {
+                            "arealight": {
+                                "material": "PoseAnimDifAsgNor",
+                                "textureList": [
+                                    "$SURVIVAL_DATA/Objects/Textures/lights/obj_light_arealight_dif.tga",
+                                    "$SURVIVAL_DATA/Objects/Textures/lights/obj_light_arealight_asg.tga",
+                                    "$SURVIVAL_DATA/Objects/Textures/lights/obj_light_arealight_nor.tga"
+                                ]
+                            },
+                            "beam": {
+                                "material": "PoseAnimLightCone",
+                                "textureList": [
+                                    "$GAME_DATA/Objects/Textures/lights/obj_light_headlightbeam_dif.tga",
+                                    "",
+                                    ""
+                                ]
+                            },
+                            "flare": {
+                                "material": "PoseAnimLightFlare",
+                                "textureList": [
+                                    "$GAME_DATA/Objects/Textures/lights/obj_light_headlightflare_dif.tga",
+                                    "",
+                                    ""
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "rotationSet": "PropY",
+            "scripted": {
+                "classname": "FastLight",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLight.lua"
+            },
+            "sticky": "-Y",
+            "uuid": "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b"
+        },
+        {
+            "color": "bb0000",
+            "flammable": true,
+            "hull": {
+                "col": "$GAME_DATA/Objects/Collision/obj_interactive_button.obj",
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "name": "EndTickButton",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "buoyancy": 2,
+                "density": 2,
+                "durability": 3,
+                "friction": 5
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_button.rend",
+            "rotationSet": "PropY",
+            "scripted": {
+                "classname": "EndTickButton",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/EndTickButton.lua"
+            },
+            "sticky": "-Y",
+            "uuid": "d8b529ad-3865-40fa-b798-cb2868e5dc4d"
+        }
+    ]
+}

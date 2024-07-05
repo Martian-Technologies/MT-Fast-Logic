@@ -4,6 +4,7 @@ local table = table
 local type = type
 local pairs = pairs
 
+
 function FastLogicRunner.optimizeLogic(self)
     local blockInputs = self.blockInputs
     local numberOfBlockInputs = self.numberOfBlockInputs
@@ -38,8 +39,6 @@ function FastLogicRunner.optimizeLogic(self)
                     end
                     top = top / (math.floor(#newBLockInputs / 3) + 1)
                     if top / bottom > 1.2 then
-                        -- print(blockType)
-
                         if (blockType == 6 or blockType == 8 or blockType == 11 or blockType == 13) then
                             self:makeBlockAlt(id, blockType + 1)
                         end
@@ -57,7 +56,7 @@ function FastLogicRunner.optimizeLogic(self)
                 end
 
                 -- multi blocks
-                -- self:findMultiBlocks(id)
+                self:findMultiBlocks(id)
             end
         end
     end
@@ -79,24 +78,47 @@ function FastLogicRunner.findMultiBlocks(self, id)
     -- line, id = 1 -- not line, id = 2
     if self.runnableBlockPathIds[id] == 3 and self.multiBlockData[id] == false then
         local blocks = { id }
+        local needsEndOfTick
         ::checkInputAgain::
-        if self.numberOfBlockInputs[blocks[1]] == 1 then
+        if self.numberOfBlockInputs[blocks[1]] == 1 and self.numberOfOtherInputs[blocks[1]] == 0 then
             local blockToCheck = blockInputs[blocks[1]][1]
-            if (
-                self.multiBlockData[blockToCheck] == false and
-                self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 15 and
-                self.numberOfBlockOutputs[blockToCheck] == 1
-            ) then
-                blocks = table.appendTable({blockToCheck}, blocks)
-                goto checkInputAgain
+            if not table.contains(blocks, blockToCheck) then
+                local lightCount = 0
+                for i=1, self.numberOfBlockOutputs[blockToCheck] do
+                    if self.runnableBlockPathIds[blockOutputs[blockToCheck][i]] == 2 then
+                        lightCount = lightCount + 1
+                    end
+                end
+                if (
+                    self.multiBlockData[blockToCheck] == false and
+                    self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 15 and self.runnableBlockPathIds[blockToCheck] ~= 5 and
+                    self.numberOfBlockOutputs[blockToCheck] == lightCount + 1
+                ) then
+                    blocks = table.appendTable({blockToCheck}, blocks)
+                    goto checkInputAgain
+                end
             end
         end
         ::checkOutputAgain::
-        if self.numberOfBlockOutputs[blocks[#blocks]] == 1 then
-            local blockToCheck = blockOutputs[blocks[#blocks]][1]
-            if (self.multiBlockData[blockToCheck] == false and self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 5) then
-                blocks[#blocks + 1] = blockToCheck
-                goto checkOutputAgain
+        local lightCount = 0
+        local blockToCheck = nil
+        for i=1, self.numberOfBlockOutputs[blocks[#blocks]] do
+            if self.runnableBlockPathIds[blockOutputs[blocks[#blocks]][i]] == 2 then
+                lightCount = lightCount + 1
+            else
+                blockToCheck = blockOutputs[blocks[#blocks]][i]
+            end
+        end
+        if self.numberOfBlockOutputs[blocks[#blocks]] == lightCount + 1 then
+            -- local blockToCheck = blockOutputs[blocks[#blocks]][1]
+            if not table.contains(blocks, blockToCheck) then
+                if (
+                    self.multiBlockData[blockToCheck] == false and
+                    self.runnableBlockPathIds[blockToCheck] >= 3 and self.runnableBlockPathIds[blockToCheck] <= 4
+                ) then
+                    blocks[#blocks + 1] = blockToCheck
+                    goto checkOutputAgain
+                end
             end
         end
         ::checkCanBeInputAgain::
@@ -104,7 +126,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             table.remove(blocks, 1)
             goto checkCanBeInputAgain
         end
-        if #blocks >= 3 then
+        if #blocks >= 4 then
             local length = -1
             local isNot = false
             for i = 1, #blocks do
@@ -123,17 +145,14 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self:makeBlockAlt(blocks[1], self.toMultiBlockInput[self.runnableBlockPathIds[blocks[1]]])
             
             self:internalAddBlockToMultiBlock(blocks[1], multiBlockId, true, false)
-            self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
             self.multiBlockData[multiBlockId][7] = length
-
             for i = 2, #blocks-1 do
                 self:internalAddBlockToMultiBlock(blocks[i], multiBlockId, false, false)
             end
+            self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
 
             self:updateLongestTimerToLength(length)
-            print(isNot)
-            print(length)
-            print(blocks)
+            -- print("made line: lenght = " .. tostring(length))
         end
     end
 end

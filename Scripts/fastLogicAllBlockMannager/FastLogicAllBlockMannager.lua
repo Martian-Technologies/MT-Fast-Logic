@@ -7,6 +7,55 @@ FastLogicAllBlockMannager = FastLogicAllBlockMannager or {}
 dofile "FastLogicAllBlockFixer.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
+
+FastLogicAllBlockMannager.blockUuidToConnectionColorID = {
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88087"] = 0,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88088"] = 1,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88089"] = 2,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88090"] = 3,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88091"] = 4,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88092"] = 5,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88093"] = 6,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88094"] = 7,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88095"] = 8,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88096"] = 9,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88097"] = 10,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88098"] = 11,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88099"] = 12,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88100"] = 13,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88101"] = 14,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88102"] = 15,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88103"] = 16,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88104"] = 17,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88105"] = 18,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88106"] = 19,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88107"] = 20,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88108"] = 21,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88109"] = 22,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88110"] = 23,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88111"] = 24,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88112"] = 25,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88113"] = 26,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88114"] = 27,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88115"] = 28,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88116"] = 29,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88117"] = 30,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88118"] = 31,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88119"] = 32,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88120"] = 33,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88121"] = 34,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88122"] = 35,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88123"] = 36,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88124"] = 37,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88125"] = 38,
+    ["6a9dbff5-7562-4e9a-99ae-3590ece88126"] = 39,
+}
+
+FastLogicAllBlockMannager.fastLogicGateBlockUuids = {} -- only the keys from the above table
+for k, _ in pairs(FastLogicAllBlockMannager.blockUuidToConnectionColorID) do
+    table.insert(FastLogicAllBlockMannager.fastLogicGateBlockUuids, k)
+end
 
 function FastLogicAllBlockMannager.getNew(creationId)
     local new = table.deepCopy(FastLogicAllBlockMannager)
@@ -52,31 +101,32 @@ function FastLogicAllBlockMannager.addBlock(self, block)
     local pos = block:getLocalCenter()
     local rot = { block.shape.xAxis, block.shape.yAxis, block.shape.zAxis }
     if block.type == "LogicGate" then
+        local connectionColorId = FastLogicAllBlockMannager.blockUuidToConnectionColorID[tostring(block.shape:getShapeUuid())]
         if (block.data.mode == 0) then
-            self:makeBlockData("andBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
+            self:makeBlockData("andBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
         elseif (block.data.mode == 1) then
-            self:makeBlockData("orBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
+            self:makeBlockData("orBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
         elseif (block.data.mode == 2) then
-            self:makeBlockData("xorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
+            self:makeBlockData("xorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
         elseif (block.data.mode == 3) then
-            self:makeBlockData("nandBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
+            self:makeBlockData("nandBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
         elseif (block.data.mode == 4) then
-            self:makeBlockData("norBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
+            self:makeBlockData("norBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
         elseif (block.data.mode == 5) then
-            self:makeBlockData("xnorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, false)
+            self:makeBlockData("xnorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
         end
     elseif block.type == "Timer" then
-        self:makeBlockData("timerBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), false, block.time, false)
+        self:makeBlockData("timerBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), 0, false, block.time, false)
     elseif block.type == "EndTickButton" then
-        self:makeBlockData("EndTickButtons", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), false, false)
+        self:makeBlockData("EndTickButtons", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), 0, false, false)
     elseif block.type == "Light" then
-        self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), false, false)
+        self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), 0, false, false)
     end
 end
 
-function FastLogicAllBlockMannager.addSiliconBlock(self, type, uuid, pos, rot, inputs, outputs, state, color, siliconBlockId)
+function FastLogicAllBlockMannager.addSiliconBlock(self, type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, siliconBlockId)
     if self.blocks[uuid] == nil then
-        self:makeBlockData(type, uuid, pos, rot, inputs, outputs, state, color, true, nil, siliconBlockId)
+        self:makeBlockData(type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, true, nil, siliconBlockId)
     end
 end
 
@@ -154,7 +204,8 @@ function FastLogicAllBlockMannager.removeOutput(self, uuid, uuidToDeconnect)
     end
 end
 
-function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, color, isSilicon, timerLength, siliconBlockId)
+function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, isSilicon, timerLength, siliconBlockId)
+    sm.MTFastLogic.UsedUuids[uuid] = true
     local keyPos = string.vecToString(pos)
     if self.locationCash[keyPos] == nil then
         self.locationCash[keyPos] = {}
@@ -188,6 +239,7 @@ function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inp
         state = state,
         timerLength = timerLength,
         color = color,
+        connectionColorId = connectionColorId,
         isSilicon = isSilicon,
         siliconBlockId = siliconBlockId
     }
@@ -203,4 +255,8 @@ end
 function FastLogicAllBlockMannager.changeTimerTime(self, uuid, time)
     self.creation.FastLogicRunner:externalChangeTimerTime(uuid, time)
     self.blocks[uuid].timerLength = time
+end
+
+function FastLogicAllBlockMannager.changeConnectionColor(self, uuid, connectionColorId)
+    self.blocks[uuid].connectionColorId = connectionColorId
 end

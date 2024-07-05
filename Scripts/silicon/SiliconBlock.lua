@@ -10,7 +10,6 @@ SiliconBlock = SiliconBlock or class()
 dofile "SiliconCompressor.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
--- sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 sm.MTFastLogic.SiliconBlocks = sm.MTFastLogic.SiliconBlocks or {}
 sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
 sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
@@ -33,7 +32,6 @@ local uuidToSize = {
 
 function SiliconBlock.deepRescanSelf(self)
     for _, block in ipairs(self.data.blocks) do
-        -- sm.MTFastLogic.UsedUuids[block.uuid] = nil
         self.FastLogicAllBlockMannager:removeBlock(block.uuid)
     end
     self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
@@ -69,7 +67,7 @@ function SiliconBlock.getData(self)
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
         local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
-        self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, self.id)
+        self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, block.connectionColorId, self.id)
     end
     self:server_saveBlocks(self.data.blocks)
     sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2] + 1] = self
@@ -132,7 +130,6 @@ function SiliconBlock.server_onDestroy(self)
     self.creation.SiliconBlocks[self.id] = nil
     if self.removeData ~= false then
         for _, block in ipairs(self.data.blocks) do
-            -- sm.MTFastLogic.UsedUuids[block.uuid] = nil
             self.FastLogicAllBlockMannager:removeBlock(block.uuid)
         end
     end
@@ -140,6 +137,7 @@ end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
     -- advPrint(self., 3)
+    -- print(self:compressBlocks())
 end
 
 function SiliconBlock.client_onTinker(self, character, state)
@@ -190,7 +188,8 @@ function SiliconBlock.addBlocks(self, uuids)
                 inputs = table.copy(block.inputs),
                 outputs = table.copy(block.outputs),
                 state = block.state,
-                color = block.color
+                color = block.color,
+                connectionColorId = block.connectionColorId,
                 -- timerLength = block.timerLength,
             }
         end

@@ -293,8 +293,8 @@ function MTMultitoolLib.formatOrdinal(n)
     return n .. suffix
 end
 
-function MTMultitoolLib.getVoxelMap(body)
-    if MTMultitoolLib.voxelMapHash[body:getId()] then
+function MTMultitoolLib.getVoxelMap(body, override_cache)
+    if MTMultitoolLib.voxelMapHash[body:getId()] and not override_cache then
         local hashValue = MTMultitoolLib.voxelMapHash[body:getId()]
         if os.clock() - hashValue.time < 5 then
             return hashValue.voxelMap

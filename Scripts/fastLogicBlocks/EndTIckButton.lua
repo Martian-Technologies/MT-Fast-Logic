@@ -30,7 +30,6 @@ function EndTickButton.client_onDestroy2(self)
 end
 
 function EndTickButton.client_onInteract(self, character, state)
-    print(state)
     self.FastLogicRunner:externalChangeNonFastOnInput(self.data.uuid, state and 1 or -1)
     self.FastLogicRunner:externalAddBlockToUpdate(self.data.uuid)
 end

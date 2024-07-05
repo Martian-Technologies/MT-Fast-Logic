@@ -115,16 +115,8 @@ end
 
 SiliconCompressor.Versions["a"].decompressBlockData = function(siliconBlock, rawData)
     local blockData = LibDeflate:DecompressDeflate(LibDeflate:DecodeForPrint(rawData))
-    -- print(blockData)
-    if blockData == nil then
-        print("Failed to decompress, blockdata is nil")
-        print(rawData)
-    end
     if blockData == nil then return {} end
     blockData = siliconBlock:stringToTable(blockData)
-    if blockData == nil then
-        print("Failed to decompress AFTER decompression, blockdata is nil")
-    end
     if blockData == nil then return {} end
     local colorIndexHash = blockData[2]
     local onlyBlockData = blockData[1]

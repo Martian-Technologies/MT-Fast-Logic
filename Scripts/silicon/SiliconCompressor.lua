@@ -10,9 +10,7 @@ local highestVersion = "a"
 function SiliconCompressor.decompressBlockData(siliconBlock, blockData)
     if blockData == nil then return {} end
     local firstChar = string.sub(blockData, 1, 1)
-    print(firstChar)
     local version = SiliconCompressor.Versions[firstChar]
-    print(version)
     if version == nil then
         version = SiliconCompressor.Versions["default"]
     else

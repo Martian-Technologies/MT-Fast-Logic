@@ -18,14 +18,14 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
     multitool.BlockSelector.enabled = false
 
     -- handle forcebuild
-    if MTMultitool.handleForceBuild(multitool, forceBuild) then
-        self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Tool/Tool_Colorizer.layout", true)
-        self.gui:setGridSize("ColorGrid", 10)
-        self.gui:addGridItem("ColorGrid", {
+    -- if MTMultitool.handleForceBuild(multitool, forceBuild) then
+    --     self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Tool/Tool_Colorizer.layout", true)
+    --     self.gui:setGridSize("ColorGrid", 10)
+    --     self.gui:addGridItem("ColorGrid", {
             
-        })
-        self.gui:open()
-    end
+    --     })
+    --     self.gui:open()
+    -- end
 
     local needToRaycast = false
 

@@ -55,7 +55,7 @@ SiliconCompressor.Versions["a"].decompressBlockData = function(siliconBlock, raw
         local block = onlyBlockData[i]
         if block ~= nil and block ~= false then
             blocks[#blocks + 1] = {
-                type = numberToType[math.fmod(block[1], 6)],
+                type = DataUtil.numberToType[math.fmod(block[1], 6)],
                 uuid = block[2],
                 pos = sm.vec3.new(
                     math.fmod(i - 1, siliconBlock.size[1]) + 0.5,
@@ -63,7 +63,7 @@ SiliconCompressor.Versions["a"].decompressBlockData = function(siliconBlock, raw
                     0.5,
                     math.floor((i - 1) / (siliconBlock.size[2] * siliconBlock.size[1])) + 0.5
                 ),
-                rot = numberToRotation[math.floor(block[1] / 6)],
+                rot = DataUtil.numberToRotation[math.floor(block[1] / 6)],
                 inputs = block[3],
                 outputs = block[4],
                 state = false,

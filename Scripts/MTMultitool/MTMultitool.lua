@@ -494,6 +494,31 @@ function MTMultitool.server_convertBody(self, data)
 end
 
 MTGateUUIDs = {
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88087"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88088"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88089"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88090"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88091"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88092"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88093"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88094"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88095"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88096"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88097"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88098"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88099"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88100"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88101"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88102"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88103"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88104"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88105"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88106"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88107"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88108"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88109"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88110"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88111"),
     sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88112"),
     sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88113"),
     sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88114"),
@@ -506,7 +531,9 @@ MTGateUUIDs = {
     sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88121"),
     sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88122"),
     sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88123"),
-
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88124"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88125"),
+    sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88126"),
 }
 
 function MTMultitool.server_convertSilicon(self, data)

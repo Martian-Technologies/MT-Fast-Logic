@@ -1,8 +1,6 @@
 dofile "../../util/stringCompression/LibDeflate.lua"
 
-SiliconCompressor.Versions["a"] = {
-    priority = 0,
-}
+SiliconCompressor.Versions["a"] = {}
 
 local numberToRotation = {
     [1] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0) },
@@ -112,13 +110,21 @@ SiliconCompressor.Versions["a"].compressBlocks = function (siliconBlock)
         colorIndexHash[index] = color
     end
     local dataString = siliconBlock:tableToString({ blocks, colorIndexHash })
-    return LibDeflate:CompressDeflate(dataString)
+    return LibDeflate:EncodeForPrint(LibDeflate:CompressDeflate(dataString))
 end
 
 SiliconCompressor.Versions["a"].decompressBlockData = function(siliconBlock, rawData)
-    local blockData = LibDeflate:DecompressDeflate(rawData)
+    local blockData = LibDeflate:DecompressDeflate(LibDeflate:DecodeForPrint(rawData))
+    -- print(blockData)
+    if blockData == nil then
+        print("Failed to decompress, blockdata is nil")
+        print(rawData)
+    end
     if blockData == nil then return {} end
     blockData = siliconBlock:stringToTable(blockData)
+    if blockData == nil then
+        print("Failed to decompress AFTER decompression, blockdata is nil")
+    end
     if blockData == nil then return {} end
     local colorIndexHash = blockData[2]
     local onlyBlockData = blockData[1]
@@ -131,7 +137,8 @@ SiliconCompressor.Versions["a"].decompressBlockData = function(siliconBlock, raw
                 uuid = block[2],
                 pos = sm.vec3.new(
                     math.fmod(i - 1, siliconBlock.size[1]) + 0.5,
-                    math.floor(math.fmod(i - 1, siliconBlock.size[2] * siliconBlock.size[1]) / siliconBlock.size[1]) + 0.5,
+                    math.floor(math.fmod(i - 1, siliconBlock.size[2] * siliconBlock.size[1]) / siliconBlock.size[1]) +
+                    0.5,
                     math.floor((i - 1) / (siliconBlock.size[2] * siliconBlock.size[1])) + 0.5
                 ),
                 rot = numberToRotation[math.floor(block[1] / 6)],

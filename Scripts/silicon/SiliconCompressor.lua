@@ -5,14 +5,7 @@ SiliconCompressor = SiliconCompressor or {
 dofile "compressorVersions/Version1.lua"
 dofile "compressorVersions/Version2.lua"
 
-local highestVersion = nil
-local highestPriority = -1000000
-for identifier, version in pairs(SiliconCompressor.Versions) do
-    if version.priority > highestPriority or highestVersion == nil then
-        highestPriority = version.priority
-        highestVersion = identifier
-    end
-end
+local highestVersion = "a"
 
 function SiliconCompressor.decompressBlockData(siliconBlock, blockData)
     if blockData == nil then return {} end

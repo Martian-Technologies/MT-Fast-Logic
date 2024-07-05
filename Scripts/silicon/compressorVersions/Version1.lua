@@ -1,6 +1,4 @@
-SiliconCompressor.Versions["default"] = {
-    priority = -1,
-}
+SiliconCompressor.Versions["default"] = {}
 
 local numberToRotation = {
     [1] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0) },

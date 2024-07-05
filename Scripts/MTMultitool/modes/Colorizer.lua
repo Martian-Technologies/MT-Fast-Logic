@@ -10,11 +10,22 @@ function Colorizer.inject(multitool)
     self.final = nil
     self.color = 1
     self.nametagUpdate = NametagManager.createController(multitool)
+    self.gui = nil
 end
 
 function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.colorizer
     multitool.BlockSelector.enabled = false
+
+    -- handle forcebuild
+    if MTMultitool.handleForceBuild(multitool, forceBuild) then
+        self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Tool/Tool_Colorizer.layout", true)
+        self.gui:setGridSize("ColorGrid", 10)
+        self.gui:addGridItem("ColorGrid", {
+            
+        })
+        self.gui:open()
+    end
 
     local needToRaycast = false
 
@@ -153,7 +164,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
     end
     if MTMultitool.handleForceBuild(multitool, forceBuild) then
         self.color = self.color + 1
-        if self.color > 12 then
+        if self.color > 40 then
             self.color = 1
         end
     end

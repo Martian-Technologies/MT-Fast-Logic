@@ -22,6 +22,7 @@ function MTFlying.sv_toggleFlying(multitool, data)
     local self = multitool.MTFlying
     self.flying = data[1]
     local clientIsHost = data[2]
+    print(clientIsHost)
     local character = multitool.tool:getOwner().character
     MTFlying.playersFlying[character.id] = {flying = self.flying, isHost = clientIsHost}
 	if character ~= nil then
@@ -30,8 +31,10 @@ function MTFlying.sv_toggleFlying(multitool, data)
 			if self.flying == false then
 				character.publicData.waterMovementSpeedFraction = 1
 				character.publicData.MovementSpeedFraction = 1
+                character:setDiving(false)
+            else
                 character:setDiving(not clientIsHost)
-			end
+            end
 		end
 	end
 end
@@ -49,12 +52,12 @@ function MTFlying.server_onFixedUpdate(multitool, dt)
 		if character ~= nil then
 			character.movementSpeedFraction = 3.5
             if character:isSprinting() then
-                if not MTFlying.playersFlying[character.id].isHost then
+                if MTFlying.playersFlying[character.id].isHost then
                     character:setDiving(true)
                 end
 				character.movementSpeedFraction = 20.0
             else
-                if not MTFlying.playersFlying[character.id].isHost then
+                if MTFlying.playersFlying[character.id].isHost then
                     character:setDiving(false)
                 end
             end

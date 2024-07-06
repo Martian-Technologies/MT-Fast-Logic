@@ -18,6 +18,8 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BackupEngine.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/Flying.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/LogicConverter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SiliconConverter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Settings.lua")
@@ -80,6 +82,10 @@ MTMultitool.FastLogicModes = {
     -- 2
 }
 
+function MTMultitool.server_onCreate(self)
+    MTFlying.sv_inject(self)
+end
+
 function MTMultitool.client_onCreate(self)
     ThisMultitool = self
     self.subscriptions = {
@@ -88,6 +94,8 @@ function MTMultitool.client_onCreate(self)
 
     CallbackEngine.inject(self)
     BackupEngine.inject(self)
+
+    MTFlying.inject(self)
 
     LogicConverter.inject(self)
     SiliconConverterTool.inject(self)
@@ -536,6 +544,10 @@ MTGateUUIDs = {
     sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88126"),
 }
 
+function MTMultitool.server_onFixedUpdate(self, dt)
+    MTFlying.server_onFixedUpdate(self, dt)
+end
+
 function MTMultitool.server_convertSilicon(self, data)
     local wantedType = data.wantedType
     local positions = {}
@@ -767,4 +779,12 @@ function MTMultitool.server_recolor(self, data)
             end
         end
     end
+end
+
+function MTMultitool.cl_notifyFlying(self, data)
+    MTFlying.cl_notifyFlying(self, data)
+end
+
+function MTMultitool.sv_toggleFlying(self, data)
+    MTFlying.sv_toggleFlying(self, data)
 end

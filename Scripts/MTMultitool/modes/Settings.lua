@@ -122,7 +122,25 @@ function Settings.inject(multitool)
         end,
     })
 
-
+    table.insert(self.elements, {
+        name = "flyModeToggle",
+        type = "customButton",
+        position = { a = math.pi / 8 * fovMult, e = 2 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = 0.03 * fovMult,
+        getrender = function()
+            local isFlying = multitool.MTFlying.flying
+            local text = "Fly Mode: " .. (isFlying and "On" or "Off")
+            local color = isFlying and sm.color.new(0.2, 0.9, 0.2) or sm.color.new(0.9, 0.2, 0.2)
+            return {
+                text = text,
+                color = color,
+            }
+        end,
+        onclick = function()
+            MTFlying.toggleFlying(multitool)
+        end,
+    })
 end
 
 local function button(multitool, ctx)
@@ -175,7 +193,7 @@ local function toggleButton(multitool, ctx)
     local cameraPos = ctx.cameraPos
     local pos = (levelQuat * azimuthQuat * elevationQuat) * sm.vec3.new(0, 0, 25) + cameraPos
     local elementAtVec = sm.quat.getAt(levelQuat * azimuthQuat * elevationQuat)
-    
+
     local horizontalAngle = ctx.horizontalAngle
     local verticalAngle = ctx.verticalAngle
 
@@ -199,6 +217,46 @@ local function toggleButton(multitool, ctx)
             color = sm.color.new(0, 0, 0)
         end
         if primaryState == 1 then
+            element.onclick()
+        end
+    end
+    table.insert(tags, {
+        pos = pos,
+        txt = text,
+        color = color
+    })
+end
+
+local function customButton(multitool, ctx)
+    local element = ctx.element
+    local tags = ctx.tags
+    local levelQuat = ctx.levelQuat
+    local elevationQuat = ctx.elevationQuat
+    local azimuthQuat = ctx.azimuthQuat
+    local cameraVec = ctx.cameraVec
+    local cameraPos = ctx.cameraPos
+    local pos = (levelQuat * azimuthQuat * elevationQuat) * sm.vec3.new(0, 0, 25) + cameraPos
+    local elementAtVec = sm.quat.getAt(levelQuat * azimuthQuat * elevationQuat)
+
+    local horizontalAngle = ctx.horizontalAngle
+    local verticalAngle = ctx.verticalAngle
+
+    local hover = not ctx.block.hovered
+    if horizontalAngle > element.angleBoundHorizontal or verticalAngle > element.angleBoundVertical then
+        hover = false
+    else
+        ctx.block.hovered = true
+    end
+
+    local render = element.getrender()
+    local text = render.text
+    local color = render.color
+    if hover then
+        text = "[ " .. text .. " ]"
+        if ctx.buttonClicks.primaryState > 0 then
+            color = sm.color.new(0, 0, 0)
+        end
+        if ctx.buttonClicks.primaryState == 1 then
             element.onclick()
         end
     end
@@ -292,6 +350,8 @@ function Settings.trigger(multitool, primaryState, secondaryState, forceBuild, l
             button(multitool, ctx)
         elseif element.type == "toggleButton" then
             toggleButton(multitool, ctx)
+        elseif element.type == "customButton" then
+            customButton(multitool, ctx)
         elseif element.type == "indicator" then
             indicator(multitool, ctx)
         end

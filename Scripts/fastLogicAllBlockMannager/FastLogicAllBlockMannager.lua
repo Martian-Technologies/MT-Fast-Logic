@@ -164,7 +164,7 @@ function FastLogicAllBlockMannager.addOutput(self, uuid, uuidToConnect, skipSili
     if (
         self.blocks[uuid] ~= nil and self.blocks[uuidToConnect] ~= nil and
         (self.blocks[uuid].outputHash[uuidToConnect] == nil or self.blocks[uuidToConnect].inputHash[uuid] == nil)
-    )then
+    ) then
         if self.blocks[uuid].isSilicon then
             self.creation.SiliconBlocks[self.blocks[uuid].siliconBlockId]:addOutput(uuid, uuidToConnect, skipSiliconSave)
         end

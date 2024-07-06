@@ -43,7 +43,7 @@ function CreationUtil.getCreationId(body)
     return id
 end
 
-function CreationUtil.newUuid()
+function CreationUtil.newUuid() -- should never return true
     local uuid = string.uuid()
     while sm.MTFastLogic.UsedUuids[uuid] ~= nil do
         uuid = string.uuid()
@@ -54,18 +54,18 @@ end
 
 function CreationUtil.updateOldUuid(uuid, creationId)
     local creation = sm.MTFastLogic.Creations[creationId]
-    if sm.MTFastLogic.UsedUuids[uuid] == nil or creation.blocks[uuid] ~= nil then
-        sm.MTFastLogic.UsedUuids[uuid] = true
-        return uuid
-    end
     local currentTick = sm.game.getCurrentTick()
     if creation.NewBlockUuids[currentTick] == nil then
         creation.NewBlockUuids = {}
         creation.NewBlockUuids[currentTick] = {}
-    else
-        if creation.NewBlockUuids[currentTick][uuid] ~= nil then
-            return creation.NewBlockUuids[currentTick][uuid]
-        end
+    end
+    if sm.MTFastLogic.UsedUuids[uuid] == nil or creation.blocks[uuid] ~= nil or creation.NewBlockUuids[currentTick][uuid] == true then
+        sm.MTFastLogic.UsedUuids[uuid] = true
+        reation.NewBlockUuids[currentTick][uuid] = true
+        return uuid
+    end
+    if creation.NewBlockUuids[currentTick][uuid] ~= nil then
+        return creation.NewBlockUuids[currentTick][uuid]
     end
     local newUuid = CreationUtil.newUuid()
     creation.NewBlockUuids[currentTick][uuid] = newUuid

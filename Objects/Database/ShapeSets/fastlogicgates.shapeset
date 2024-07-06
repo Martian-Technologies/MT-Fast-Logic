@@ -21,7 +21,8 @@
                 "classname": "FastLogicGate_0",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88087"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88087",
+            "showInInventory": false
         },
         {
             "box": {
@@ -44,7 +45,8 @@
                 "classname": "FastLogicGate_1",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88088"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88088",
+            "showInInventory": false
         },
         {
             "box": {
@@ -67,7 +69,8 @@
                 "classname": "FastLogicGate_2",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88089"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88089",
+            "showInInventory": false
         },
         {
             "box": {
@@ -90,7 +93,8 @@
                 "classname": "FastLogicGate_3",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88090"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88090",
+            "showInInventory": false
         },
         {
             "box": {
@@ -113,7 +117,8 @@
                 "classname": "FastLogicGate_4",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88091"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88091",
+            "showInInventory": false
         },
         {
             "box": {
@@ -136,7 +141,8 @@
                 "classname": "FastLogicGate_5",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88092"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88092",
+            "showInInventory": false
         },
         {
             "box": {
@@ -159,7 +165,8 @@
                 "classname": "FastLogicGate_6",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88093"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88093",
+            "showInInventory": false
         },
         {
             "box": {
@@ -182,7 +189,8 @@
                 "classname": "FastLogicGate_7",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88094"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88094",
+            "showInInventory": false
         },
         {
             "box": {
@@ -205,7 +213,8 @@
                 "classname": "FastLogicGate_8",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88095"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88095",
+            "showInInventory": false
         },
         {
             "box": {
@@ -228,7 +237,8 @@
                 "classname": "FastLogicGate_9",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88096"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88096",
+            "showInInventory": false
         },
         {
             "box": {
@@ -251,7 +261,8 @@
                 "classname": "FastLogicGate_10",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88097"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88097",
+            "showInInventory": false
         },
         {
             "box": {
@@ -274,7 +285,8 @@
                 "classname": "FastLogicGate_11",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88098"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88098",
+            "showInInventory": false
         },
         {
             "box": {
@@ -297,7 +309,8 @@
                 "classname": "FastLogicGate_12",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88099"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88099",
+            "showInInventory": false
         },
         {
             "box": {
@@ -320,7 +333,8 @@
                 "classname": "FastLogicGate_13",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88100"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88100",
+            "showInInventory": false
         },
         {
             "box": {
@@ -343,7 +357,8 @@
                 "classname": "FastLogicGate_14",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88101"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88101",
+            "showInInventory": false
         },
         {
             "box": {
@@ -366,7 +381,8 @@
                 "classname": "FastLogicGate_15",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88102"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88102",
+            "showInInventory": false
         },
         {
             "box": {
@@ -389,7 +405,8 @@
                 "classname": "FastLogicGate_16",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88103"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88103",
+            "showInInventory": false
         },
         {
             "box": {
@@ -412,7 +429,8 @@
                 "classname": "FastLogicGate_17",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88104"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88104",
+            "showInInventory": false
         },
         {
             "box": {
@@ -435,7 +453,8 @@
                 "classname": "FastLogicGate_18",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88105"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88105",
+            "showInInventory": false
         },
         {
             "box": {
@@ -458,7 +477,8 @@
                 "classname": "FastLogicGate_19",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88106"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88106",
+            "showInInventory": false
         },
         {
             "box": {
@@ -481,7 +501,8 @@
                 "classname": "FastLogicGate_20",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88107"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88107",
+            "showInInventory": false
         },
         {
             "box": {
@@ -504,7 +525,8 @@
                 "classname": "FastLogicGate_21",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88108"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88108",
+            "showInInventory": false
         },
         {
             "box": {
@@ -527,7 +549,8 @@
                 "classname": "FastLogicGate_22",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88109"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88109",
+            "showInInventory": false
         },
         {
             "box": {
@@ -550,7 +573,8 @@
                 "classname": "FastLogicGate_23",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88110"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88110",
+            "showInInventory": false
         },
         {
             "box": {
@@ -573,7 +597,8 @@
                 "classname": "FastLogicGate_24",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88111"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88111",
+            "showInInventory": false
         },
         {
             "box": {
@@ -619,7 +644,8 @@
                 "classname": "FastLogicGate_26",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88113"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88113",
+            "showInInventory": false
         },
         {
             "box": {
@@ -642,7 +668,8 @@
                 "classname": "FastLogicGate_27",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88114"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88114",
+            "showInInventory": false
         },
         {
             "box": {
@@ -665,7 +692,8 @@
                 "classname": "FastLogicGate_28",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88115"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88115",
+            "showInInventory": false
         },
         {
             "box": {
@@ -688,7 +716,8 @@
                 "classname": "FastLogicGate_29",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88116"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88116",
+            "showInInventory": false
         },
         {
             "box": {
@@ -711,7 +740,8 @@
                 "classname": "FastLogicGate_30",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88117"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88117",
+            "showInInventory": false
         },
         {
             "box": {
@@ -734,7 +764,8 @@
                 "classname": "FastLogicGate_31",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88118"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88118",
+            "showInInventory": false
         },
         {
             "box": {
@@ -757,7 +788,8 @@
                 "classname": "FastLogicGate_32",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88119"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88119",
+            "showInInventory": false
         },
         {
             "box": {
@@ -780,7 +812,8 @@
                 "classname": "FastLogicGate_33",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88120"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88120",
+            "showInInventory": false
         },
         {
             "box": {
@@ -803,7 +836,8 @@
                 "classname": "FastLogicGate_34",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88121"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88121",
+            "showInInventory": false
         },
         {
             "box": {
@@ -826,7 +860,8 @@
                 "classname": "FastLogicGate_35",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88122"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88122",
+            "showInInventory": false
         },
         {
             "box": {
@@ -849,7 +884,8 @@
                 "classname": "FastLogicGate_36",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88123"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88123",
+            "showInInventory": false
         },
         {
             "box": {
@@ -872,7 +908,8 @@
                 "classname": "FastLogicGate_37",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88124"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88124",
+            "showInInventory": false
         },
         {
             "box": {
@@ -895,7 +932,8 @@
                 "classname": "FastLogicGate_38",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88125"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88125",
+            "showInInventory": false
         },
         {
             "box": {
@@ -918,7 +956,8 @@
                 "classname": "FastLogicGate_39",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88126"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88126",
+            "showInInventory": false
         }
     ]
 }

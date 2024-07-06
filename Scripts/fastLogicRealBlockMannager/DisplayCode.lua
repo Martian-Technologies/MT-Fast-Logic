@@ -17,7 +17,6 @@ function FastLogicRealBlockMannager.updateDisplay(self, blockToUpdate)
             if displayedStates[uuid] ~= state then
                 displayedStates[uuid] = state
                 if block.interactable.active ~= state or block.state ~= state then
-                    print("yes")
                     block.interactable.active = state
                     block.state = state
                     if state then
@@ -31,7 +30,6 @@ function FastLogicRealBlockMannager.updateDisplay(self, blockToUpdate)
             end
         end
         if numberOfChanges > 1000 then
-            print("WHAT")
             changedUuidsArray[#changedUuidsArray + 1] = changedUuids
             changedUuids = {}
             numberOfChanges = 0
@@ -39,7 +37,6 @@ function FastLogicRealBlockMannager.updateDisplay(self, blockToUpdate)
        
     end
     if numberOfChanges > 0 then
-        print(changedUuids)
         changedUuidsArray[#changedUuidsArray + 1] = changedUuids
     end
     self.creation.lastBodyUpdate = sm.game.getCurrentTick()

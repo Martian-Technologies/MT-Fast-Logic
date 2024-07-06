@@ -22,7 +22,6 @@ sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
 sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
-    print(self.run)
     if self.run then
         -- bodiesToConvert
         if self.bodiesToConvert ~= nil then
@@ -45,16 +44,15 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         for k, v in pairs(sm.MTFastLogic.Creations) do
             v.FastLogicRealBlockMannager:update()
         end
-        -- print("----")
-        -- print(self.changedUuidsArray)
         for i = 1, #self.changedUuidsArray do
             local changedUuidsArray = {}
             for ii = 1, #self.changedUuidsArray[i] do
                 if  sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]] ~= nil then
                     changedUuidsArray[ii] = {
                         sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].id,
-                        sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].interactable.active
+                        sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].state
                     }
+                    print(sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].state)
                 end
             end
             self.network:sendToClients("client_updateTexturesAndStates", changedUuidsArray)
@@ -87,6 +85,7 @@ function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedIds)
     for i = 1, #changedIds do
         local block = sm.MTFastLogic.client_FastLogicBlockLookUp[changedIds[i][1]]
         if block ~= nil then
+            print(changedIds[i][2])
             block:client_updateTexture(changedIds[i][2])
         end
     end

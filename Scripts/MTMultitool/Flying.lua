@@ -1,5 +1,9 @@
-MTFlying = MTFlying or {
-    playersFlying = {}
+MTFlying = {playersFlying = {}}
+
+MTFlying.modes = {
+    swimSmart = 1,
+    swimPermadive = 2,
+    impulseModulation = 3
 }
 
 function MTFlying.inject(multitool)
@@ -48,22 +52,25 @@ end
 function MTFlying.server_onFixedUpdate(multitool, dt)
     local self = multitool.MTFlying
     local character = multitool.tool:getOwner().character
-	if MTFlying.playersFlying[character.id].flying then
-		if character ~= nil then
-			character.movementSpeedFraction = 3.5
-            if character:isSprinting() then
-                if MTFlying.playersFlying[character.id].isHost then
-                    character:setDiving(true)
+    local status = MTFlying.playersFlying[character.id]
+    if status ~= nil then
+        if MTFlying.playersFlying[character.id].flying then
+            if character ~= nil then
+                character.movementSpeedFraction = 3.5
+                if character:isSprinting() then
+                    if MTFlying.playersFlying[character.id].isHost then
+                        character:setDiving(true)
+                    end
+                    character.movementSpeedFraction = 20.0
+                else
+                    if MTFlying.playersFlying[character.id].isHost then
+                        character:setDiving(false)
+                    end
                 end
-				character.movementSpeedFraction = 20.0
-            else
-                if MTFlying.playersFlying[character.id].isHost then
-                    character:setDiving(false)
+                if character.publicData then
+                    character.publicData.waterMovementSpeedFraction = character.movementSpeedFraction
                 end
             end
-			if character.publicData then
-				character.publicData.waterMovementSpeedFraction = character.movementSpeedFraction
-			end
-		end
-	end
+        end
+    end
 end

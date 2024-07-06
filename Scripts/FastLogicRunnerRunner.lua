@@ -52,7 +52,6 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
                         sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].id,
                         sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].state
                     }
-                    print(sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].state)
                 end
             end
             self.network:sendToClients("client_updateTexturesAndStates", changedUuidsArray)

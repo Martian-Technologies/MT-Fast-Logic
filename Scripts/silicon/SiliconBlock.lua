@@ -137,7 +137,7 @@ end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
     -- advPrint(self., 3)
-    -- print(self:compressBlocks())
+    print(SiliconCompressor.compressBlocks(self))
 end
 
 function SiliconBlock.client_onTinker(self, character, state)

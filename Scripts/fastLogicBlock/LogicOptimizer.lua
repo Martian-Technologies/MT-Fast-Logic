@@ -56,7 +56,7 @@ function FastLogicRunner.optimizeLogic(self)
                 end
 
                 -- multi blocks
-                self:findMultiBlocks(id)
+                -- self:findMultiBlocks(id)
             end
         end
     end

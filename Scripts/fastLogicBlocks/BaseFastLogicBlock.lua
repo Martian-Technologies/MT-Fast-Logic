@@ -176,10 +176,20 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     print(self.FastLogicRunner.numberOfOtherInputs[runnrerId])
     print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
     print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
-    print(self.FastLogicRunner.blockInputs[runnrerId])
-    print(self.FastLogicRunner.blockOutputs[runnrerId])
+    -- print(self.FastLogicRunner.blockInputs[runnrerId])
+    -- print(self.FastLogicRunner.blockOutputs[runnrerId])
+    -- for i = 3, #self.FastLogicRunner.runningBlocks-6 do
+    --     if self.FastLogicRunner.runningBlockLengths[i] == 0 then
+    --         print("{}" .. tostring(i))
+    --     else
+    --         print(formater.getFormatedForPrint(self.FastLogicRunner.runningBlocks[i], 2, self.FastLogicRunner.runningBlockLengths[i])  .. tostring(i))
+    --     end
+    -- end
+    print(self.FastLogicRunner.optimizedBlockOutputs[runnrerId])
+    print(self.FastLogicRunner.numberOfOptimizedInputs[runnrerId])
     print(runnrerId)
     print(self.data.uuid)
+ 
     -- print(self.interactable.id)
 end
 

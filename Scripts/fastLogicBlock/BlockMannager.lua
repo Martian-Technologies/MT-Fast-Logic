@@ -403,7 +403,7 @@ function FastLogicRunner.fixBlockOutputData(self, id)
 end
 
 function FastLogicRunner.fixBlockInputData(self, id)
-    local path = self.runnableBlockPathIds[id]
+    local runnableBlockPathIds = self.runnableBlockPathIds[id]
     if runnableBlockPathIds == 7 or runnableBlockPathIds == 12 then -- all on blocks
         if self.numberOfBlockInputs[id] == 0 then
             self.numberOfOptimizedInputs[id] = 0

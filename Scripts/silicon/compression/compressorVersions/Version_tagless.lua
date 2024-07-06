@@ -1,8 +1,13 @@
-dofile "../../util/dataUtil.lua"
+dofile "../../../util/compressionUtil/compressionUtil.lua"
 
-SiliconCompressor.Versions["tagless"] = {}
 
-SiliconCompressor.Versions["tagless"].compressBlocks = function (siliconBlock)
+sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.SiliconCompressor = sm.MTFastLogic.SiliconCompressor or {}
+sm.MTFastLogic.SiliconCompressor.Versions = sm.MTFastLogic.SiliconCompressor.Versions or {}
+sm.MTFastLogic.SiliconCompressor.Versions["tagless"] = {}
+local compressor = sm.MTFastLogic.SiliconCompressor.Versions["tagless"]
+
+compressor.compressBlocks = function (siliconBlock)
     if siliconBlock.data.blocks == nil then return {} end
     local blocks = table.makeArray(siliconBlock.size[1] * siliconBlock.size[2] * siliconBlock.size[3])
     local colorHash = {}
@@ -24,9 +29,9 @@ SiliconCompressor.Versions["tagless"].compressBlocks = function (siliconBlock)
                 end
             end
         end
-        local rotNumber = DataUtil.rotationToNumber[tostring(block.rot[1].x) .. tostring(block.rot[1].y) .. tostring(block.rot[1].z) .. tostring(block.rot[3].x) .. tostring(block.rot[3].y) .. tostring(block.rot[3].z)]
+        local rotNumber = sm.MTFastLogic.CompressionUtil.rotationToNumber[tostring(block.rot[1].x) .. tostring(block.rot[1].y) .. tostring(block.rot[1].z) .. tostring(block.rot[3].x) .. tostring(block.rot[3].y) .. tostring(block.rot[3].z)]
         blocks[(block.pos.x - 0.5) + (block.pos.y - 0.5) * siliconBlock.size[1] + (block.pos.z - 0.5) * siliconBlock.size[2] * siliconBlock.size[1] + 1] = {
-            rotNumber * 6 + DataUtil.typeToNumber[block.type],
+            rotNumber * 6 + sm.MTFastLogic.CompressionUtil.typeToNumber[block.type],
             block.uuid,
             inputs,
             block.outputs,
@@ -37,11 +42,11 @@ SiliconCompressor.Versions["tagless"].compressBlocks = function (siliconBlock)
     for color, index in pairs(colorHash) do
         colorIndexHash[index] = color
     end
-    return DataUtil.tableToString({ blocks, colorIndexHash })
+    return sm.MTFastLogic.CompressionUtil.tableToString({ blocks, colorIndexHash })
 end
 
-SiliconCompressor.Versions["tagless"].decompressBlockData = function(siliconBlock, blockData)
-    blockData = DataUtil.stringToTable(blockData)
+compressor.decompressBlockData = function(siliconBlock, blockData)
+    blockData = sm.MTFastLogic.CompressionUtil.stringToTable(blockData)
     if blockData == nil then return {} end
     local colorIndexHash = blockData[2]
     local onlyBlockData = blockData[1]
@@ -50,14 +55,14 @@ SiliconCompressor.Versions["tagless"].decompressBlockData = function(siliconBloc
         local block = onlyBlockData[i]
         if block ~= nil and block ~= false then
             blocks[#blocks + 1] = {
-                type = DataUtil.numberToType[math.fmod(block[1], 6)],
+                type = sm.MTFastLogic.CompressionUtil.numberToType[math.fmod(block[1], 6)],
                 uuid = block[2],
                 pos = sm.vec3.new(
                     math.fmod(i - 1, siliconBlock.size[1]) + 0.5,
                     math.floor(math.fmod(i - 1, siliconBlock.size[2] * siliconBlock.size[1]) / siliconBlock.size[1]) + 0.5,
                     math.floor((i - 1) / (siliconBlock.size[2] * siliconBlock.size[1])) + 0.5
                 ),
-                rot = DataUtil.numberToRotation[math.floor(block[1] / 6)],
+                rot = sm.MTFastLogic.CompressionUtil.numberToRotation[math.floor(block[1] / 6)],
                 inputs = block[3],
                 outputs = block[4],
                 state = false,

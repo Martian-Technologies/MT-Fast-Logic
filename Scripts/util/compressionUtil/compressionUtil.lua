@@ -1,6 +1,9 @@
-DataUtil = {} or DataUtil
+sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.CompressionUtil = sm.MTFastLogic.CompressionUtil or {}
 
-DataUtil.numberToRotation = {
+dofile "LibDeflate.lua"
+
+sm.MTFastLogic.CompressionUtil.numberToRotation = {
     [1] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, 0, 1), sm.vec3.new(0, -1, 0) },
     [2] = { sm.vec3.new(1, 0, 0), sm.vec3.new(0, -1, 0), sm.vec3.new(0, 0, -1) },
     [3] = { sm.vec3.new(0, 1, 0), sm.vec3.new(0, 0, -1), sm.vec3.new(-1, 0, 0) },
@@ -27,7 +30,7 @@ DataUtil.numberToRotation = {
     [24] = { sm.vec3.new(0, -1, 0), sm.vec3.new(-1, 0, 0), sm.vec3.new(0, 0, -1) },
 }
 
-DataUtil.rotationToNumber = {
+sm.MTFastLogic.CompressionUtil.rotationToNumber = {
     ["1000-10"] = 1,
     ["10000-1"] = 2,
     ["010-100"] = 3,
@@ -54,7 +57,7 @@ DataUtil.rotationToNumber = {
     ["0-1000-1"] = 24,
 }
 
-DataUtil.typeToNumber = {
+sm.MTFastLogic.CompressionUtil.typeToNumber = {
     andBlocks = 0,
     orBlocks = 1,
     xorBlocks = 2,
@@ -63,7 +66,7 @@ DataUtil.typeToNumber = {
     xnorBlocks = 5,
 }
 
-DataUtil.numberToType = {
+sm.MTFastLogic.CompressionUtil.numberToType = {
     [0] = "andBlocks",
     [1] = "orBlocks",
     [2] = "xorBlocks",
@@ -72,13 +75,13 @@ DataUtil.numberToType = {
     [5] = "xnorBlocks",
 }
 
-function DataUtil.tableToString(table)
+function sm.MTFastLogic.CompressionUtil.tableToString(table)
     local str = ""
     local i = 1
     for k, v in pairs(table) do
         local needsKey = k == i
         if type(v) == "table" then
-            v = "{" .. DataUtil.tableToString(v) .. "}"
+            v = "{" .. sm.MTFastLogic.CompressionUtil.tableToString(v) .. "}"
         elseif type(v) ~= "string" then
             v = tostring(v)
         else
@@ -106,10 +109,10 @@ function DataUtil.tableToString(table)
     -- if string.sub(str, -1, -1) == "}" then
     --     str = string.sub(str, 1, -2)
     -- end
-    return str--string.sub(str, 2, -1)
+    return str --string.sub(str, 2, -1)
 end
 
-function DataUtil.stringToTable(str)
+function sm.MTFastLogic.CompressionUtil.stringToTable(str)
     local tbl = {}
     local chunk = ""
     local gettingTableString = false
@@ -129,7 +132,7 @@ function DataUtil.stringToTable(str)
                     depth = depth - 1
                     chunk = chunk .. c
                 else
-                    chunk = DataUtil.stringToTable(chunk)
+                    chunk = sm.MTFastLogic.CompressionUtil.stringToTable(chunk)
                     gettingTableString = false
                     c = "|"
                     goto again
@@ -192,7 +195,7 @@ function DataUtil.stringToTable(str)
         end
         if stringIndex == #str then
             if gettingTableString then
-                chunk = DataUtil.stringToTable(chunk)
+                chunk = sm.MTFastLogic.CompressionUtil.stringToTable(chunk)
                 gettingTableString = false
             end
             c = "|"

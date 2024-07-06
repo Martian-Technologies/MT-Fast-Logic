@@ -1,6 +1,9 @@
-SiliconCompressor = SiliconCompressor or {
+sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.SiliconCompressor = sm.MTFastLogic.SiliconCompressor or {
     Versions = {}
 }
+local SiliconCompressor = sm.MTFastLogic.SiliconCompressor
+
 
 dofile "compressorVersions/Version_tagless.lua"
 dofile "compressorVersions/Version_a.lua"

@@ -1,18 +1,19 @@
 dofile "../util/util.lua"
-dofile "../CreationUtil.lua"
+
 local string = string
 local table = table
 local type = type
 local pairs = pairs
 
-SiliconBlock = SiliconBlock or class()
-
-dofile "SiliconCompressor.lua"
-
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.SiliconBlocks = sm.MTFastLogic.SiliconBlocks or {}
 sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
 sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
+
+dofile "compression/SiliconCompressor.lua"
+local SiliconCompressor = sm.MTFastLogic.SiliconCompressor
+
+SiliconBlock = SiliconBlock or class()
 
 local uuidToSize = {
     ["3706ba55-bd11-4053-b437-bbf2aff823b4"] = { 1, 1, 1 },

@@ -224,7 +224,8 @@ function table.getKeysSortedByValue(tbl, sortFunction, validationFunction)
 end
 
 printOld = printOld or print
-local formater = {}
+formater = {}
+local formater = formater
 function formater.getFormatedForPrint(val, depth, maxTableLength)
     depth = depth or 5
     depth = depth - 1
@@ -243,7 +244,7 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
         local count = 0
         maxTableLength = maxTableLength or 100
         for key, value in pairs(val) do
-            if count > maxTableLength then
+            if count >= maxTableLength then
                 str = str .. "..."
                 break
             end

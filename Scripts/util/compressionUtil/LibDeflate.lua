@@ -79,7 +79,11 @@ Their original licenses shall be comply when used.
     Project Hash: @project-hash@
     Project Version: @project-version@
 --]]
-LibDeflate = {}
+
+sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.CompressionUtil = sm.MTFastLogic.CompressionUtil or {}
+
+local LibDeflate = {}
 
 do
     -- Semantic version. all lowercase.
@@ -3602,5 +3606,5 @@ do
       os.exit(0)
     end
   end
-  
-  return LibDeflate
+
+sm.MTFastLogic.CompressionUtil.LibDeflate = LibDeflate

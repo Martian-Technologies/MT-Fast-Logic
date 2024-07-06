@@ -58,35 +58,37 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
             local inputs = block.interactable:getParents()
             local inputsHash = {}
             for _, v in pairs(inputs) do
-                local inputId = v:getId()
-                local inputUuid = self.creation.uuids[inputId]
-                inputsHash[inputId] = true
-                if inputUuid ~= nil then
-                    self.FastLogicAllBlockMannager:addOutput(inputUuid, uuid)
-                else
-                    local currentState = v.active
-                    if self.creation.AllNonFastBlocks[inputId] == nil then
-                        self.creation.AllNonFastBlocks[inputId] = {
-                            ["interactable"] = v,
-                            ["currentState"] = currentState,
-                            ["outputs"] = {}
-                        }
-                    end
-                    if not table.contains(self.creation.AllNonFastBlocks[inputId].outputs, uuid) then
-                        self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] = uuid
-                    end
-                    local activeInput = block.activeInputs[inputId]
-                    if (activeInput == nil) then
-                        self.FastLogicRunner:externalAddNonFastConnection(uuid)
-                        if currentState then
-                            self.FastLogicRunner:externalAddNonFastOnInput(uuid)
-                            block.activeInputs[inputId] = true
-                        else
-                            block.activeInputs[inputId] = false
+                if sm.exists(v) then
+                    local inputId = v:getId()
+                    local inputUuid = self.creation.uuids[inputId]
+                    inputsHash[inputId] = true
+                    if inputUuid ~= nil then
+                        self.FastLogicAllBlockMannager:addOutput(inputUuid, uuid)
+                    else
+                        local currentState = v.active
+                        if self.creation.AllNonFastBlocks[inputId] == nil then
+                            self.creation.AllNonFastBlocks[inputId] = {
+                                ["interactable"] = v,
+                                ["currentState"] = currentState,
+                                ["outputs"] = {}
+                            }
                         end
-                    elseif activeInput ~= currentState then
-                        block.activeInputs[inputId] = currentState
-                        self.FastLogicRunner:externalAddBlockToUpdate(uuid)
+                        if not table.contains(self.creation.AllNonFastBlocks[inputId].outputs, uuid) then
+                            self.creation.AllNonFastBlocks[inputId].outputs[#self.creation.AllNonFastBlocks[inputId].outputs + 1] = uuid
+                        end
+                        local activeInput = block.activeInputs[inputId]
+                        if (activeInput == nil) then
+                            self.FastLogicRunner:externalAddNonFastConnection(uuid)
+                            if currentState then
+                                self.FastLogicRunner:externalAddNonFastOnInput(uuid)
+                                block.activeInputs[inputId] = true
+                            else
+                                block.activeInputs[inputId] = false
+                            end
+                        elseif activeInput ~= currentState then
+                            block.activeInputs[inputId] = currentState
+                            self.FastLogicRunner:externalAddBlockToUpdate(uuid)
+                        end
                     end
                 end
             end

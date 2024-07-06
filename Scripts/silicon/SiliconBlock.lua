@@ -77,17 +77,17 @@ function SiliconBlock.addConnections(self)
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
         for ii = 1, #block.inputs do
-            self.FastLogicAllBlockMannager:addOutput(block.inputs[ii], block.uuid)
+            self.FastLogicAllBlockMannager:addOutput(block.inputs[ii], block.uuid, true)
         end
 
         for ii = 1, #block.outputs do
-            self.FastLogicAllBlockMannager:addOutput(block.uuid, block.outputs[ii])
+            self.FastLogicAllBlockMannager:addOutput(block.uuid, block.outputs[ii], true)
         end
     end
     sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
 end
 
-function SiliconBlock.addOutput(self, uuid, uuidToConnect)
+function SiliconBlock.addOutput(self, uuid, uuidToConnect, skipSave)
     local changed = false
     for i = 1, #self.data.blocks do
         if self.data.blocks[i].uuid == uuid and not table.contains(self.data.blocks[i].outputs, uuidToConnect) then
@@ -99,7 +99,7 @@ function SiliconBlock.addOutput(self, uuid, uuidToConnect)
             self.data.blocks[i].inputs[#self.data.blocks[i].inputs + 1] = uuid
         end
     end
-    if changed then
+    if changed and skipSave ~= true then
         sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
     end
 end

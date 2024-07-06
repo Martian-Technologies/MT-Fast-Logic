@@ -61,7 +61,7 @@ function CreationUtil.updateOldUuid(uuid, creationId)
     end
     if sm.MTFastLogic.UsedUuids[uuid] == nil or creation.blocks[uuid] ~= nil or creation.NewBlockUuids[currentTick][uuid] == true then
         sm.MTFastLogic.UsedUuids[uuid] = true
-        reation.NewBlockUuids[currentTick][uuid] = true
+        creation.NewBlockUuids[currentTick][uuid] = true
         return uuid
     end
     if creation.NewBlockUuids[currentTick][uuid] ~= nil then

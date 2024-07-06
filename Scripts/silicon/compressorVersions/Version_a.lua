@@ -40,26 +40,14 @@ SiliconCompressor.Versions["a"].compressBlocks = function (siliconBlock)
         colorIndexHash[index] = color
     end
     local dataString = DataUtil.tableToString({ blocks, colorIndexHash })
-    print("dataString")
-    print(dataString)
     local compressedData = LibDeflate:CompressDeflate(dataString)
-    print("compressedData")
-    print(compressedData)
     local data = LibDeflate:EncodeForPrint(compressedData)
-    print("data")
-    print(data)
     return data
 end
 
 SiliconCompressor.Versions["a"].decompressBlockData = function(siliconBlock, rawData)
-    print("rawData")
-    print(rawData)
     local decodedData = LibDeflate:DecodeForPrint(rawData)
-    print("decodedData")
-    print(decodedData)
     local blockData = LibDeflate:DecompressDeflate(decodedData)
-    print("blockData")
-    print(blockData)
     if blockData == nil then return {} end
     blockData = DataUtil.stringToTable(blockData)
     if blockData == nil then return {} end

@@ -85,7 +85,6 @@ function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedIds)
     for i = 1, #changedIds do
         local block = sm.MTFastLogic.client_FastLogicBlockLookUp[changedIds[i][1]]
         if block ~= nil then
-            print(changedIds[i][2])
             block:client_updateTexture(changedIds[i][2])
         end
     end

@@ -81,9 +81,11 @@ function FastLogicGate.client_onClientDataUpdate(self, mode)
     self:client_updateTexture()
 end
 
-function FastLogicGate.client_updateTexture(self)
-    print(self.interactable.active)
-    if self.interactable.active then
+function FastLogicGate.client_updateTexture(self, state)
+    if state == nil then
+        state = self.interactable.active
+    end
+    if state then
         self.interactable:setUvFrameIndex(6 + self.client_mode)
     else
         self.interactable:setUvFrameIndex(0 + self.client_mode)

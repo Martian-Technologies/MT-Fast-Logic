@@ -160,14 +160,16 @@ function FastLogicAllBlockMannager.removeInput(self, uuid, uuidToDeconnect)
     self:removeOutput(uuidToDeconnect, uuid)
 end
 
-function FastLogicAllBlockMannager.addOutput(self, uuid, uuidToConnect)
-    if self.blocks[uuid] ~= nil and self.blocks[uuidToConnect] ~= nil and
-    (self.blocks[uuid].outputHash[uuidToConnect] == nil or self.blocks[uuidToConnect].inputHash[uuid] == nil) then
+function FastLogicAllBlockMannager.addOutput(self, uuid, uuidToConnect, skipSiliconSave)
+    if (
+        self.blocks[uuid] ~= nil and self.blocks[uuidToConnect] ~= nil and
+        (self.blocks[uuid].outputHash[uuidToConnect] == nil or self.blocks[uuidToConnect].inputHash[uuid] == nil)
+    ) then
         if self.blocks[uuid].isSilicon then
-            self.creation.SiliconBlocks[self.blocks[uuid].siliconBlockId]:addOutput(uuid, uuidToConnect)
+            self.creation.SiliconBlocks[self.blocks[uuid].siliconBlockId]:addOutput(uuid, uuidToConnect, skipSiliconSave)
         end
         if self.blocks[uuidToConnect].isSilicon then
-            self.creation.SiliconBlocks[self.blocks[uuidToConnect].siliconBlockId]:addOutput(uuid, uuidToConnect)
+            self.creation.SiliconBlocks[self.blocks[uuidToConnect].siliconBlockId]:addOutput(uuid, uuidToConnect, skipSiliconSave)
         end
         if self.blocks[uuid].outputHash[uuidToConnect] == nil then
             self.blocks[uuid].outputs[#self.blocks[uuid].outputs + 1] = uuidToConnect

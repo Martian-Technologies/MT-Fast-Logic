@@ -13,6 +13,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/lib.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/DoMeleeState.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
@@ -103,6 +104,7 @@ function MTMultitool.client_onCreate(self)
 
     MTFlying.inject(self)
     ConnectionShower.inject(self)
+    DoMeleeState.inject(self)
 
     LogicConverter.inject(self)
     SiliconConverterTool.inject(self)
@@ -170,6 +172,7 @@ function MTMultitool.repullSettings(self)
     end
     ConnectionManager.syncStorage(self)
     ConnectionShower.syncStorage(self)
+    DoMeleeState.syncStorage(self)
 end
 
 function MTMultitool.handleForceBuild(self, forceBuild)

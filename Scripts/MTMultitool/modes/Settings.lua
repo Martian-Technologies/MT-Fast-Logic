@@ -224,7 +224,25 @@ function Settings.inject(multitool)
         getText = function()
             return "from Scrap Mechanic/Data/blueprint.json"
         end,
+    })
 
+    table.insert(self.elements, {
+        name = "doMeleeState",
+        type = "toggleButton",
+        position = { a = math.pi / 8 * fovMult, e = 11 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        color = {
+            on = sm.color.new(0.2, 0.9, 0.2),
+            off = sm.color.new(0.9, 0.2, 0.2)
+        },
+        text = "Hammer One Tick (fast logic)",
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        getState = function()
+            return multitool.DoMeleeState.enabled
+        end,
+        onclick = function()
+            DoMeleeState.toggle(multitool)
+        end,
     })
 end
 

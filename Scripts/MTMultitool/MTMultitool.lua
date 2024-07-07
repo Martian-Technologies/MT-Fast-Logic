@@ -718,6 +718,11 @@ function MTMultitool.server_volumePlace(self, data)
     local originLocal = data.origin
     local finalLocal = data.final
     local body = data.body
+    local placingType = data.placingType -- "vanilla" | "fast"
+    local uuidPlacing = sm.uuid.new("9f0f56e8-2c31-4d83-996c-d00a9b296c3f")
+    if placingType == "fast" then
+        uuidPlacing = sm.uuid.new("6a9dbff5-7562-4e9a-99ae-3590ece88112")
+    end
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
     local y = math.min(originLocal.y, finalLocal.y) - halfBlock
@@ -730,7 +735,7 @@ function MTMultitool.server_volumePlace(self, data)
             for k = z * 4, zMax * 4 do
                 local indexString = i / 4 .. ";" .. j / 4 .. ";" .. k / 4
                 -- uuid, position, z-axis, x-axis, forceAccept
-                local shape = body:createPart(sm.uuid.new("9f0f56e8-2c31-4d83-996c-d00a9b296c3f"), sm.vec3.new(i, j+1, k), sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0), true)
+                local shape = body:createPart(uuidPlacing, sm.vec3.new(i, j+1, k), sm.vec3.new(0, -1, 0), sm.vec3.new(1, 0, 0), true)
             end
         end
     end

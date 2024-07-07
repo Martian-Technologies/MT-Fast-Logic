@@ -7,6 +7,7 @@ function VolumePlacer.inject(multitool)
     self.body = nil
     self.final = nil
     self.nametagUpdate = NametagManager.createController(multitool)
+    self.placingType = "vanilla" -- "vanilla" or "fast"
 end
 
 function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -25,8 +26,11 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
     elseif self.origin ~= nil and self.final ~= nil then
         sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>     This will create a cuboid of logic gates in the region you selected     <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Create     ",
-            sm.gui.getKeyBinding("Attack", true), "Cancel")
+            sm.gui.getKeyBinding("Attack", true), "Cancel" .. "     " .. sm.gui.getKeyBinding("ForceBuild", true) .. " Placing block type: <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. self.placingType .. "</p>")
         needToRaycast = false
+        if MTMultitool.handleForceBuild(multitool, forceBuild) then
+            self.placingType = self.placingType == "vanilla" and "fast" or "vanilla"
+        end
     end
     local tags = {}
     local localPosition = nil
@@ -129,7 +133,8 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
             multitool.network:sendToServer("server_volumePlace", {
                 origin = self.origin,
                 final = self.final,
-                body = bodyUsed
+                body = bodyUsed,
+                placingType = self.placingType
             })
             VolumePlacer.cleanUp(multitool)
         end

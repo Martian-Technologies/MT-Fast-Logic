@@ -69,7 +69,6 @@ function ConnectionShower.client_onUpdate(multitool)
     local toolsThatDisplayConnections = {
         "8c7efc37-cd7c-4262-976e-39585f8527bf"
     }
-    print(MTMultitool.internalModes[multitool.mode])
     if MTMultitool.internalModes[multitool.mode] ~= "Settings" then
         table.insert(toolsThatDisplayConnections, "018e4ca0-c5be-7f80-a80f-259c5951594b")
     end

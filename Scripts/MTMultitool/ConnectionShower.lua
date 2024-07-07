@@ -63,17 +63,24 @@ end
 function ConnectionShower.client_onUpdate(multitool)
     local self = multitool.ConnectionShower
     if not self.enabled then
+        self.updateNametags(nil)
         return
     end
     local toolsThatDisplayConnections = {
-        "018e4ca0-c5be-7f80-a80f-259c5951594b",
         "8c7efc37-cd7c-4262-976e-39585f8527bf"
     }
+    print(MTMultitool.internalModes[multitool.mode])
+    if MTMultitool.internalModes[multitool.mode] ~= "Settings" then
+        table.insert(toolsThatDisplayConnections, "018e4ca0-c5be-7f80-a80f-259c5951594b")
+    end
     local toolsThatDisplayUI = {
         "8c7efc37-cd7c-4262-976e-39585f8527bf"
     }
     local holdingItem = tostring(sm.localPlayer.getActiveItem())
     if not table.contains(toolsThatDisplayConnections, holdingItem) then
+        if self.hideOnPanAway then
+            self.updateNametags(nil)
+        end
         return
     end
     local displayUI = table.contains(toolsThatDisplayUI, holdingItem)

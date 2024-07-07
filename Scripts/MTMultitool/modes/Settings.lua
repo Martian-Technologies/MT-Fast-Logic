@@ -165,6 +165,44 @@ function Settings.inject(multitool)
             ConnectionManager.updateConnectionLimitDisplay(multitool, newLimit)
         end,
     })
+
+    table.insert(self.elements, {
+        name = "showConnections",
+        type = "toggleButton",
+        position = { a = math.pi / 8 * fovMult, e = 6 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        color = {
+            on = sm.color.new(0.2, 0.9, 0.2),
+            off = sm.color.new(0.9, 0.2, 0.2)
+        },
+        text = "Show Connections",
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        getState = function()
+            return multitool.ConnectionShower.enabled
+        end,
+        onclick = function()
+            ConnectionShower.toggle(multitool)
+        end,
+    })
+
+    table.insert(self.elements, {
+        name = "hideOnPanAway",
+        type = "toggleButton",
+        position = { a = math.pi / 8 * fovMult, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        color = {
+            on = sm.color.new(0.2, 0.9, 0.2),
+            off = sm.color.new(0.9, 0.2, 0.2)
+        },
+        text = "Hide on Pan Away",
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        getState = function()
+            return multitool.ConnectionShower.hideOnPanAway
+        end,
+        onclick = function()
+            ConnectionShower.toggleHideOnPanAway(multitool)
+        end,
+    })
 end
 
 local function button(multitool, ctx)

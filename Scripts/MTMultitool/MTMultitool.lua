@@ -15,6 +15,8 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionShower.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BackupEngine.lua")
 
@@ -98,6 +100,7 @@ function MTMultitool.client_onCreate(self)
     BackupEngine.inject(self)
 
     MTFlying.inject(self)
+    ConnectionShower.inject(self)
 
     LogicConverter.inject(self)
     SiliconConverterTool.inject(self)
@@ -164,6 +167,7 @@ function MTMultitool.repullSettings(self)
         end
     end
     ConnectionManager.syncStorage(self)
+    ConnectionShower.syncStorage(self)
 end
 
 function MTMultitool.handleForceBuild(self, forceBuild)
@@ -203,6 +207,7 @@ function MTMultitool.client_onUpdate(self, dt)
         end
     end
     MTFlying.cl_onUpdate(self, dt)
+    ConnectionShower.client_onUpdate(self)
 	if MTMultitool.internalModes[self.mode] == "SingleConnect" then
     	SingleConnect.client_onUpdate(self)
 	elseif MTMultitool.internalModes[self.mode] == "SeriesConnect" then

@@ -270,7 +270,11 @@ local function parseTableAsNumbers(tbl)
     return out
 end
 
-function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint)
+function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint, connectionDotRad)
+    local connectionDotRadiusGiven = self.connectionDotRadius
+    if connectionDotRad ~= nil then
+        connectionDotRadiusGiven = connectionDotRad
+    end
     -- go till we hit the first body
     local hit, res = sm.physics.raycast(rayOrigin, rayOrigin + rayDirection * 128, sm.localPlayer.getPlayer().character)
     if not hit then
@@ -371,7 +375,7 @@ function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint
                 local rad2 = rad * rad
                 -- print(self.connectionDotRadius2 * math.min(bb.x, bb.y, bb.z)*4)
                 if math.abs(d2) < rad2 then
-                    local t1c = math.sqrt(self.connectionDotRadius * self.connectionDotRadius - d2)
+                    local t1c = math.sqrt(connectionDotRadiusGiven * connectionDotRadiusGiven - d2)
                     local distance = tc - t1c
                     local res = {
                         pointWorld = body:transformPoint(hitBlockPos),

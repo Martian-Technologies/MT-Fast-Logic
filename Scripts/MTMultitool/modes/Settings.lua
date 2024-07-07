@@ -292,7 +292,7 @@ function Settings.trigger(multitool, primaryState, secondaryState, forceBuild, l
         local cameraAtVec = sm.camera.getDirection()
         local x = cameraAtVec.x
         local y = cameraAtVec.y
-        self.startAngle = math.atan2(y, x)
+        self.startAngle = math.atan(y, x)
     end
     multitool.BlockSelector.enabled = false
     multitool.tool:setCrossHairAlpha(0)

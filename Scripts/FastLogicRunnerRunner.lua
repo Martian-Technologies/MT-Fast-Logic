@@ -22,6 +22,9 @@ sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
 sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
+    -- sm.MTUtil.Profiler.Count.increment("tickCount")
+    -- print(tostring(sm.MTUtil.Profiler.Time.get("FastLogicRunnerUpdate") / sm.MTUtil.Profiler.Count.get("tickCount")) .. " seconds per update")
+    -- print(tostring(sm.MTUtil.Profiler.Time.getPrecent("FastLogicRunnerUpdate")) .. "% of time")
     if self.run then
         -- bodiesToConvert
         if self.bodiesToConvert ~= nil then

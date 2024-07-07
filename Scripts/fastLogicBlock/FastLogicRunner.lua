@@ -31,9 +31,6 @@ local timerLengths = nil
 local timerInputStates = nil
 local blockOutputs = nil
 local numberOfStateChanges = nil
-local numberOfOptimizedInputs = nil
-local optimizedBlockOutputs = nil
-local optimizedBlockOutputsPosHash = nil
 local nextTimerOutputWait = nil
 local multiBlockData = nil
 local runningBlocks1 = nil
@@ -105,9 +102,6 @@ function FastLogicRunner.makeDataArrays(self)
     self.runnableBlockPathIds = table.makeArrayForHash(self.hashData)
     self.longestTimer = 0
     self.numberOfStateChanges = table.makeArrayForHash(self.hashData)
-    self.numberOfOptimizedInputs = table.makeArrayForHash(self.hashData)
-    self.optimizedBlockOutputs = table.makeArrayForHash(self.hashData)
-    self.optimizedBlockOutputsPosHash = table.makeArrayForHash(self.hashData)
     self.altBlockData = table.makeArrayForHash(self.hashData)
     self.multiBlockData = table.makeArrayForHash(self.hashData)
     self.pathNames = {
@@ -117,14 +111,14 @@ function FastLogicRunner.makeDataArrays(self)
         "norThroughBlocks",          -- 4
         "timerBlocks",               -- 5
         "andBlocks",                 -- 6
-        "and2Blocks",                -- 7
+        "none",                      -- 7
         "orBlocks",                  -- 8
-        "or2Blocks",                 -- 9
+        "none",                      -- 9
         "xorBlocks",                 -- 10
         "nandBlocks",                -- 11
-        "nand2Blocks",               -- 12
+        "none",                      -- 12
         "norBlocks",                 -- 13
-        "nor2Blocks",                -- 14
+        "none",                      -- 14
         "xnorBlocks",                -- 15
         "multiBlocks",               -- 16
         "throughMultiBlockInput",    -- 17
@@ -197,9 +191,6 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
     numberOfStateChanges = self.numberOfStateChanges
-    numberOfOptimizedInputs = self.numberOfOptimizedInputs
-    optimizedBlockOutputs = self.optimizedBlockOutputs
-    optimizedBlockOutputsPosHash = self.optimizedBlockOutputsPosHash
     nextTimerOutputWait = self.nextTimerOutputWait
     multiBlockData = self.multiBlockData
     if needsRunningBlocks == true then
@@ -284,16 +275,18 @@ function FastLogicRunner.update(self)
     if self.updateTicks >= 1 then
         --make sure all blocks are not broken
         for pathId = 1, #runningBlocks do
-            local i = 1
-            while i <= runningBlockLengths[pathId] do
-                local id = runningBlocks[pathId][i]
-                if countOfOnInputs[id] == false then
-                    -- print("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
-                    nextRunningBlocks[id] = false
-                    table.remove(runningBlocks[pathId], i)
-                    runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1
-                else
-                    i = i + 1
+            if self.pathNames[pathId] ~= "none" then
+                local i = 1
+                while i <= runningBlockLengths[pathId] do
+                    local id = runningBlocks[pathId][i]
+                    if countOfOnInputs[id] == false then
+                        -- print("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
+                        nextRunningBlocks[id] = false
+                        table.remove(runningBlocks[pathId], i)
+                        runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1
+                    else
+                        i = i + 1
+                    end
                 end
             end
         end
@@ -318,7 +311,9 @@ function FastLogicRunner.update(self)
             self.updateTicks = self.updateTicks - 1
             sum = 0
             for i = 1, #self.runningBlockLengths do
-                sum = sum + self.runningBlockLengths[i]
+                if self.pathNames[i] ~= "none" then
+                    sum = sum + self.runningBlockLengths[i]
+                end
             end
             if sum == 0 and self.nextTimerOutputWait > 10000000 then
                 self.updateTicks = 1
@@ -395,67 +390,6 @@ function FastLogicRunner.doUpdate(self)
         end
     end
     runningBlockLengths[6] = 0
-    -- and2
-    for k = 1, runningBlockLengths[7] do
-        self.blocksRan = self.blocksRan + 1
-        local blockId = runningBlocks7[k]
-        local numberOfOptimized = numberOfOptimizedInputs[blockId]
-        if numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId] == 0 then -- no inputs
-            if blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif countOfOnInputs[blockId] == numberOfBlockInputs[blockId] then --  all inputs on
-            if (countOfOnOtherInputs[blockId] == numberOfOtherInputs[blockId]) ~= blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif countOfOnInputs[blockId] == numberOfOptimized then -- all optimizedInputs on
-            numberOfOptimized = numberOfOptimized + 1
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-            while blockStates[blockInputs[blockId][numberOfOptimized]] do        -- while the top optimizedInput on
-                countOfOnInputs[blockId] = countOfOnInputs[blockId] + 1
-                if countOfOnInputs[blockId] == numberOfBlockInputs[blockId] then -- if that was the last input to turn on
-                    if (countOfOnOtherInputs[blockId] == numberOfOtherInputs[blockId]) ~= blockStates[blockId] then
-                        newBlockStatesLength = newBlockStatesLength + 1
-                        newBlockStates[newBlockStatesLength] = blockId
-                    end
-                    break
-                else
-                    numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
-                    inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-                end
-            end
-        else -- some optimizedInputs are off
-            ::AND::
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            if blockStates[inputId] then -- the top optimizedInput on
-                countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
-                numberOfOptimized = numberOfOptimized - 1
-
-                -- remove from optimizedBlockOutputs
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
-                goto AND
-            elseif countOfOnInputs[blockId] + 1 < numberOfOptimized then -- the top optimizedInput off
-                numberOfOptimized = numberOfOptimized - 1
-
-                -- remove from optimizedBlockOutputs
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
-                goto AND
-            end
-
-            if blockStates[blockId] then -- block is on but should be off
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        end
-        numberOfOptimizedInputs[blockId] = numberOfOptimized
-    end
-    runningBlockLengths[7] = 0
     -- or
     for k = 1, runningBlockLengths[8] do
         self.blocksRan = self.blocksRan + 1
@@ -466,69 +400,6 @@ function FastLogicRunner.doUpdate(self)
         end
     end
     runningBlockLengths[8] = 0
-    -- or2
-    for k = 1, runningBlockLengths[9] do
-        self.blocksRan = self.blocksRan + 1
-        local blockId = runningBlocks9[k]
-        local numberOfOptimized = numberOfOptimizedInputs[blockId]
-        if numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId] == 0 then -- no inputs
-            if blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif numberOfOptimized == numberOfBlockInputs[blockId] and countOfOnInputs[blockId] == 0 then -- all inputs off
-            if (countOfOnOtherInputs[blockId] == 0) == blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif countOfOnInputs[blockId] == 0 then -- all optimizedInputs off
-            numberOfOptimized = numberOfOptimized + 1
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-            while not blockStates[blockInputs[blockId][numberOfOptimized]] do -- while the top optimizedInput off
-                if numberOfOptimized == numberOfBlockInputs[blockId] then     -- if that was the last input to turn off
-                    if (countOfOnOtherInputs[blockId] == 0) == blockStates[blockId] then
-                        newBlockStatesLength = newBlockStatesLength + 1
-                        newBlockStates[newBlockStatesLength] = blockId
-                    end
-                    break
-                else
-                    numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
-                    inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-                end
-            end
-            if blockStates[blockInputs[blockId][numberOfOptimized]] then
-                countOfOnInputs[blockId] = 1
-            end
-        else -- some optimizedInputs are on
-            ::OR::
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            if not blockStates[inputId] then -- the top optimizedInput off
-                numberOfOptimized = numberOfOptimized - 1
-
-                -- remove from optimizedBlockOutputs
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
-                goto OR
-            elseif countOfOnInputs[blockId] > 1 then -- the top optimizedInput on
-                countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
-                numberOfOptimized = numberOfOptimized - 1
-
-                -- remove from optimizedBlockOutputs
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
-                goto OR
-            end
-
-            if not blockStates[blockId] then -- block is off but should be no
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        end
-        numberOfOptimizedInputs[blockId] = numberOfOptimized
-    end
-    runningBlockLengths[9] = 0
     -- xor
     for k = 1, runningBlockLengths[10] do
         self.blocksRan = self.blocksRan + 1
@@ -551,67 +422,6 @@ function FastLogicRunner.doUpdate(self)
         end
     end
     runningBlockLengths[11] = 0
-    -- nand2
-    for k = 1, runningBlockLengths[12] do
-        self.blocksRan = self.blocksRan + 1
-        local blockId = runningBlocks12[k]
-        local numberOfOptimized = numberOfOptimizedInputs[blockId]
-        if numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId] == 0 then -- no inputs
-            if blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif countOfOnInputs[blockId] == numberOfBlockInputs[blockId] then --  all inputs on
-            if (countOfOnOtherInputs[blockId] == numberOfOtherInputs[blockId]) == blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif countOfOnInputs[blockId] == numberOfOptimized then -- all optimizedInputs on
-            numberOfOptimized = numberOfOptimized + 1
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-            while blockStates[blockInputs[blockId][numberOfOptimized]] do        -- while the top optimizedInput on
-                countOfOnInputs[blockId] = countOfOnInputs[blockId] + 1
-                if countOfOnInputs[blockId] == numberOfBlockInputs[blockId] then -- if that was the last input to turn off
-                    if (countOfOnOtherInputs[blockId] == numberOfOtherInputs[blockId]) == blockStates[blockId] then
-                        newBlockStatesLength = newBlockStatesLength + 1
-                        newBlockStates[newBlockStatesLength] = blockId
-                    end
-                    break
-                else
-                    numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
-                    inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-                end
-            end
-        else -- some optimizedInputs are off
-            ::NAND::
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            if blockStates[inputId] then -- the top optimizedInput on
-                countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
-                numberOfOptimized = numberOfOptimized - 1
-
-                -- remove from optimizedBlockOutputs
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
-                goto NAND
-            elseif countOfOnInputs[blockId] + 1 < numberOfOptimized then -- the top optimizedInput off
-                numberOfOptimized = numberOfOptimized - 1
-
-                -- remove from optimizedBlockOutputs
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
-                goto NAND
-            end
-
-            if not blockStates[blockId] then -- block is off but should be no
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        end
-        numberOfOptimizedInputs[blockId] = numberOfOptimized
-    end
-    runningBlockLengths[12] = 0
     -- nor
     for k = 1, runningBlockLengths[13] do
         self.blocksRan = self.blocksRan + 1
@@ -623,68 +433,6 @@ function FastLogicRunner.doUpdate(self)
         k = k + 1
     end
     runningBlockLengths[13] = 0
-    -- nor2
-    for k = 1, runningBlockLengths[14] do
-        self.blocksRan = self.blocksRan + 1
-        local blockId = runningBlocks14[k]
-        local numberOfOptimized = numberOfOptimizedInputs[blockId]
-        if numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId] == 0 then -- no inputs
-            if blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif numberOfOptimized == numberOfBlockInputs[blockId] and countOfOnInputs[blockId] == 0 then --  all inputs off
-            if (countOfOnOtherInputs[blockId] == 0) ~= blockStates[blockId] then
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        elseif countOfOnInputs[blockId] == 0 then -- all optimizedInputs off
-            numberOfOptimized = numberOfOptimized + 1
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-            -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-            while not blockStates[blockInputs[blockId][numberOfOptimized]] do -- while the top optimizedInput off
-                if numberOfOptimized == numberOfBlockInputs[blockId] then     -- if that was the last input to turn off
-                    if (countOfOnOtherInputs[blockId] == 0) ~= blockStates[blockId] then
-                        newBlockStatesLength = newBlockStatesLength + 1
-                        newBlockStates[newBlockStatesLength] = blockId
-                    end
-                    break
-                else
-                    numberOfOptimized = numberOfOptimized + 1 -- if it was not the last input adds 1 to the # of inputs
-                    inputId = blockInputs[blockId][numberOfOptimized]
-                    optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = blockId
-                    -- optimizedBlockOutputsPosHash[inputId][blockId] = #optimizedBlockOutputs[inputId]
-                end
-            end
-            if blockStates[blockInputs[blockId][numberOfOptimized]] then
-                countOfOnInputs[blockId] = 1
-            end
-        else -- some optimizedInputs are on
-            ::NOR::
-            local inputId = blockInputs[blockId][numberOfOptimized]
-            if not blockStates[inputId] then -- the top optimizedInput off
-                numberOfOptimized = numberOfOptimized - 1
-
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1 -- new
-                goto NOR
-            elseif countOfOnInputs[blockId] > 1 then                                                -- the top optimizedInput on
-                countOfOnInputs[blockId] = countOfOnInputs[blockId] - 1
-                numberOfOptimized = numberOfOptimized - 1
-
-                -- remove from optimizedBlockOutputs
-                optimizedBlockOutputs[inputId][optimizedBlockOutputsPosHash[inputId][blockId]] = -1
-                goto NOR
-            end
-
-            if blockStates[blockId] then -- block is on but should be off
-                newBlockStatesLength = newBlockStatesLength + 1
-                newBlockStates[newBlockStatesLength] = blockId
-            end
-        end
-        numberOfOptimizedInputs[blockId] = numberOfOptimized
-    end
-    runningBlockLengths[14] = 0
     -- xnor
     for k = 1, runningBlockLengths[15] do
         self.blocksRan = self.blocksRan + 1
@@ -866,7 +614,7 @@ function FastLogicRunner.doUpdate(self)
             local id = multiData[5][i]
             blockStates[id] = not blockStates[id]
             local stateNumber = blockStates[id] and 1 or -1
-            local outputs = optimizedBlockOutputs[id]
+            local outputs = blockOutputs[id]
             for j = 1, #outputs do
                 local outputId = outputs[j]
                 if outputId ~= -1 then
@@ -891,45 +639,44 @@ function FastLogicRunner.doUpdate(self)
 
         if didNotRunInternal then -- run blocks
             for i = 1, #multiData[3] do
-                local outputs = optimizedBlockOutputs[multiData[3][i]]
+                local outputs = blockOutputs[multiData[3][i]]
                 for j = 1, #outputs do
                     local outputId = outputs[j]
-                    if outputId ~= -1 then
+                    -- if outputId ~= -1 then
                         if nextRunningBlocks[outputId] ~= nextRunningIndex then
                             nextRunningBlocks[outputId] = nextRunningIndex
                             local pathId = runnableBlockPathIds[outputId]
                             runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
                             runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
                         end
-                    end
+                    -- end
                 end
             end
         end
         multiBlockData[blockId][5] = {}
     end
     runningBlockLengths[16] = 0
-
+    -- sm.MTUtil.Profiler.Time.on("FastLogicRunnerUpdate")
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
         numberOfStateChanges[id] = numberOfStateChanges[id] + 1
         blockStates[id] = not blockStates[id]
         local stateNumber = blockStates[id] and 1 or -1
-        local outputs = optimizedBlockOutputs[id]
+        local outputs = blockOutputs[id]
         for k = 1, #outputs do
             local outputId = outputs[k]
-            if outputId ~= -1 then
-                countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
-                if nextRunningBlocks[outputId] ~= nextRunningIndex then
-                    nextRunningBlocks[outputId] = nextRunningIndex
-                    local pathId = runnableBlockPathIds[outputId]
-                    if pathId ~= 2 then
-                        runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
-                        runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
-                    end
+            countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
+            if nextRunningBlocks[outputId] ~= nextRunningIndex then
+                nextRunningBlocks[outputId] = nextRunningIndex
+                local pathId = runnableBlockPathIds[outputId]
+                if pathId ~= 2 then
+                    runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
+                    runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
                 end
             end
         end
     end
+    -- sm.MTUtil.Profiler.Time.off("FastLogicRunnerUpdate")
 end
 
 -- assumes that the blocks are all make up a balenced circuit
@@ -1124,7 +871,7 @@ function FastLogicRunner.simulatedManyBalencedUpdates(self, blockIdsToInclude, l
             local timerHash = allTimerDataHash[k]
             local timer = allTimerData[k]
             for i = 1, #data do
-                id = data[i][1]
+                local id = data[i][1]
                 if timerHash[id] == nil then
                     timer[#timer + 1] = data[i]
                     timerHash[id] = #timer

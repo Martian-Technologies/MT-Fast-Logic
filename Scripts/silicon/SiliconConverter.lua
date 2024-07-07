@@ -139,7 +139,6 @@ function SiliconConverter.getAreas(posHash)
         for k, rot in pairs(rotations) do
             if vec[string.sub(k, 1, 1)] <= x - cornerPos.x + 1 and vec[string.sub(k, 2, 2)] <= y - cornerPos.y + 1 and vec[string.sub(k, 3, 3)] <= z - cornerPos.z + 1 then
                 if bestScore == nil or score > bestScore then
-                    -- print(k)
                     bestArea = { vec[string.sub(k, 1, 1)], vec[string.sub(k, 2, 2)], vec[string.sub(k, 3, 3)] }
                     bestScore = score
                     bestUuid = uuid

@@ -64,13 +64,13 @@ function SiliconBlock.getData(self)
     if sm.MTFastLogic.DataForSiliconBlocks[self.id] ~= nil then
         self:addBlocks(sm.MTFastLogic.DataForSiliconBlocks[self.id])
         sm.MTFastLogic.DataForSiliconBlocks[self.id] = nil
+    else
+        for i = 1, #self.data.blocks do
+            local block = self.data.blocks[i]
+            local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
+            self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, block.connectionColorId, self.id)
+        end
     end
-    for i = 1, #self.data.blocks do
-        local block = self.data.blocks[i]
-        local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
-        self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, block.connectionColorId, self.id)
-    end
-    self:server_saveBlocks(self.data.blocks)
     sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2] + 1] = self
 end
 
@@ -85,7 +85,6 @@ function SiliconBlock.addConnections(self)
             self.FastLogicAllBlockMannager:addOutput(block.uuid, block.outputs[ii], true)
         end
     end
-    sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
 end
 
 function SiliconBlock.addOutput(self, uuid, uuidToConnect, skipSave)
@@ -105,6 +104,21 @@ function SiliconBlock.addOutput(self, uuid, uuidToConnect, skipSave)
     end
 end
 
+function SiliconBlock.removeOutput(self, uuid, uuidToDisconnect, skipSave)
+    local changed = false
+    for i = 1, #self.data.blocks do
+        if self.data.blocks[i].uuid == uuid and not table.removeValue(self.data.blocks[i].outputs, uuidToDisconnect) then
+            changed = true
+        end
+        if self.data.blocks[i].uuid == uuidToDisconnect and table.removeValue(self.data.blocks[i].inputs, uuid) then
+            changed = true
+        end
+    end
+    if changed and skipSave ~= true then
+        sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
+    end
+end
+
 function SiliconBlock.server_onCreate(self)
     self:getCreationData()
     self.size = table.copy(uuidToSize[tostring(self.shape.shapeUuid)])
@@ -113,17 +127,32 @@ function SiliconBlock.server_onCreate(self)
     self.data = self.data or {}
     -- sm.MTFastLogic.SiliconBlocksToGetData[#sm.MTFastLogic.SiliconBlocksToGetData + 1] = self
     self.data.blocks = SiliconCompressor.decompressBlockData(self, self.storage:load())
+    local didUuidChange = false
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
+        local oldUUid = block.uuid
         block.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(block.uuid, self.creationId)
+        if oldUUid ~= block.uuid then
+            didUuidChange = true
+        end
         for ii = 1, #block.inputs do
+            oldUUid = block.outputs[ii]
             block.inputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.inputs[ii], self.creationId)
+            if oldUUid ~= block.inputs[ii] then
+                didUuidChange = true
+            end
         end
         for ii = 1, #block.outputs do
+            oldUUid = block.outputs[ii]
             block.outputs[ii] = sm.MTFastLogic.CreationUtil.updateOldUuid(block.outputs[ii], self.creationId)
+            if oldUUid ~= block.inputs[ii] then
+                didUuidChange = true
+            end
         end
     end
-    self.storage:save(SiliconCompressor.compressBlocks(self))
+    if didUuidChange then
+        self.storage:save(SiliconCompressor.compressBlocks(self))
+    end
     self:getData()
 end
 

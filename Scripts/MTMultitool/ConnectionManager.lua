@@ -3,6 +3,7 @@ ConnectionManager = {}
 function ConnectionManager.inject(multitool)
     multitool.ConnectionManager = {}
     local self = multitool.ConnectionManager
+    ConnectionManager.syncStorage(multitool)
     self.taskQueue = {}
     self.taskQueueIndex = 0
     self.taskQueueSize = 0
@@ -11,6 +12,26 @@ function ConnectionManager.inject(multitool)
     self.lastSpawn = 0
     self.mode = "connect"
     self.displayMode = "fast"
+    self.connectionIndexAt = 1 -- the current connection we are at when displaying
+    -- if the number of connections is greater than the limit, we will display the connections in chunks of the connection limit, and do the next chunk when the previous chunk is gone
+end
+
+function ConnectionManager.syncStorage(multitool)
+    local self = multitool.ConnectionManager
+    local saveData = SaveFile.getSaveData(multitool.saveIdx)
+    if saveData["config"].connectionDisplayLimit ~= nil then
+        self.connectionDisplayLimit = saveData["config"].connectionDisplayLimit
+    else
+        self.connectionDisplayLimit = 4096 -- number | "unlimited"
+    end
+end
+
+function ConnectionManager.updateConnectionLimitDisplay(multitool, limit)
+    local self = multitool.ConnectionManager
+    self.connectionDisplayLimit = limit
+    local saveData = SaveFile.getSaveData(multitool.saveIdx)
+    saveData["config"].connectionDisplayLimit = limit
+    SaveFile.setSaveData(multitool.saveIdx, saveData)
 end
 
 function ConnectionManager.toggleMode(multitool)
@@ -26,23 +47,32 @@ end
 function ConnectionManager.client_onUpdate(multitool)
     local self = multitool.ConnectionManager
     local spawnParticles = false
-    if self.displayMode == "fast" then
-        if os.clock() - self.lastSpawn > 0.05 then
-            spawnParticles = true
-        end
-    elseif self.displayMode == "slow" then
-        if #self.travellingDots == 0 then
-            spawnParticles = true
-        end
-    else -- if the display mode is something else, spawn particles every frame
+    if os.clock() - self.lastSpawn > 0.05 then
         spawnParticles = true
     end
+    -- if self.displayMode == "fast" then
+    --     if os.clock() - self.lastSpawn > 0.05 then
+    --         spawnParticles = true
+    --     end
+    -- elseif self.displayMode == "slow" then
+    --     if #self.travellingDots == 0 then
+    --         spawnParticles = true
+    --     end
+    -- else -- if the display mode is something else, spawn particles every frame
+    --     spawnParticles = true
+    -- end
     if spawnParticles then
         if spawnParticles and #self.preview > 0 then
             -- print('spawnParticles')
             self.lastSpawn = os.clock()
-            for i = 1, #self.preview do
-                local task = self.preview[i]
+            local particlesSpawnedThisTick = 0
+            for i = 1, math.min(256, #self.preview) do
+                if self.connectionDisplayLimit ~= "unlimited" and #self.travellingDots >= self.connectionDisplayLimit then
+                    break
+                end
+                self.connectionIndexAt = (self.connectionIndexAt-1) % #self.preview + 1
+                local task = self.preview[self.connectionIndexAt]
+                self.connectionIndexAt = self.connectionIndexAt + 1
                 if task.visible == false then
                     goto continue
                 end

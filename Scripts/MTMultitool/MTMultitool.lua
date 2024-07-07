@@ -92,6 +92,8 @@ function MTMultitool.client_onCreate(self)
         client_onUpdate = {}
     }
 
+    self.saveIdx = 1
+
     CallbackEngine.inject(self)
     BackupEngine.inject(self)
 
@@ -119,8 +121,6 @@ function MTMultitool.client_onCreate(self)
     VertexRenderer.subscribe(self, function() return BlockSelector.addVertexPoints(self) end)
     VertexRenderer.subscribe(self, ConnectionManager.createVertexSubsription(self))
     VertexRenderer.subscribe(self, SingleConnect.createVertexSubsription(self)) -- TODO: remove vertex subscription
-
-    self.saveIdx = 1
 
     -- BlockSelector.tool = self.tool
     -- BlockSelector.client_onCreate()
@@ -163,6 +163,7 @@ function MTMultitool.repullSettings(self)
             end
         end
     end
+    ConnectionManager.syncStorage(self)
 end
 
 function MTMultitool.handleForceBuild(self, forceBuild)
@@ -189,18 +190,19 @@ function MTMultitool.client_onUpdate(self, dt)
     for _, modeIndex in pairs(MTMultitool.forceOn) do
         self.enabledModes[modeIndex] = true
     end
-	if sm.MTFastLogic ~= nil then
-		for _, modeIndex in pairs(MTMultitool.FastLogicModes) do
-			self.enabledModes[modeIndex] = true
-		end
-	else
+    if sm.MTFastLogic ~= nil then
+        for _, modeIndex in pairs(MTMultitool.FastLogicModes) do
+            self.enabledModes[modeIndex] = true
+        end
+    else
         for _, modeIndex in pairs(MTMultitool.FastLogicModes) do
             if self.enabledModes[modeIndex] then
                 self.enabledModes[modeIndex] = false
                 SiliconConverterTool.cleanNametags(self)
             end
-		end
-	end
+        end
+    end
+    MTFlying.cl_onUpdate(self, dt)
 	if MTMultitool.internalModes[self.mode] == "SingleConnect" then
     	SingleConnect.client_onUpdate(self)
 	elseif MTMultitool.internalModes[self.mode] == "SeriesConnect" then

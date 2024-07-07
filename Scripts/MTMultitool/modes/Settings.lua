@@ -127,7 +127,7 @@ function Settings.inject(multitool)
         type = "customButton",
         position = { a = math.pi / 8 * fovMult, e = 2 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         angleBoundHorizontal = 0.1 * fovMult,
-        angleBoundVertical = 0.03 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getrender = function()
             local isFlying = multitool.MTFlying.flying
             local text = "Fly Mode: " .. (isFlying and "On" or "Off")
@@ -139,6 +139,30 @@ function Settings.inject(multitool)
         end,
         onclick = function()
             MTFlying.toggleFlying(multitool)
+        end,
+    })
+
+    table.insert(self.elements, {
+        name = "connectionDisplayLimit",
+        type = "customButton",
+        position = { a = math.pi / 8 * fovMult, e = 3 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        angleBoundHorizontal = 0.1,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        getrender = function()
+            local text = "Connection Display Limit: " .. multitool.ConnectionManager.connectionDisplayLimit
+            return {
+                text = text,
+                color = sm.color.new(0.2, 0.2, 0.9),
+            }
+        end,
+        onclick = function()
+            local options = { 128, 256, 512, 1024, 2048, 4096, 8194, 16384, "unlimited" }
+            local idx = table.find(options, multitool.ConnectionManager.connectionDisplayLimit)
+            local newLimit = options[1]
+            if idx ~= #options then
+                newLimit = options[idx + 1]
+            end
+            ConnectionManager.updateConnectionLimitDisplay(multitool, newLimit)
         end,
     })
 end

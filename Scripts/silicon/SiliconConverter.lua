@@ -50,7 +50,11 @@ function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for F
                 table.length(creation.AllFastBlocks[uuid].activeInputs) == 0 and
                 #creation.AllFastBlocks[uuid].shape:getJoints() == 0
             ) then
-                blocksPosHash[string.vecToString(block.pos)] = uuid
+                local pos = string.vecToString(block.pos)
+                if blocksPosHash[pos] == nil then
+                    blocksPosHash[pos] = {}
+                end
+                blocksPosHash[pos][#blocksPosHash[pos]+1] = uuid
             end
             ::continue::
         end
@@ -182,8 +186,11 @@ function SiliconConverter.getAreas(posHash)
     for x1 = cornerPos.x, x do
         for y1 = cornerPos.y, y do
             for z1 = cornerPos.z, z do
-                areas[1].uuids[#areas[1].uuids + 1] = posHash[string.vecToString(sm.vec3.new(x1, y1, z1))]
-                posHash[string.vecToString(sm.vec3.new(x1, y1, z1))] = nil
+                local pos = string.vecToString(sm.vec3.new(x1, y1, z1))
+                for i = 1, #posHash[pos] do
+                    areas[1].uuids[#areas[1].uuids + 1] = posHash[pos][i]
+                end
+                posHash[pos] = nil
             end
         end
     end

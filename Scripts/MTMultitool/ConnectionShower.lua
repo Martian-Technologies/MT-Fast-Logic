@@ -121,9 +121,9 @@ function ConnectionShower.client_onUpdate(multitool)
         })
         self.updateNametags(nametags)
         if displayUI then
-            sm.gui.setInteractionText("", "INPUTS: <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>INPUTS: " ..
             #inputConnections .. "</p>")
-            sm.gui.setInteractionText("", "OUTPUTS: <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>OUTPUTS: " ..
             #outputConnections .. "</p>")
         end
     else

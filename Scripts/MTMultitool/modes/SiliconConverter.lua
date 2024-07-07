@@ -80,7 +80,7 @@ function SiliconConverterTool.trigger(multitool, primaryState, secondaryState, f
         bodyUsed = nil
     end
 
-    if minPos ~= nil and maxPos ~= nil and bodyUsed ~= nil then
+    if minPos ~= nil and maxPos ~= nil and bodyUsed ~= nil and sm.exists(bodyUsed) then
         local x1 = minPos.x - 0.125
         local y1 = minPos.y - 0.125
         local z1 = minPos.z - 0.125

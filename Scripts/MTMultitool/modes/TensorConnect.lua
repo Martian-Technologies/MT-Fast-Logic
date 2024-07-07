@@ -1,5 +1,7 @@
 TensorConnect = {}
 
+TensorConnect.sv_tasks = {}
+
 function TensorConnect.inject(multitool)
     multitool.TensorConnect = {}
     local self = multitool.TensorConnect
@@ -272,6 +274,35 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             ConnectionManager.commitPreview(multitool)
             TensorConnect.cleanUp(multitool)
         end
+    elseif selfData.nextAction == "previewlessConfirm" then
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Toggle",
+            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            multitool.ConnectionManager.mode .. "<p>")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Connect (preview unavailable)")
+        multitool.BlockSelector.enabled = false
+        if MTMultitool.handleForceBuild(multitool, forceBuild) then
+            ConnectionManager.toggleMode(multitool)
+        end
+        if primaryState == 1 then
+            local dimSteps = selfData.dimSteps
+            local fromOrigin = selfData.fromOrigin
+            local toOrigin = selfData.toOrigin
+            local vectorsFrom = selfData.vectorsFrom
+            local vectorsTo = selfData.vectorsTo
+
+            local packet = {
+                fromOrigin = fromOrigin,
+                toOrigin = toOrigin,
+                dimSteps = dimSteps,
+                vectorsFrom = vectorsFrom,
+                vectorsTo = vectorsTo,
+                mode = multitool.ConnectionManager.mode,
+                i = 0
+            }
+
+            multitool.network:sendToServer("sv_connectTensors", packet)
+            TensorConnect.cleanUp(multitool)
+        end
     end
     
     -- render all previously selected vectors
@@ -356,7 +387,7 @@ function TensorConnect.recalculateNextAction(multitool)
                 if selecting == "from" then
                     if selfData.fromOrigin:getBody():isOnLift() then
                         vectorsFrom[dimIndex] = actionObj.vecEnd:getWorldPosition() -
-                        selfData.fromOrigin:getWorldPosition()
+                            selfData.fromOrigin:getWorldPosition()
                     else
                         vectorsFrom[dimIndex] = MTMultitoolLib.getLocalCenter(actionObj.vecEnd) -
                             MTMultitoolLib.getLocalCenter(selfData.fromOrigin)
@@ -374,7 +405,7 @@ function TensorConnect.recalculateNextAction(multitool)
                         vectorsTo[dimIndex] = actionObj.vecEnd:getWorldPosition() - selfData.toOrigin:getWorldPosition()
                     else
                         vectorsTo[dimIndex] = MTMultitoolLib.getLocalCenter(actionObj.vecEnd) -
-                        MTMultitoolLib.getLocalCenter(selfData.toOrigin)
+                            MTMultitoolLib.getLocalCenter(selfData.toOrigin)
                     end
                     nextAction = "nextVector"
                     nDimsTo = nDimsTo + 1
@@ -420,6 +451,17 @@ function TensorConnect.recalculateNextAction(multitool)
             end
         else
             error("Invalid action: " .. action)
+        end
+    end
+    if nextAction == "confirm" then
+        -- calculate maximum number of connections
+        local nConnections = 1
+        for i, dimStep in pairs(dimSteps) do
+            nConnections = nConnections * (dimStep + 1)
+        end
+        local previewLimit = 65536
+        if nConnections > previewLimit then
+            nextAction = "previewlessConfirm"
         end
     end
     selfData.nextAction = nextAction
@@ -554,4 +596,86 @@ function TensorConnect.calculatePreview(multitool)
             table.insert(multitool.ConnectionManager.preview, task)
         end
     end
+end
+
+function TensorConnect.sv_connectTensors(multitool, packet)
+    local fromOrigin = packet.fromOrigin
+    local toOrigin = packet.toOrigin
+    if fromOrigin:getBody():isOnLift() then
+        packet.fromVG = MTMultitoolLib.createVoxelGridFromCreationBodies(fromOrigin:getBody():getCreationBodies())
+        packet.toVG = MTMultitoolLib.createVoxelGridFromCreationBodies(toOrigin:getBody():getCreationBodies())
+    else
+        packet.fromVG = MTMultitoolLib.createVoxelGrid(fromOrigin:getBody())
+        packet.toVG = MTMultitoolLib.createVoxelGrid(toOrigin:getBody())
+    end
+    table.insert(TensorConnect.sv_tasks, packet)
+end
+
+function TensorConnect.server_onFixedUpdate(multitool, dt)
+    if #TensorConnect.sv_tasks == 0 then
+        return
+    end
+    -- do 100 connections from the first task in the queue
+    local task = table.remove(TensorConnect.sv_tasks, 1)
+    local fromOrigin = task.fromOrigin
+    local toOrigin = task.toOrigin
+    local dimSteps = task.dimSteps
+    local vectorsFrom = task.vectorsFrom
+    local vectorsTo = task.vectorsTo
+    local mode = task.mode
+    local nDims = #dimSteps
+    local fromVG = task.fromVG
+    local toVG = task.toVG
+    local i = task.i -- completed progress
+    local fromPos = MTMultitoolLib.getLocalCenter(fromOrigin)
+    local toPos = MTMultitoolLib.getLocalCenter(toOrigin)
+    if fromOrigin:getBody():isOnLift() then
+        fromPos = fromOrigin:getWorldPosition()
+        toPos = toOrigin:getWorldPosition()
+    end
+    local nConnections = 1
+    for i, dimStep in pairs(dimSteps) do
+        nConnections = nConnections * (dimStep + 1)
+    end
+    -- print(nConnections)
+    local makeConnectionsPerTick = 1024
+    for k = i, i + makeConnectionsPerTick - 1 do
+        -- print(k)
+        if k >= nConnections then
+            break
+        end
+        for j = 0, nDims - 1 do
+            local fromOffset = sm.vec3.new(0, 0, 0)
+            local toOffset = sm.vec3.new(0, 0, 0)
+            local value = k
+            for l = 0, nDims - 1 do
+                local dimStep = dimSteps[l + 1]
+                local dimValue = value % (dimStep + 1)
+                value = math.floor(value / (dimStep + 1))
+                fromOffset = fromOffset + vectorsFrom[l + 1] * dimValue
+                toOffset = toOffset + vectorsTo[l + 1] * dimValue
+            end
+            local from = fromPos + fromOffset
+            local to = toPos + toOffset
+            local fromShape = MTMultitoolLib.getShapeAtVoxelGrid(fromVG, from)
+            local toShape = MTMultitoolLib.getShapeAtVoxelGrid(toVG, to)
+            if fromShape ~= nil and toShape ~= nil then
+                local fromInt = fromShape:getInteractable()
+                local toInt = toShape:getInteractable()
+                if fromInt ~= nil and toInt ~= nil then
+                    if mode == "connect" then
+                        fromInt:connect(toInt)
+                    elseif mode == "disconnect" then
+                        fromInt:disconnect(toInt)
+                    end
+                end
+            end
+        end
+    end
+    i = i + makeConnectionsPerTick
+    if i >= nConnections then
+        return
+    end
+    task.i = i
+    table.insert(TensorConnect.sv_tasks, task)
 end

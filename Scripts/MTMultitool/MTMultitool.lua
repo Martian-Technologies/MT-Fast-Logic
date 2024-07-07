@@ -548,6 +548,7 @@ MTGateUUIDs = {
 
 function MTMultitool.server_onFixedUpdate(self, dt)
     MTFlying.server_onFixedUpdate(self, dt)
+    TensorConnect.server_onFixedUpdate(self, dt)
 end
 
 function MTMultitool.server_convertSilicon(self, data)
@@ -789,4 +790,8 @@ end
 
 function MTMultitool.sv_toggleFlying(self, data)
     MTFlying.sv_toggleFlying(self, data)
+end
+
+function MTMultitool.sv_connectTensors(self, data)
+    TensorConnect.sv_connectTensors(self, data)
 end

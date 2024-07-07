@@ -353,7 +353,7 @@ function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint
         -- })
         local indexString = position.x .. ";" .. position.y .. ";" .. position.z
         local hitBlock = voxelMap[indexString]
-        if hitBlock ~= nil then
+        if hitBlock ~= nil and sm.exists(hitBlock) then
             -- check connection dot hit
             -- print(hitBlock)
             local bb = hitBlock:getBoundingBox()

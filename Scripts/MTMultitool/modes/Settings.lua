@@ -203,6 +203,29 @@ function Settings.inject(multitool)
             ConnectionShower.toggleHideOnPanAway(multitool)
         end,
     })
+
+    table.insert(self.elements, {
+        name = "importCreation",
+        type = "button",
+        position = { a = math.pi / 8 * fovMult, e = 9 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        color = sm.color.new(0.2, 0.2, 0.9),
+        text = "Import Creation",
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        onclick = function()
+            BlueprintSpawner.cl_spawn(multitool)
+        end,
+    })
+    table.insert(self.elements, {
+        name = "importCreationCaption",
+        type = "indicator",
+        position = { a = math.pi / 8 * fovMult, e = 8 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        color = sm.color.new(0.2, 0.2, 0.9),
+        getText = function()
+            return "from Scrap Mechanic/Data/blueprint.json"
+        end,
+
+    })
 end
 
 local function button(multitool, ctx)

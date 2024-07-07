@@ -12,6 +12,8 @@ dofile("$CONTENT_DATA/Scripts/util/mathUtil.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/lib.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
 
@@ -804,4 +806,8 @@ end
 
 function MTMultitool.sv_connectTensors(self, data)
     TensorConnect.sv_connectTensors(self, data)
+end
+
+function MTMultitool.sv_receiveBlueprintPacket(self, data)
+    BlueprintSpawner.sv_receiveBlueprintPacket(self, data)
 end

@@ -184,10 +184,9 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
 end
 
 function BaseFastLogicBlock.server_onMelee(self, position, attacker, damage, power, direction, normal)
-    -- if sm.MTFastLogic.doMeleeState then
-    print("here")
+    if sm.MTFastLogic.doMeleeState then
         self.FastLogicRunner:externalSetBlockState(self.data.uuid, not self.state)
-    -- end
+    end
 end
 
 function BaseFastLogicBlock.server_changeSpeed(self, isCrouching)

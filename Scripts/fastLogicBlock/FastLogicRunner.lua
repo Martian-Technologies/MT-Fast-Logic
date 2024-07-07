@@ -660,8 +660,9 @@ function FastLogicRunner.doUpdate(self)
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
         numberOfStateChanges[id] = numberOfStateChanges[id] + 1
-        blockStates[id] = not blockStates[id]
-        local stateNumber = blockStates[id] and 1 or -1
+        local state = not blockStates[id]
+        local stateNumber = state and 1 or -1
+        blockStates[id] = state
         local outputs = blockOutputs[id]
         for k = 1, #outputs do
             local outputId = outputs[k]

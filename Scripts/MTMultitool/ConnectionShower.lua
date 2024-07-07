@@ -104,27 +104,46 @@ function ConnectionShower.client_onUpdate(multitool)
         local inputConnections = interactable:getParents()
         local outputConnections = interactable:getChildren()
         local nametags = {}
+        local selfWired = false
         for _, connection in pairs(inputConnections) do
+            if connection == interactable then
+                selfWired = true
+                goto continue
+            end
             local nametag = {
                 txt = "IN",
                 color = sm.color.new(0, 1, 0, 1),
                 pos = connection:getShape():getWorldPosition()
             }
             table.insert(nametags, nametag)
+            ::continue::
         end
         for _, connection in pairs(outputConnections) do
+            if connection == interactable then
+                selfWired = true
+                goto continue
+            end
             local nametag = {
                 txt = "OUT",
                 color = sm.color.new(1, 0, 0, 1),
                 pos = connection:getShape():getWorldPosition()
             }
             table.insert(nametags, nametag)
+            ::continue::
         end
-        table.insert(nametags, {
-            txt = "X",
-            color = sm.color.new(1, 1, 1, 1),
-            pos = interactable:getShape():getWorldPosition()
-        })
+        if selfWired then
+            table.insert(nametags, {
+                txt = "SW",
+                color = sm.color.new(1, 1, 0, 1),
+                pos = interactable:getShape():getWorldPosition()
+            })
+        else
+            table.insert(nametags, {
+                txt = "X",
+                color = sm.color.new(1, 1, 1, 1),
+                pos = interactable:getShape():getWorldPosition()
+            })
+        end
         self.updateNametags(nametags)
         if displayUI then
             sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>INPUTS: " ..

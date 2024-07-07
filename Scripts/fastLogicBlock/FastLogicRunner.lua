@@ -30,7 +30,6 @@ local timerData = nil
 local timerLengths = nil
 local timerInputStates = nil
 local blockOutputs = nil
-local numberOfStateChanges = nil
 local nextTimerOutputWait = nil
 local multiBlockData = nil
 local runningBlocks1 = nil
@@ -62,6 +61,7 @@ function FastLogicRunner.getNew(creationId)
     local new = table.deepCopy(FastLogicRunner)
     new.creationId = creationId
     new.getNew = nil
+    new.isNew = 10
     return new
 end
 
@@ -101,7 +101,6 @@ function FastLogicRunner.makeDataArrays(self)
     self.timerInputStates = table.makeArrayForHash(self.hashData)
     self.runnableBlockPathIds = table.makeArrayForHash(self.hashData)
     self.longestTimer = 0
-    self.numberOfStateChanges = table.makeArrayForHash(self.hashData)
     self.altBlockData = table.makeArrayForHash(self.hashData)
     self.multiBlockData = table.makeArrayForHash(self.hashData)
     self.pathNames = {
@@ -190,7 +189,6 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     timerLengths = self.timerLengths
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
-    numberOfStateChanges = self.numberOfStateChanges
     nextTimerOutputWait = self.nextTimerOutputWait
     multiBlockData = self.multiBlockData
     if needsRunningBlocks == true then
@@ -272,6 +270,13 @@ function FastLogicRunner.update(self)
     self:optimizeLogic()
     self.blocksRan = 0
     self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
+    if self.isNew ~= nil then
+        if self.isNew > 1 then
+            self.isNew = self.isNew - 1
+            return
+        end
+        self.isNew = nil
+    end
     if self.updateTicks >= 1 then
         --make sure all blocks are not broken
         for pathId = 1, #runningBlocks do
@@ -659,7 +664,6 @@ function FastLogicRunner.doUpdate(self)
     -- sm.MTUtil.Profiler.Time.on("FastLogicRunnerUpdate")
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
-        numberOfStateChanges[id] = numberOfStateChanges[id] + 1
         local state = not blockStates[id]
         local stateNumber = state and 1 or -1
         blockStates[id] = state

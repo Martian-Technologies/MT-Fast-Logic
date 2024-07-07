@@ -8,7 +8,6 @@ local pairs = pairs
 function FastLogicRunner.optimizeLogic(self)
     local blockInputs = self.blockInputs
     local numberOfBlockInputs = self.numberOfBlockInputs
-    local numberOfStateChanges = self.numberOfStateChanges
     local id = self.blocksOptimized
     local target = math.min(id + math.ceil(#blockInputs / 160), #blockInputs)
     if target < 1 then
@@ -21,14 +20,6 @@ function FastLogicRunner.optimizeLogic(self)
                 self:findMultiBlocks(id)
             end
         end
-    end
-    if id == #blockInputs then
-        for i = 1, #numberOfStateChanges do
-            if numberOfStateChanges[i] ~= false then
-                numberOfStateChanges[i] = numberOfStateChanges[i] * 0.4
-            end
-        end
-        id = - #blockInputs
     end
 
     self.blocksOptimized = id

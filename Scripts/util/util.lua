@@ -3,46 +3,43 @@ sm.MTUtil = sm.MTUtil or {}
 dofile "profiler.lua"
 
 -- deque class --
-sm.MTUtil.deque = {}
-local deque = deque
-
-if true then
-    function deque.new()
+local deque = {
+    new = function()
         return { front = 0, back = -1 }
-    end
+    end,
 
-    function deque.is_empty(dequeObject)
+    is_empty = function(dequeObject)
         return dequeObject.front > dequeObject.back
-    end
+    end,
 
-    function deque.front(dequeObject)
+    front = function(dequeObject)
         return dequeObject[dequeObject.front]
-    end
+    end,
 
-    function deque.back(dequeObject)
+    back = function(dequeObject)
         return dequeObject[dequeObject.back]
-    end
+    end,
 
-    function deque.push_front(dequeObject, value)
+    push_front = function(dequeObject, value)
         dequeObject.front = dequeObject.front - 1
         dequeObject[dequeObject.front] = value
-    end
+    end,
 
-    function deque.pop_front(dequeObject)
+    pop_front = function(dequeObject)
         if dequeObject.front <= dequeObject.back then
             local result = dequeObject[dequeObject.front]
             dequeObject[dequeObject.front] = nil
             dequeObject.front = dequeObject.front + 1
             return result
         end
-    end
+    end,
 
-    function deque.push_back(dequeObject, value)
+    push_back = function(dequeObject, value)
         dequeObject.back = dequeObject.back + 1
         dequeObject[dequeObject.back] = value
-    end
+    end,
 
-    function deque.pop_back(dequeObject)
+    pop_back = function(dequeObject)
         if dequeObject.front <= dequeObject.back then
             local result = dequeObject[dequeObject.back]
             dequeObject[dequeObject.back] = nil
@@ -50,7 +47,8 @@ if true then
             return result
         end
     end
-end
+}
+sm.MTUtil.deque = deque
 
 if not table.unpack then
     ---@diagnostic disable-next-line: deprecated

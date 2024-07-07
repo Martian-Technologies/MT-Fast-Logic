@@ -39,6 +39,28 @@ function FastLogicRealBlockMannager.checkForNewInputs(self)
     end
 end
 
+function FastLogicRealBlockMannager.checkForCreationDeletion(self)
+    if not sm.exists(self.creation.body) then
+        for _, block in pairs(self.creation.AllFastBlocks) do
+            if block ~= nil and block.shape ~= nil then
+                if sm.exists(block.shape) then
+                    block:deepRescanSelf()
+                end
+            end
+        end
+        for _, block in pairs(self.creation.SiliconBlocks) do
+            if block ~= nil and block.shape ~= nil  then
+                if sm.exists(block.shape) then
+                    block:deepRescanSelf()
+                end
+            end
+        end
+        sm.MTFastLogic.Creations[self.creationId] = nil
+        return true
+    end
+    return false
+end
+
 function FastLogicRealBlockMannager.checkForBodyUpdate(self)
     local scanNext
     if not sm.exists(self.creation.body) or self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
@@ -50,7 +72,8 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
     end
 
     for uuid, block in pairs(scanNext) do
-        if self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then
+        if block == nil or block.shape == nil then
+        elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then
             block:deepRescanSelf()
         else
             self.FastLogicAllBlockMannager:setColor(uuid, block.shape.color:getHexStr())
@@ -122,7 +145,8 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
 end
 
 function FastLogicRealBlockMannager.scanSiliconBlocks(self)
-    for uuid, block in pairs(self.creation.SiliconBlocks) do
+    for _, block in pairs(self.creation.SiliconBlocks) do
+        if block == nil or block.shape == nil then return end
         if self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then
             block:deepRescanSelf()
         end

@@ -3,6 +3,7 @@ sm.MTUtil.Profiler = sm.MTUtil.Profiler or {}
 
 
 -- time
+sm.MTUtil.Profiler.Count = sm.MTUtil.Profiler.Count or {}
 local Timers = sm.MTUtil.Profiler.Count.Timers or {}
 sm.MTUtil.Profiler.Time = {
     Timers = Timers,
@@ -80,7 +81,7 @@ sm.MTUtil.Profiler.Time.reset() -- just for testing so that I can reset the time
 sm.MTUtil.Profiler.Time.on("main")
 
 -- counter
-print(Counters)
+sm.MTUtil.Profiler.Count = sm.MTUtil.Profiler.Count or {}
 local Counters = sm.MTUtil.Profiler.Count.Counters or {}
 sm.MTUtil.Profiler.Count = {
     Counters = Counters,
@@ -117,4 +118,3 @@ sm.MTUtil.Profiler.Count = {
 }
 
 sm.MTUtil.Profiler.Count.reset() -- just for testing so that I can reset the counters
-

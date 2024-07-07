@@ -116,17 +116,17 @@ end
 
 function BaseFastLogicBlock.server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
-    if self.creation == nil then
-        return
-    end
+    if self.creation ~= nil and sm.MTFastLogic.Creations[self.creationId] ~= nil then
+        if self.creation.FastLogicRealBlockMannager:checkForCreationDeletion() == false then
+            self.creation.AllFastBlocks[self.data.uuid] = nil
+            self.creation.uuids[self.id] = nil
+            self.creation.ids[self.data.uuid] = nil
 
-    self.creation.AllFastBlocks[self.data.uuid] = nil
-    self.creation.uuids[self.id] = nil
-    self.creation.ids[self.data.uuid] = nil
-
-    self.creation.AllFastBlocks[self.data.uuid] = nil
-    if self.removeAllData then
-        self.FastLogicAllBlockMannager:removeBlock(self.data.uuid) -- remove
+            self.creation.AllFastBlocks[self.data.uuid] = nil
+            if self.removeAllData then
+                self.FastLogicAllBlockMannager:removeBlock(self.data.uuid) -- remove
+            end
+        end
     end
     self:server_onDestroy2()
 end

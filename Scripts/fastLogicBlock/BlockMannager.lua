@@ -29,7 +29,6 @@ function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state
     self.numberOfBlockOutputs[id] = 0
     self.countOfOnInputs[id] = 0
     self.countOfOnOtherInputs[id] = 0
-    self.numberOfStateChanges[id] = 0
     if pathName == "multiBlocks" then
         if type(inputs) == "number" then
             inputs = {inputs}
@@ -142,7 +141,6 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     end
     self:internalRemoveBlockFromUpdate(id)
     table.removeValue(self.blocksSortedByPath[self.runnableBlockPathIds[id]], id)
-    self.numberOfStateChanges[id] = false
     self.blockStates[id] = false
     self.blockInputs[id] = false
     self.blockInputsHash[id] = false
@@ -421,6 +419,7 @@ function FastLogicRunner.internalChangeTimerTime(self, id, time)
         self.timerLengths[id] = time + 1
         self:updateLongestTimer()
         self:shouldBeThroughBlock(id)
+        self:internalAddBlockToUpdate(id)
     end
 end
 
@@ -456,6 +455,7 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
         end
 
         self:shouldBeThroughBlock(id)
+        self:internalAddBlockToUpdate(id)
     end
 end
 

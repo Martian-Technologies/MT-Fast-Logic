@@ -1,4 +1,5 @@
 dofile "../util/util.lua"
+dofile "../CreationUtil.lua"
 
 local string = string
 local table = table
@@ -33,7 +34,7 @@ local uuidToSize = {
 
 function SiliconBlock.deepRescanSelf(self)
     for _, block in ipairs(self.data.blocks) do
-        self.FastLogicAllBlockMannager:removeBlock(block.uuid)
+        self.FastLogicAllBlockMannager:removeBlock(block.uuid, true)
     end
     self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
     self.creation.SiliconBlocks[self.id] = nil
@@ -157,10 +158,16 @@ function SiliconBlock.server_onCreate(self)
 end
 
 function SiliconBlock.server_onDestroy(self)
-    self.creation.SiliconBlocks[self.id] = nil
+    sm.MTFastLogic.SiliconBlocks[self.id] = nil
+    if self.creation == nil or sm.MTFastLogic.Creations[self.creationId] == nil then
+        return
+    end
     if self.removeData ~= false then
-        for _, block in ipairs(self.data.blocks) do
-            self.FastLogicAllBlockMannager:removeBlock(block.uuid)
+        if self.creation.FastLogicRealBlockMannager:checkForCreationDeletion() == false then
+            self.creation.SiliconBlocks[self.id] = nil
+            for _, block in ipairs(self.data.blocks) do
+                self.FastLogicAllBlockMannager:removeBlock(block.uuid)
+            end
         end
     end
 end

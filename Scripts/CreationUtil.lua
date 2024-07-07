@@ -33,6 +33,11 @@ function CreationUtil.MakeCreationData(creationId, body, lastSeenSpeed)
     end
 end
 
+function CreationUtil.getCreationIdFromShape(fastLogicBlock)
+    if fastLogicBlock == nil or fastLogicBlock.shape == nil then return nil end
+    return CreationUtil.getCreationId(fastLogicBlock.shape:getBody())
+end
+
 function CreationUtil.getCreationId(body)
     local id = body:getId()
     for _, b in pairs(body:getCreationBodies()) do

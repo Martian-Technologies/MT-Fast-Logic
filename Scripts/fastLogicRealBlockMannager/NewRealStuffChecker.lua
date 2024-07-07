@@ -41,22 +41,22 @@ end
 
 function FastLogicRealBlockMannager.checkForCreationDeletion(self)
     if not sm.exists(self.creation.body) then
-        for _, block in pairs(self.creation.AllFastBlocks) do
-            if block ~= nil and block.shape ~= nil then
-                if sm.exists(block.shape) then
-                    block:deepRescanSelf()
+            for _, block in pairs(self.creation.AllFastBlocks) do
+                if block ~= nil and block.shape ~= nil then
+                    if sm.exists(block.shape) then
+                        block:deepRescanSelf()
+                    end
                 end
             end
-        end
-        for _, block in pairs(self.creation.SiliconBlocks) do
-            if block ~= nil and block.shape ~= nil  then
-                if sm.exists(block.shape) then
-                    block:deepRescanSelf()
+            for _, block in pairs(self.creation.SiliconBlocks) do
+                if block ~= nil and block.shape ~= nil  then
+                    if sm.exists(block.shape) then
+                        block:deepRescanSelf()
+                    end
                 end
             end
-        end
-        sm.MTFastLogic.Creations[self.creationId] = nil
-        return true
+            sm.MTFastLogic.Creations[self.creationId] = nil
+            return true
     end
     return false
 end
@@ -73,7 +73,7 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
 
     for uuid, block in pairs(scanNext) do
         if block == nil or block.shape == nil then
-        elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then
+        elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationIdFromShape(block) then
             block:deepRescanSelf()
         else
             self.FastLogicAllBlockMannager:setColor(uuid, block.shape.color:getHexStr())

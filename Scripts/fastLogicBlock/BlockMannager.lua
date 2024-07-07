@@ -667,3 +667,9 @@ function FastLogicRunner.externalChangeBlockType(self, uuid, blockType)
         self:internalChangeBlockType(self.hashedLookUp[uuid], blockType)
     end
 end
+
+function FastLogicRunner.externalSetBlockState(self, uuid, state)
+    if self.hashedLookUp[uuid] ~= nil then
+        self:internalSetBlockStates({{self.hashedLookUp[uuid], state}})
+    end
+end

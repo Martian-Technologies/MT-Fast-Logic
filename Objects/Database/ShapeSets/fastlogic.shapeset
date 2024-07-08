@@ -106,6 +106,32 @@
             },
             "sticky": "-Y",
             "uuid": "d8b529ad-3865-40fa-b798-cb2868e5dc4d"
+        },
+        {
+            "color": "34fa3f",
+            "flammable": true,
+            "hull": {
+                "col": "$GAME_DATA/Objects/Collision/obj_interactive_button.obj",
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "name": "TickStepButton",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "buoyancy": 2,
+                "density": 2,
+                "durability": 3,
+                "friction": 5
+            },
+            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_button.rend",
+            "rotationSet": "PropY",
+            "scripted": {
+                "classname": "TickStepButton",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/TickStepButton.lua"
+            },
+            "sticky": "-Y",
+            "uuid": "d8b529ad-3865-40fa-b798-b8a6b83f898b"
         }
     ]
 }

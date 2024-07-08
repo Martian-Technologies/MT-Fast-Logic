@@ -269,7 +269,12 @@ function FastLogicRunner.update(self)
     self.blocksToAddInputs = {}
     self:optimizeLogic()
     self.blocksRan = 0
-    self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
+    if self.numberOfUpdatesPerTick == -1 then
+        self.numberOfUpdatesPerTick = 0
+        self.updateTicks = 1
+    else
+        self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
+    end
     if self.isNew ~= nil then
         if self.isNew > 1 then
             self.isNew = self.isNew - 1

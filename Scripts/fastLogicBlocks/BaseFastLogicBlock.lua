@@ -190,12 +190,15 @@ function BaseFastLogicBlock.server_onMelee(self, position, attacker, damage, pow
 end
 
 function BaseFastLogicBlock.server_changeSpeed(self, isCrouching)
-    if isCrouching then
-        self.creation.FastLogicRunner.numberOfUpdatesPerTick = self.creation.FastLogicRunner.numberOfUpdatesPerTick / 2
+    if self.creation.FastLogicRunner.numberOfUpdatesPerTick <= 0 then
+        self.creation.FastLogicRunner.numberOfUpdatesPerTick = 1
     else
-        self.creation.FastLogicRunner.numberOfUpdatesPerTick = self.creation.FastLogicRunner.numberOfUpdatesPerTick * 2
+        if isCrouching then
+            self.creation.FastLogicRunner.numberOfUpdatesPerTick = self.creation.FastLogicRunner.numberOfUpdatesPerTick / 2
+        else
+            self.creation.FastLogicRunner.numberOfUpdatesPerTick = self.creation.FastLogicRunner.numberOfUpdatesPerTick * 2
+        end
     end
-
     self:sendMessageToAll("UpdatesPerTick = " .. tostring(self.creation.FastLogicRunner.numberOfUpdatesPerTick))
 end
 

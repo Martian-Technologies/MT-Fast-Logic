@@ -73,7 +73,7 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
 
     for uuid, block in pairs(scanNext) do
         if block == nil or block.shape == nil then
-        elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationIdFromShape(block) then
+        elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationIdFromBlock(block) then
             block:deepRescanSelf()
         else
             self.FastLogicAllBlockMannager:setColor(uuid, block.shape.color:getHexStr())

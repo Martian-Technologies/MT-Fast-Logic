@@ -1,6 +1,6 @@
 Colorizer = {}
 
--- FastLogicRealBlockMannager.changeConnectionColor
+-- FastLogicRealBlockManager.changeConnectionColor
 
 function Colorizer.inject(multitool)
     multitool.colorizer = {}

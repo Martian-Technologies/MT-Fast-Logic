@@ -205,7 +205,7 @@ end
 
 function SiliconConverter.convertFromSilicon(creationId, blockUuids) -- only for FastLogicGates
     local creation = sm.MTFastLogic.Creations[creationId]
-    local allBlockMannager = creation.FastLogicAllBlockMannager
+    local allBlockManager = creation.FastLogicAllBlockManager
     local blocks = creation.blocks
     local siliconBlocks = {}
     for _, uuid in ipairs(blockUuids) do
@@ -220,7 +220,7 @@ function SiliconConverter.convertFromSilicon(creationId, blockUuids) -- only for
             local block = blocks[siliconData.uuid]
             if block ~= nil and block.isSilicon then
                 block.isSilicon = false
-                creation.FastLogicRealBlockMannager:createPartWithData(block, siliconBlock.shape.body)
+                creation.FastLogicRealBlockManager:createPartWithData(block, siliconBlock.shape.body)
             end
         end
         siliconBlock:remove(false)

@@ -5,8 +5,8 @@ local table = table
 local type = type
 local pairs = pairs
 
-dofile "fastLogicRealBlockMannager/FastLogicRealBlockMannager.lua"
-dofile "fastLogicAllBlockMannager/FastLogicAllBlockMannager.lua"
+dofile "fastLogicRealBlockManager/FastLogicRealBlockManager.lua"
+dofile "fastLogicAllBlockManager/FastLogicAllBlockManager.lua"
 dofile "fastLogicBlock/FastLogicRunner.lua"
 dofile "silicon/SiliconConverter.lua"
 local SiliconConverter = SiliconConverter
@@ -14,7 +14,7 @@ local SiliconConverter = SiliconConverter
 
 FastLogicRunnerRunner = FastLogicRunnerRunner or class()
 
-dofile "fastLogicRealBlockMannager/LogicConverter.lua"
+dofile "fastLogicRealBlockManager/LogicConverter.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
@@ -45,7 +45,7 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         sm.MTFastLogic.SiliconBlocksToAddConnections[2] = {}
         self.changedUuidsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
-            v.FastLogicRealBlockMannager:update()
+            v.FastLogicRealBlockManager:update()
         end
         for i = 1, #self.changedUuidsArray do
             local changedUuidsArray = {}
@@ -98,11 +98,11 @@ function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocat
     local creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
     local creation = sm.MTFastLogic.Creations[creationId]
     if creation == nil then return end
-    local allBlockMannager = creation.FastLogicAllBlockMannager
+    local allBlockManager = creation.FastLogicAllBlockManager
     local blocksToConvert = {}
     for i = 1, #localLocations do
         local keyPos = string.vecToString(localLocations[i])
-        local blocks = allBlockMannager.locationCash[keyPos]
+        local blocks = allBlockManager.locationCash[keyPos]
         if blocks ~= nil then
             for i = 1, #blocks do
                 blocksToConvert[#blocksToConvert + 1] = blocks[i]

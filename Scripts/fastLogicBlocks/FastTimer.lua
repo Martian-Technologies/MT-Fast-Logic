@@ -105,5 +105,5 @@ function FastTimer.server_saveTime(self, data)
     self.time = data.seconds * 40 + data.ticks
     self.network:setClientData({ticks = self.data.ticks, seconds = self.data.seconds})
     self.storage:save(self.data)
-    self.FastLogicAllBlockMannager:changeTimerTime(self.data.uuid, self.time)
+    self.FastLogicAllBlockManager:changeTimerTime(self.data.uuid, self.time)
 end

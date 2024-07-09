@@ -2,14 +2,14 @@ dofile "../util/util.lua"
 local string = string
 local table = table
 
-FastLogicAllBlockMannager = FastLogicAllBlockMannager or {}
+FastLogicAllBlockManager = FastLogicAllBlockManager or {}
 
 dofile "FastLogicAllBlockFixer.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 
-FastLogicAllBlockMannager.blockUuidToConnectionColorID = {
+FastLogicAllBlockManager.blockUuidToConnectionColorID = {
     ["6a9dbff5-7562-4e9a-99ae-3590ece88087"] = 0,
     ["6a9dbff5-7562-4e9a-99ae-3590ece88088"] = 1,
     ["6a9dbff5-7562-4e9a-99ae-3590ece88089"] = 2,
@@ -52,26 +52,26 @@ FastLogicAllBlockMannager.blockUuidToConnectionColorID = {
     ["6a9dbff5-7562-4e9a-99ae-3590ece88126"] = 39,
 }
 
-FastLogicAllBlockMannager.fastLogicGateBlockUuids = {} -- only the keys from the above table
-for k, _ in pairs(FastLogicAllBlockMannager.blockUuidToConnectionColorID) do
-    table.insert(FastLogicAllBlockMannager.fastLogicGateBlockUuids, k)
+FastLogicAllBlockManager.fastLogicGateBlockUuids = {} -- only the keys from the above table
+for k, _ in pairs(FastLogicAllBlockManager.blockUuidToConnectionColorID) do
+    table.insert(FastLogicAllBlockManager.fastLogicGateBlockUuids, k)
 end
 
-function FastLogicAllBlockMannager.getNew(creationId)
-    local new = table.deepCopy(FastLogicAllBlockMannager)
+function FastLogicAllBlockManager.getNew(creationId)
+    local new = table.deepCopy(FastLogicAllBlockManager)
     new.getNew = nil
     new.creationId = creationId
     return new
 end
 
-function FastLogicAllBlockMannager.init(self)
+function FastLogicAllBlockManager.init(self)
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicRunner = self.creation.FastLogicRunner
     self.blocks = self.creation.blocks
     self.locationCash = {}
 end
 
-function FastLogicAllBlockMannager.update(self)
+function FastLogicAllBlockManager.update(self)
     -- run fast gates
     self.creation.FastLogicRunner:update()
     -- do state updates
@@ -94,14 +94,14 @@ function FastLogicAllBlockMannager.update(self)
     return realBlocksToUpdate
 end
 
-function FastLogicAllBlockMannager.addBlock(self, block)
+function FastLogicAllBlockManager.addBlock(self, block)
     if self.blocks[block.data.uuid] ~= nil then
         return
     end
     local pos = block:getLocalCenter()
     local rot = { block.shape.xAxis, block.shape.yAxis, block.shape.zAxis }
     if block.type == "LogicGate" then
-        local connectionColorId = FastLogicAllBlockMannager.blockUuidToConnectionColorID[tostring(block.shape:getShapeUuid())]
+        local connectionColorId = FastLogicAllBlockManager.blockUuidToConnectionColorID[tostring(block.shape:getShapeUuid())]
         if (block.data.mode == 0) then
             self:makeBlockData("andBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
         elseif (block.data.mode == 1) then
@@ -124,13 +124,13 @@ function FastLogicAllBlockMannager.addBlock(self, block)
     end
 end
 
-function FastLogicAllBlockMannager.addSiliconBlock(self, type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, siliconBlockId)
+function FastLogicAllBlockManager.addSiliconBlock(self, type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, siliconBlockId)
     if self.blocks[uuid] == nil then
         self:makeBlockData(type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, true, nil, siliconBlockId)
     end
 end
 
-function FastLogicAllBlockMannager.removeBlock(self, uuid, skipSiliconChanges)
+function FastLogicAllBlockManager.removeBlock(self, uuid, skipSiliconChanges)
     local block = self.blocks[uuid]
     if block == nil then return end
     for i = 0, #block.outputs do
@@ -148,19 +148,19 @@ function FastLogicAllBlockMannager.removeBlock(self, uuid, skipSiliconChanges)
     self.blocks[uuid] = nil
 end
 
-function FastLogicAllBlockMannager.setColor(self, uuid, colorStr)
+function FastLogicAllBlockManager.setColor(self, uuid, colorStr)
     self.blocks[uuid].color = colorStr
 end
 
-function FastLogicAllBlockMannager.addInput(self, uuid, uuidToConnect)
+function FastLogicAllBlockManager.addInput(self, uuid, uuidToConnect)
     self:addOutput(uuidToConnect, uuid)
 end
 
-function FastLogicAllBlockMannager.removeInput(self, uuid, uuidToDisconnect)
+function FastLogicAllBlockManager.removeInput(self, uuid, uuidToDisconnect)
     self:removeOutput(uuidToDisconnect, uuid)
 end
 
-function FastLogicAllBlockMannager.addOutput(self, uuid, uuidToConnect, skipSiliconSave)
+function FastLogicAllBlockManager.addOutput(self, uuid, uuidToConnect, skipSiliconSave)
     if (
         self.blocks[uuid] ~= nil and self.blocks[uuidToConnect] ~= nil and
         (self.blocks[uuid].outputHash[uuidToConnect] == nil or self.blocks[uuidToConnect].inputHash[uuid] == nil)
@@ -185,7 +185,7 @@ function FastLogicAllBlockMannager.addOutput(self, uuid, uuidToConnect, skipSili
     end
 end
 
-function FastLogicAllBlockMannager.removeOutput(self, uuid, uuidToDisconnect, skipSiliconChanges)
+function FastLogicAllBlockManager.removeOutput(self, uuid, uuidToDisconnect, skipSiliconChanges)
     if (
         self.blocks[uuid] ~= nil and self.blocks[uuidToDisconnect] ~= nil and
         (self.blocks[uuid].outputHash[uuidToDisconnect] ~= nil or self.blocks[uuidToDisconnect].inputHash[uuid] ~= nil)
@@ -216,7 +216,7 @@ function FastLogicAllBlockMannager.removeOutput(self, uuid, uuidToDisconnect, sk
     end
 end
 
-function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, isSilicon, timerLength, siliconBlockId)
+function FastLogicAllBlockManager.makeBlockData(self, type, uuid, pos, rot, inputs, outputs, state, color, connectionColorId, isSilicon, timerLength, siliconBlockId)
     sm.MTFastLogic.UsedUuids[uuid] = true
     local keyPos = string.vecToString(pos)
     if self.locationCash[keyPos] == nil then
@@ -259,16 +259,16 @@ function FastLogicAllBlockMannager.makeBlockData(self, type, uuid, pos, rot, inp
     self:doFixOnBlock(uuid)
 end
 
-function FastLogicAllBlockMannager.changeBlockType(self, uuid, mode)
+function FastLogicAllBlockManager.changeBlockType(self, uuid, mode)
     self.creation.FastLogicRunner:externalChangeBlockType(uuid, mode)
     self.blocks[uuid].type = mode
 end
 
-function FastLogicAllBlockMannager.changeTimerTime(self, uuid, time)
+function FastLogicAllBlockManager.changeTimerTime(self, uuid, time)
     self.creation.FastLogicRunner:externalChangeTimerTime(uuid, time)
     self.blocks[uuid].timerLength = time
 end
 
-function FastLogicAllBlockMannager.changeConnectionColor(self, uuid, connectionColorId)
+function FastLogicAllBlockManager.changeConnectionColor(self, uuid, connectionColorId)
     self.blocks[uuid].connectionColorId = connectionColorId
 end

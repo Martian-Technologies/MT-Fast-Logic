@@ -7,8 +7,8 @@ sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 
 function CreationUtil.MakeCreationData(creationId, body, lastSeenSpeed)
     sm.MTFastLogic.Creations[creationId] = {
-        FastLogicRealBlockMannager = FastLogicRealBlockMannager.getNew(creationId),
-        FastLogicAllBlockMannager = FastLogicAllBlockMannager.getNew(creationId),
+        FastLogicRealBlockManager = FastLogicRealBlockManager.getNew(creationId),
+        FastLogicAllBlockManager = FastLogicAllBlockManager.getNew(creationId),
         FastLogicRunner = FastLogicRunner.getNew(creationId),
         FastLogicGates = {},
         FastTimers = {},
@@ -25,8 +25,8 @@ function CreationUtil.MakeCreationData(creationId, body, lastSeenSpeed)
         lastBodyUpdate = 0,
         NewBlockUuids = {}
     }
-    sm.MTFastLogic.Creations[creationId].FastLogicRealBlockMannager:init()
-    sm.MTFastLogic.Creations[creationId].FastLogicAllBlockMannager:init()
+    sm.MTFastLogic.Creations[creationId].FastLogicRealBlockManager:init()
+    sm.MTFastLogic.Creations[creationId].FastLogicAllBlockManager:init()
     sm.MTFastLogic.Creations[creationId].FastLogicRunner:init()
     if lastSeenSpeed ~= nil then
         sm.MTFastLogic.Creations[creationId].FastLogicRunner.numberOfUpdatesPerTick = lastSeenSpeed

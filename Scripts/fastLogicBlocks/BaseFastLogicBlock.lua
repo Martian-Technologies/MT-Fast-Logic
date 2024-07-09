@@ -20,7 +20,7 @@ sm.MTFastLogic.dataToSet = sm.MTFastLogic.dataToSet or {}
 function BaseFastLogicBlock.deepRescanSelf(self)
     if self.creation ~= nil then
         self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
-        self.creation.FastLogicAllBlockMannager:removeBlock(self.data.uuid)
+        self.creation.FastLogicAllBlockManager:removeBlock(self.data.uuid)
         self.creation.AllFastBlocks[self.data.uuid] = nil
     end
     self.activeInputs = {}
@@ -59,7 +59,7 @@ function BaseFastLogicBlock.getCreationData(self)
     end
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicRunner = self.creation.FastLogicRunner
-    self.FastLogicAllBlockMannager = self.creation.FastLogicAllBlockMannager
+    self.FastLogicAllBlockManager = self.creation.FastLogicAllBlockManager
 end
 
 function BaseFastLogicBlock.getData(self)
@@ -90,7 +90,7 @@ function BaseFastLogicBlock.server_onCreate(self)
     self.type = nil
     self.id = self.interactable:getId()
     if sm.MTFastLogic.dataToSet[self.id] ~= nil then
-        self.creation.FastLogicRealBlockMannager:setData(self, sm.MTFastLogic.dataToSet[self.id])
+        self.creation.FastLogicRealBlockManager:setData(self, sm.MTFastLogic.dataToSet[self.id])
         sm.MTFastLogic.dataToSet[self.id] = nil
     else
         if self.storage:load() ~= nil then
@@ -117,14 +117,14 @@ end
 function BaseFastLogicBlock.server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
     if self.creation ~= nil and sm.MTFastLogic.Creations[self.creationId] ~= nil then
-        if self.creation.FastLogicRealBlockMannager:checkForCreationDeletion() == false then
+        if self.creation.FastLogicRealBlockManager:checkForCreationDeletion() == false then
             self.creation.AllFastBlocks[self.data.uuid] = nil
             self.creation.uuids[self.id] = nil
             self.creation.ids[self.data.uuid] = nil
 
             self.creation.AllFastBlocks[self.data.uuid] = nil
             if self.removeAllData then
-                self.FastLogicAllBlockMannager:removeBlock(self.data.uuid) -- remove
+                self.FastLogicAllBlockManager:removeBlock(self.data.uuid) -- remove
             end
         end
     end

@@ -790,7 +790,7 @@ function MTMultitool.server_recolor(self, data)
                 if table.contains(MTGateUUIDs, shape.uuid) then
                     local interactable = shape:getInteractable()
                     if interactable ~= nil then
-                        creation.FastLogicRealBlockMannager:changeConnectionColor(interactable.id, colorId)
+                        creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorId)
                     end
                 end
                 ::continue::

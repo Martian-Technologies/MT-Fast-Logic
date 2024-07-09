@@ -2,7 +2,7 @@ dofile "../util/util.lua"
 local string = string
 local table = table
 
-function FastLogicRealBlockMannager.updateDisplay(self, blockToUpdate)
+function FastLogicRealBlockManager.updateDisplay(self, blockToUpdate)
     local numberOfChanges = 0
     local blocks = self.creation.blocks
     local displayedStates = self.displayedBlockStates

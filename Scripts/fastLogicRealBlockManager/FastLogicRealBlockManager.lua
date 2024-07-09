@@ -4,7 +4,7 @@ local table = table
 local type = type
 local pairs = pairs
 
-FastLogicRealBlockMannager = FastLogicRealBlockMannager or {}
+FastLogicRealBlockManager = FastLogicRealBlockManager or {}
 
 dofile "DisplayCode.lua"
 dofile "NewRealStuffChecker.lua"
@@ -12,24 +12,24 @@ dofile "NewRealStuffChecker.lua"
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.dataToSet = sm.MTFastLogic.dataToSet or {}
 
-function FastLogicRealBlockMannager.getNew(creationId)
-    local new = table.deepCopy(FastLogicRealBlockMannager)
+function FastLogicRealBlockManager.getNew(creationId)
+    local new = table.deepCopy(FastLogicRealBlockManager)
     new.getNew = nil
     new.creationId = creationId
     return new
 end
 
-function FastLogicRealBlockMannager.init(self)
+function FastLogicRealBlockManager.init(self)
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicRunner = self.creation.FastLogicRunner
-    self.FastLogicAllBlockMannager = self.creation.FastLogicAllBlockMannager
+    self.FastLogicAllBlockManager = self.creation.FastLogicAllBlockManager
     self.displayedBlockStates = {}
     self.blocksWithData = {}
     self.scanNext = {}
     self.needDisplayUpdate = {}
 end
 
-function FastLogicRealBlockMannager.update(self)
+function FastLogicRealBlockManager.update(self)
     -- check if body updated
     self:addAllNewBlocks()
     self:checkForBodyUpdate()
@@ -38,22 +38,22 @@ function FastLogicRealBlockMannager.update(self)
     self:checkForNewInputs()
 
     -- run
-    local updatedGates = self.FastLogicAllBlockMannager:update()
+    local updatedGates = self.FastLogicAllBlockManager:update()
     table.appendTable(updatedGates, self.needDisplayUpdate)
     self.needDisplayUpdate = {}
     -- update states of fast gates
     self:updateDisplay(updatedGates)
 end
 
-function FastLogicRealBlockMannager.addAllNewBlocks(self)
+function FastLogicRealBlockManager.addAllNewBlocks(self)
     for i = 1, #self.creation.BlocksToScan do
         local block = self.creation.BlocksToScan[i]
         if block.isFastLogic == true then
-            self.FastLogicAllBlockMannager:addBlock(block)
+            self.FastLogicAllBlockManager:addBlock(block)
             self.scanNext[block.data.uuid] = block
         elseif block.isSilicon == true then
             for _, siliconBlock in ipairs(block.data.blocks) do
-                self.FastLogicAllBlockMannager:addSiliconBlock(
+                self.FastLogicAllBlockManager:addSiliconBlock(
                     siliconBlock.type,
                     siliconBlock.uuid,
                     siliconBlock.pos,
@@ -69,15 +69,15 @@ function FastLogicRealBlockMannager.addAllNewBlocks(self)
     self.creation.BlocksToScan = {}
 end
 
-function FastLogicRealBlockMannager.createPartWithData(self, block, body)
+function FastLogicRealBlockManager.createPartWithData(self, block, body)
     local pos = block.pos - (block.rot[1] + block.rot[2] + block.rot[3]) * 0.5
     if block.connectionColorId == nil then
         block.connectionColorId = 0
     end
 
-    local blockId = table.afind(FastLogicAllBlockMannager.blockUuidToConnectionColorID, block.connectionColorId)
+    local blockId = table.afind(FastLogicAllBlockManager.blockUuidToConnectionColorID, block.connectionColorId)
     if blockId == nil then
-        blockId = table.afind(FastLogicAllBlockMannager.blockUuidToConnectionColorID, 0)
+        blockId = table.afind(FastLogicAllBlockManager.blockUuidToConnectionColorID, 0)
     end
     local shape = body:createPart(sm.uuid.new(blockId), pos, block.rot[3], block.rot[1], true)
     shape.color = sm.color.new(block.color)
@@ -93,7 +93,7 @@ local typeToNumber = {
     xnorBlocks=5,
 }
 
-function FastLogicRealBlockMannager.setData(self, block, data)
+function FastLogicRealBlockManager.setData(self, block, data)
     block.data.uuid = data.uuid
     sm.MTFastLogic.FastLogicBlockLookUp[block.data.uuid] = block
     for _, v in pairs(data.inputs) do
@@ -141,10 +141,10 @@ function FastLogicRealBlockMannager.setData(self, block, data)
     self.displayedBlockStates[block.data.uuid] = false
 end
 
-function FastLogicRealBlockMannager.changeConnectionColor(self, id, connectionColorId)
+function FastLogicRealBlockManager.changeConnectionColor(self, id, connectionColorId)
     local uuid = self.creation.uuids[id]
     local block = self.creation.blocks[uuid]
-    self.FastLogicAllBlockMannager:changeConnectionColor(uuid, connectionColorId)
+    self.FastLogicAllBlockManager:changeConnectionColor(uuid, connectionColorId)
     local realBlock = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
     if realBlock == nil then
         print("Block not found ope")
@@ -169,5 +169,5 @@ function FastLogicRealBlockMannager.changeConnectionColor(self, id, connectionCo
         nonFastLogicInputs = parents,
         nonFastLogicOutputs = children,
     }
-    self.creation.FastLogicRealBlockMannager:createPartWithData(blockdata, body)
+    self.creation.FastLogicRealBlockManager:createPartWithData(blockdata, body)
 end

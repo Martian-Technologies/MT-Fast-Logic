@@ -3,7 +3,7 @@ local string = string
 local table = table
 
 
-function FastLogicAllBlockMannager.doFixOnBlock(self, uuid)
+function FastLogicAllBlockManager.doFixOnBlock(self, uuid)
     -- local block = self.blocks[uuid]
     -- if block ~= nil then
     --     -- inputs

@@ -6,7 +6,7 @@ local pairs = pairs
 
 FastLogicRunner = FastLogicRunner or {}
 
-dofile "BlockMannager.lua"
+dofile "BlockManager.lua"
 dofile "BalancedLogicFinder.lua"
 dofile "LogicOptimizer.lua"
 

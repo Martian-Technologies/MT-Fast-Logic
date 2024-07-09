@@ -97,5 +97,5 @@ function FastLogicGate.server_saveMode(self, mode)
     self.network:setClientData(self.data.mode)
     self.storage:save(self.data)
     local modes = { "andBlocks", "orBlocks", "xorBlocks", "nandBlocks", "norBlocks", "xnorBlocks" }
-    self.FastLogicAllBlockMannager:changeBlockType(self.data.uuid, modes[self.data.mode + 1])
+    self.FastLogicAllBlockManager:changeBlockType(self.data.uuid, modes[self.data.mode + 1])
 end

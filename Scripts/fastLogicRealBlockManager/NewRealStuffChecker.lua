@@ -7,7 +7,7 @@ local pairs = pairs
 
 dofile "../fastLogicBlock/FastLogicRunner.lua"
 
-function FastLogicRealBlockMannager.checkForNewInputs(self)
+function FastLogicRealBlockManager.checkForNewInputs(self)
     for uuid, data in pairs(self.creation.AllNonFastBlocks) do
         if sm.exists(data.interactable) then
             if data.currentState ~= data.interactable.active then
@@ -39,7 +39,7 @@ function FastLogicRealBlockMannager.checkForNewInputs(self)
     end
 end
 
-function FastLogicRealBlockMannager.checkForCreationDeletion(self)
+function FastLogicRealBlockManager.checkForCreationDeletion(self)
     if not sm.exists(self.creation.body) then
             for _, block in pairs(self.creation.AllFastBlocks) do
                 if block ~= nil and block.shape ~= nil then
@@ -61,7 +61,7 @@ function FastLogicRealBlockMannager.checkForCreationDeletion(self)
     return false
 end
 
-function FastLogicRealBlockMannager.checkForBodyUpdate(self)
+function FastLogicRealBlockManager.checkForBodyUpdate(self)
     local scanNext
     if not sm.exists(self.creation.body) or self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()
@@ -76,7 +76,7 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
         elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationIdFromBlock(block) then
             block:deepRescanSelf()
         else
-            self.FastLogicAllBlockMannager:setColor(uuid, block.shape.color:getHexStr())
+            self.FastLogicAllBlockManager:setColor(uuid, block.shape.color:getHexStr())
             -- self.FastLogicRunner:externalAddBlockToUpdate(uuid)
             local inputs = block.interactable:getParents()
             local inputsHash = {}
@@ -86,7 +86,7 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
                     local inputUuid = self.creation.uuids[inputId]
                     inputsHash[inputId] = true
                     if inputUuid ~= nil then
-                        self.FastLogicAllBlockMannager:addOutput(inputUuid, uuid)
+                        self.FastLogicAllBlockManager:addOutput(inputUuid, uuid)
                     else
                         local currentState = v.active
                         if self.creation.AllNonFastBlocks[inputId] == nil then
@@ -135,16 +135,16 @@ function FastLogicRealBlockMannager.checkForBodyUpdate(self)
             for i = 0, #inputs do
                 local inputUuid = inputs[i]
                 if inputsHash[self.creation.ids[inputUuid]] == nil and self.creation.blocks[inputUuid] ~= nil and self.creation.blocks[inputUuid].isSilicon == false then
-                    self.FastLogicAllBlockMannager:removeOutput(inputUuid, uuid)
+                    self.FastLogicAllBlockManager:removeOutput(inputUuid, uuid)
                 end
             end
-            -- self.FastLogicAllBlockMannager:doFixOnBlock(uuid)
+            -- self.FastLogicAllBlockManager:doFixOnBlock(uuid)
         end
     end
     self.scanNext = {}
 end
 
-function FastLogicRealBlockMannager.scanSiliconBlocks(self)
+function FastLogicRealBlockManager.scanSiliconBlocks(self)
     for _, block in pairs(self.creation.SiliconBlocks) do
         if block == nil or block.shape == nil then return end
         if self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then

@@ -34,13 +34,13 @@ local uuidToSize = {
 
 function SiliconBlock.deepRescanSelf(self)
     for _, block in ipairs(self.data.blocks) do
-        self.FastLogicAllBlockMannager:removeBlock(block.uuid, true)
+        self.FastLogicAllBlockManager:removeBlock(block.uuid, true)
     end
     self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
     self.creation.SiliconBlocks[self.id] = nil
     self.creation = nil
     self.creationId = nil
-    self.FastLogicAllBlockMannager = nil
+    self.FastLogicAllBlockManager = nil
     self:getData()
 end
 
@@ -50,7 +50,7 @@ function SiliconBlock.getCreationData(self)
         sm.MTFastLogic.CreationUtil.MakeCreationData(self.creationId, self.shape:getBody(), self.lastSeenSpeed)
     end
     self.creation = sm.MTFastLogic.Creations[self.creationId]
-    self.FastLogicAllBlockMannager = self.creation.FastLogicAllBlockMannager
+    self.FastLogicAllBlockManager = self.creation.FastLogicAllBlockManager
 end
 
 function SiliconBlock.getData(self)
@@ -69,7 +69,7 @@ function SiliconBlock.getData(self)
         for i = 1, #self.data.blocks do
             local block = self.data.blocks[i]
             local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
-            self.FastLogicAllBlockMannager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, block.connectionColorId, self.id)
+            self.FastLogicAllBlockManager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, block.connectionColorId, self.id)
         end
     end
     sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2] + 1] = self
@@ -79,11 +79,11 @@ function SiliconBlock.addConnections(self)
     for i = 1, #self.data.blocks do
         local block = self.data.blocks[i]
         for ii = 1, #block.inputs do
-            self.FastLogicAllBlockMannager:addOutput(block.inputs[ii], block.uuid, true)
+            self.FastLogicAllBlockManager:addOutput(block.inputs[ii], block.uuid, true)
         end
 
         for ii = 1, #block.outputs do
-            self.FastLogicAllBlockMannager:addOutput(block.uuid, block.outputs[ii], true)
+            self.FastLogicAllBlockManager:addOutput(block.uuid, block.outputs[ii], true)
         end
     end
 end
@@ -163,10 +163,10 @@ function SiliconBlock.server_onDestroy(self)
         return
     end
     if self.removeData ~= false then
-        if self.creation.FastLogicRealBlockMannager:checkForCreationDeletion() == false then
+        if self.creation.FastLogicRealBlockManager:checkForCreationDeletion() == false then
             self.creation.SiliconBlocks[self.id] = nil
             for _, block in ipairs(self.data.blocks) do
-                self.FastLogicAllBlockMannager:removeBlock(block.uuid)
+                self.FastLogicAllBlockManager:removeBlock(block.uuid)
             end
         end
     end

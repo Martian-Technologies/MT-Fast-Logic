@@ -324,7 +324,7 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, withFixe
         end
         -- update states
         if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
-            self.countOfOnInputs[idToDisconnect] = self.countOfOnInputs[idToDisconnect] + 1
+            self.countOfOnInputs[idToDisconnect] = self.countOfOnInputs[idToDisconnect] - 1
             self:internalAddBlockToUpdate(idToDisconnect)
         end
         -- do fixes

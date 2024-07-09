@@ -1,7 +1,7 @@
-sm.MTUtil = sm.MTUtil
+sm.MTUtil = sm.MTUtil or {}
 sm.MTUtil.Profiler = sm.MTUtil.Profiler or {}
 
-
+print("loaded Profiler")
 -- time
 sm.MTUtil.Profiler.Count = sm.MTUtil.Profiler.Count or {}
 local Timers = sm.MTUtil.Profiler.Count.Timers or {}

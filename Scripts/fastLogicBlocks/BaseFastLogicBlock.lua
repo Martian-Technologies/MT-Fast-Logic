@@ -17,8 +17,8 @@ sm.MTFastLogic.client_FastLogicBlockLookUp = sm.MTFastLogic.client_FastLogicBloc
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 sm.MTFastLogic.dataToSet = sm.MTFastLogic.dataToSet or {}
 
-function BaseFastLogicBlock.deepRescanSelf(self)
-    if self.creation ~= nil then
+function BaseFastLogicBlock.deepRescanSelf(self, noRemove)
+    if self.creation ~= nil and noRemove ~= true then
         self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
         self.creation.FastLogicAllBlockManager:removeBlock(self.data.uuid)
         self.creation.AllFastBlocks[self.data.uuid] = nil
@@ -183,10 +183,14 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- print(self.interactable.id)
 end
 
-function BaseFastLogicBlock.server_onMelee(self, position, attacker, damage, power, direction, normal)
+function BaseFastLogicBlock.client_onMelee(self, position, attacker, damage, power, direction, normal)
     if sm.MTFastLogic.doMeleeState then
-        self.FastLogicRunner:externalSetBlockState(self.data.uuid, not self.state)
+        self.network:sendToServer("server_changeBlockState")
     end
+end
+
+function BaseFastLogicBlock.server_changeBlockState(self)
+    self.FastLogicRunner:externalSetBlockState(self.data.uuid, not self.state)
 end
 
 function BaseFastLogicBlock.server_changeSpeed(self, isCrouching)

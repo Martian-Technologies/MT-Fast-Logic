@@ -5,6 +5,7 @@ local type = type
 local pairs = pairs
 
 function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state, timerLength)
+    -- sm.MTUtil.Profiler.Time.on("internalAddBlock" .. tostring(self.creationId))
     -- path data
     local pathName
     if type(path) == "string" then
@@ -73,6 +74,7 @@ function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state
     end
     -- add block to next update tick
     self:internalAddBlockToUpdate(id)
+    -- sm.MTUtil.Profiler.Time.off("internalAddBlock" .. tostring(self.creationId))
 end
 
 function FastLogicRunner.internalRemoveBlock(self, id)
@@ -167,6 +169,7 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
     for i = 1, #idStatePairs do
         local id = idStatePairs[i][1]
         self.blockStates[id] = idStatePairs[i][2]
+        blocksToFixInputData[id] = true
         for k = 1, #self.blockOutputs[id] do
             blocksToFixInputData[self.blockOutputs[id][k]] = true
         end

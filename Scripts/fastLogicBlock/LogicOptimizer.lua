@@ -105,7 +105,6 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
 
             self:updateLongestTimerToLength(length)
-            -- print("made line: lenght = " .. tostring(length))
         end
     end
 end

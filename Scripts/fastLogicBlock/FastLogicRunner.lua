@@ -290,7 +290,7 @@ function FastLogicRunner.update(self)
                 while i <= runningBlockLengths[pathId] do
                     local id = runningBlocks[pathId][i]
                     if countOfOnInputs[id] == false then
-                        -- print("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
+                        -- pri nt("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
                         nextRunningBlocks[id] = false
                         table.remove(runningBlocks[pathId], i)
                         runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1

@@ -10,7 +10,7 @@ dofile "compressorVersions/Version_a.lua"
 
 local highestVersion = "a"
 
-function SiliconCompressor.decompressBlockData(siliconBlock, blockData)    
+function SiliconCompressor.decompressBlockData(siliconBlock, blockData)
     if blockData == nil then return {} end
     local firstChar = string.sub(blockData, 1, 1)
     local version = SiliconCompressor.Versions[firstChar]

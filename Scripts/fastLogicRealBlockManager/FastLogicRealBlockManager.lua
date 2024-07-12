@@ -30,6 +30,7 @@ function FastLogicRealBlockManager.init(self)
 end
 
 function FastLogicRealBlockManager.update(self)
+    -- sm.MTUtil.Profiler.Time.on("update" .. tostring(self.creationId))
     -- check if body updated
     self:addAllNewBlocks()
     self:checkForBodyUpdate()
@@ -43,9 +44,14 @@ function FastLogicRealBlockManager.update(self)
     self.needDisplayUpdate = {}
     -- update states of fast gates
     self:updateDisplay(updatedGates)
+    -- sm.MTUtil.Profiler.Time.off("update" .. tostring(self.creationId))
+    -- print("update" .. tostring(self.creationId) .. ": " .. tostring(sm.MTUtil.Profiler.Time.get("update" .. tostring(self.creationId))))
+    -- sm.MTUtil.Profiler.Time.reset("update" .. tostring(self.creationId))
 end
 
 function FastLogicRealBlockManager.addAllNewBlocks(self)
+    -- sm.MTUtil.Profiler.Time.on("addAllNewBlocks" .. tostring(self.creationId))
+
     for i = 1, #self.creation.BlocksToScan do
         local block = self.creation.BlocksToScan[i]
         if block.isFastLogic == true then
@@ -67,6 +73,7 @@ function FastLogicRealBlockManager.addAllNewBlocks(self)
         end
     end
     self.creation.BlocksToScan = {}
+    -- sm.MTUtil.Profiler.Time.off("addAllNewBlocks" .. tostring(self.creationId))
 end
 
 function FastLogicRealBlockManager.createPartWithData(self, block, body)

@@ -32,9 +32,11 @@ local uuidToSize = {
     ["f0e2828f-8888-4444-b1d9-8a3c45b63898"] = { 8, 8, 4 },
 }
 
-function SiliconBlock.deepRescanSelf(self)
-    for _, block in ipairs(self.data.blocks) do
-        self.FastLogicAllBlockManager:removeBlock(block.uuid, true)
+function SiliconBlock.deepRescanSelf(self, noRemove)
+    if noRemove ~= true then
+        for _, block in ipairs(self.data.blocks) do
+            self.FastLogicAllBlockManager:removeBlock(block.uuid, true)
+        end
     end
     self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
     self.creation.SiliconBlocks[self.id] = nil
@@ -173,7 +175,8 @@ function SiliconBlock.server_onDestroy(self)
 end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    -- advPrint(self., 3)
+    -- print("internalAddBlock: " .. tostring(sm.MTUtil.Profiler.Time.get("internalAddBlock" .. tostring(self.creationId))))
+    -- print("addAllNewBlocks: " .. tostring(sm.MTUtil.Profiler.Time.get("addAllNewBlocks" .. tostring(self.creationId))))
     print(SiliconCompressor.compressBlocks(self))
 end
 

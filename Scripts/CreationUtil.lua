@@ -33,9 +33,9 @@ function CreationUtil.MakeCreationData(creationId, body, lastSeenSpeed)
     end
 end
 
-function CreationUtil.getCreationIdFromBlock(fastLogicBlock)
-    if fastLogicBlock == nil or fastLogicBlock.shape == nil then return nil end
-    return CreationUtil.getCreationId(fastLogicBlock.shape:getBody())
+function CreationUtil.getCreationIdFromBlock(block)
+    if block == nil or block.shape == nil then return nil end
+    return CreationUtil.getCreationId(block.shape:getBody())
 end
 
 function CreationUtil.getCreationId(body)

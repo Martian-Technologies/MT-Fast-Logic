@@ -41,29 +41,31 @@ end
 
 function FastLogicRealBlockManager.checkForCreationDeletion(self)
     if not sm.exists(self.creation.body) then
-            for _, block in pairs(self.creation.AllFastBlocks) do
-                if block ~= nil and block.shape ~= nil then
-                    if sm.exists(block.shape) then
-                        block:deepRescanSelf()
-                    end
+        for _, block in pairs(self.creation.AllFastBlocks) do
+            if block ~= nil and block.shape ~= nil then
+                if sm.exists(block.shape) then
+                    block:deepRescanSelf(true)
                 end
             end
-            for _, block in pairs(self.creation.SiliconBlocks) do
-                if block ~= nil and block.shape ~= nil  then
-                    if sm.exists(block.shape) then
-                        block:deepRescanSelf()
-                    end
+        end
+        for _, block in pairs(self.creation.SiliconBlocks) do
+            if block ~= nil and block.shape ~= nil  then
+                if sm.exists(block.shape) then
+                    block:deepRescanSelf(true)
                 end
             end
-            sm.MTFastLogic.Creations[self.creationId] = nil
-            return true
+        end
+        sm.MTFastLogic.Creations[self.creationId] = nil
+        return true
     end
     return false
 end
 
 function FastLogicRealBlockManager.checkForBodyUpdate(self)
     local scanNext
-    if not sm.exists(self.creation.body) or self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
+    if self:checkForCreationDeletion() then
+        return
+    elseif self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()
         scanNext = self.creation.AllFastBlocks
         self:scanSiliconBlocks()
@@ -71,6 +73,8 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
         scanNext = self.scanNext
     end
 
+    -- if table.length(scanNext) > 0 then
+    --     sm.MTUtil.Profiler.Time.on("checkForBodyUpdate" .. tostring(self.creationId))
     for uuid, block in pairs(scanNext) do
         if block == nil or block.shape == nil then
         elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationIdFromBlock(block) then
@@ -138,16 +142,19 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                     self.FastLogicAllBlockManager:removeOutput(inputUuid, uuid)
                 end
             end
-            -- self.FastLogicAllBlockManager:doFixOnBlock(uuid)
         end
     end
+    -- sm.MTUtil.Profiler.Time.off("checkForBodyUpdate" .. tostring(self.creationId))
+    -- print("checkForBodyUpdate: " .. tostring(sm.MTUtil.Profiler.Time.get("checkForBodyUpdate" .. tostring(self.creationId))))
+    -- sm.MTUtil.Profiler.Time.reset("checkForBodyUpdate" .. tostring(self.creationId))
+    -- end
     self.scanNext = {}
 end
 
 function FastLogicRealBlockManager.scanSiliconBlocks(self)
     for _, block in pairs(self.creation.SiliconBlocks) do
         if block == nil or block.shape == nil then return end
-        if self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationId(block.shape:getBody()) then
+        if self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationIdFromBlock(block) then
             block:deepRescanSelf()
         end
     end

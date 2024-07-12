@@ -71,9 +71,10 @@ function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for F
         )
         sm.MTFastLogic.DataForSiliconBlocks[newShape:getInteractable():getId()] = siliconBlocksToMake[i].uuids
         for ii = 1, #siliconBlocksToMake[i].uuids do
-            creation.blocks[siliconBlocksToMake[i].uuids[ii]].isSilicon = true
-            creation.blocks[siliconBlocksToMake[i].uuids[ii]].siliconBlockId = newShape:getInteractable():getId()
-            creation.AllFastBlocks[siliconBlocksToMake[i].uuids[ii]]:remove(false)
+            local uuid = siliconBlocksToMake[i].uuids[ii]
+            creation.blocks[uuid].isSilicon = true
+            creation.blocks[uuid].siliconBlockId = newShape:getInteractable():getId()
+            creation.AllFastBlocks[uuid]:remove(false)
         end
     end
 end

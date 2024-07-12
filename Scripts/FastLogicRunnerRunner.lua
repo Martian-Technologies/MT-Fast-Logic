@@ -23,8 +23,8 @@ sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAdd
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
     -- sm.MTUtil.Profiler.Count.increment("tickCount")
-    -- print(tostring(sm.MTUtil.Profiler.Time.get("FastLogicRunnerUpdate") / sm.MTUtil.Profiler.Count.get("tickCount")) .. " seconds per update")
-    -- print(tostring(sm.MTUtil.Profiler.Time.getPrecent("FastLogicRunnerUpdate")) .. "% of time")
+    -- pri nt(tostring(sm.MTUtil.Profiler.Time.get("FastLogicRunnerUpdate") / sm.MTUtil.Profiler.Count.get("tickCount")) .. " seconds per update")
+    -- pri nt(tostring(sm.MTUtil.Profiler.Time.getPrecent("FastLogicRunnerUpdate")) .. "% of time")
     if self.run then
         -- bodiesToConvert
         if self.bodiesToConvert ~= nil then
@@ -95,6 +95,7 @@ end
 -- wantedType = "toSilicon" or "toFastLogic"
 -- localLocations shoud be in blocks not meters
 function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocations)
+    if not sm.exists(body) then return end
     local creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
     local creation = sm.MTFastLogic.Creations[creationId]
     if creation == nil then return end

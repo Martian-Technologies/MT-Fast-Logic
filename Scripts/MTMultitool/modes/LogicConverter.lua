@@ -20,7 +20,6 @@ function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBu
         local body = nil
         if hit and res.type == "body" then
             body = res:getBody()
-            -- print(body)
         end
         if hit and res.type == "joint" then
             body = res:getJoint().shapeA.body

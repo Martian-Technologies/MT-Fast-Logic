@@ -48,7 +48,6 @@ function SiliconConverterTool.trigger(multitool, primaryState, secondaryState, f
         end
         -- self.nametagUpdate(tags)
     end
-    -- print(localPosition)
 
     -- display a preview
     local minPos = nil

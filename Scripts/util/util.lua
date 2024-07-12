@@ -426,7 +426,6 @@ function string.split(inputstr, sep)
     end
 end
 
-sm.MTUtil = {}
 function sm.MTUtil.getOffset(rot)
     local xAxisSimple = rot.xAxis.x + rot.xAxis.y * 2 + rot.xAxis.z * 3
 	local zAxisSimple = rot.zAxis.x + rot.zAxis.y * 2 + rot.zAxis.z * 3

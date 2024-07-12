@@ -4,8 +4,6 @@ local table = table
 
 FastLogicAllBlockManager = FastLogicAllBlockManager or {}
 
-dofile "FastLogicAllBlockFixer.lua"
-
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.UsedUuids = sm.MTFastLogic.UsedUuids or {}
 
@@ -149,6 +147,7 @@ function FastLogicAllBlockManager.removeBlock(self, uuid, skipSiliconChanges)
 end
 
 function FastLogicAllBlockManager.setColor(self, uuid, colorStr)
+    if self.blocks[uuid] == nil then return end
     self.blocks[uuid].color = colorStr
 end
 
@@ -180,8 +179,6 @@ function FastLogicAllBlockManager.addOutput(self, uuid, uuidToConnect, skipSilic
             self.blocks[uuidToConnect].inputHash[uuid] = true
         end
         self.FastLogicRunner:externalAddOutput(uuid, uuidToConnect)
-        -- self:doFixOnBlock(uuid)
-        -- self:doFixOnBlock(uuidToConnect)
     end
 end
 
@@ -207,12 +204,6 @@ function FastLogicAllBlockManager.removeOutput(self, uuid, uuidToDisconnect, ski
             self.blocks[uuidToDisconnect].inputHash[uuid] = nil
         end
         self.FastLogicRunner:externalRemoveOutput(uuid, uuidToDisconnect)
-        -- if self.blocks[uuid] ~= nil then
-        --     self:doFixOnBlock(uuid)
-        -- end
-        -- if self.blocks[uuidToDisconnect] ~= nil then
-        --     self:doFixOnBlock(uuidToDisconnect)
-        -- end
     end
 end
 
@@ -256,7 +247,6 @@ function FastLogicAllBlockManager.makeBlockData(self, type, uuid, pos, rot, inpu
         siliconBlockId = siliconBlockId
     }
     self.FastLogicRunner:externalAddBlock(self.blocks[uuid])
-    self:doFixOnBlock(uuid)
 end
 
 function FastLogicAllBlockManager.changeBlockType(self, uuid, mode)

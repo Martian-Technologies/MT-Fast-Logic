@@ -28,6 +28,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
         "Light Red", "Red", "Dim Red", "Dark Red",
         "Light Orange", "Orange", "Light Brown", "Dark Brown"
     }
+    multitool.VolumeSelector.actionWord = "Colorize"
     multitool.VolumeSelector.isBeta = false
 
     local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)

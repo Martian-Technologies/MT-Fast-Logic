@@ -8,6 +8,22 @@ local type = type
 local pairs = pairs
 
 local letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+local vlightsToFlights = {
+    ["e91b0bf2-dafa-439e-a503-286e91461bb0"] = "f36e03b4-eea7-4c0a-842d-225ed50e5635",
+    ["1e2485d7-f600-406e-b348-9f0b7c1f5077"] = "da2a1835-8ef3-4bef-a16c-c3d38ffe3b34",
+    ["7b2c96af-a4a1-420e-9370-ea5b58f23a7e"] = "767a4a08-7471-465a-9dda-6e3c246fe3b1",
+    ["5e3dff9b-2450-44ae-ad46-d2f6b5148cbf"] = "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b",
+    ["16ba2d22-7b96-4c5e-9eb7-f6422ed80ad4"] = "e5b00d9a-e27f-4aff-ae74-612ac9edae07",
+    ["85339a1d-e67f-4c63-94fd-4a1cf8c25810"] = "6efc9636-e380-4c6e-ad95-79f1919ac1dc",
+    ["ed27f5e2-cac5-4a32-a5d9-49f116acc6af"] = "31eac728-a2db-420a-8034-835229f42d4c",
+    ["695d66c8-b937-472d-8bc2-f3d72dd92879"] = "85caeefe-9935-42ae-83a4-8c1df6528758"
+}
+local flightsToVlights = {}
+for v,f in pairs(vlightsToFlights) do
+    flightsToVlights[f] = v
+end
+
 function FastLogicRunnerRunner.server_convertBody(self, data)
     --"FastLogic" or "VanillaLogic"
     local body = data.body
@@ -115,8 +131,8 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
                     jsontable.bodies[i].childs[j].controller.active = nil
                     jsontable.bodies[i].childs[j].controller.seconds = nil
                     jsontable.bodies[i].childs[j].controller.ticks = nil
-                elseif jsontable.bodies[i].childs[j].shapeId == "5e3dff9b-2450-44ae-ad46-d2f6b5148cbf" then --Vanilla Warehouse Square Light
-                    jsontable.bodies[i].childs[j].shapeId = "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b"
+                elseif vlightsToFlights[jsontable.bodies[i].childs[j].shapeId] ~= nil then --Vanilla Light
+                    jsontable.bodies[i].childs[j].shapeId = vlightsToFlights[jsontable.bodies[i].childs[j].shapeId]
                     local childdata = nil
                     local luminance = jsontable.bodies[i].childs[j].controller.luminance
                     if luminance == 10 then
@@ -261,9 +277,7 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
                     jsontable.bodies[i].childs[j].controller.active = false
                     jsontable.bodies[i].childs[j].controller.seconds = seconds
                     jsontable.bodies[i].childs[j].controller.ticks = ticks
-                elseif jsontable.bodies[i].childs[j].shapeId == "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b" then --Fast Warehouse Square Light
-                    jsontable.bodies[i].childs[j].shapeId = "5e3dff9b-2450-44ae-ad46-d2f6b5148cbf"
-
+                elseif flightsToVlights[jsontable.bodies[i].childs[j].shapeId] ~= nil then --Fast Light
                     local luminance = 50
                     local childdata = jsontable.bodies[i].childs[j].controller.data
                     if childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgK" then
@@ -291,6 +305,7 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
                         -- sm.gui.chatMessage(childdata)
                         goto continue
                     end
+                    jsontable.bodies[i].childs[j].shapeId = flightsToVlights[jsontable.bodies[i].childs[j].shapeId]
                     jsontable.bodies[i].childs[j].controller.luminance = luminance
                     jsontable.bodies[i].childs[j].controller.data = nil
                 end

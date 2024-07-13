@@ -18,10 +18,13 @@ sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 sm.MTFastLogic.dataToSet = sm.MTFastLogic.dataToSet or {}
 
 function BaseFastLogicBlock.deepRescanSelf(self, noRemove)
-    if self.creation ~= nil and noRemove ~= true then
+    if self.creation ~= nil then
         self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
-        self.creation.FastLogicAllBlockManager:removeBlock(self.data.uuid)
-        self.creation.AllFastBlocks[self.data.uuid] = nil
+        if noRemove ~= true then
+            self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
+            self.creation.FastLogicAllBlockManager:removeBlock(self.data.uuid)
+            self.creation.AllFastBlocks[self.data.uuid] = nil
+        end
     end
     self.activeInputs = {}
     self.FastLogicRunner = nil

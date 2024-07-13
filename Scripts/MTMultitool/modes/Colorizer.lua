@@ -45,14 +45,9 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
 end
 
 function Colorizer.cleanUp(multitool)
-    local self = multitool.colorizer
-    self.origin = nil
-    self.final = nil
-    self.body = nil
-    self.nametagUpdate(nil)
+    VolumeSelector.cleanUp(multitool)
 end
 
 function Colorizer.cleanNametags(multitool)
-    local self = multitool.colorizer
-    self.nametagUpdate(nil)
+    VolumeSelector.cleanNametags(multitool)
 end

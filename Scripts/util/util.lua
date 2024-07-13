@@ -280,8 +280,23 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
             formater.getFormatedForPrint(val.x, depth, maxTableLength) .. ", " ..
             formater.getFormatedForPrint(val.y, depth, maxTableLength) .. ", " ..
             formater.getFormatedForPrint(val.z, depth, maxTableLength) .. ">"
+    elseif type(val) == "Color" then
+        local str = "Color <" ..
+            formater.getFormatedForPrint(val.r, depth, maxTableLength) .. ", " ..
+            formater.getFormatedForPrint(val.g, depth, maxTableLength) .. ", " ..
+            formater.getFormatedForPrint(val.b, depth, maxTableLength)
+        if val.a ~= 1 then
+            str = str .. ", " .. formater.getFormatedForPrint(val.a, depth, maxTableLength) .. ">"
+        else
+            str = str .. ">"
+        end
+        return str
     else
-        return type(val)
+        local str = tostring(val)
+        if str == nil then
+            return type(val)
+        end
+        return type(val) .. " <" .. str .. ">"
     end
 end
 

@@ -1,5 +1,8 @@
-local CreationUtil = CreationUtil or {}
+dofile "../fastLogicAllBlockManager/FastLogicAllBlockManager.lua"
+dofile "../fastLogicBlock/FastLogicRunner.lua"
+dofile "../fastLogicRealBlockManager/FastLogicRealBlockManager.lua"
 
+local CreationUtil = CreationUtil or {}
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}

@@ -1,25 +1,25 @@
-dofile "util/util.lua"
+dofile "../util/util.lua"
+dofile "../fastLogicRealBlockManager/FastLogicRealBlockManager.lua"
+dofile "../fastLogicAllBlockManager/FastLogicAllBlockManager.lua"
+dofile "../fastLogicBlock/FastLogicRunner.lua"
+dofile "../silicon/SiliconConverter.lua"
+dofile "../fastLogicRealBlockManager/LogicConverter.lua"
 dofile "CreationUtil.lua"
 local string = string
 local table = table
 local type = type
 local pairs = pairs
 
-dofile "fastLogicRealBlockManager/FastLogicRealBlockManager.lua"
-dofile "fastLogicAllBlockManager/FastLogicAllBlockManager.lua"
-dofile "fastLogicBlock/FastLogicRunner.lua"
-dofile "silicon/SiliconConverter.lua"
 local SiliconConverter = SiliconConverter
 
 
 FastLogicRunnerRunner = FastLogicRunnerRunner or class()
 
-dofile "fastLogicRealBlockManager/LogicConverter.lua"
+dofile "AllCreationDisplay.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
--- sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
     if self.run then
@@ -33,29 +33,11 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
             self.bodiesToConvert[1] = self.bodiesToConvert[2]
             self.bodiesToConvert[2] = {}
         end
-        -- if sm.MTFastLogic.SiliconBlocksToAddConnections[1] ~= nil then
-        --     for i = 1, #sm.MTFastLogic.SiliconBlocksToAddConnections[1] do
-        --         sm.MTFastLogic.SiliconBlocksToAddConnections[1][i]:addConnections()
-        --     end
-        -- end
-        -- sm.MTFastLogic.SiliconBlocksToAddConnections[1] = sm.MTFastLogic.SiliconBlocksToAddConnections[2]
-        -- sm.MTFastLogic.SiliconBlocksToAddConnections[2] = {}
         self.changedUuidsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
             v.FastLogicRealBlockManager:update()
         end
-        for i = 1, #self.changedUuidsArray do
-            local changedUuidsArray = {}
-            for ii = 1, #self.changedUuidsArray[i] do
-                if  sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]] ~= nil then
-                    changedUuidsArray[ii] = {
-                        sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].id,
-                        sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i][ii]].state
-                    }
-                end
-            end
-            self.network:sendToClients("client_updateTexturesAndStates", changedUuidsArray)
-        end
+        self:updatedDisplays()
     end
 end
 
@@ -78,15 +60,6 @@ end
 
 function FastLogicRunnerRunner.client_sendMessage(self, message)
     sm.gui.chatMessage(message)
-end
-
-function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedIds)
-    for i = 1, #changedIds do
-        local block = sm.MTFastLogic.client_FastLogicBlockLookUp[changedIds[i][1]]
-        if block ~= nil then
-            block:client_updateTexture(changedIds[i][2])
-        end
-    end
 end
 
 -- wantedType = "toSilicon" or "toFastLogic"

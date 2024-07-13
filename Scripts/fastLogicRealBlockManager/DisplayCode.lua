@@ -3,12 +3,10 @@ local string = string
 local table = table
 
 function FastLogicRealBlockManager.updateDisplay(self, blockToUpdate)
-    local numberOfChanges = 0
     local blocks = self.creation.blocks
     local displayedStates = self.displayedBlockStates
     local fastBlocks = self.creation.AllFastBlocks
-    local changedUuidsArray = sm.MTFastLogic.FastLogicRunnerRunner.changedUuidsArray
-    local changedUuids = {}
+    local changedUuids = sm.MTFastLogic.FastLogicRunnerRunner.changedUuidsArray
     for i = 1, #blockToUpdate do
         local uuid = blockToUpdate[i]
         local block = fastBlocks[uuid]
@@ -24,20 +22,10 @@ function FastLogicRealBlockManager.updateDisplay(self, blockToUpdate)
                     else
                         block.interactable.power = 0
                     end
-                    numberOfChanges = numberOfChanges + 1
-                    changedUuids[numberOfChanges] = uuid
+                    changedUuids[#changedUuids + 1] = uuid
                 end
             end
         end
-        if numberOfChanges > 1000 then
-            changedUuidsArray[#changedUuidsArray + 1] = changedUuids
-            changedUuids = {}
-            numberOfChanges = 0
-        end
-       
     end
-    if numberOfChanges > 0 then
-        changedUuidsArray[#changedUuidsArray + 1] = changedUuids
-    end
-    self.creation.lastBodyUpdate = sm.game.getCurrentTick()
+    -- self.creation.lastBodyUpdate = sm.game.getCurrentTick()
 end

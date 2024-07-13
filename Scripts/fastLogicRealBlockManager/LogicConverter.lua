@@ -1,7 +1,7 @@
 -- quickGateConverter.lua by HerrVincling
 -- moddifed
 dofile "../util/util.lua"
-dofile "../CreationUtil.lua"
+dofile "../allCreationStuff/CreationUtil.lua"
 local string = string
 local table = table
 local type = type

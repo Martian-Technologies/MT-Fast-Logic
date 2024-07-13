@@ -1,5 +1,5 @@
 dofile "../util/util.lua"
-dofile "../CreationUtil.lua"
+
 local string = string
 local table = table
 local type = type

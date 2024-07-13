@@ -136,6 +136,12 @@ function ConnectionShower.client_onUpdate(multitool)
             -- print("EEE")
             local blockFastUuid = creation.uuids[interactable.id]
             local block = creation.blocks[blockFastUuid]
+            if block == nil then
+                if self.hideOnPanAway then
+                    self.updateNametags(nil)
+                end
+                return
+            end
             local inputs = block.inputs
             local outputs = block.outputs
             local shapesOutput = {}

@@ -66,7 +66,8 @@ function FastLogicAllBlockManager.init(self)
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.FastLogicRunner = self.creation.FastLogicRunner
     self.dataToSetToDo = {}
-    self.dataToSetDelay = {}
+    self.dataToSetDelay1 = {}
+    self.dataToSetDelay2 = {}
     self.blocks = self.creation.blocks
     self.locationCash = {}
 end
@@ -75,28 +76,33 @@ function FastLogicAllBlockManager.update(self)
     local dataToSetLength = #self.dataToSetToDo
     if dataToSetLength > 0 then
         for i = 1, dataToSetLength do
-            local uuid = self.dataToSetToDo[1]
-            local inputs = self.dataToSetToDo[2]
+            local uuid = self.dataToSetToDo[i][1]
+            local inputs = self.dataToSetToDo[i][2]
             if inputs ~= nil then
                 for j = 1, #inputs do
-                    self:addOutput(inputs[i], uuid, true, true)
+                    if inputs[j] ~= nil then
+                        self:addOutput(inputs[j], uuid, true, true)
+                    end
                 end
             end
-            local outputs = self.dataToSetToDo[3]
+            local outputs = self.dataToSetToDo[i][3]
             if outputs ~= nil then
                 for j = 1, #outputs do
-                    self:addOutput(uuid, outputs[i], true, true)
+                    if outputs[j] ~= nil then
+                        self:addOutput(uuid, outputs[j], true, true)
+                    end
                 end
             end
         end
         for i = 1, dataToSetLength do
             local uuid = self.dataToSetToDo[i][1]
-            self.FastLogicRunner:externalShouldBeThroughBlock(uuid)
+            -- self.FastLogicRunner:externalShouldBeThroughBlock(uuid)
             self.FastLogicRunner:externalAddBlockToUpdate(uuid)
         end
     end
-    self.dataToSetToDo = self.dataToSetDelay
-    self.dataToSetDelay = {}
+    self.dataToSetToDo = self.dataToSetDelay1
+    self.dataToSetDelay1 = self.dataToSetDelay2
+    self.dataToSetDelay2 = {}
     -- run fast gates
     self.creation.FastLogicRunner:update()
     -- do state updates
@@ -248,7 +254,7 @@ function FastLogicAllBlockManager.makeBlockData(self, type, uuid, pos, rot, inpu
     if self.locationCash[keyPos] == nil then
         self.locationCash[keyPos] = {}
     end
-    self.dataToSetDelay[#self.dataToSetDelay+1] = {
+    self.dataToSetDelay2[#self.dataToSetDelay2+1] = {
         uuid,
         inputs,
         outputs

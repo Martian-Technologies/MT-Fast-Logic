@@ -161,7 +161,10 @@ function SiliconBlock.server_onDestroy(self)
 end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    print(SiliconCompressor.compressBlocks(self))
+    print("time per rev: " .. tostring(sm.MTUtil.Profiler.Time.get("revertBlockType"..tostring(self.creationId)) / sm.MTUtil.Profiler.Count.get("revertBlockType"..tostring(self.creationId))))
+    print("time: " .. tostring(sm.MTUtil.Profiler.Time.get("revertBlockType"..tostring(self.creationId))))
+    print("count: " .. tostring(sm.MTUtil.Profiler.Count.get("revertBlockType"..tostring(self.creationId))))
+    -- print(SiliconCompressor.compressBlocks(self))
 end
 
 function SiliconBlock.client_onTinker(self, character, state)

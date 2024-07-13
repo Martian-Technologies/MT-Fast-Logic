@@ -94,7 +94,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         if inputs ~= false then
             local inputId = inputs[1]
             while inputId ~= nil do
-                self:internalRemoveOutput(inputId, id, false)
+                self:internalRemoveOutput(inputId, id, true)
                 inputId = inputs[1]
             end
         end
@@ -102,7 +102,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         if outputs ~= false then
             local outputId = outputs[1]
             while outputId ~= nil do
-                self:internalRemoveOutput(id, outputId, false)
+                self:internalRemoveOutput(id, outputId, true)
                 self:shouldBeThroughBlock(outputId)
                 self:internalAddBlockToUpdate(outputId)
                 outputId = outputs[1]
@@ -241,15 +241,15 @@ function FastLogicRunner.internalAddBlockToMultiBlock(self, id, multiBlockId, is
     end
 end
 
-function FastLogicRunner.internalAddInput(self, id, idToConnect, withFixes)
-    self:internalAddOutput(idToConnect, id, withFixes)
+function FastLogicRunner.internalAddInput(self, id, idToConnect, withChecksAndUpdates)
+    self:internalAddOutput(idToConnect, id, withChecksAndUpdates)
 end
 
-function FastLogicRunner.internalRemoveInput(self, id, idToDisconnect, withFixes)
-    self:internalRemoveInput(idToConnect, id, withFixes)
+function FastLogicRunner.internalRemoveInput(self, id, idToDisconnect, withChecksAndUpdates)
+    self:internalRemoveInput(idToConnect, id, withChecksAndUpdates)
 end
 
-function FastLogicRunner.internalAddOutput(self, id, idToConnect, withFixes)
+function FastLogicRunner.internalAddOutput(self, id, idToConnect, withChecksAndUpdates)
     if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToConnect] ~= false and self.blockOutputsHash[id][idToConnect] == nil then
         -- remove from multi blocks
         if self.multiBlockData[id] ~= false then
@@ -269,16 +269,18 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect, withFixes)
         -- update states
         if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
             self.countOfOnInputs[idToConnect] = self.countOfOnInputs[idToConnect] + 1
-            self:internalAddBlockToUpdate(idToConnect)
+            if skipChecksAndUpdates ~= true then
+                self:internalAddBlockToUpdate(idToConnect)
+            end
         end
         -- do fixes
-        if withFixes ~= false then
+        if skipChecksAndUpdates ~= true then
             self:shouldBeThroughBlock(idToConnect)
         end
     end
 end
 
-function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, withFixes)
+function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, withChecksAndUpdates)
     if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToDisconnect] ~= false and table.removeValue(self.blockOutputs[id], idToDisconnect) ~= nil then
         -- remove from multi blocks
         if self.multiBlockData[id] ~= false then
@@ -297,10 +299,11 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, withFixe
         -- update states
         if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
             self.countOfOnInputs[idToDisconnect] = self.countOfOnInputs[idToDisconnect] - 1
-            self:internalAddBlockToUpdate(idToDisconnect)
+            if withChecksAndUpdates ~= true then
+                self:internalAddBlockToUpdate(idToDisconnect)
+            end
         end
-        -- do fixes
-        if withFixes ~= false then
+        if withChecksAndUpdates ~= true then
             self:shouldBeThroughBlock(idToDisconnect)
         end
     end
@@ -466,6 +469,7 @@ end
 
 function FastLogicRunner.revertBlockType(self, id)
     if self.altBlockData[id] ~= false then
+        sm.MTUtil.Profiler.Time.on("revertBlockType"..tostring(self.creationId))
         -- remove from multi blocks
         if self.multiBlockData[id] ~= false then
             self:internalRemoveBlock(self.multiBlockData[id])
@@ -491,6 +495,8 @@ function FastLogicRunner.revertBlockType(self, id)
                 end
             end
         end
+        sm.MTUtil.Profiler.Time.off("revertBlockType"..tostring(self.creationId))
+        sm.MTUtil.Profiler.Count.increment("revertBlockType"..tostring(self.creationId))
     end
 end
 
@@ -572,19 +578,19 @@ function FastLogicRunner.externalRemoveBlock(self, uuid)
     end
 end
 
-function FastLogicRunner.externalAddInput(self, uuid, uuidToConnect, withFixes)
+function FastLogicRunner.externalAddInput(self, uuid, uuidToConnect, skipChecksAndUpdates)
     local id = self.hashedLookUp[uuid]
     local idToConnect = self.hashedLookUp[uuidToConnect]
     if id ~= nil and idToConnect ~= nil then
-        self:internalAddOutput(idToConnect, id, withFixes)
+        self:internalAddOutput(idToConnect, id, skipChecksAndUpdates)
     end
 end
 
-function FastLogicRunner.externalRemoveInput(self, uuid, uuidToDisconnect, withFixes)
+function FastLogicRunner.externalRemoveInput(self, uuid, uuidToDisconnect, skipChecksAndUpdates)
     local id = self.hashedLookUp[uuid]
     local idToDisconnect = self.hashedLookUp[uuidToDisconnect]
     if id ~= nil and idToDisconnect ~= nil then
-        self:internalRemoveOutput(idToDisconnect, id, withFixes)
+        self:internalRemoveOutput(idToDisconnect, id, skipChecksAndUpdates)
     end
 end
 
@@ -596,11 +602,11 @@ function FastLogicRunner.externalAddOutput(self, uuid, uuidToConnect, withFixes)
     end
 end
 
-function FastLogicRunner.externalRemoveOutput(self, uuid, uuidToDisconnect, withFixes)
+function FastLogicRunner.externalRemoveOutput(self, uuid, uuidToDisconnect, skipChecksAndUpdates)
     local id = self.hashedLookUp[uuid]
     local idToDisconnect = self.hashedLookUp[uuidToDisconnect]
     if id ~= nil and idToDisconnect ~= nil then
-        self:internalRemoveOutput(id, idToDisconnect, withFixes)
+        self:internalRemoveOutput(id, idToDisconnect, skipChecksAndUpdates)
     end
 end
 

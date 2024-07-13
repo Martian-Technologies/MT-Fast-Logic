@@ -142,7 +142,7 @@ function FastLogicRealBlockManager.setData(self, block, data)
     sm.event.sendToInteractable(block.interactable, "server_saveMode", typeToNumber[data.type])
     block.data.mode = typeToNumber[data.type]
     self.needDisplayUpdate[#self.needDisplayUpdate+1] = block.data.uuid
-    self.displayedBlockStates[block.data.uuid] = false
+    self.displayedBlockStates[block.data.uuid] = nil
 end
 
 function FastLogicRealBlockManager.changeConnectionColor(self, id, connectionColorId)

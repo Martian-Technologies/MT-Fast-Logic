@@ -26,8 +26,8 @@ function FastLogicGate.server_onDestroy2(self)
 end
 
 function FastLogicGate.client_onCreate2(self)
-    self.client_mode = self.client_mode or 0
-    self.displayState = self.displayState
+    self.client_mode = self.client_mode
+    self.client_state = self.client_state
 end
 
 function FastLogicGate.client_onDestroy2(self)
@@ -76,20 +76,23 @@ function FastLogicGate.client_onInteract(self, character, state)
 end
 
 function FastLogicGate.client_onClientDataUpdate(self, mode)
-    self.client_mode = mode
-    self:client_updateTexture()
+    self:client_updateTexture(nil, mode)
 end
 
-function FastLogicGate.client_updateTexture(self, state)
+function FastLogicGate.client_updateTexture(self, state, mode)
     if state == nil then
-        state = self.displayState
+        state = self.client_state or false
     end
-    if self.displayState ~= state then
-        self.displayState = state
+    if mode == nil then
+        mode = self.client_mode or 0
+    end
+    if self.client_state ~= state or client_mode ~= mode then
+        self.client_state = state
+        self.client_mode = mode
         if state then
-            self.interactable:setUvFrameIndex(6 + self.client_mode)
+            self.interactable:setUvFrameIndex(6 + mode)
         else
-            self.interactable:setUvFrameIndex(0 + self.client_mode)
+            self.interactable:setUvFrameIndex(0 + mode)
         end
     end
 end

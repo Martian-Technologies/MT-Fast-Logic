@@ -30,7 +30,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
     multitool.VolumeSelector.actionWord = "Colorize"
     multitool.VolumeSelector.isBeta = false
 
-    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
+    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
     if result == nil then
         return
     end

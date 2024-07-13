@@ -24,7 +24,7 @@ function ModeChanger.trigger(multitool, primaryState, secondaryState, forceBuild
     multitool.VolumeSelector.actionWord = "Change Mode"
     multitool.VolumeSelector.isBeta = false
 
-    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
+    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
     if result == nil then
         return
     end

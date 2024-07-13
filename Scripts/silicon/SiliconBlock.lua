@@ -166,6 +166,8 @@ function SiliconBlock.server_onProjectile(self, position, airTime, velocity, pro
     -- print("count: " .. tostring(sm.MTUtil.Profiler.Count.get("revertBlockType"..tostring(self.creationId))))
     sm.MTUtil.Profiler.Time.reset("checkForBodyUpdate" .. tostring(self.creationId))
     sm.MTUtil.Profiler.Count.reset("checkForBodyUpdate" .. tostring(self.creationId))
+    sm.MTUtil.Profiler.Time.reset("2checkForBodyUpdate" .. tostring(self.creationId))
+    sm.MTUtil.Profiler.Count.reset("2checkForBodyUpdate" .. tostring(self.creationId))
     -- print(SiliconCompressor.compressBlocks(self))
 end
 

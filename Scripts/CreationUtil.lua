@@ -1,5 +1,6 @@
 local CreationUtil = CreationUtil or {}
 
+
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 sm.MTFastLogic.CreationUtil = CreationUtil
@@ -35,14 +36,27 @@ end
 
 function CreationUtil.getCreationIdFromBlock(block)
     if block == nil or block.shape == nil then return nil end
-    return CreationUtil.getCreationId(block.shape:getBody())
+    -- copied from getCreationId for speed
+    local id = 1000000000
+    local bodies = block.shape:getBody():getCreationBodies()
+    for i = 1, #bodies do
+        local b = bodies[i]
+        local bId = b:getId()
+        if id > bId then
+            id = bId
+        end
+    end
+    return id
 end
 
 function CreationUtil.getCreationId(body)
-    local id = body:getId()
-    for _, b in pairs(body:getCreationBodies()) do
-        if id > b:getId() then
-            id = b:getId()
+    local id = 1000000000
+    local bodies = body:getCreationBodies()
+    for i = 1, #bodies do
+        local b = bodies[i]
+        local bId = b:getId()
+        if id > bId then
+            id = bId
         end
     end
     return id

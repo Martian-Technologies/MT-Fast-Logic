@@ -14,8 +14,9 @@ compressor.compressBlocks = function (siliconBlock)
     local colorIndex = 1
     for i = 1, #siliconBlock.data.blocks do
         local block = siliconBlock.data.blocks[i]
-        if colorHash[block.color] == nil then
-            colorHash[block.color] = colorIndex
+        local color = block.color:getHexStr()
+        if colorHash[color] == nil then
+            colorHash[color] = colorIndex
             colorIndex = colorIndex + 1
         end
         local inputs = table.copy(block.inputs)
@@ -35,7 +36,7 @@ compressor.compressBlocks = function (siliconBlock)
             block.uuid,
             inputs,
             block.outputs,
-            colorHash[block.color]
+            colorHash[color]
         }
     end
     local colorIndexHash = {}
@@ -66,7 +67,7 @@ compressor.decompressBlockData = function(siliconBlock, blockData)
                 inputs = block[3],
                 outputs = block[4],
                 state = false,
-                color = colorIndexHash[block[5]],
+                color = sm.color.new(colorIndexHash[block[5]]),
                 connectionColorId = block[6] or 25,
             }
         end

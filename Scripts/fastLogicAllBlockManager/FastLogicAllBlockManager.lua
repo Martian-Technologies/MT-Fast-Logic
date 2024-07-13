@@ -136,24 +136,24 @@ function FastLogicAllBlockManager.addBlock(self, block)
     if block.type == "LogicGate" then
         local connectionColorId = FastLogicAllBlockManager.blockUuidToConnectionColorID[tostring(block.shape:getShapeUuid())]
         if (block.data.mode == 0) then
-            self:makeBlockData("andBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
+            self:makeBlockData("andBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, connectionColorId, false, false)
         elseif (block.data.mode == 1) then
-            self:makeBlockData("orBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
+            self:makeBlockData("orBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, connectionColorId, false, false)
         elseif (block.data.mode == 2) then
-            self:makeBlockData("xorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
+            self:makeBlockData("xorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, connectionColorId, false, false)
         elseif (block.data.mode == 3) then
-            self:makeBlockData("nandBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
+            self:makeBlockData("nandBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, connectionColorId, false, false)
         elseif (block.data.mode == 4) then
-            self:makeBlockData("norBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
+            self:makeBlockData("norBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, connectionColorId, false, false)
         elseif (block.data.mode == 5) then
-            self:makeBlockData("xnorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), connectionColorId, false, false)
+            self:makeBlockData("xnorBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, connectionColorId, false, false)
         end
     elseif block.type == "Timer" then
-        self:makeBlockData("timerBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color:getHexStr(), 0, false, block.time, false)
+        self:makeBlockData("timerBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, block.time, false)
     elseif block.type == "EndTickButton" then
-        self:makeBlockData("EndTickButtons", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), 0, false, false)
+        self:makeBlockData("EndTickButtons", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color, 0, false, false)
     elseif block.type == "Light" then
-        self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color:getHexStr(), 0, false, false)
+        self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color, 0, false, false)
     end
 end
 
@@ -183,9 +183,9 @@ function FastLogicAllBlockManager.removeBlock(self, uuid, skipSiliconChanges)
     self.blocks[uuid] = nil
 end
 
-function FastLogicAllBlockManager.setColor(self, uuid, colorStr)
+function FastLogicAllBlockManager.setColor(self, uuid, color)
     if self.blocks[uuid] == nil then return end
-    self.blocks[uuid].color = colorStr
+    self.blocks[uuid].color = color
 end
 
 function FastLogicAllBlockManager.addInput(self, uuid, uuidToConnect, skipSiliconChanges, skipChecksAndUpdates)
@@ -197,8 +197,9 @@ function FastLogicAllBlockManager.removeInput(self, uuid, uuidToDisconnect)
 end
 
 function FastLogicAllBlockManager.addOutput(self, uuid, uuidToConnect, skipSiliconChanges, skipChecksAndUpdates)
-    local block = self.blocks[uuid]
-    local blockToConnect = self.blocks[uuidToConnect]
+    local blocks = self.blocks
+    local block = blocks[uuid]
+    local blockToConnect = blocks[uuidToConnect]
     if (
         block ~= nil and blockToConnect ~= nil and
         (block.outputsHash[uuidToConnect] == nil or blockToConnect.inputsHash[uuid] == nil)

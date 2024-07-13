@@ -71,26 +71,12 @@ function SiliconBlock.getData(self)
         for i = 1, #self.data.blocks do
             local block = self.data.blocks[i]
             local pos, rot = self:toBodyPosAndRot(block.pos, block.rot)
-            self.FastLogicAllBlockManager:addSiliconBlock(block.type, block.uuid, pos, rot, {}, {}, block.state, block.color, block.connectionColorId, self.id)
-        end
-    end
-    sm.MTFastLogic.SiliconBlocksToAddConnections[2][#sm.MTFastLogic.SiliconBlocksToAddConnections[2] + 1] = self
-end
-
-function SiliconBlock.addConnections(self)
-    for i = 1, #self.data.blocks do
-        local block = self.data.blocks[i]
-        for ii = 1, #block.inputs do
-            self.FastLogicAllBlockManager:addOutput(block.inputs[ii], block.uuid, true)
-        end
-
-        for ii = 1, #block.outputs do
-            self.FastLogicAllBlockManager:addOutput(block.uuid, block.outputs[ii], true)
+            self.FastLogicAllBlockManager:addSiliconBlock(block.type, block.uuid, pos, rot, block.inputs, block.outputs, block.state, block.color, block.connectionColorId, self.id)
         end
     end
 end
 
-function SiliconBlock.addOutput(self, uuid, uuidToConnect, skipSave)
+function SiliconBlock.addOutput(self, uuid, uuidToConnect)
     local changed = false
     for i = 1, #self.data.blocks do
         if self.data.blocks[i].uuid == uuid and not table.contains(self.data.blocks[i].outputs, uuidToConnect) then
@@ -102,12 +88,12 @@ function SiliconBlock.addOutput(self, uuid, uuidToConnect, skipSave)
             self.data.blocks[i].inputs[#self.data.blocks[i].inputs + 1] = uuid
         end
     end
-    if changed and skipSave ~= true then
+    if changed then
         sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
     end
 end
 
-function SiliconBlock.removeOutput(self, uuid, uuidToDisconnect, skipSave)
+function SiliconBlock.removeOutput(self, uuid, uuidToDisconnect)
     local changed = false
     for i = 1, #self.data.blocks do
         if self.data.blocks[i].uuid == uuid and not table.removeValue(self.data.blocks[i].outputs, uuidToDisconnect) then
@@ -117,7 +103,7 @@ function SiliconBlock.removeOutput(self, uuid, uuidToDisconnect, skipSave)
             changed = true
         end
     end
-    if changed and skipSave ~= true then
+    if changed then
         sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
     end
 end
@@ -175,8 +161,6 @@ function SiliconBlock.server_onDestroy(self)
 end
 
 function SiliconBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    -- print("internalAddBlock: " .. tostring(sm.MTUtil.Profiler.Time.get("internalAddBlock" .. tostring(self.creationId))))
-    -- print("addAllNewBlocks: " .. tostring(sm.MTUtil.Profiler.Time.get("addAllNewBlocks" .. tostring(self.creationId))))
     print(SiliconCompressor.compressBlocks(self))
 end
 

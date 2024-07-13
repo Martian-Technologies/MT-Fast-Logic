@@ -50,8 +50,6 @@ function FastLogicRealBlockManager.update(self)
 end
 
 function FastLogicRealBlockManager.addAllNewBlocks(self)
-    -- sm.MTUtil.Profiler.Time.on("addAllNewBlocks" .. tostring(self.creationId))
-
     for i = 1, #self.creation.BlocksToScan do
         local block = self.creation.BlocksToScan[i]
         if block.isFastLogic == true then
@@ -73,7 +71,6 @@ function FastLogicRealBlockManager.addAllNewBlocks(self)
         end
     end
     self.creation.BlocksToScan = {}
-    -- sm.MTUtil.Profiler.Time.off("addAllNewBlocks" .. tostring(self.creationId))
 end
 
 function FastLogicRealBlockManager.createPartWithData(self, block, body)

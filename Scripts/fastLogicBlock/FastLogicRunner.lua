@@ -70,7 +70,6 @@ function FastLogicRunner.init(self)
     self.numberOfUpdatesPerTick = self.numberOfUpdatesPerTick or 1
     self.updateTicks = self.updateTicks or 0
     self.blocksOptimized = self.blocksOptimized or -100
-    self.blocksToAddInputs = {}
     if self.hashData == nil then
         self:makeDataArrays()
     end
@@ -263,10 +262,6 @@ end
 
 function FastLogicRunner.update(self)
     self:setFastReadData(true)
-    for i = 1, #self.blocksToAddInputs do
-        self:externalAddInput(self.blocksToAddInputs[i][1], self.blocksToAddInputs[i][2])
-    end
-    self.blocksToAddInputs = {}
     self:optimizeLogic()
     self.blocksRan = 0
     if self.numberOfUpdatesPerTick == -1 then
@@ -666,7 +661,6 @@ function FastLogicRunner.doUpdate(self)
         multiBlockData[blockId][5] = {}
     end
     runningBlockLengths[16] = 0
-    -- sm.MTUtil.Profiler.Time.on("FastLogicRunnerUpdate")
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
         local state = not blockStates[id]
@@ -686,7 +680,6 @@ function FastLogicRunner.doUpdate(self)
             end
         end
     end
-    -- sm.MTUtil.Profiler.Time.off("FastLogicRunnerUpdate")
 end
 
 -- assumes that the blocks are all make up a balenced circuit

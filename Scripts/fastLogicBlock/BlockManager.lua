@@ -4,8 +4,7 @@ local table = table
 local type = type
 local pairs = pairs
 
-function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state, timerLength)
-    -- sm.MTUtil.Profiler.Time.on("internalAddBlock" .. tostring(self.creationId))
+function FastLogicRunner.internalAddBlock(self, path, id, state, timerLength, skipChecksAndUpdates)
     -- path data
     local pathName
     if type(path) == "string" then
@@ -31,50 +30,20 @@ function FastLogicRunner.internalAddBlock(self, path, id, inputs, outputs, state
     self.countOfOnInputs[id] = 0
     self.countOfOnOtherInputs[id] = 0
     if pathName == "multiBlocks" then
-        if type(inputs) == "number" then
-            inputs = {inputs}
-        elseif inputs == nil then
-            inputs = {}
-        end
         self.multiBlockData[id] = {0, {}, {}, {}, {}, 0} -- id, all blocks, inputs, outputs, score, otherdata...
     else
         self.multiBlockData[id] = false
-
-        if type(inputs) == "table" then
-            for i = 1, #inputs do
-                if inputs[i] ~= nil then
-                    self:internalAddOutput(inputs[i], id, false)
-                end
-            end
-        elseif inputs ~= nil then
-            self:internalAddOutput(inputs, id, false)
-        end
-        self:shouldBeThroughBlock(id)
-
-        -- outputs
-        if pathName ~= "lightBlocks" or pathName ~= "EndTickButtons" then
-            if type(outputs) == "table" then
-                for i = 1, #outputs do
-                    if outputs[i] ~= nil then
-                        self:internalAddOutput(id, outputs[i], false)
-                        self:shouldBeThroughBlock(outputs[i])
-                    end
-                end
-            elseif outputs ~= nil then
-                self:internalAddOutput(id, outputs, false)
-                self:shouldBeThroughBlock(outputs)
-            end
-        end
-
         if pathName == "timerBlocks" then
             self.timerLengths[id] = timerLength + 1
             self.timerInputStates[id] = false
             self:updateLongestTimer()
         end
+        if skipChecksAndUpdates ~= true then
+            self:shouldBeThroughBlock(id)
+            -- add block to next update tick
+            self:internalAddBlockToUpdate(id)
+        end
     end
-    -- add block to next update tick
-    self:internalAddBlockToUpdate(id)
-    -- sm.MTUtil.Profiler.Time.off("internalAddBlock" .. tostring(self.creationId))
 end
 
 function FastLogicRunner.internalRemoveBlock(self, id)
@@ -246,14 +215,14 @@ function FastLogicRunner.internalGetLastMultiBlockInternalStates(self, multiBloc
     return {lastIdStatePairs, idStatePairs} -- if idStatePairs is also calulated here return idStatePairs else nil
 end
 
-function FastLogicRunner.internalFakeAddBlock(self, path, inputs, outputs, state, timerLength)
+function FastLogicRunner.internalFakeAddBlock(self, path, state, timerLength)
     local newBlockId = table.addBlankToConstantKeysOnlyHash(self.hashData)
-    self:internalAddBlock(path, newBlockId, inputs, outputs, state, timerLength)
+    self:internalAddBlock(path, newBlockId, state, timerLength)
     return newBlockId
 end
 
 function FastLogicRunner.internalAddMultiBlock(self, multiBlockType)
-    local multiBlockId = self:internalFakeAddBlock(16, {}, {}, false, nil) -- 16 is the multiBlocks id
+    local multiBlockId = self:internalFakeAddBlock(16, false, nil) -- 16 is the multiBlocks id
     self.multiBlockData[multiBlockId][1] = multiBlockType
     return multiBlockId
 end
@@ -281,7 +250,7 @@ function FastLogicRunner.internalRemoveInput(self, id, idToDisconnect, withFixes
 end
 
 function FastLogicRunner.internalAddOutput(self, id, idToConnect, withFixes)
-    if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToConnect] ~= false and not table.contains(self.blockOutputs[id], idToConnect) then
+    if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToConnect] ~= false and self.blockOutputsHash[id][idToConnect] == nil then
         -- remove from multi blocks
         if self.multiBlockData[id] ~= false then
             self:internalRemoveBlock(self.multiBlockData[id])
@@ -361,7 +330,7 @@ function FastLogicRunner.internalAddBlockToUpdate(self, id)
     end
 end
 
-function FastLogicRunner.internalRemoveBlockFromUpdate(self, id)
+ function FastLogicRunner.internalRemoveBlockFromUpdate(self, id)
     if self.nextRunningBlocks[id] == self.nextRunningIndex then
         self.nextRunningBlocks[id] = self.nextRunningIndex - 1
         local pathId = self.runnableBlockPathIds[id]
@@ -589,20 +558,10 @@ function FastLogicRunner.externalChangeNonFastOnInput(self, uuid, amount)
     end
 end
 
-function FastLogicRunner.externalAddBlock(self, block)
+function FastLogicRunner.externalAddBlock(self, block, skipChecksAndUpdates)
     if self.hashedLookUp[block.uuid] == nil then
         table.addToConstantKeysOnlyHash(self.hashData, block.uuid)
-        local inputs = table.hashArrayValues(self.hashData, block.inputs)
-        local outputs = table.hashArrayValues(self.hashData, block.outputs)
-        self:internalAddBlock(block.type, self.hashedLookUp[block.uuid], inputs, outputs, block.state, block.timerLength)
-        local missingInputs = table.getMissingHashValues(self.hashData, block.inputs)
-        for i = 1, #missingInputs do
-            self.blocksToAddInputs[#self.blocksToAddInputs + 1] = { block.uuid, missingInputs[i] }
-        end
-        local missingOutputs = table.getMissingHashValues(self.hashData, block.outputs)
-        for i = 1, #missingOutputs do
-            self.blocksToAddInputs[#self.blocksToAddInputs + 1] = { missingOutputs[i], block.uuid }
-        end
+        self:internalAddBlock(block.type, self.hashedLookUp[block.uuid], block.state, block.timerLength, skipChecksAndUpdates)
     end
 end
 
@@ -674,5 +633,11 @@ end
 function FastLogicRunner.externalSetBlockState(self, uuid, state)
     if self.hashedLookUp[uuid] ~= nil then
         self:internalSetBlockStates({{self.hashedLookUp[uuid], state}})
+    end
+end
+
+function FastLogicRunner.externalShouldBeThroughBlock(self, uuid)
+    if self.hashedLookUp[uuid] ~= nil then
+        self:shouldBeThroughBlock(self.hashedLookUp[uuid])
     end
 end

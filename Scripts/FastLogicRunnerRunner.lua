@@ -19,12 +19,9 @@ dofile "fastLogicRealBlockManager/LogicConverter.lua"
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}
 sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
-sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
+-- sm.MTFastLogic.SiliconBlocksToAddConnections = sm.MTFastLogic.SiliconBlocksToAddConnections or {{}, {}}
 
 function FastLogicRunnerRunner.server_onFixedUpdate(self)
-    -- sm.MTUtil.Profiler.Count.increment("tickCount")
-    -- pri nt(tostring(sm.MTUtil.Profiler.Time.get("FastLogicRunnerUpdate") / sm.MTUtil.Profiler.Count.get("tickCount")) .. " seconds per update")
-    -- pri nt(tostring(sm.MTUtil.Profiler.Time.getPrecent("FastLogicRunnerUpdate")) .. "% of time")
     if self.run then
         -- bodiesToConvert
         if self.bodiesToConvert ~= nil then
@@ -36,13 +33,13 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
             self.bodiesToConvert[1] = self.bodiesToConvert[2]
             self.bodiesToConvert[2] = {}
         end
-        if sm.MTFastLogic.SiliconBlocksToAddConnections[1] ~= nil then
-            for i = 1, #sm.MTFastLogic.SiliconBlocksToAddConnections[1] do
-                sm.MTFastLogic.SiliconBlocksToAddConnections[1][i]:addConnections()
-            end
-        end
-        sm.MTFastLogic.SiliconBlocksToAddConnections[1] = sm.MTFastLogic.SiliconBlocksToAddConnections[2]
-        sm.MTFastLogic.SiliconBlocksToAddConnections[2] = {}
+        -- if sm.MTFastLogic.SiliconBlocksToAddConnections[1] ~= nil then
+        --     for i = 1, #sm.MTFastLogic.SiliconBlocksToAddConnections[1] do
+        --         sm.MTFastLogic.SiliconBlocksToAddConnections[1][i]:addConnections()
+        --     end
+        -- end
+        -- sm.MTFastLogic.SiliconBlocksToAddConnections[1] = sm.MTFastLogic.SiliconBlocksToAddConnections[2]
+        -- sm.MTFastLogic.SiliconBlocksToAddConnections[2] = {}
         self.changedUuidsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
             v.FastLogicRealBlockManager:update()

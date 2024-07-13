@@ -5,7 +5,6 @@ Colorizer = {}
 function Colorizer.inject(multitool)
     multitool.colorizer = {}
     local self = multitool.colorizer
-    self.nametagUpdate = NametagManager.createController(multitool)
     self.gui = nil
 end
 
@@ -28,6 +27,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
         "Light Red", "Red", "Dim Red", "Dark Red",
         "Light Orange", "Orange", "Light Brown", "Dark Brown"
     }
+    multitool.VolumeSelector.actionWord = "Colorize"
     multitool.VolumeSelector.isBeta = false
 
     local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -44,14 +44,9 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
 end
 
 function Colorizer.cleanUp(multitool)
-    local self = multitool.colorizer
-    self.origin = nil
-    self.final = nil
-    self.body = nil
-    self.nametagUpdate(nil)
+    VolumeSelector.cleanUp(multitool)
 end
 
 function Colorizer.cleanNametags(multitool)
-    local self = multitool.colorizer
-    self.nametagUpdate(nil)
+    VolumeSelector.cleanNametags(multitool)
 end

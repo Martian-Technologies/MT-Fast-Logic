@@ -33,7 +33,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
             sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final ~= nil then
-        sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Convert     ",
+        sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), self.actionWord .. "     ",
             sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
         needToRaycast = false
     end

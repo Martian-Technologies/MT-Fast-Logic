@@ -233,7 +233,9 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
     if depth == -1 then
         return "MDR"
     end
-    if type(val) == "number" then
+    if val == nil then
+        return "nil"
+    elseif type(val) == "number" then
         val = math.floor(val * 100 + 0.5) / 100
         return tostring(val)
     elseif type(val) == "table" then
@@ -280,8 +282,28 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
             formater.getFormatedForPrint(val.x, depth, maxTableLength) .. ", " ..
             formater.getFormatedForPrint(val.y, depth, maxTableLength) .. ", " ..
             formater.getFormatedForPrint(val.z, depth, maxTableLength) .. ">"
+    elseif type(val) == "Color" then
+        local str = "Color <" ..
+            formater.getFormatedForPrint(val.r, depth, maxTableLength) .. ", " ..
+            formater.getFormatedForPrint(val.g, depth, maxTableLength) .. ", " ..
+            formater.getFormatedForPrint(val.b, depth, maxTableLength)
+        if val.a ~= 1 then
+            str = str .. ", " .. formater.getFormatedForPrint(val.a, depth, maxTableLength) .. ">"
+        else
+            str = str .. ">"
+        end
+        return str
     else
-        return type(val)
+        local status, result = pcall(tostring, val)
+        if status ~= true or result == nil or result == type(val) then -- if the tostring function failed or provides no useful information
+            return type(val)
+        end
+        -- if the tostring function succeeded and provided useful information
+        -- first, check if the result starts with the type of the value
+        if result:sub(1, #type(val)) == type(val) then
+            return result
+        end
+        return type(val) .. " <" .. result .. ">"
     end
 end
 

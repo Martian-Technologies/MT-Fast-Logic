@@ -84,7 +84,7 @@ function FastLogicRealBlockManager.createPartWithData(self, block, body)
         blockId = table.afind(FastLogicAllBlockManager.blockUuidToConnectionColorID, 0)
     end
     local shape = body:createPart(sm.uuid.new(blockId), pos, block.rot[3], block.rot[1], true)
-    shape.color = sm.color.new(block.color)
+    shape.color = block.color
     sm.MTFastLogic.dataToSet[shape:getInteractable().id] = table.deepCopy(block)
 end
 

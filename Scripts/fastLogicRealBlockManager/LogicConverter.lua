@@ -165,7 +165,6 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
     elseif wantedType == "VanillaLogic" then
         for i = 1, #jsontable.bodies do
             for j = 1, #jsontable.bodies[i].childs do
-                -- if jsontable.bodies[i].childs[j].shapeId == "6a9dbff5-7562-4e9a-99ae-3590ece88112" then --fastgate
                 if table.contains(FastLogicAllBlockManager.fastLogicGateBlockUuids, jsontable.bodies[i].childs[j].shapeId) then
                     local childdata = jsontable.bodies[i].childs[j].controller.data
                     local mode

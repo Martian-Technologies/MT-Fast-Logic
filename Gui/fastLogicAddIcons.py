@@ -15,7 +15,7 @@ def blit(source:np.ndarray, destination:np.ndarray, xPos:int, yPos:int):
 
 
 image = cv2.imread(r"Gui\IconMap.png", cv2.IMREAD_UNCHANGED)
-logo = cv2.imread(r"C:\Users\Ben H\Downloads\MT_logo.png", cv2.IMREAD_UNCHANGED)
+logo = cv2.imread(r"Gui\MT_logo.png", cv2.IMREAD_UNCHANGED)
 
 imageSize = 96
 

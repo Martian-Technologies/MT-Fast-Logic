@@ -155,9 +155,17 @@ function ConnectionShower.client_onUpdate(multitool)
                 if isSilicon then
                     local siliconBlockId = block.siliconBlockId
                     local siliconBlock = creation.SiliconBlocks[siliconBlockId]
+                    if siliconBlock == nil then
+                        -- print("SILICON BLOCK IS NIL") idk why this happens, but by the next tick the system realizes it has shat itself and everything gets fixed
+                        goto continue
+                    end
                     body = siliconBlock.shape:getBody()
                 else
-                    body = creation.AllFastBlocks[input].shape:getBody()
+                    local block = creation.AllFastBlocks[input]
+                    if block == nil then
+                        goto continue
+                    end
+                    body = block.shape:getBody()
                     table.insert(shapesInput, creation.AllFastBlocks[input].shape)
                 end
                 table.insert(positionsAsInput, body:transformPoint(block.pos / 4))
@@ -174,9 +182,17 @@ function ConnectionShower.client_onUpdate(multitool)
                 if isSilicon then
                     local siliconBlockId = block.siliconBlockId
                     local siliconBlock = creation.SiliconBlocks[siliconBlockId]
+                    if siliconBlock == nil then
+                        -- print("SILICON BLOCK IS NIL") idk why this happens, but by the next tick the system realizes it has shat itself and everything gets fixed
+                        goto continue
+                    end
                     body = siliconBlock.shape:getBody()
                 else
-                    body = creation.AllFastBlocks[output].shape:getBody()
+                    local block = creation.AllFastBlocks[output]
+                    if block == nil then
+                        goto continue
+                    end
+                    body = block.shape:getBody()
                     table.insert(shapesOutput, creation.AllFastBlocks[output].shape)
                 end
                 table.insert(positionsAsOutput, body:transformPoint(block.pos / 4))

@@ -12,6 +12,7 @@ function VolumeSelector.inject(multitool)
     self.modes = nil
     self.modesNice = nil
     self.index = 1
+    self.selectionMode = "inside" -- "inside" or "outside"
     self.nametagUpdate = NametagManager.createController(multitool)
 end
 
@@ -57,7 +58,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
     local localPosition = nil
     local bodyhit = nil
     if needToRaycast then
-        localPosition, bodyhit = ConnectionRaycaster:raycastToBlock()
+        localPosition, bodyhit = ConnectionRaycaster:raycastToBlock(self.selectionMode == "outside")
         if (bodyhit ~= self.body) and (self.body ~= nil) then
             localPosition = nil
             bodyhit = nil
@@ -179,46 +180,6 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
                 txt = "•"
             })
         end
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y1, z1)),
-        --     color = color,
-        --     txt = "•"
-        -- })
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y1, z2)),
-        --     color = color,
-        --     txt = "•"
-        -- })
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y2, z1)),
-        --     color = color,
-        --     txt = "•"
-        -- })
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y2, z2)),
-        --     color = color,
-        --     txt = "•"
-        -- })
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y1, z1)),
-        --     color = color,
-        --     txt = "•"
-        -- })
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y1, z2)),
-        --     color = color,
-        --     txt = "•"
-        -- })
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y2, z1)),
-        --     color = color,
-        --     txt = "•"
-        -- })
-        -- table.insert(tags, {
-        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y2, z2)),
-        --     color = color,
-        --     txt = "•"
-        -- })
     end
 
     self.nametagUpdate(tags)
@@ -233,9 +194,11 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
             local result = {
                 origin = self.origin,
                 final = self.final,
-                mode = self.modes[self.index],
                 body = self.body
             }
+            if self.modes ~= nil then
+                result.mode = self.modes[self.index]
+            end
             VolumeSelector.cleanUp(multitool)
             return result
         end

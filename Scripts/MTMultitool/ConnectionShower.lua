@@ -132,7 +132,7 @@ function ConnectionShower.client_onUpdate(multitool)
         local selfWired = false
         local creationId = sm.MTFastLogic.CreationUtil.getCreationId(shape:getBody())
         local creation = sm.MTFastLogic.Creations[creationId]
-        if creation.uuids[interactable.id] ~= nil then
+        if creation ~= nil and creation.uuids[interactable.id] ~= nil then
             -- print("EEE")
             local blockFastUuid = creation.uuids[interactable.id]
             local block = creation.blocks[blockFastUuid]

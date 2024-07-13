@@ -13,6 +13,7 @@ function Merger.trigger(multitool, primaryState, secondaryState, forceBuild, loo
     multitool.VolumeSelector.modes = nil
     multitool.VolumeSelector.isBeta = false
     multitool.VolumeSelector.actionWord = "Merge"
+    multitool.VolumeSelector.selectionMode = "inside"
 
     local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
     if result == nil then

@@ -77,12 +77,16 @@ function FastLogicAllBlockManager.update(self)
         for i = 1, dataToSetLength do
             local uuid = self.dataToSetToDo[1]
             local inputs = self.dataToSetToDo[2]
-            local outputs = self.dataToSetToDo[3]
-            for j = 1, #inputs do
-                self:addOutput(inputs[i], uuid, true, true)
+            if inputs ~= nil then
+                for j = 1, #inputs do
+                    self:addOutput(inputs[i], uuid, true, true)
+                end
             end
-            for j = 1, #outputs do
-                self:addOutput(uuid, outputs[i], true, true)
+            local outputs = self.dataToSetToDo[3]
+            if outputs ~= nil then
+                for j = 1, #outputs do
+                    self:addOutput(uuid, outputs[i], true, true)
+                end
             end
         end
         for i = 1, dataToSetLength do

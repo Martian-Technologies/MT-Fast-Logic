@@ -5,7 +5,6 @@ Colorizer = {}
 function Colorizer.inject(multitool)
     multitool.colorizer = {}
     local self = multitool.colorizer
-    self.nametagUpdate = NametagManager.createController(multitool)
     self.gui = nil
 end
 

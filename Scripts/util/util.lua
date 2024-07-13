@@ -292,11 +292,11 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
         end
         return str
     else
-        local str = tostring(val)
-        if str == nil then
+        local status, result = pcall(tostring, val)
+        if status ~= true or result == nil then
             return type(val)
         end
-        return type(val) .. " <" .. str .. ">"
+        return type(val) .. " <" .. result .. ">"
     end
 end
 

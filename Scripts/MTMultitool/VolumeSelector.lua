@@ -103,46 +103,122 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         local y2 = maxPos.y + 0.125
         local z2 = maxPos.z + 0.125
         local color = sm.color.new(1, 1, 1, 1)
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x1, y1, z1)),
-            color = color,
-            txt = "•"
-        })
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x1, y1, z2)),
-            color = color,
-            txt = "•"
-        })
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x1, y2, z1)),
-            color = color,
-            txt = "•"
-        })
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x1, y2, z2)),
-            color = color,
-            txt = "•"
-        })
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x2, y1, z1)),
-            color = color,
-            txt = "•"
-        })
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x2, y1, z2)),
-            color = color,
-            txt = "•"
-        })
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x2, y2, z1)),
-            color = color,
-            txt = "•"
-        })
-        table.insert(tags, {
-            pos = bodyUsed:transformPoint(sm.vec3.new(x2, y2, z2)),
-            color = color,
-            txt = "•"
-        })
+        local xWidth = x2 - x1
+        local yWidth = y2 - y1
+        local zWidth = z2 - z1
+        local stepsPerBlock = 2
+        local xSteps = math.floor(xWidth / 0.25) * stepsPerBlock
+        local ySteps = math.floor(yWidth / 0.25) * stepsPerBlock
+        local zSteps = math.floor(zWidth / 0.25) * stepsPerBlock
+        for i = 0, xSteps do
+            local x = x1 + i / stepsPerBlock * 0.25
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x, y1, z1)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x, y1, z2)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x, y2, z1)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x, y2, z2)),
+                color = color,
+                txt = "•"
+            })
+        end
+        for i = 0, ySteps do
+            local y = y1 + i / stepsPerBlock * 0.25
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x1, y, z1)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x1, y, z2)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x2, y, z1)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x2, y, z2)),
+                color = color,
+                txt = "•"
+            })
+        end
+        for i = 0, zSteps do
+            local z = z1 + i / stepsPerBlock * 0.25
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x1, y1, z)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x1, y2, z)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x2, y1, z)),
+                color = color,
+                txt = "•"
+            })
+            table.insert(tags, {
+                pos = bodyUsed:transformPoint(sm.vec3.new(x2, y2, z)),
+                color = color,
+                txt = "•"
+            })
+        end
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y1, z1)),
+        --     color = color,
+        --     txt = "•"
+        -- })
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y1, z2)),
+        --     color = color,
+        --     txt = "•"
+        -- })
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y2, z1)),
+        --     color = color,
+        --     txt = "•"
+        -- })
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x1, y2, z2)),
+        --     color = color,
+        --     txt = "•"
+        -- })
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y1, z1)),
+        --     color = color,
+        --     txt = "•"
+        -- })
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y1, z2)),
+        --     color = color,
+        --     txt = "•"
+        -- })
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y2, z1)),
+        --     color = color,
+        --     txt = "•"
+        -- })
+        -- table.insert(tags, {
+        --     pos = bodyUsed:transformPoint(sm.vec3.new(x2, y2, z2)),
+        --     color = color,
+        --     txt = "•"
+        -- })
     end
 
     self.nametagUpdate(tags)

@@ -91,6 +91,7 @@ end
 
 function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local tags = {}
+    multitool.VolumeSelector.enabled = false
     multitool.ConnectionManager.displayMode = "slow"
     local self = multitool.TensorConnect
     local selfData = self.data

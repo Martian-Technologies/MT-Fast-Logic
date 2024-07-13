@@ -10,6 +10,7 @@ end
 function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.LogicConverter
     multitool.BlockSelector.enabled = false
+    multitool.VolumeSelector.enabled = false
     -- shoot raycast to get the hit position
     if self.confirming == nil then
         local origin = sm.camera.getPosition()

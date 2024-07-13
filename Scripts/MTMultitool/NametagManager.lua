@@ -28,7 +28,7 @@ function NametagManager.createController(multitool)
             local distance = (camPos - newNametags[i].pos):length()
             local newNametag = newNametags[i]
             nametag:setWorldPosition(newNametag.pos - RangeOffset.rangeOffset * distance)
-            nametag:setText("Text", "#" .. NametagManager.toHexNoAlpha(newNametag.color) .. newNametag.txt)
+            nametag:setText("Text", "#" .. sm.MTUtil.colorToHexNoAlpha(newNametag.color) .. newNametag.txt)
         end
         self.nametagPositions = {}
         for i, nametag in pairs(newNametags) do
@@ -44,9 +44,4 @@ function NametagManager.createController(multitool)
     end
     table.insert(multitool.subscriptions.client_onUpdate, refreshPositions)
     return updateNametags
-end
-
-function NametagManager.toHexNoAlpha(color)
-    -- drop the last 2 chars of :getHexStr()
-    return color:getHexStr():sub(1, -3)
 end

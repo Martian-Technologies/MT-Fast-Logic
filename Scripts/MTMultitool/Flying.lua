@@ -49,12 +49,10 @@ function MTFlying.sv_toggleFlying(multitool, data)
 
     if previousFlyMode == MTFlying.modes.swimSmart then
         character.movementSpeedFraction = 1
-        character.publicData.waterMovementSpeedFraction = 1
         character:setSwimming(false)
         character:setDiving(false)
     elseif previousFlyMode == MTFlying.modes.swimPermadive then
         character.movementSpeedFraction = 1
-        character.publicData.waterMovementSpeedFraction = 1
         character:setSwimming(false)
         character:setDiving(false)
     elseif previousFlyMode == MTFlying.modes.impulseModulation then
@@ -73,6 +71,9 @@ function MTFlying.sv_toggleFlying(multitool, data)
             self.previousVelocity = nil
             character.movementSpeedFraction = 3.5
         end
+    end
+    if character.publicData then
+        character.publicData.waterMovementSpeedFraction = character.movementSpeedFraction
     end
 end
 
@@ -111,6 +112,8 @@ function MTFlying.server_onFixedUpdate(multitool, dt)
             character.publicData.waterMovementSpeedFraction = character.movementSpeedFraction
         end
     elseif flyMode == MTFlying.modes.swimPermadive then
+        character:setSwimming(true)
+        character:setDiving(true)
         character.movementSpeedFraction = 3.5
         if character:isSprinting() then
             character.movementSpeedFraction = 20.0

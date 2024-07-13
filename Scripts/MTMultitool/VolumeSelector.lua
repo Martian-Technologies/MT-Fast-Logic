@@ -1,50 +1,69 @@
-VolumePlacer = {}
+VolumeSelector = {}
 
-function VolumePlacer.inject(multitool)
-    multitool.VolumePlacer = {}
-    local self = multitool.VolumePlacer
+function VolumeSelector.inject(multitool)
+    multitool.VolumeSelector = {}
+    local self = multitool.VolumeSelector
+    self.enabled = false
     self.origin = nil
     self.body = nil
     self.final = nil
+    self.isBeta = false
+    self.actionWord = ""
+    self.modes = nil
+    self.modesNice = nil
+    self.index = 1
     self.nametagUpdate = NametagManager.createController(multitool)
-    self.placingType = "vanilla" -- "vanilla" or "fast"
 end
 
-function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
-    local self = multitool.VolumePlacer
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = false
-
+function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+    local self = multitool.VolumeSelector
     local needToRaycast = false
-
+    local betaTextStart = ""
+    local betaTextEnd = ""
+    if self.isBeta then
+        betaTextStart = "<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! BETA !</p>     "
+        betaTextEnd = "     <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! BETA !</p>"
+    end
     if self.origin == nil and self.final == nil then
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select first corner")
+        sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true),
+            "Select first corner" .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final == nil then
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select second corner     ",
-            sm.gui.getKeyBinding("Attack", true), "Cancel")
+        sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Select second corner     ",
+            sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final ~= nil then
-        sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>     This will create a cuboid of logic gates in the region you selected     <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>")
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Create     ",
-            sm.gui.getKeyBinding("Attack", true), "Cancel" .. "     " .. sm.gui.getKeyBinding("ForceBuild", true) .. " Placing block type: <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. self.placingType .. "</p>")
+        sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Convert     ",
+            sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
         needToRaycast = false
-        if MTMultitool.handleForceBuild(multitool, forceBuild) then
-            self.placingType = self.placingType == "vanilla" and "fast" or "vanilla"
-        end
     end
+    if self.final ~= nil and self.modes ~= nil then
+        if MTMultitool.handleForceBuild(multitool, forceBuild) then
+            self.index = self.index + 1
+        end
+        if self.index > #self.modes then
+            self.index = 1
+        end
+        if self.index < 1 then
+            self.index = #self.modes
+        end
+        local niceMode = self.modesNice[self.index]
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
+            "Toggle mode <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            niceMode .. "</p>")
+    end
+
     local tags = {}
     local localPosition = nil
     local bodyhit = nil
     if needToRaycast then
-        localPosition, bodyhit = ConnectionRaycaster:raycastToBlock(true)
+        localPosition, bodyhit = ConnectionRaycaster:raycastToBlock()
         if (bodyhit ~= self.body) and (self.body ~= nil) then
             localPosition = nil
             bodyhit = nil
         end
         -- self.nametagUpdate(tags)
     end
-    -- print(localPosition)
 
     -- display a preview
     local minPos = nil
@@ -70,6 +89,10 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
         minPos = sm.vec3.min(self.origin, self.final)
         maxPos = sm.vec3.max(self.origin, self.final)
         bodyUsed = self.body
+    end
+
+    if not sm.exists(bodyUsed) then
+        bodyUsed = nil
     end
 
     if minPos ~= nil and maxPos ~= nil and bodyUsed ~= nil and sm.exists(bodyUsed) then
@@ -131,13 +154,14 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
         elseif self.final == nil then
             self.final = localPosition
         else
-            multitool.network:sendToServer("server_volumePlace", {
+            local result = {
                 origin = self.origin,
                 final = self.final,
-                body = bodyUsed,
-                placingType = self.placingType
-            })
-            VolumePlacer.cleanUp(multitool)
+                mode = self.modes[self.index],
+                body = self.body
+            }
+            VolumeSelector.cleanUp(multitool)
+            return result
         end
     end
     if secondaryState == 1 then
@@ -148,17 +172,23 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
             self.body = nil
         end
     end
+    return nil
 end
 
-function VolumePlacer.cleanUp(multitool)
-    local self = multitool.VolumePlacer
+function VolumeSelector.client_onUpdate(multitool, dt)
+    local self = multitool.VolumeSelector
+    if self.enabled == false then
+        VolumeSelector.cleanNametags(multitool)
+    end
+end
+
+function VolumeSelector.cleanUp(multitool)
+    local self = multitool.VolumeSelector
     self.origin = nil
-    self.final = nil
     self.body = nil
-    self.nametagUpdate(nil)
+    self.final = nil
 end
 
-function VolumePlacer.cleanNametags(multitool)
-    local self = multitool.VolumePlacer
-    self.nametagUpdate(nil)
+function VolumeSelector.cleanNametags(multitool)
+    multitool.VolumeSelector.nametagUpdate(nil)
 end

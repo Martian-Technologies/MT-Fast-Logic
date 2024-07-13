@@ -398,6 +398,7 @@ function Settings.trigger(multitool, primaryState, secondaryState, forceBuild, l
         self.startAngle = math.atan2(y, x)
     end
     multitool.BlockSelector.enabled = false
+    multitool.VolumeSelector.enabled = false
     multitool.tool:setCrossHairAlpha(0)
 
     local elements = self.elements

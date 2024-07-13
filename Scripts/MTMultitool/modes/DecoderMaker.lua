@@ -16,6 +16,7 @@ function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuil
     multitool.ConnectionManager.displayMode = "slow"
     local needToUpdateNametags = false
     multitool.BlockSelector.enabled = true
+    multitool.VolumeSelector.enabled = false
     if self.outputFirst ~= nil and self.outputOrigin ~= nil then
         if primaryState == 1 then
             DecoderMaker.calculatePreview(multitool)

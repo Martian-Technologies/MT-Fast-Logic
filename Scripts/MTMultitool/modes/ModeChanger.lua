@@ -22,6 +22,7 @@ end
 function ModeChanger.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.ModeChanger
     multitool.BlockSelector.enabled = false
+    multitool.VolumeSelector.enabled = false
 
     local needToRaycast = false
 

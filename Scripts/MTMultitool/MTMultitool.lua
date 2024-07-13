@@ -15,6 +15,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/DoMeleeState.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/VolumeSelector.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
 
@@ -105,6 +106,8 @@ function MTMultitool.client_onCreate(self)
     MTFlying.inject(self)
     ConnectionShower.inject(self)
     DoMeleeState.inject(self)
+
+    VolumeSelector.inject(self)
 
     LogicConverter.inject(self)
     SiliconConverterTool.inject(self)
@@ -212,6 +215,7 @@ function MTMultitool.client_onUpdate(self, dt)
         end
     end
     MTFlying.cl_onUpdate(self, dt)
+    VolumeSelector.client_onUpdate(self, dt)
     ConnectionShower.client_onUpdate(self)
 	if MTMultitool.internalModes[self.mode] == "SingleConnect" then
     	SingleConnect.client_onUpdate(self)

@@ -59,6 +59,7 @@ function SeriesConnect.trigger(multitool, primaryState, secondaryState, forceBui
     else
         multitool.BlockSelector.enabled = false
     end
+    multitool.VolumeSelector.enabled = false
     if primaryState == 1 then
         if #selfData.selected < 2 then
             if lookingAt ~= nil then

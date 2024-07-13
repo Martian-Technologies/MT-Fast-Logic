@@ -12,6 +12,7 @@ end
 function Merger.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.Merger
     multitool.BlockSelector.enabled = false
+    multitool.VolumeSelector.enabled = false
 
     local needToRaycast = false
 

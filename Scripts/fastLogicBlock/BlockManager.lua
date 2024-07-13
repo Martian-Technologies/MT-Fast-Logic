@@ -241,15 +241,15 @@ function FastLogicRunner.internalAddBlockToMultiBlock(self, id, multiBlockId, is
     end
 end
 
-function FastLogicRunner.internalAddInput(self, id, idToConnect, withChecksAndUpdates)
-    self:internalAddOutput(idToConnect, id, withChecksAndUpdates)
+function FastLogicRunner.internalAddInput(self, id, idToConnect, skipChecksAndUpdates)
+    self:internalAddOutput(idToConnect, id, skipChecksAndUpdates)
 end
 
-function FastLogicRunner.internalRemoveInput(self, id, idToDisconnect, withChecksAndUpdates)
-    self:internalRemoveInput(idToConnect, id, withChecksAndUpdates)
+function FastLogicRunner.internalRemoveInput(self, id, idToDisconnect, skipChecksAndUpdates)
+    self:internalRemoveInput(idToConnect, id, skipChecksAndUpdates)
 end
 
-function FastLogicRunner.internalAddOutput(self, id, idToConnect, withChecksAndUpdates)
+function FastLogicRunner.internalAddOutput(self, id, idToConnect, skipChecksAndUpdates)
     if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToConnect] ~= false and self.blockOutputsHash[id][idToConnect] == nil then
         -- remove from multi blocks
         if self.multiBlockData[id] ~= false then
@@ -280,7 +280,7 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect, withChecksAndU
     end
 end
 
-function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, withChecksAndUpdates)
+function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChecksAndUpdates)
     if self.runnableBlockPaths[id] ~= false and self.runnableBlockPaths[idToDisconnect] ~= false and table.removeValue(self.blockOutputs[id], idToDisconnect) ~= nil then
         -- remove from multi blocks
         if self.multiBlockData[id] ~= false then
@@ -299,11 +299,11 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, withChec
         -- update states
         if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
             self.countOfOnInputs[idToDisconnect] = self.countOfOnInputs[idToDisconnect] - 1
-            if withChecksAndUpdates ~= true then
+            if skipChecksAndUpdates ~= true then
                 self:internalAddBlockToUpdate(idToDisconnect)
             end
         end
-        if withChecksAndUpdates ~= true then
+        if skipChecksAndUpdates ~= true then
             self:shouldBeThroughBlock(idToDisconnect)
         end
     end
@@ -501,22 +501,23 @@ function FastLogicRunner.revertBlockType(self, id)
 end
 
 function FastLogicRunner.shouldBeThroughBlock(self, id)
+    local pathId = self.runnableBlockPathIds[id]
     if self.numberOfBlockInputs[id] + self.numberOfOtherInputs[id] <= 1 then
-        if self.runnableBlockPathIds[id] < 16 then
-            if self.runnableBlockPathIds[id] >= 11 then    -- nand nor xnor
+        if pathId < 16 then
+            if pathId >= 11 then    -- nand nor xnor
                 self:makeBlockAlt(id, 4)
-            elseif self.runnableBlockPathIds[id] >= 6 then -- and or xor
+            elseif pathId >= 6 then -- and or xor
                 self:makeBlockAlt(id, 3)
-            elseif self.runnableBlockPathIds[id] == 5 then -- timer
+            elseif pathId == 5 then -- timer
                 if self.timerLengths[id] == 1 then
                     self:makeBlockAlt(id, 3)
-                else
-                    self:revertBlockType(id)
                 end
             end
         end
     else
-        self:revertBlockType(id)
+        if pathId == 3 or pathId == 4 then
+            self:revertBlockType(id)
+        end
     end
 end
 
@@ -594,11 +595,11 @@ function FastLogicRunner.externalRemoveInput(self, uuid, uuidToDisconnect, skipC
     end
 end
 
-function FastLogicRunner.externalAddOutput(self, uuid, uuidToConnect, withFixes)
+function FastLogicRunner.externalAddOutput(self, uuid, uuidToConnect, skipChecksAndUpdates)
     local id = self.hashedLookUp[uuid]
     local idToConnect = self.hashedLookUp[uuidToConnect]
     if id ~= nil and idToConnect ~= nil then
-        self:internalAddOutput(id, idToConnect, withFixes)
+        self:internalAddOutput(id, idToConnect, skipChecksAndUpdates)
     end
 end
 

@@ -61,7 +61,7 @@ function FastLogicRunner.getNew(creationId)
     local new = table.deepCopy(FastLogicRunner)
     new.creationId = creationId
     new.getNew = nil
-    new.isNew = 10
+    new.isNew = 4
     return new
 end
 
@@ -346,7 +346,7 @@ function FastLogicRunner.doUpdate(self)
     local newBlockStates = {}
     local lastRunningIndex = self.nextRunningIndex
     local nextRunningIndex = lastRunningIndex + 1
-    self.nextRunningIndex = nextRunningIndex 
+    self.nextRunningIndex = nextRunningIndex
     -- EndTickButton
     for k = 1, runningBlockLengths[1] do
         self.blocksRan = self.blocksRan + 1

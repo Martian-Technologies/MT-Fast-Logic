@@ -186,8 +186,8 @@ function FastLogicAllBlockManager.setColor(self, uuid, colorStr)
     self.blocks[uuid].color = colorStr
 end
 
-function FastLogicAllBlockManager.addInput(self, uuid, uuidToConnect)
-    self:addOutput(uuidToConnect, uuid)
+function FastLogicAllBlockManager.addInput(self, uuid, uuidToConnect, skipSiliconChanges, skipChecksAndUpdates)
+    self:addOutput(uuidToConnect, uuid, skipSiliconChanges, skipChecksAndUpdates)
 end
 
 function FastLogicAllBlockManager.removeInput(self, uuid, uuidToDisconnect)
@@ -199,7 +199,7 @@ function FastLogicAllBlockManager.addOutput(self, uuid, uuidToConnect, skipSilic
     local blockToConnect = self.blocks[uuidToConnect]
     if (
         block ~= nil and blockToConnect ~= nil and
-        (block.outputHash[uuidToConnect] == nil or blockToConnect.inputHash[uuid] == nil)
+        (block.outputsHash[uuidToConnect] == nil or blockToConnect.inputsHash[uuid] == nil)
     ) then
         if skipSiliconChanges ~= true then
             if block.isSilicon then
@@ -209,13 +209,13 @@ function FastLogicAllBlockManager.addOutput(self, uuid, uuidToConnect, skipSilic
                 self.creation.SiliconBlocks[blockToConnect.siliconBlockId]:addOutput(uuid, uuidToConnect)
             end
         end
-        if block.outputHash[uuidToConnect] == nil then
+        if block.outputsHash[uuidToConnect] == nil then
             block.outputs[#block.outputs + 1] = uuidToConnect
-            block.outputHash[uuidToConnect] = true
+            block.outputsHash[uuidToConnect] = true
         end
-        if blockToConnect.inputHash[uuid] == nil then
+        if blockToConnect.inputsHash[uuid] == nil then
             blockToConnect.inputs[#blockToConnect.inputs + 1] = uuid
-            blockToConnect.inputHash[uuid] = true
+            blockToConnect.inputsHash[uuid] = true
         end
         self.FastLogicRunner:externalAddOutput(uuid, uuidToConnect, skipChecksAndUpdates)
     end
@@ -226,7 +226,7 @@ function FastLogicAllBlockManager.removeOutput(self, uuid, uuidToDisconnect, ski
     local blockToDisconnect = self.blocks[uuidToDisconnect]
     if (
         block ~= nil and blockToDisconnect ~= nil and
-        (block.outputHash[uuidToDisconnect] ~= nil or blockToDisconnect.inputHash[uuid] ~= nil)
+        (block.outputsHash[uuidToDisconnect] ~= nil or blockToDisconnect.inputsHash[uuid] ~= nil)
     ) then
         if skipSiliconChanges ~= true then
             if block.isSilicon and self.creation.SiliconBlocks[block.siliconBlockId] ~= nil then
@@ -236,13 +236,13 @@ function FastLogicAllBlockManager.removeOutput(self, uuid, uuidToDisconnect, ski
                 self.creation.SiliconBlocks[blockToDisconnect.siliconBlockId]:removeOutput(uuid, uuidToDisconnect)
             end
         end
-        if block.outputHash[uuidToDisconnect] ~= nil then
+        if block.outputsHash[uuidToDisconnect] ~= nil then
             table.removeValue(block.outputs, uuidToDisconnect)
-            block.outputHash[uuidToDisconnect] = nil
+            block.outputsHash[uuidToDisconnect] = nil
         end
-        if blockToDisconnect.inputHash[uuid] ~= nil then
+        if blockToDisconnect.inputsHash[uuid] ~= nil then
             table.removeValue(blockToDisconnect.inputs, uuid)
-            blockToDisconnect.inputHash[uuid] = nil
+            blockToDisconnect.inputsHash[uuid] = nil
         end
         self.FastLogicRunner:externalRemoveOutput(uuid, uuidToDisconnect)
     end
@@ -266,9 +266,9 @@ function FastLogicAllBlockManager.makeBlockData(self, type, uuid, pos, rot, inpu
         pos = pos,
         rot = rot,
         inputs = {},
-        inputHash = {},
+        inputsHash = {},
         outputs = {},
-        outputHash = {},
+        outputsHash = {},
         state = state,
         timerLength = timerLength,
         color = color,

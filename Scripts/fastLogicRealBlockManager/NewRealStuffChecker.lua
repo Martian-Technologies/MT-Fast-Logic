@@ -67,23 +67,23 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
         return
     elseif self.creation.body:hasChanged(self.creation.lastBodyUpdate) then
         self.creation.lastBodyUpdate = sm.game.getCurrentTick()
-        scanNext = self.creation.AllFastBlocks
+        self.scanNext = self.creation.AllFastBlocks
         self:scanSiliconBlocks()
-    else
-        scanNext = self.scanNext
     end
+    scanNext = self.scanNext
 
     -- if table.length(scanNext) > 0 then
     --     sm.MTUtil.Profiler.Time.on("checkForBodyUpdate" .. tostring(self.creationId))
+    if self.FastLogicRunner.isNew ~= nil then return end
     for uuid, block in pairs(scanNext) do
         if block == nil or block.shape == nil then
         elseif self.creationId ~= sm.MTFastLogic.CreationUtil.getCreationIdFromBlock(block) then
             block:deepRescanSelf()
         else
             self.FastLogicAllBlockManager:setColor(uuid, block.shape.color:getHexStr())
-            -- self.FastLogicRunner:externalAddBlockToUpdate(uuid)
             local inputs = block.interactable:getParents()
             local inputsHash = {}
+            local inputUuidsHash = self.creation.blocks[uuid].inputsHash
             for _, v in pairs(inputs) do
                 if sm.exists(v) then
                     local inputId = v:getId()
@@ -145,7 +145,9 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
         end
     end
     -- sm.MTUtil.Profiler.Time.off("checkForBodyUpdate" .. tostring(self.creationId))
-    -- print("checkForBodyUpdate: " .. tostring(sm.MTUtil.Profiler.Time.get("checkForBodyUpdate" .. tostring(self.creationId))))
+    -- print("time per blocks")
+    -- print("time: " .. tostring(sm.MTUtil.Profiler.Time.get("checkForBodyUpdate" .. tostring(self.creationId))))
+    -- print("count: " .. tostring(table.length(scanNext)))
     -- sm.MTUtil.Profiler.Time.reset("checkForBodyUpdate" .. tostring(self.creationId))
     -- end
     self.scanNext = {}

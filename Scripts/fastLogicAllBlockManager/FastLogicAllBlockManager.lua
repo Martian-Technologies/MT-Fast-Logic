@@ -68,6 +68,7 @@ function FastLogicAllBlockManager.init(self)
     self.dataToSetToDo = {}
     self.dataToSetDelay1 = {}
     self.dataToSetDelay2 = {}
+    self.dataToSetDelay3 = {}
     self.blocks = self.creation.blocks
     self.locationCash = {}
 end
@@ -102,7 +103,8 @@ function FastLogicAllBlockManager.update(self)
     end
     self.dataToSetToDo = self.dataToSetDelay1
     self.dataToSetDelay1 = self.dataToSetDelay2
-    self.dataToSetDelay2 = {}
+    self.dataToSetDelay2 = self.dataToSetDelay3
+    self.dataToSetDelay3 = {}
     -- run fast gates
     self.creation.FastLogicRunner:update()
     -- do state updates
@@ -254,7 +256,7 @@ function FastLogicAllBlockManager.makeBlockData(self, type, uuid, pos, rot, inpu
     if self.locationCash[keyPos] == nil then
         self.locationCash[keyPos] = {}
     end
-    self.dataToSetDelay2[#self.dataToSetDelay2+1] = {
+    self.dataToSetDelay3[#self.dataToSetDelay3+1] = {
         uuid,
         inputs,
         outputs

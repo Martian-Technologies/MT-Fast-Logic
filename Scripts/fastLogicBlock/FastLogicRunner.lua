@@ -61,7 +61,7 @@ function FastLogicRunner.getNew(creationId)
     local new = table.deepCopy(FastLogicRunner)
     new.creationId = creationId
     new.getNew = nil
-    new.isNew = 4
+    new.isNew = 5
     return new
 end
 
@@ -261,6 +261,13 @@ function FastLogicRunner.doLastTickUpdates(self)
 end
 
 function FastLogicRunner.update(self)
+    if self.isNew ~= nil then
+        if self.isNew > 1 then
+            self.isNew = self.isNew - 1
+            return
+        end
+        self.isNew = nil
+    end
     self:setFastReadData(true)
     self:optimizeLogic()
     self.blocksRan = 0
@@ -269,13 +276,6 @@ function FastLogicRunner.update(self)
         self.updateTicks = 1
     else
         self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
-    end
-    if self.isNew ~= nil then
-        if self.isNew > 1 then
-            self.isNew = self.isNew - 1
-            return
-        end
-        self.isNew = nil
     end
     if self.updateTicks >= 1 then
         --make sure all blocks are not broken

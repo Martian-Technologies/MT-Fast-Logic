@@ -7,6 +7,7 @@ function ConnectionShower.inject(multitool)
     self.hideOnPanAway = true
     ConnectionShower.syncStorage(multitool)
     self.updateNametags = NametagManager.createController(multitool)
+    self.lastLookAt = nil
 end
 
 function ConnectionShower.syncStorage(multitool)
@@ -76,24 +77,44 @@ function ConnectionShower.client_onUpdate(multitool)
         "8c7efc37-cd7c-4262-976e-39585f8527bf"
     }
     local holdingItem = tostring(sm.localPlayer.getActiveItem())
+    local doRaycast = true
     if not table.contains(toolsThatDisplayConnections, holdingItem) then
+        doRaycast = false
         if self.hideOnPanAway then
             self.updateNametags(nil)
         end
-        return
+        if self.lastLookAt == nil then
+            return
+        end
     end
+
     local displayUI = table.contains(toolsThatDisplayUI, holdingItem)
-    local rayOrigin = sm.camera.getPosition()
-    local rayDirection = sm.camera.getDirection()
-    local hit, res = ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, nil, 5)
-    if hit then
-        local shape = res.getShape()
+    local hit = false
+    local res = nil
+    if doRaycast then
+        local rayOrigin = sm.camera.getPosition()
+        local rayDirection = sm.camera.getDirection()
+        hit, res = ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, nil, 5)
+    end
+    if hit or self.lastLookAt ~= nil and self.hideOnPanAway == false then
+        local shape = nil
+        if not hit then
+            shape = self.lastLookAt
+        else
+            shape = res.getShape()
+        end
+        if not sm.exists(shape) then
+            self.updateNametags(nil)
+            self.lastLookAt = nil
+            return
+        end
         if shape == nil then
             if self.hideOnPanAway then
                 self.updateNametags(nil)
             end
             return
         end
+        self.lastLookAt = shape
         local interactable = shape:getInteractable()
         if interactable == nil then
             if self.hideOnPanAway then
@@ -101,40 +122,114 @@ function ConnectionShower.client_onUpdate(multitool)
             end
             return
         end
-        local inputConnections = interactable:getParents()
-        local outputConnections = interactable:getChildren()
-        local nametags = {}
+        local uuid = tostring(shape:getShapeUuid())
+        -- print(uuid)
+        -- print(FastLogicAllBlockManager.fastLogicGateBlockUuids)
+        local numInputs = 0
+        local numOutputs = 0
+        local positionsAsInput = {}
+        local positionsAsOutput = {}
         local selfWired = false
-        for _, connection in pairs(inputConnections) do
-            if connection == interactable then
-                selfWired = true
-                goto continue
+        local creationId = sm.MTFastLogic.CreationUtil.getCreationId(shape:getBody())
+        local creation = sm.MTFastLogic.Creations[creationId]
+        if creation.uuids[interactable.id] ~= nil then
+            -- print("EEE")
+            local blockFastUuid = creation.uuids[interactable.id]
+            local block = creation.blocks[blockFastUuid]
+            local inputs = block.inputs
+            local outputs = block.outputs
+            local shapesOutput = {}
+            local shapesInput = {}
+            -- local backdoneUuid = FLR.unhashedLookUp[runnerId]
+            -- print(blockFastUuid, backdoneUuid)
+            numInputs = #inputs
+            numOutputs = #outputs
+            for _, input in pairs(inputs) do
+                local block = creation.blocks[input]
+                if input == blockFastUuid then
+                    selfWired = true
+                    goto continue
+                end
+                local isSilicon = block.isSilicon
+                local body = nil
+                if isSilicon then
+                    local siliconBlockId = block.siliconBlockId
+                    local siliconBlock = creation.SiliconBlocks[siliconBlockId]
+                    body = siliconBlock.shape:getBody()
+                else
+                    body = creation.AllFastBlocks[input].shape:getBody()
+                    table.insert(shapesInput, creation.AllFastBlocks[input].shape)
+                end
+                table.insert(positionsAsInput, body:transformPoint(block.pos / 4))
+                ::continue::
             end
-            local nametag = {
-                txt = "IN",
-                color = sm.color.new(0, 1, 0, 1),
-                pos = connection:getShape():getWorldPosition()
-            }
-            table.insert(nametags, nametag)
-            ::continue::
-        end
-        for _, connection in pairs(outputConnections) do
-            if connection == interactable then
-                selfWired = true
-                goto continue
+            for _, output in pairs(outputs) do
+                if output == blockFastUuid then
+                    selfWired = true
+                    goto continue
+                end
+                local block = creation.blocks[output]
+                local isSilicon = block.isSilicon
+                local body = nil
+                if isSilicon then
+                    local siliconBlockId = block.siliconBlockId
+                    local siliconBlock = creation.SiliconBlocks[siliconBlockId]
+                    body = siliconBlock.shape:getBody()
+                else
+                    body = creation.AllFastBlocks[output].shape:getBody()
+                    table.insert(shapesOutput, creation.AllFastBlocks[output].shape)
+                end
+                table.insert(positionsAsOutput, body:transformPoint(block.pos / 4))
+                ::continue::
             end
-            local nametag = {
-                txt = "OUT",
-                color = sm.color.new(1, 0, 0, 1),
-                pos = connection:getShape():getWorldPosition()
-            }
-            table.insert(nametags, nametag)
-            ::continue::
+            for _, connection in pairs(interactable:getParents()) do
+                if connection == interactable then
+                    goto continue
+                end
+                if not table.contains(shapesInput, connection:getShape()) then
+                    table.insert(positionsAsInput, connection:getShape():getWorldPosition())
+                    numInputs = numInputs + 1
+                end
+                ::continue::
+            end
+            for _, connection in pairs(interactable:getChildren()) do
+                if connection == interactable then
+                    goto continue
+                end
+                if not table.contains(shapesOutput, connection:getShape()) then
+                    table.insert(positionsAsOutput, connection:getShape():getWorldPosition())
+                    numOutputs = numOutputs + 1
+                end
+                ::continue::
+            end
+            -- advPrint(creation, 4, 100, true)
+        else
+            local inputConnections = interactable:getParents()
+            local outputConnections = interactable:getChildren()
+            numInputs = #inputConnections
+            numOutputs = #outputConnections
+            for _, connection in pairs(inputConnections) do
+                if connection == interactable then
+                    goto continue
+                end
+                table.insert(positionsAsInput, connection:getShape():getWorldPosition())
+                ::continue::
+            end
+            for _, connection in pairs(outputConnections) do
+                if connection == interactable then
+                    selfWired = true
+                    goto continue
+                end
+                table.insert(positionsAsOutput, connection:getShape():getWorldPosition())
+                ::continue::
+            end
         end
+
+        local nametags = {}
         if selfWired then
             table.insert(nametags, {
-                txt = "SW",
-                color = sm.color.new(1, 1, 0, 1),
+                txt = "SW", -- ↻
+                color = sm.color.new(0.95, 0.9, 0, 1),
                 pos = interactable:getShape():getWorldPosition()
             })
         else
@@ -144,12 +239,26 @@ function ConnectionShower.client_onUpdate(multitool)
                 pos = interactable:getShape():getWorldPosition()
             })
         end
+        for _, pos in pairs(positionsAsInput) do
+            table.insert(nametags, {
+                txt = "IN",
+                color = sm.color.new(0, 1, 0, 1),
+                pos = pos
+            })
+        end
+        for _, pos in pairs(positionsAsOutput) do
+            table.insert(nametags, {
+                txt = "OUT",
+                color = sm.color.new(1, 0, 0, 1),
+                pos = pos
+            })
+        end
         self.updateNametags(nametags)
         if displayUI then
             sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>INPUTS: " ..
-            #inputConnections .. "</p>")
+            numInputs .. "</p>")
             sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>OUTPUTS: " ..
-            #outputConnections .. "</p>")
+            numOutputs .. "</p>")
         end
     else
         if self.hideOnPanAway then

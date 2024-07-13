@@ -245,7 +245,7 @@ function BlockSelector.client_onUpdate(multitool)
         local posTopRightBack = pos + halfSizeAt + halfSizeRight - halfSizeUp
         local posTopRightFront = pos + halfSizeAt + halfSizeRight + halfSizeUp
         local verteces = {}
-        local interSteps = 16 * bb.z
+        local interSteps = 16 * (posTopLeftBack - posBottomLeftBack):length()
         for i = 0, interSteps do
             -- interpolate between the Back and Front positions
             local posLeftBack = posBottomLeftBack * (interSteps - i) / interSteps + posTopLeftBack * i / interSteps
@@ -257,7 +257,7 @@ function BlockSelector.client_onUpdate(multitool)
             table.insert(verteces, { pos = posLeftFront, color = invColor, txt = nil })
             table.insert(verteces, { pos = posRightFront, color = invColor, txt = nil })
         end
-        interSteps = 16 * bb.y
+        interSteps = 16 * (posTopLeftBack - posTopRightBack):length()
         for i = 0, interSteps do
             -- interpolate between the Left and Right positions
             local posBottomBack = posBottomLeftBack * (interSteps - i) / interSteps + posBottomRightBack * i / interSteps
@@ -270,7 +270,7 @@ function BlockSelector.client_onUpdate(multitool)
             table.insert(verteces, { pos = posBottomFront, color = invColor, txt = nil })
             table.insert(verteces, { pos = posTopFront, color = invColor, txt = nil })
         end
-        interSteps = 16 * bb.x
+        interSteps = 16 * (posTopLeftBack - posBottomLeftBack):length()
         for i = 0, interSteps do
             -- interpolate between the Bottom and Top positions
             local posLeftBottom = posBottomLeftBack * (interSteps - i) / interSteps + posBottomLeftFront * i / interSteps

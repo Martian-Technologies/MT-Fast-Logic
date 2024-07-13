@@ -227,11 +227,14 @@ end
 printOld = printOld or print
 formater = {}
 local formater = formater
-function formater.getFormatedForPrint(val, depth, maxTableLength)
+function formater.getFormatedForPrint(val, depth, maxTableLength, unrollTables, indentationDepth, recursedTables)
+    indentationDepth = indentationDepth or 0
+    indentationDepth = indentationDepth + 1
     depth = depth or 5
     depth = depth - 1
-    if depth == -1 then
-        return "MDR"
+    recursedTables = recursedTables or {}
+    if depth == -1 and type(val) == "table" then
+        return "tbl"
     end
     if val == nil then
         return "nil"
@@ -242,10 +245,15 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
         if depth == 0 then
             return "tbl"
         end
+        if table.contains(recursedTables, val) then
+            depth = 0
+        end
+        table.insert(recursedTables, val)
         local i = 1
         local str = "{"
         local count = 0
         maxTableLength = maxTableLength or 100
+        unrollTables = unrollTables or false
         for key, value in pairs(val) do
             if count >= maxTableLength then
                 str = str .. "..."
@@ -253,15 +261,30 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
             end
             count = count + 1
             if (#str > 1) then
-                str = str .. ", "
+                str = str .. ","
+            end
+            if unrollTables then
+                str = str .. "\n"
+                for i = 1, indentationDepth do
+                    str = str .. "    "
+                end
+            else
+                str = str .. " "
             end
             if (key == i) then
                 i = i + 1
-                str = str .. formater.getFormatedForPrint(value, depth, maxTableLength)
+                str = str .. formater.getFormatedForPrint(value, depth, maxTableLength, unrollTables, indentationDepth, recursedTables)
             else
                 str = str ..
                     "[" ..
-                    formater.getFormatedForPrint(key, depth, maxTableLength) .. "] = " .. formater.getFormatedForPrint(value, depth, maxTableLength)
+                    formater.getFormatedForPrint(key, depth, maxTableLength, unrollTables, indentationDepth, recursedTables) ..
+                    "] = " .. formater.getFormatedForPrint(value, depth, maxTableLength, unrollTables, indentationDepth, recursedTables)
+            end
+        end
+        if unrollTables then
+            str = str .. "\n"
+            for i = 1, indentationDepth - 1 do
+                str = str .. "    "
             end
         end
         return str .. "}"
@@ -276,19 +299,19 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
         end
         return "false"
     elseif type(val) == "Shape" then
-        return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId(), depth, maxTableLength) .. "}"
+        return "{<Shape>, id = " .. formater.getFormatedForPrint(val:getId(), depth, maxTableLength, unrollTables, indentationDepth, recursedTables) .. "}"
     elseif type(val) == "Vec3" then
         return "Vec3 <" ..
-            formater.getFormatedForPrint(val.x, depth, maxTableLength) .. ", " ..
-            formater.getFormatedForPrint(val.y, depth, maxTableLength) .. ", " ..
-            formater.getFormatedForPrint(val.z, depth, maxTableLength) .. ">"
+            formater.getFormatedForPrint(val.x, depth, maxTableLength, unrollTables, indentationDepth, recursedTables) .. ", " ..
+            formater.getFormatedForPrint(val.y, depth, maxTableLength, unrollTables, indentationDepth, recursedTables) .. ", " ..
+            formater.getFormatedForPrint(val.z, depth, maxTableLength, unrollTables, indentationDepth, recursedTables) .. ">"
     elseif type(val) == "Color" then
         local str = "Color <" ..
-            formater.getFormatedForPrint(val.r, depth, maxTableLength) .. ", " ..
-            formater.getFormatedForPrint(val.g, depth, maxTableLength) .. ", " ..
-            formater.getFormatedForPrint(val.b, depth, maxTableLength)
+            formater.getFormatedForPrint(val.r, depth, maxTableLength, unrollTables, indentationDepth, recursedTables) .. ", " ..
+            formater.getFormatedForPrint(val.g, depth, maxTableLength, unrollTables, indentationDepth, recursedTables) .. ", " ..
+            formater.getFormatedForPrint(val.b, depth, maxTableLength, unrollTables, indentationDepth, recursedTables)
         if val.a ~= 1 then
-            str = str .. ", " .. formater.getFormatedForPrint(val.a, depth, maxTableLength) .. ">"
+            str = str .. ", " .. formater.getFormatedForPrint(val.a, depth, maxTableLength, unrollTables, indentationDepth, recursedTables) .. ">"
         else
             str = str .. ">"
         end
@@ -307,12 +330,18 @@ function formater.getFormatedForPrint(val, depth, maxTableLength)
     end
 end
 
-function print(val)
-    printOld(formater.getFormatedForPrint(val))
+function print(...)
+    local strings = {}
+    for i = 1, select("#", ...) do
+        local val = select(i, ...)
+        strings[#strings + 1] = formater.getFormatedForPrint(val)
+    end
+    printOld(table.concat(strings, " "))
+    -- printOld(formater.getFormatedForPrint(val))
 end
 
-function advPrint(val, depth, maxTableLength)
-    printOld(formater.getFormatedForPrint(val, depth, maxTableLength))
+function advPrint(val, depth, maxTableLength, unrollTables)
+    printOld(formater.getFormatedForPrint(val, depth, maxTableLength, unrollTables))
 end
 
 -- input the keys you want to be able to hash

@@ -12,6 +12,8 @@ dofile("$CONTENT_DATA/Scripts/util/mathUtil.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/lib.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/HoveringUI.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/DoMeleeState.lua")
 
@@ -106,6 +108,8 @@ function MTMultitool.client_onCreate(self)
     MTFlying.inject(self)
     ConnectionShower.inject(self)
     DoMeleeState.inject(self)
+
+    HoveringUI.inject(self)
 
     VolumeSelector.inject(self)
 
@@ -477,6 +481,7 @@ function MTMultitool.client_onToggle(self)
             self.mode = #self.modes
         end
     until self.enabledModes[self.mode]
+    HoveringUI.cleanUp(self)
     return true
 end
 

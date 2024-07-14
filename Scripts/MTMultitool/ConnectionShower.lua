@@ -152,6 +152,9 @@ function ConnectionShower.client_onUpdate(multitool)
             numOutputs = #outputs
             for _, input in pairs(inputs) do
                 local block = creation.blocks[input]
+                if block == nil then
+                    goto continue
+                end
                 if input == blockFastUuid then
                     selfWired = true
                     goto continue
@@ -183,6 +186,9 @@ function ConnectionShower.client_onUpdate(multitool)
                     goto continue
                 end
                 local block = creation.blocks[output]
+                if block == nil then
+                    goto continue
+                end
                 local isSilicon = block.isSilicon
                 local body = nil
                 if isSilicon then

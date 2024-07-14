@@ -12,6 +12,8 @@ dofile("$CONTENT_DATA/Scripts/util/mathUtil.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/lib.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/HoveringUI.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/DoMeleeState.lua")
 
@@ -107,6 +109,8 @@ function MTMultitool.client_onCreate(self)
     ConnectionShower.inject(self)
     DoMeleeState.inject(self)
 
+    HoveringUI.inject(self)
+
     VolumeSelector.inject(self)
 
     LogicConverter.inject(self)
@@ -192,6 +196,20 @@ function MTMultitool.client_onRefresh(self)
 	return true
 end
 
+local function unsafeOnUpdateStuff(self, dt)
+	if MTMultitool.internalModes[self.mode] == "SingleConnect" then
+    	SingleConnect.client_onUpdate(self)
+	elseif MTMultitool.internalModes[self.mode] == "SeriesConnect" then
+        SeriesConnect.client_onUpdate(self)
+    elseif MTMultitool.internalModes[self.mode] == "NtoNConnect" then
+		NtoNConnect.client_onUpdate(self)
+	elseif MTMultitool.internalModes[self.mode] == "ParallelConnect" then
+		ParallelConnect.client_onUpdate(self)
+	elseif MTMultitool.internalModes[self.mode] == "TensorConnect" then
+		TensorConnect.client_onUpdate(self)
+	end
+end
+
 function MTMultitool.client_onUpdate(self, dt)
     if os.clock() - self.lastSettingsRepull > 1 then
         self:repullSettings()
@@ -214,23 +232,41 @@ function MTMultitool.client_onUpdate(self, dt)
             end
         end
     end
-    MTFlying.cl_onUpdate(self, dt)
-    VolumeSelector.client_onUpdate(self, dt)
-    ConnectionShower.client_onUpdate(self)
-	if MTMultitool.internalModes[self.mode] == "SingleConnect" then
-    	SingleConnect.client_onUpdate(self)
-	elseif MTMultitool.internalModes[self.mode] == "SeriesConnect" then
-        SeriesConnect.client_onUpdate(self)
-    elseif MTMultitool.internalModes[self.mode] == "NtoNConnect" then
-		NtoNConnect.client_onUpdate(self)
-	elseif MTMultitool.internalModes[self.mode] == "ParallelConnect" then
-		ParallelConnect.client_onUpdate(self)
-	elseif MTMultitool.internalModes[self.mode] == "TensorConnect" then
-		TensorConnect.client_onUpdate(self)
-	end
-    BlockSelector.client_onUpdate(self)
-	ConnectionManager.client_onUpdate(self)
-    VertexRenderer.client_onUpdate(self)
+    -- MTFlying.cl_onUpdate(self, dt)
+    -- VolumeSelector.client_onUpdate(self, dt)
+    -- ConnectionShower.client_onUpdate(self)
+    local success, result
+    success, result = pcall(MTFlying.cl_onUpdate, self, dt)
+    if not success then
+        print("Error in MTFlying.cl_onUpdate: " .. result)
+    end
+    success, result = pcall(VolumeSelector.client_onUpdate, self, dt)
+    if not success then
+        print("Error in VolumeSelector.client_onUpdate: " .. result)
+    end
+    success, result = pcall(ConnectionShower.client_onUpdate, self, dt)
+    if not success then
+        print("Error in ConnectionShower.client_onUpdate: " .. result)
+    end
+    success, result = pcall(unsafeOnUpdateStuff, self, dt)
+    if not success then
+        print("Error in unsafeOnUpdateStuff: " .. result)
+    end
+    -- BlockSelector.client_onUpdate(self)
+	-- ConnectionManager.client_onUpdate(self)
+    -- VertexRenderer.client_onUpdate(self)
+    success, result = pcall(BlockSelector.client_onUpdate, self)
+    if not success then
+        print("Error in BlockSelector.client_onUpdate: " .. result)
+    end
+    success, result = pcall(ConnectionManager.client_onUpdate, self)
+    if not success then
+        print("Error in ConnectionManager.client_onUpdate: " .. result)
+    end
+    success, result = pcall(VertexRenderer.client_onUpdate, self)
+    if not success then
+        print("Error in VertexRenderer.client_onUpdate: " .. result)
+    end
 
 	local isSprinting =  self.tool:isSprinting()
 
@@ -445,19 +481,11 @@ function MTMultitool.client_onToggle(self)
             self.mode = #self.modes
         end
     until self.enabledModes[self.mode]
+    HoveringUI.cleanUp(self)
     return true
 end
 
-function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState, forceBuild)
-    if self.enabledModes[self.mode] == false then
-        self.mode = self.mode + 1
-		if self.mode > #self.modes then
-			self.mode = 1
-		end
-	end
-    -- print("mode: " .. self.modes[self.mode])
-	-- print(self.mode)
-	local lookingAt = self.BlockSelector.raycastLookingAt
+local function triggerTool(self, primaryState, secondaryState, forceBuild, lookingAt)
 	if MTMultitool.internalModes[self.mode] == "LogicConverter" then
         LogicConverter.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then
@@ -485,6 +513,23 @@ function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState,
 	elseif MTMultitool.internalModes[self.mode] == "TensorConnect" then
 		TensorConnect.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
 	end
+end
+
+function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState, forceBuild)
+    if self.enabledModes[self.mode] == false then
+        self.mode = self.mode + 1
+		if self.mode > #self.modes then
+			self.mode = 1
+		end
+	end
+    -- print("mode: " .. self.modes[self.mode])
+	-- print(self.mode)
+    local lookingAt = self.BlockSelector.raycastLookingAt
+    -- pcall triggerTool to catch errors
+    local success, result = pcall(triggerTool, self, primaryState, secondaryState, forceBuild, lookingAt)
+    if not success then
+        print("Error in triggerTool: " .. result)
+    end
 
     local enabledModes = 0
     local modeOfEnabled = 0

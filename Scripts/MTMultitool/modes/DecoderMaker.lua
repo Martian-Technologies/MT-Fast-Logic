@@ -80,10 +80,14 @@ function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuil
         local color = sm.color.new(1, 1, 1, 1)
         local tags = {}
         for i, input in ipairs(self.listOfNormalInputs) do
-            table.insert(tags, { pos = input:getWorldPosition(), txt = "i" .. i, color = color })
+            if input ~= nil then
+                table.insert(tags, { pos = input:getWorldPosition(), txt = "i" .. i, color = color })
+            end
         end
         for i, input in ipairs(self.listOfInvertedInputs) do
-            table.insert(tags, { pos = input:getWorldPosition(), txt = "i" .. i .. "'", color = color })
+            if input ~= nil then
+                table.insert(tags, { pos = input:getWorldPosition(), txt = "i" .. i .. "'", color = color })
+            end
         end
         if self.outputOrigin ~= nil then
             table.insert(tags, { pos = self.outputOrigin:getWorldPosition(), txt = "o", color = color })
@@ -131,11 +135,13 @@ function DecoderMaker.calculatePreview(multitool)
             end
         end
         for j, input in ipairs(inputs) do
-            local task = {
-                from = input,
-                to = shape
-            }
-            table.insert(multitool.ConnectionManager.preview, task)
+            if input ~= nil and shape ~= nil then
+                local task = {
+                    from = input,
+                    to = shape
+                }
+                table.insert(multitool.ConnectionManager.preview, task)
+            end
         end
     end
 end

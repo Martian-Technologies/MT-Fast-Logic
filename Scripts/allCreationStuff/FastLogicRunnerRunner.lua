@@ -3,7 +3,6 @@ dofile "../fastLogicRealBlockManager/FastLogicRealBlockManager.lua"
 dofile "../fastLogicAllBlockManager/FastLogicAllBlockManager.lua"
 dofile "../fastLogicBlock/FastLogicRunner.lua"
 dofile "../silicon/SiliconConverter.lua"
-dofile "../fastLogicRealBlockManager/LogicConverter.lua"
 dofile "CreationUtil.lua"
 local string = string
 local table = table
@@ -16,6 +15,7 @@ local SiliconConverter = SiliconConverter
 FastLogicRunnerRunner = FastLogicRunnerRunner or class()
 
 dofile "AllCreationDisplay.lua"
+dofile "LogicConverter.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.Creations = sm.MTFastLogic.Creations or {}

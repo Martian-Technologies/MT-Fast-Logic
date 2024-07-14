@@ -1,23 +1,26 @@
 function FastLogicRunnerRunner.updatedDisplays(self)
-    local changedUuidsArray = {}
-    for i = 1, #self.changedUuidsArray do
-        if sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]] ~= nil then
-            local stateNumber = 0
-            if sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]].state then
-                stateNumber = 1
+    if 0 < #self.changedUuidsArray then
+        local changedUuidsArray = {}
+        for i = 1, #self.changedUuidsArray do
+            if sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]] ~= nil then
+                local stateNumber = 0
+                if sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]].state then
+                    stateNumber = 1
+                end
+                changedUuidsArray[#changedUuidsArray+1] = (
+                    sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]].id * 2 + stateNumber
+                )
             end
-            changedUuidsArray[#changedUuidsArray+1] = (
-                sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]].id * 2 + stateNumber
-            )
+            if #changedUuidsArray > 5000 then
+                self.network:sendToClients("client_updateTexturesAndStates", changedUuidsArray)
+                changedUuidsArray = {}
+            end
         end
-        if #changedUuidsArray > 5000 then
+        if #changedUuidsArray > 0 then
             self.network:sendToClients("client_updateTexturesAndStates", changedUuidsArray)
             changedUuidsArray = {}
         end
-    end
-    if #changedUuidsArray > 0 then
-        self.network:sendToClients("client_updateTexturesAndStates", changedUuidsArray)
-        changedUuidsArray = {}
+        self.changedUuidsArray = {}
     end
 end
 

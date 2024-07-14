@@ -27,5 +27,5 @@ function FastLogicRealBlockManager.updateDisplay(self, blockToUpdate)
             end
         end
     end
-    -- self.creation.lastBodyUpdate = sm.game.getCurrentTick()
+    self.creation.lastBodyUpdate = sm.game.getCurrentTick()
 end

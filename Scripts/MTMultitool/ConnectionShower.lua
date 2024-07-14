@@ -148,13 +148,14 @@ function ConnectionShower.client_onUpdate(multitool)
             local shapesInput = {}
             -- local backdoneUuid = FLR.unhashedLookUp[runnerId]
             -- print(blockFastUuid, backdoneUuid)
-            numInputs = #inputs
-            numOutputs = #outputs
+            numInputs = 0
+            numOutputs = 0
             for _, input in pairs(inputs) do
                 local block = creation.blocks[input]
                 if block == nil then
                     goto continue
                 end
+                numInputs = numInputs + 1
                 if input == blockFastUuid then
                     selfWired = true
                     goto continue
@@ -185,6 +186,7 @@ function ConnectionShower.client_onUpdate(multitool)
                     selfWired = true
                     goto continue
                 end
+                numOutputs = numOutputs + 1
                 local block = creation.blocks[output]
                 if block == nil then
                     goto continue

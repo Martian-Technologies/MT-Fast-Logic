@@ -40,7 +40,12 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
     end
     if self.final ~= nil and self.modes ~= nil then
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
-            self.index = self.index + 1
+            local isCrouching = multitool.tool:isCrouching()
+            if isCrouching then
+                self.index = self.index - 1
+            else
+                self.index = self.index + 1
+            end
         end
         if self.index > #self.modes then
             self.index = 1

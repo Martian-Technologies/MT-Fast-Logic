@@ -12,11 +12,19 @@ function VolumeSelector.inject(multitool)
     self.modes = nil
     self.modesNice = nil
     self.index = 1
+    self.previewColor = sm.color.new(1, 1, 1, 1)
     self.selectionMode = "inside" -- "inside" or "outside"
     self.nametagUpdate = NametagManager.createController(multitool)
 end
 
-function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, extraTooltip)
+    if extraTooltip == nil then
+        extraTooltip = {
+            selectOrigin = "",
+            selectFinal = "",
+            confirm = "",
+        }
+    end
     local self = multitool.VolumeSelector
     local needToRaycast = false
     local betaTextStart = ""
@@ -27,7 +35,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
     end
     if self.origin == nil and self.final == nil then
         sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true),
-            "Select first corner" .. betaTextEnd)
+            "Select first corner" .. extraTooltip.selectOrigin .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final == nil then
         sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Select second corner     ",
@@ -108,7 +116,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         local x2 = maxPos.x + 0.125
         local y2 = maxPos.y + 0.125
         local z2 = maxPos.z + 0.125
-        local color = sm.color.new(1, 1, 1, 1)
+        local color = self.previewColor
         local xWidth = x2 - x1
         local yWidth = y2 - y1
         local zWidth = z2 - z1
@@ -231,6 +239,7 @@ function VolumeSelector.cleanUp(multitool)
     self.origin = nil
     self.body = nil
     self.final = nil
+    self.previewColor = sm.color.new(1, 1, 1, 1)
 end
 
 function VolumeSelector.cleanNametags(multitool)

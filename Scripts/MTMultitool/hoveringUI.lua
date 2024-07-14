@@ -32,7 +32,14 @@ local function button(multitool, ctx)
     local text = element.text
     local primaryState = ctx.buttonClicks.primaryState
     local color = element.color
+    local tooltip = nil
+    if element.tooltip ~= nil then
+        tooltip = element.tooltip()
+    end
     if hover then
+        if tooltip ~= nil then
+            sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..tooltip.."</p>")
+        end
         text = "[ " .. text .. " ]"
         if primaryState > 0 then
             color = sm.color.new(0, 0, 0)
@@ -76,7 +83,14 @@ local function toggleButton(multitool, ctx)
     if state then
         color = element.color.on
     end
+    local tooltip = nil
+    if element.tooltip ~= nil then
+        tooltip = element.tooltip(state)
+    end
     if hover then
+        if tooltip ~= nil then
+            sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..tooltip.."</p>")
+        end
         text = "[ " .. text .. " ]"
         if primaryState > 0 then
             color = sm.color.new(0, 0, 0)
@@ -116,7 +130,14 @@ local function customButton(multitool, ctx)
     local render = element.getrender(hover)
     local text = render.text
     local color = render.color
+    local tooltip = nil
+    if element.tooltip ~= nil then
+        tooltip = element.tooltip()
+    end
     if hover then
+        if tooltip ~= nil then
+            sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..tooltip.."</p>")
+        end
         if ctx.buttonClicks.primaryState > 0 then
             color = sm.color.new(0, 0, 0)
         end
@@ -140,6 +161,28 @@ local function indicator(multitool, ctx)
     local cameraVec = ctx.cameraVec
     local cameraPos = ctx.cameraPos
     local pos = (levelQuat * azimuthQuat * elevationQuat) * sm.vec3.new(0, 0, 25) + cameraPos
+
+    local tooltip = nil
+    if element.tooltip ~= nil then
+        tooltip = element.tooltip()
+    end
+
+    if tooltip ~= nil then
+
+        local horizontalAngle = ctx.horizontalAngle
+        local verticalAngle = ctx.verticalAngle
+
+        local hover = not ctx.block.hovered
+        if horizontalAngle > element.angleBoundHorizontal or verticalAngle > element.angleBoundVertical then
+            hover = false
+        else
+            ctx.block.hovered = true
+        end
+        if hover then
+            sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..tooltip.."</p>")
+        end
+    end
+
 
     local text = element.getText()
 

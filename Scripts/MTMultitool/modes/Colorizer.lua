@@ -9,6 +9,49 @@ function Colorizer.inject(multitool)
     self.selectedColor = 1
 end
 
+local connectionColors = {
+    sm.color.new(0.9333333333333333, 0.9333333333333333, 0.9333333333333333),
+    sm.color.new(0.4980392156862745, 0.4980392156862745, 0.4980392156862745),
+    sm.color.new(0.2901960784313726, 0.2901960784313726, 0.2901960784313726),
+    sm.color.new(0.13333333333333333, 0.13333333333333333, 0.13333333333333333),
+    sm.color.new(0.9607843137254902, 0.9411764705882353, 0.44313725490196076),
+    sm.color.new(0.8862745098039215, 0.8588235294117647, 0.07450980392156863),
+    sm.color.new(0.5058823529411764, 0.48627450980392156, 0.0),
+    sm.color.new(0.19607843137254902, 0.18823529411764706, 0.0),
+    sm.color.new(0.796078431372549, 0.9647058823529412, 0.43529411764705883),
+    sm.color.new(0.6274509803921569, 0.9176470588235294, 0.0),
+    sm.color.new(0.3411764705882353, 0.49019607843137253, 0.027450980392156862),
+    sm.color.new(0.21568627450980393, 0.3137254901960784, 0.0),
+    sm.color.new(0.40784313725490196, 1.0, 0.5333333333333333),
+    sm.color.new(0.09803921568627451, 0.9058823529411765, 0.3254901960784314),
+    sm.color.new(0.054901960784313725, 0.5019607843137255, 0.19215686274509805),
+    sm.color.new(0.023529411764705882, 0.25098039215686274, 0.13725490196078433),
+    sm.color.new(0.49411764705882355, 0.9294117647058824, 0.9294117647058824),
+    sm.color.new(0.17254901960784313, 0.9019607843137255, 0.9019607843137255),
+    sm.color.new(0.06666666666666667, 0.5294117647058824, 0.5294117647058824),
+    sm.color.new(0.0392156862745098, 0.26666666666666666, 0.26666666666666666),
+    sm.color.new(0.2980392156862745, 0.43529411764705883, 0.8901960784313725),
+    sm.color.new(0.0392156862745098, 0.24313725490196078, 0.8862745098039215),
+    sm.color.new(0.058823529411764705, 0.1803921568627451, 0.5686274509803921),
+    sm.color.new(0.0392156862745098, 0.11372549019607843, 0.35294117647058826),
+    sm.color.new(0.6823529411764706, 0.4745098039215686, 0.9411764705882353),
+    sm.color.new(0.4588235294117647, 0.0784313725490196, 0.9294117647058824),
+    sm.color.new(0.3137254901960784, 0.0392156862745098, 0.6509803921568628),
+    sm.color.new(0.20784313725490197, 0.03137254901960784, 0.4235294117647059),
+    sm.color.new(0.9333333333333333, 0.4823529411764706, 0.9411764705882353),
+    sm.color.new(0.8117647058823529, 0.06666666666666667, 0.8235294117647058),
+    sm.color.new(0.4470588235294118, 0.0392156862745098, 0.4549019607843137),
+    sm.color.new(0.3215686274509804, 0.023529411764705882, 0.3254901960784314),
+    sm.color.new(0.9411764705882353, 0.403921568627451, 0.403921568627451),
+    sm.color.new(0.8156862745098039, 0.1450980392156863, 0.1450980392156863),
+    sm.color.new(0.48627450980392156, 0.0, 0.0),
+    sm.color.new(0.33725490196078434, 0.00784313725490196, 0.00784313725490196),
+    sm.color.new(0.9333333333333333, 0.6862745098039216, 0.3607843137254902),
+    sm.color.new(0.8745098039215686, 0.4980392156862745, 0.0),
+    sm.color.new(0.403921568627451, 0.23137254901960785, 0.0),
+    sm.color.new(0.2784313725490196, 0.1568627450980392, 0.0),
+}
+
 local function injectElements(multitool)
     local self = multitool.colorizer
     local hUI = multitool.HoveringUI
@@ -28,49 +71,6 @@ local function injectElements(multitool)
         [40] = "Dark Brown"
     }
 
-    local colors = {
-        sm.color.new(0.9333333333333333, 0.9333333333333333, 0.9333333333333333),
-        sm.color.new(0.4980392156862745, 0.4980392156862745, 0.4980392156862745),
-        sm.color.new(0.2901960784313726, 0.2901960784313726, 0.2901960784313726),
-        sm.color.new(0.13333333333333333, 0.13333333333333333, 0.13333333333333333),
-        sm.color.new(0.9607843137254902, 0.9411764705882353, 0.44313725490196076),
-        sm.color.new(0.8862745098039215, 0.8588235294117647, 0.07450980392156863),
-        sm.color.new(0.5058823529411764, 0.48627450980392156, 0.0),
-        sm.color.new(0.19607843137254902, 0.18823529411764706, 0.0),
-        sm.color.new(0.796078431372549, 0.9647058823529412, 0.43529411764705883),
-        sm.color.new(0.6274509803921569, 0.9176470588235294, 0.0),
-        sm.color.new(0.3411764705882353, 0.49019607843137253, 0.027450980392156862),
-        sm.color.new(0.21568627450980393, 0.3137254901960784, 0.0),
-        sm.color.new(0.40784313725490196, 1.0, 0.5333333333333333),
-        sm.color.new(0.09803921568627451, 0.9058823529411765, 0.3254901960784314),
-        sm.color.new(0.054901960784313725, 0.5019607843137255, 0.19215686274509805),
-        sm.color.new(0.023529411764705882, 0.25098039215686274, 0.13725490196078433),
-        sm.color.new(0.49411764705882355, 0.9294117647058824, 0.9294117647058824),
-        sm.color.new(0.17254901960784313, 0.9019607843137255, 0.9019607843137255),
-        sm.color.new(0.06666666666666667, 0.5294117647058824, 0.5294117647058824),
-        sm.color.new(0.0392156862745098, 0.26666666666666666, 0.26666666666666666),
-        sm.color.new(0.2980392156862745, 0.43529411764705883, 0.8901960784313725),
-        sm.color.new(0.0392156862745098, 0.24313725490196078, 0.8862745098039215),
-        sm.color.new(0.058823529411764705, 0.1803921568627451, 0.5686274509803921),
-        sm.color.new(0.0392156862745098, 0.11372549019607843, 0.35294117647058826),
-        sm.color.new(0.6823529411764706, 0.4745098039215686, 0.9411764705882353),
-        sm.color.new(0.4588235294117647, 0.0784313725490196, 0.9294117647058824),
-        sm.color.new(0.3137254901960784, 0.0392156862745098, 0.6509803921568628),
-        sm.color.new(0.20784313725490197, 0.03137254901960784, 0.4235294117647059),
-        sm.color.new(0.9333333333333333, 0.4823529411764706, 0.9411764705882353),
-        sm.color.new(0.8117647058823529, 0.06666666666666667, 0.8235294117647058),
-        sm.color.new(0.4470588235294118, 0.0392156862745098, 0.4549019607843137),
-        sm.color.new(0.3215686274509804, 0.023529411764705882, 0.3254901960784314),
-        sm.color.new(0.9411764705882353, 0.403921568627451, 0.403921568627451),
-        sm.color.new(0.8156862745098039, 0.1450980392156863, 0.1450980392156863),
-        sm.color.new(0.48627450980392156, 0.0, 0.0),
-        sm.color.new(0.33725490196078434, 0.00784313725490196, 0.00784313725490196),
-        sm.color.new(0.9333333333333333, 0.6862745098039216, 0.3607843137254902),
-        sm.color.new(0.8745098039215686, 0.4980392156862745, 0.0),
-        sm.color.new(0.403921568627451, 0.23137254901960785, 0.0),
-        sm.color.new(0.2784313725490196, 0.1568627450980392, 0.0),
-    }
-
     local colorNames = {}
     for i = 1, #colorNamesMajor do
         for j = 1, #colorNameModifiers do
@@ -87,7 +87,7 @@ local function injectElements(multitool)
                 name = "color_" .. i,
                 type = "customButton",
                 position = { a = (col - 5.5) * 0.07, e = (row) * 0.07 + 0.0 }, -- a = azimuth, e = elevation
-                color = colors[i],
+                color = connectionColors[i],
                 angleBoundHorizontal = 0.035,
                 angleBoundVertical = 0.035,
                 -- getText = function()
@@ -95,7 +95,7 @@ local function injectElements(multitool)
                 -- end,
                 getrender = function(hovering)
                     local text = "▉"
-                    local color = colors[i]
+                    local color = connectionColors[i]
                     if self.selectedColor == i then
                         text = "▉▉"
                     end
@@ -133,8 +133,9 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
     multitool.BlockSelector.enabled = false
     multitool.VolumeSelector.enabled = not self.displayingGUI
 
-    if not self.displayingGUI and MTMultitool.handleForceBuild(multitool, forceBuild) then
-        self.displayingGUI = true
+    local hasForceBuilt = MTMultitool.handleForceBuild(multitool, forceBuild)
+    if hasForceBuilt then
+        self.displayingGUI = not self.displayingGUI
     end
 
     if not self.displayingGUI then
@@ -157,11 +158,15 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
         multitool.VolumeSelector.actionWord = "Colorize"
         multitool.VolumeSelector.isBeta = false
         multitool.VolumeSelector.selectionMode = "inside"
-
+        multitool.VolumeSelector.previewColor = connectionColors[self.selectedColor]
 
 
         -- print("Colorizer")
-        local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+        local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, {
+            selectOrigin = "     "..sm.gui.getKeyBinding("ForceBuild", true) .. " Change Color",
+            selectFinal = "",
+            confirm = ""
+        })
         if result == nil then
             return
         end

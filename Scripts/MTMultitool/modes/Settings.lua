@@ -5,6 +5,22 @@ function Settings.inject(multitool)
     local self = multitool.Settings
 end
 
+local modesAndTheirFunctions = {
+    ["LogicConverter"] = "Lets you convert Vanilla Logic to FastLogic and vice versa.",
+    ["SiliconConverter"] =
+    "Lets you convert FastLogic to Silicon and vice versa. Silicon helps reduce lag and file size.",
+    ["ModeChanger"] = "Lets you select a lot of gates and change their modes (AND/NOR/XOR/etc..) all at once",
+    ["VolumePlacer"] = "Lets you place a cuboid of logic gates all at once",
+    ["Merger"] = "Lets you merge gates. Merging takes all of a gates inputs and wires them into the gate's outputs deleting the gate.",
+    ["Colorizer"] = "Changes the connection dot color of FastLogic gates.",
+    ["DecoderMaker"] = "Goofy tool that wires up decoders for you.",
+    ["SingleConnect"] = "Makes a single connection, useful when you have a lot of connections and need to see.",
+    ["SeriesConnect"] = "Connects a row of gates in series, one into the next.",
+    ["NtoNConnect"] = "Crosswires one row of gates into another.",
+    ["ParallelConnect"] = "Wires two rows of gates of identical length together in parallel.",
+    ["TensorConnect"] = "Lets you define two tensors of the same size and connect them together in parallel.",
+}
+
 local function injectElements(multitool)
     local fovMult = sm.camera.getFov() / 90
 
@@ -37,6 +53,13 @@ local function injectElements(multitool)
                 saveData.modeStates[mode] = multitool.enabledModes[i]
                 SaveFile.setSaveData(multitool.saveIdx, saveData)
             end,
+            tooltip = function()
+                if modesAndTheirFunctions[mode] then
+                    return modesAndTheirFunctions[mode]
+                else
+                    return nil
+                end
+            end,
         })
         ::continue::
     end
@@ -46,8 +69,13 @@ local function injectElements(multitool)
         type = "indicator",
         position = { a = -math.pi/8 * fovMult, e = 2 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = 0.03 * fovMult,
         getText = function()
             return "Save Index: " .. tostring(multitool.saveIdx)
+        end,
+        tooltip = function()
+            return "The save index is used to store different settings profiles."
         end,
     })
 
@@ -67,6 +95,9 @@ local function injectElements(multitool)
             end
             MTMultitool.repullSettings(multitool)
         end,
+        tooltip = function()
+            return "Increment the save index."
+        end,
     })
 
     table.insert(hUI.elements, {
@@ -84,6 +115,9 @@ local function injectElements(multitool)
                 multitool.saveIdx = multitool.saveIdx - 1
             end
             MTMultitool.repullSettings(multitool)
+        end,
+        tooltip = function()
+            return "Decrement the save index."
         end,
     })
 
@@ -108,6 +142,9 @@ local function injectElements(multitool)
         onclick = function()
             MTFlying.toggleFlying(multitool)
         end,
+        tooltip = function()
+            return "Toggles flight mode for you. Not recommended for multiplayer."
+        end,
     })
 
     table.insert(hUI.elements, {
@@ -116,8 +153,11 @@ local function injectElements(multitool)
         position = { a = math.pi / 8 * fovMult, e = 3 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         angleBoundHorizontal = 0.1,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
-        getrender = function()
+        getrender = function(hover)
             local text = "Connection Display Limit: " .. multitool.ConnectionManager.connectionDisplayLimit
+            if hover then
+                text = "[ " .. text .. " ]"
+            end
             return {
                 text = text,
                 color = sm.color.new(0.2, 0.2, 0.9),
@@ -131,6 +171,9 @@ local function injectElements(multitool)
                 newLimit = options[idx + 1]
             end
             ConnectionManager.updateConnectionLimitDisplay(multitool, newLimit)
+        end,
+        tooltip = function()
+            return "The maximum number of connections that will be displayed in connection previews."
         end,
     })
 
@@ -151,6 +194,9 @@ local function injectElements(multitool)
         onclick = function()
             ConnectionShower.toggle(multitool)
         end,
+        tooltip = function()
+            return "Toggles the display of connections between gates when looking at them with a connection tool."
+        end,
     })
 
     table.insert(hUI.elements, {
@@ -161,7 +207,7 @@ local function injectElements(multitool)
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
-        text = "Hide on Pan Away",
+        text = "Hide Connection on Look Away",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getState = function()
@@ -169,6 +215,9 @@ local function injectElements(multitool)
         end,
         onclick = function()
             ConnectionShower.toggleHideOnPanAway(multitool)
+        end,
+        tooltip = function()
+            return "Toggles if the connection display should hide when you look away from the gate."
         end,
     })
 
@@ -183,6 +232,9 @@ local function injectElements(multitool)
         onclick = function()
             BlueprintSpawner.cl_spawn(multitool)
         end,
+        tooltip = function()
+            return "Spawns the creation from the blueprint.json file in C:\\Program Files (x86)\\Steam\\steamapps\\common\\Scrap Mechanic\\Data"
+        end,
     })
     table.insert(hUI.elements, {
         name = "importCreationCaption",
@@ -190,7 +242,12 @@ local function injectElements(multitool)
         position = { a = math.pi / 8 * fovMult, e = 8 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         getText = function()
-            return "from Scrap Mechanic/Data/blueprint.json"
+            return "from Scrap Mechanic\\Data\\blueprint.json"
+        end,
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        tooltip = function()
+            return "You can get here by browsing SM's local files on Steam, and then opening the Data folder. You will need to make the blueprint.json yourself."
         end,
     })
 
@@ -210,6 +267,9 @@ local function injectElements(multitool)
         end,
         onclick = function()
             DoMeleeState.toggle(multitool)
+        end,
+        tooltip = function()
+            return "Lets you smack the shit out of a FastLogic gate with a hammer to pulse it for a tick."
         end,
     })
 end

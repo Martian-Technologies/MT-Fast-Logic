@@ -172,18 +172,24 @@ end
 
 function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
     local runnrerId = self.FastLogicRunner.hashedLookUp[self.data.uuid]
-    print(self.FastLogicRunner.blockStates[runnrerId])
-    print(self.FastLogicRunner.countOfOnInputs[runnrerId])
-    print(self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
-    print(self.FastLogicRunner.numberOfBlockInputs[runnrerId])
-    print(self.FastLogicRunner.numberOfOtherInputs[runnrerId])
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
+    -- print(self.FastLogicRunner.blockStates[runnrerId])
+    -- print(self.FastLogicRunner.countOfOnInputs[runnrerId])
+    -- print(self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
+    -- print(self.FastLogicRunner.numberOfBlockInputs[runnrerId])
+    -- print(self.FastLogicRunner.numberOfOtherInputs[runnrerId])
+    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
+    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
     -- print(self.FastLogicRunner.blockInputs[runnrerId])
     -- print(self.FastLogicRunner.blockOutputs[runnrerId])
-    print(runnrerId)
-    print(self.data.uuid)
+    -- print(runnrerId)
+    -- print(self.data.uuid)
     -- print(self.interactable.id)
+    local layers = self.FastLogicRunner:findBalencedLogic(runnrerId)
+    -- print(layers)
+    print("------")
+    for i = 1, #layers do
+        print(#layers[i])
+    end
 end
 
 function BaseFastLogicBlock.client_onMelee(self, position, attacker, damage, power, direction, normal)

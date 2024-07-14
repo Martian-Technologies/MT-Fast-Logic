@@ -268,7 +268,7 @@ function formater.getFormatedForPrint(val, depth, maxTableLength, unrollTables, 
                 for i = 1, indentationDepth do
                     str = str .. "    "
                 end
-            else
+            elseif (#str > 1) then
                 str = str .. " "
             end
             if (key == i) then

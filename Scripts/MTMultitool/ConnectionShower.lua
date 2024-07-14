@@ -175,7 +175,7 @@ function ConnectionShower.client_onUpdate(multitool)
                         goto continue
                     end
                     body = block.shape:getBody()
-                    table.insert(shapesInput, creation.AllFastBlocks[input].shape)
+                    table.insert(shapesInput, block.shape)
                 end
                 table.insert(positionsAsInput, body:transformPoint(block.pos / 4))
                 ::continue::
@@ -205,7 +205,7 @@ function ConnectionShower.client_onUpdate(multitool)
                         goto continue
                     end
                     body = block.shape:getBody()
-                    table.insert(shapesOutput, creation.AllFastBlocks[output].shape)
+                    table.insert(shapesOutput, block.shape)
                 end
                 table.insert(positionsAsOutput, body:transformPoint(block.pos / 4))
                 ::continue::

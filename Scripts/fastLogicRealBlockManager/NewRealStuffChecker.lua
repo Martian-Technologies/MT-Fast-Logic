@@ -97,12 +97,14 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                                 (inputUuidsHash[inputUuid] == nil or blockToConnect.outputsHash[uuid] == nil)
                             ) then
                                 newInputCount = newInputCount + 1
+                                bodyHasChanged = true
                                 FastLogicAllBlockManager:addOutput(inputUuid, uuid)
                             end
                         else
                             newInputCount = newInputCount + 256
                             local nonFastBlock = AllNonFastBlocks[inputId]
                             if nonFastBlock == nil then
+                                bodyHasChanged = true
                                 local currentState = interactable.active
                                 nonFastBlock = {
                                     ["interactable"] = interactable,

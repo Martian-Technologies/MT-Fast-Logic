@@ -35,7 +35,7 @@ function FastLogicRealBlockManager.update(self)
     -- check if body updated
     self:addAllNewBlocks()
     self:checkForBodyUpdate()
-
+    self.creation.lastBodyUpdate = sm.game.getCurrentTick()
     -- check switches and other inputs
     self:checkForNewInputs()
 

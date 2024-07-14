@@ -269,13 +269,11 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect, skipChecksAndU
         -- update states
         if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
             self.countOfOnInputs[idToConnect] = self.countOfOnInputs[idToConnect] + 1
-            if skipChecksAndUpdates ~= true then
-                self:internalAddBlockToUpdate(idToConnect)
-            end
         end
         -- do fixes
         if skipChecksAndUpdates ~= true then
             self:shouldBeThroughBlock(idToConnect)
+            self:internalAddBlockToUpdate(idToConnect)
         end
     end
 end
@@ -299,12 +297,10 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChec
         -- update states
         if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
             self.countOfOnInputs[idToDisconnect] = self.countOfOnInputs[idToDisconnect] - 1
-            if skipChecksAndUpdates ~= true then
-                self:internalAddBlockToUpdate(idToDisconnect)
-            end
         end
         if skipChecksAndUpdates ~= true then
             self:shouldBeThroughBlock(idToDisconnect)
+            self:internalAddBlockToUpdate(idToDisconnect)
         end
     end
 end

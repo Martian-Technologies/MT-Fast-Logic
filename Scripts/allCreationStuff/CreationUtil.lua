@@ -65,6 +65,16 @@ function CreationUtil.getCreationId(body)
     return id
 end
 
+function CreationUtil.checkIfCreationHasChanged(body, timeTicks)
+    local bodies = body:getCreationBodies()
+    for i = 1, #bodies do
+        if bodies[i]:hasChanged(timeTicks) then
+            return true
+        end
+    end
+    return false
+end
+
 function CreationUtil.newUuid() -- should never return true
     local uuid = string.uuid()
     while sm.MTFastLogic.UsedUuids[uuid] ~= nil do

@@ -6,13 +6,13 @@ function Settings.inject(multitool)
 end
 
 local modesAndTheirFunctions = {
-    ["LogicConverter"] = "Lets you convert Vanilla Logic to FastLogic and vice versa.",
+    ["LogicConverter"] = "Lets you convert Vanilla Logic to Fast Logic and vice versa.",
     ["SiliconConverter"] =
-    "Lets you convert FastLogic to Silicon and vice versa. Silicon helps reduce lag and file size.",
+    "Lets you convert Fast Logic to Silicon and vice versa. Silicon helps reduce lag and file size.",
     ["ModeChanger"] = "Lets you select a lot of gates and change their modes (AND/NOR/XOR/etc..) all at once",
     ["VolumePlacer"] = "Lets you place a cuboid of logic gates all at once",
     ["Merger"] = "Lets you merge gates. Merging takes all of a gates inputs and wires them into the gate's outputs deleting the gate.",
-    ["Colorizer"] = "Changes the connection dot color of FastLogic gates.",
+    ["Colorizer"] = "Changes the connection dot color of Fast Logic gates.",
     ["DecoderMaker"] = "Goofy tool that wires up decoders for you.",
     ["SingleConnect"] = "Makes a single connection, useful when you have a lot of connections and need to see.",
     ["SeriesConnect"] = "Connects a row of gates in series, one into the next.",
@@ -269,7 +269,7 @@ local function injectElements(multitool)
             DoMeleeState.toggle(multitool)
         end,
         tooltip = function()
-            return "Lets you smack the shit out of a FastLogic gate with a hammer to pulse it for a tick."
+            return "Lets you smack the shit out of a Fast Logic gate with a hammer to pulse it for a tick."
         end,
     })
 end

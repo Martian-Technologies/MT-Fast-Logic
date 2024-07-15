@@ -6,7 +6,8 @@ function Heatmap.inject(multitool)
     self.creationTracking = nil
     self.updateNametags = NametagManager.createController(multitool)
     self.blockUsageTracker = {}
-    self.blockUsageAverage = {}
+    self.blockUsageSum = {}
+    self.sumMaximum = 0
 end
 
 function Heatmap.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -40,6 +41,8 @@ function Heatmap.trigger(multitool, primaryState, secondaryState, forceBuild, lo
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Track creation")
         if primaryState == 1 then
             self.creationTracking = body:getCreationBodies()
+            self.blockUsageTracker = {}
+            self.blockUsageSum = {}
         end
 
         sm.visualization.setCreationBodies(body:getCreationBodies())
@@ -65,7 +68,6 @@ function Heatmap.server_onFixedUpdate(multitool, dt)
     end
     if not success then
         self.creationTracking = nil
-        self.updateNametags(nil)
         return
     end
     local creationId = sm.MTFastLogic.CreationUtil.getCreationId(self.creationTracking[1])
@@ -80,28 +82,29 @@ function Heatmap.server_onFixedUpdate(multitool, dt)
     for rID, usage in ipairs(numberOfTimesRun) do
         local trueLoad = usage / FLR.numberOfUpdatesPerTick * FLR.numberOfBlockOutputs[rID]
         usageTable[rID] = trueLoad
+        self.blockUsageSum[rID] = (self.blockUsageSum[rID] or 0) + trueLoad
         numberOfTimesRun[rID] = 0
     end
     table.insert(self.blockUsageTracker, usageTable)
     if #self.blockUsageTracker > 40 then
+        for i = 1, #self.blockUsageTracker[1] do
+            self.blockUsageSum[i] = (self.blockUsageSum[i] or 0) - (self.blockUsageTracker[1][i] or 0)
+        end
         table.remove(self.blockUsageTracker, 1)
     end
-    local average = {}
-    local maximum = 0
-    for rID, usage in ipairs(numberOfTimesRun) do
-        local sum = 0
-        for i, usageTable in ipairs(self.blockUsageTracker) do
-            sum = sum + (usageTable[rID] or 0)
-        end
-        average[rID] = sum / #self.blockUsageTracker
-        maximum = math.max(maximum, average[rID])
+    self.sumMaximum = 0
+    for i = 1, #self.blockUsageSum do
+        self.sumMaximum = math.max(self.sumMaximum, self.blockUsageSum[i])
     end
-    if maximum ~= 0 then
-        for rID, usage in ipairs(numberOfTimesRun) do
-            average[rID] = math.sqrt(average[rID] / maximum)
-        end
-    end
-    self.blockUsageAverage = average
+    -- local sumTable = {}
+    -- for rID, usage in ipairs(numberOfTimesRun) do
+    --     local sum = 0
+    --     for i, usageTable in ipairs(self.blockUsageTracker) do
+    --         sum = sum + (usageTable[rID] or 0)
+    --     end
+    --     sumTable[rID] = sum
+    -- end
+    -- self.blockUsageSum = sumTable
 end
 
 function Heatmap.client_onUpdate(multitool, dt)
@@ -152,18 +155,31 @@ function Heatmap.client_onUpdate(multitool, dt)
         end
         local position = body:transformPoint(block.pos / 4)
         local runnerId = FLR.hashedLookUp[i]
-        local computationalLoad = self.blockUsageAverage[runnerId]
+        local computationalLoad = (self.blockUsageSum[runnerId] or 0)
+        -- if #self.blockUsageTracker ~= 0 then
+        --     computationalLoad = computationalLoad / #self.blockUsageTracker
+        -- end
+        if self.sumMaximum ~= 0 then
+            computationalLoad = math.sqrt(computationalLoad / self.sumMaximum)
+        end
         -- table.insert(tags, {
         --     txt = tostring(timesRun),
         --     pos = position,
         --     color = sm.color.new(1, 0, 0, 1),
         -- })
-        if computationalLoad < 0.05 then
+        if computationalLoad < 0.01 then
             goto continue
         end
+        local text = "·"
+        if computationalLoad > 0.3 then
+            text = "•"
+        end
+        if computationalLoad > 0.7 then
+            text = "●"
+        end
         table.insert(tags, {
-            txt = "•",
-            pos = position + sm.vec3.new(0, 0, computationalLoad),
+            txt = text,
+            pos = position + sm.vec3.new(0, 0, computationalLoad/8),
             color = sm.color.new(computationalLoad, 1-computationalLoad, 0, 1),
         })
         ::continue::

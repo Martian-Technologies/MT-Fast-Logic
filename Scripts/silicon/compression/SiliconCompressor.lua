@@ -7,8 +7,9 @@ local SiliconCompressor = sm.MTFastLogic.SiliconCompressor
 
 dofile "compressorVersions/Version_tagless.lua"
 dofile "compressorVersions/Version_a.lua"
+dofile "compressorVersions/Version_b.lua"
 
-local highestVersion = "a"
+local highestVersion = "b"
 
 function SiliconCompressor.decompressBlockData(siliconBlock, blockData)
     if blockData == nil then return {} end
@@ -23,10 +24,19 @@ function SiliconCompressor.decompressBlockData(siliconBlock, blockData)
 end
 
 function SiliconCompressor.compressBlocks(siliconBlock)
-    local dataString = SiliconCompressor.Versions[highestVersion].compressBlocks(siliconBlock)
-    if highestVersion ~= "tagless" then
-        local data = highestVersion .. dataString
-        return data
+    local dataStringC = SiliconCompressor.Versions[highestVersion].compressBlocks(siliconBlock)
+    local dataStringU = SiliconCompressor.Versions["tagless"].compressBlocks(siliconBlock)
+    local data
+    local compressionUsed
+    if #dataStringC < #dataStringU then
+        data = dataStringC
+        compressionUsed = highestVersion
+    else
+        data = dataStringU
+        compressionUsed = "tagless"
     end
-    return dataString
+    if compressionUsed ~= "tagless" then
+        data = highestVersion .. data
+    end
+    return data
 end

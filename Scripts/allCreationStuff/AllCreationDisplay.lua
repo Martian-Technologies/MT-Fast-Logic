@@ -28,11 +28,7 @@ function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedData)
     for i = 1, #changedData do
         local block = sm.MTFastLogic.client_FastLogicBlockLookUp[math.floor(changedData[i] / 2)]
         if block ~= nil then
-            if changedData[i] % 2 == 1 then
-                block:client_updateTexture(true)
-            else
-                block:client_updateTexture(false)
-            end
+            block:client_updateTexture(changedData[i] % 2 == 1)
         end
     end
 end

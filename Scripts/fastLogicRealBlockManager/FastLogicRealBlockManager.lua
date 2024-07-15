@@ -149,6 +149,18 @@ end
 function FastLogicRealBlockManager.changeConnectionColor(self, id, connectionColorId)
     local uuid = self.creation.uuids[id]
     local block = self.creation.blocks[uuid]
+    if (
+        block.connectionColorId == connectionColorId or
+        block == nil or
+        (
+            block.type ~= "andBlocks" and
+            block.type ~= "orBlocks" and
+            block.type ~= "xorBlocks" and
+            block.type ~= "nandBlocks" and
+            block.type ~= "norBlocks" and
+            block.type ~= "xnorBlocks"
+        )
+    ) then return end
     self.FastLogicAllBlockManager:changeConnectionColor(uuid, connectionColorId)
     local realBlock = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
     if realBlock == nil then

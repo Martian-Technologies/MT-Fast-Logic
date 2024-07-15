@@ -410,19 +410,20 @@ function MTMultitool.client_onUnequip(self, animate)
     -- for _, func in pairs(self.subscribtions["client_onUnequip"]) do
     --     func(self, animate)
     -- end
-	if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
+    if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
         SiliconConverterTool.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
-	elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
+    elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
         ModeChanger.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "VolumePlacer" then
         VolumePlacer.cleanNametags(self)
-	elseif MTMultitool.internalModes[self.mode] == "Merger" then
-		Merger.cleanNametags(self)
+    elseif MTMultitool.internalModes[self.mode] == "Merger" then
+        Merger.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
         Colorizer.cleanNametags(self)
     end
+    HoveringUI.cleanUp(self)
 	BlockSelector.client_onUnequip(self)
     self.wantEquipped = false
     self.equipped = false

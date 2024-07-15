@@ -35,6 +35,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/ModeChanger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/VolumePlacer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Merger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Colorizer.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Heatmap.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/DecoderMaker.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SingleConnect.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SeriesConnect.lua")
@@ -50,6 +51,23 @@ sm.tool.preloadRenderables( toolModelRends )
 sm.tool.preloadRenderables( toolAnimsThirdPerson )
 sm.tool.preloadRenderables( toolAnimsFirstPerson )
 
+local defaultEnabledModes = {
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+}
+
 MTMultitool.modes = {
 	"Fast Logic Convert",
 	"Silicon Convert",
@@ -58,6 +76,7 @@ MTMultitool.modes = {
     "Volume Placer",
     "Merger",
     "Colorizer",
+    "Heatmap",
     "Decoder Maker",
     "Single",
     "Series",
@@ -74,6 +93,7 @@ MTMultitool.internalModes = {
     "VolumePlacer",
     "Merger",
     "Colorizer",
+    "Heatmap",
     "DecoderMaker",
     "SingleConnect",
     "SeriesConnect",
@@ -120,6 +140,7 @@ function MTMultitool.client_onCreate(self)
     VolumePlacer.inject(self)
     Merger.inject(self)
     Colorizer.inject(self)
+    Heatmap.inject(self)
     DecoderMaker.inject(self)
     SingleConnect.inject(self)
     SeriesConnect.inject(self)
@@ -139,21 +160,10 @@ function MTMultitool.client_onCreate(self)
     -- BlockSelector.tool = self.tool
     -- BlockSelector.client_onCreate()
     self.raycastMode = "DDA" -- connectionRaycast, blockRaycast, DDA
-    self.enabledModes = {
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-    }
+    self.enabledModes = {}
+    for i = 1, #defaultEnabledModes do
+        self.enabledModes[i] = defaultEnabledModes[i]
+    end
     MTMultitool.repullSettings(self)
     self.mode = 1
     self.tool:setCrossHairAlpha(0.3)
@@ -167,8 +177,8 @@ end
 function MTMultitool.repullSettings(self)
     self.lastSettingsRepull = os.clock()
     local data = SaveFile.getSaveData(self.saveIdx)
-    for i = 1, #self.enabledModes do
-        self.enabledModes[i] = true
+    for i = 1, #defaultEnabledModes do
+        self.enabledModes[i] = defaultEnabledModes[i]
     end
     for internalName, state in pairs(data.modeStates) do
         for i, modeName in pairs(MTMultitool.internalModes) do
@@ -266,6 +276,10 @@ function MTMultitool.client_onUpdate(self, dt)
     success, result = pcall(VertexRenderer.client_onUpdate, self)
     if not success then
         print("Error in VertexRenderer.client_onUpdate: " .. result)
+    end
+    success, result = pcall(Heatmap.client_onUpdate, self, dt)
+    if not success then
+        print("Error in Heatmap.client_onUpdate: " .. result)
     end
 
 	local isSprinting =  self.tool:isSprinting()
@@ -501,6 +515,8 @@ local function triggerTool(self, primaryState, secondaryState, forceBuild, looki
         Merger.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
         Colorizer.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+    elseif MTMultitool.internalModes[self.mode] == "Heatmap" then
+        Heatmap.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "DecoderMaker" then
         DecoderMaker.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SingleConnect" then
@@ -609,6 +625,7 @@ MTGateUUIDs = {
 function MTMultitool.server_onFixedUpdate(self, dt)
     MTFlying.server_onFixedUpdate(self, dt)
     TensorConnect.server_onFixedUpdate(self, dt)
+    Heatmap.server_onFixedUpdate(self, dt)
 end
 
 function MTMultitool.server_convertSilicon(self, data)

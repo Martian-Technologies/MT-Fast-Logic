@@ -32,7 +32,7 @@ local timerInputStates = nil
 local blockOutputs = nil
 local nextTimerOutputWait = nil
 local multiBlockData = nil
-local numberOfTimesRunPerGameTick = nil
+local numberOfTimesRun = nil
 local runningBlocks1 = nil
 local runningBlocks3 = nil
 local runningBlocks4 = nil
@@ -103,7 +103,7 @@ function FastLogicRunner.makeDataArrays(self)
     self.longestTimer = 0
     self.altBlockData = table.makeArrayForHash(self.hashData)
     self.multiBlockData = table.makeArrayForHash(self.hashData)
-    self.numberOfTimesRunPerGameTick = table.makeArrayForHash(self.hashData, 0)
+    self.numberOfTimesRun = table.makeArrayForHash(self.hashData, 0)
     self.pathNames = {
         "EndTickButtons",            -- 1
         "lightBlocks",               -- 2
@@ -217,7 +217,7 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
         runningBlocks23 = runningBlocks[23]
         runningBlocks24 = runningBlocks[24]
         runningBlocks16 = runningBlocks[16]
-        numberOfTimesRunPerGameTick = self.numberOfTimesRunPerGameTick
+        numberOfTimesRun = self.numberOfTimesRun
     end
 end
 
@@ -670,7 +670,7 @@ function FastLogicRunner.doUpdate(self)
         local stateNumber = state and 1 or -1
         blockStates[id] = state
         local outputs = blockOutputs[id]
-        numberOfTimesRunPerGameTick[id] = numberOfTimesRunPerGameTick[id] + 1
+        numberOfTimesRun[id] = numberOfTimesRun[id] + 1
         for k = 1, #outputs do
             local outputId = outputs[k]
             countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber

@@ -1,0 +1,17 @@
+{
+    "lodList": [
+        {
+            "mesh": "$CONTENT_DATA/Renderable/Models/block11x6x1.obj",
+            "subMeshList": [
+                {
+                    "material": "DifAsgNor",
+                    "textureList": [
+                        "$CONTENT_DATA/Renderable/Textures/crab_dif.png",
+                        "$CONTENT_DATA/Renderable/Textures/default_asg.png",
+                        "$CONTENT_DATA/Renderable/Textures/default_nor.png"
+                    ]
+                }
+            ]
+        }
+    ]
+}

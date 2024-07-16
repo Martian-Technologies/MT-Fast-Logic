@@ -1,5 +1,6 @@
 dofile "../util/util.lua"
 dofile "../allCreationStuff/CreationUtil.lua"
+dofile "SiliconSizes.lua"
 
 local string = string
 local table = table
@@ -15,22 +16,6 @@ dofile "compression/SiliconCompressor.lua"
 local SiliconCompressor = sm.MTFastLogic.SiliconCompressor
 
 SiliconBlock = SiliconBlock or class()
-
-local uuidToSize = {
-    ["3706ba55-bd11-4053-b437-bbf2aff823b4"] = { 1, 1, 1 },
-    ["f0e1640f-7776-4232-b1d9-8c1a41b53958"] = { 2, 1, 1 },
-    ["f0e2828f-7776-4232-b1d9-8a3c45b63898"] = { 3, 1, 1 },
-    ["f0e1640f-7406-1984-b1d9-8c1a41b53958"] = { 4, 1, 1 },
-    ["f0e1640f-7406-4232-b1d9-8c1a41b53958"] = { 8, 1, 1 },
-    ["f3e2828f-1212-1111-b1d4-8d3c45b63000"] = { 12, 1, 1 },
-    ["f590d9d1-179d-49ff-86ab-7f74a730e243"] = { 2, 2, 1 },
-    ["d576a4c9-e6bc-46c0-9230-f92967cc39b6"] = { 4, 4, 1 },
-    ["195aa046-017a-4f0b-809c-98ed141955fb"] = { 8, 8, 1 },
-    ["f0e2828f-1234-4321-b1d9-8a3c45b63898"] = { 16, 16, 1 },
-    ["f3e2828f-1241-1412-b1f2-8d3c45b63000"] = { 12, 4, 1 },
-    ["e6011dc4-8842-4d94-a196-0c7386065ab6"] = { 2, 2, 2 },
-    ["f0e2828f-8888-4444-b1d9-8a3c45b63898"] = { 8, 8, 4 },
-}
 
 function SiliconBlock.deepRescanSelf(self, noRemove)
     if noRemove ~= true then
@@ -110,7 +95,7 @@ end
 
 function SiliconBlock.server_onCreate(self)
     self:getCreationData()
-    self.size = table.copy(uuidToSize[tostring(self.shape.shapeUuid)])
+    self.size = table.copy(sm.MTFastLogic.SiliconBlocksShapeDB.uuidToSize[tostring(self.shape.shapeUuid)])
     self.isSilicon = true
     self.id = self.interactable:getId()
     self.data = self.data or {}

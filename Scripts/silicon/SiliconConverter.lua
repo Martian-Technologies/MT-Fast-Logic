@@ -9,21 +9,6 @@ SiliconConverter = SiliconConverter or {}
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.DataForSiliconBlocks = sm.MTFastLogic.DataForSiliconBlocks or {}
 
-local blockUuids = {
-    ["1x1x1"] = "3706ba55-bd11-4053-b437-bbf2aff823b4",
-    ["2x1x1"] = "f0e1640f-7776-4232-b1d9-8c1a41b53958",
-    ["3x1x1"] = "f0e2828f-7776-4232-b1d9-8a3c45b63898",
-    ["4x1x1"] = "f0e1640f-7406-1984-b1d9-8c1a41b53958",
-    ["8x1x1"] = "f0e1640f-7406-4232-b1d9-8c1a41b53958",
-    ["12x1x1"] = "f3e2828f-1212-1111-b1d4-8d3c45b63000",
-    ["2x2x1"] = "f590d9d1-179d-49ff-86ab-7f74a730e243",
-    ["4x4x1"] = "d576a4c9-e6bc-46c0-9230-f92967cc39b6",
-    ["8x8x1"] = "195aa046-017a-4f0b-809c-98ed141955fb",
-    ["16x16x1"] = "f0e2828f-1234-4321-b1d9-8a3c45b63898",
-    ["12x4x1"] = "f3e2828f-1241-1412-b1f2-8d3c45b63000",
-    ["2x2x2"] = "e6011dc4-8842-4d94-a196-0c7386065ab6",
-    ["8x8x4"] = "f0e2828f-8888-4444-b1d9-8a3c45b63898",
-}
 local rotations = {
     yzx = { xAxis = sm.vec3.new(0, 0, 1), zAxis = sm.vec3.new(0, 1, 0) },
     zxy = { xAxis = sm.vec3.new(0, 1, 0), zAxis = sm.vec3.new(1, 0, 0) },
@@ -137,7 +122,7 @@ function SiliconConverter.getAreas(posHash)
     local xSize = x - cornerPos.x + 1
     local ySize = y - cornerPos.y + 1
     local zSize = z - cornerPos.z + 1
-    for name, uuid in pairs(blockUuids) do
+    for name, uuid in pairs(sm.MTFastLogic.SiliconBlocksShapeDB.sizeToUuid) do
         local vec = string.stringToVec(name, "x")
         vec = { x = vec.x, y = vec.y, z = vec.z }
         local score = vec.x * vec.y * vec.z

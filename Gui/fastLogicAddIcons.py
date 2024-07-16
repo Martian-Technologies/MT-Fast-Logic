@@ -19,12 +19,13 @@ logo = cv2.imread(r"Gui\MT_logo.png", cv2.IMREAD_UNCHANGED)
 
 imageSize = 96
 
-for i in range(64):
-    x = i%10*imageSize
-    y = i//10*imageSize
+for i in range(747):
+    x = i%42*imageSize
+    y = i//42*imageSize
     blit(logo, image, x, y)
 
-cv2.imshow("Image", image)
+imageS = cv2.resize(image, (960, 960), interpolation=cv2.INTER_NEAREST)
+cv2.imshow("Image", imageS)
 
 cv2.waitKey(0)
 

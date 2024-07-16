@@ -14,10 +14,10 @@ function FastLogicRunnerRunner.updatedDisplays(self)
                     sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]].id * 2 + stateNumber
                 )
             end
-            if #changedUuidsArray > 10000 then
-                self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
-                changedUuidsArray = {}
-            end
+            -- if #changedUuidsArray > 10000 then
+            --     self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
+            --     changedUuidsArray = {}
+            -- end
         end
         if #changedUuidsArray > 0 then
             self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
@@ -42,6 +42,17 @@ function FastLogicRunnerRunner.compressData(self, data)
     for i = 1, #data do
         if #str > 0 then str = str .. "," end
         str = str .. tostring(data[i] - (data[i-1] or 0))
+    end
+    local dataD = {}
+    for c in str:gmatch "%d+" do
+        dataD[#dataD+1] = tonumber(c) + (dataD[#dataD] or 0)
+    end
+    for k, v in pairs(dataD) do
+        if data[k] ~= v then
+            for i = 1, 10000 do
+                print("WHAT THE HELL")
+            end
+        end
     end
     return str
 end

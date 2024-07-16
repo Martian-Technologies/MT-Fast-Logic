@@ -25,7 +25,7 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
         origin = result.origin,
         final = result.final,
         body = result.body,
-        placingType = result.placingType
+        placingType = result.mode
     })
 end
 

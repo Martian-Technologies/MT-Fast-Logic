@@ -45,12 +45,13 @@ function FastLogicRunnerRunner.compressData(self, data)
         str = str .. tostring(data[i] - (data[i-1] or 0))
     end
     local dataD = {}
-    for c in str:gmatch "%d+" do
+    for c in str:gmatch "[-%d]%d+" do
         dataD[#dataD+1] = tonumber(c) + (dataD[#dataD] or 0)
     end
+    print(dataD)
     for k, v in pairs(dataD) do
         if data[k] ~= v then
-            for i = 1, 100 do
+            for i = 1, 1 do
                 print("WHAT THE HELL")
             end
         end

@@ -38,6 +38,7 @@ function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedData)
 end
 
 function FastLogicRunnerRunner.compressData(self, data)
+    print(data)
     local str = ""
     for i = 1, #data do
         if #str > 0 then str = str .. "," end

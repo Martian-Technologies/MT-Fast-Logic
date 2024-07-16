@@ -43,7 +43,7 @@ function FastLogicRunnerRunner.compressData(self, data)
         if #str > 0 then str = str .. "," end
         str = str .. tostring(data[i] - (data[i-1] or 0))
     end
-    return str
+    return "" -- str
 end
 
 function FastLogicRunnerRunner.decompressData(self, str)

@@ -107,6 +107,34 @@ function Heatmap.server_onFixedUpdate(multitool, dt)
     -- self.blockUsageSum = sumTable
 end
 
+local function HSVtoRGB(h, s, v)
+    local r, g, b
+
+    local i = math.floor(h * 6)
+    local f = h * 6 - i
+    local p = v * (1 - s)
+    local q = v * (1 - f * s)
+    local t = v * (1 - (1 - f) * s)
+
+    i = i % 6
+
+    if i == 0 then
+        r, g, b = v, t, p
+    elseif i == 1 then
+        r, g, b = q, v, p
+    elseif i == 2 then
+        r, g, b = p, v, t
+    elseif i == 3 then
+        r, g, b = p, q, v
+    elseif i == 4 then
+        r, g, b = t, p, v
+    elseif i == 5 then
+        r, g, b = v, p, q
+    end
+
+    return sm.color.new(r, g, b, 1)
+end
+
 function Heatmap.client_onUpdate(multitool, dt)
     local self = multitool.Heatmap
     if self.creationTracking == nil then
@@ -135,6 +163,14 @@ function Heatmap.client_onUpdate(multitool, dt)
     local fastLogicGates = creation.FastLogicGates
     local siliconBlocks = creation.SiliconBlocks
     local tags = {}
+
+    local camPos = sm.camera.getPosition()
+    -- dots decreasing in size
+    local scaleConstant = 41 * 0.95 * 5
+    local dots = {"●", "•", "·"}
+    local offsets = { 0.02, 0.02, 0.02 }
+    local distanceMargin = { scaleConstant/41, scaleConstant/23, scaleConstant/11 }
+
     for i, block in pairs(blocks) do
         local body
         if block.isSilicon then
@@ -170,17 +206,25 @@ function Heatmap.client_onUpdate(multitool, dt)
         if computationalLoad < 0.01 then
             goto continue
         end
-        local text = "·"
-        if computationalLoad > 0.3 then
-            text = "•"
+        -- local text = "·"
+        -- if computationalLoad > 0.3 then
+        --     text = "•"
+        -- end
+        -- if computationalLoad > 0.7 then
+        --     text = "●"
+        -- end
+        local distance = (camPos - position):length() / (computationalLoad + 0.1)
+        local dotIndex = 1
+        for j = 1, #distanceMargin do
+            if (distance > distanceMargin[j]) then
+                dotIndex = j
+            end
         end
-        if computationalLoad > 0.7 then
-            text = "●"
-        end
+        local clr = HSVtoRGB((1-computationalLoad)/3, 1, 1)
         table.insert(tags, {
-            txt = text,
-            pos = position + sm.vec3.new(0, 0, computationalLoad/8),
-            color = sm.color.new(computationalLoad, 1-computationalLoad, 0, 1),
+            txt = dots[dotIndex],
+            pos = position,-- + sm.vec3.new(0, 0, computationalLoad/8),
+            color = clr,
         })
         ::continue::
     end

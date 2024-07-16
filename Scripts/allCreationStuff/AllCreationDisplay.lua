@@ -14,7 +14,7 @@ function FastLogicRunnerRunner.updatedDisplays(self)
                     sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]].id * 2 + stateNumber
                 )
             end
-            if #changedUuidsArray > 5000 then
+            if #changedUuidsArray > 10000 then
                 self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
                 changedUuidsArray = {}
             end

@@ -43,16 +43,12 @@ function FastLogicRunnerRunner.compressData(self, data)
         if #str > 0 then str = str .. "," end
         str = str .. tostring(data[i] - (data[i-1] or 0))
     end
-    local dataD = {}
-    for c in str:gmatch "[-%d]%d+" do
-        dataD[#dataD+1] = tonumber(c) + (dataD[#dataD] or 0)
-    end
     return str
 end
 
 function FastLogicRunnerRunner.decompressData(self, str)
     local data = {}
-    for c in str:gmatch "%d+" do
+    for c in str:gmatch "[-%d]%d+" do
         data[#data+1] = tonumber(c) + (data[#data] or 0)
     end
     return data

@@ -38,9 +38,18 @@ function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedData)
 end
 
 function FastLogicRunnerRunner.compressData(self, data)
-    return sm.MTFastLogic.CompressionUtil.tableToString(data)
+    local str = ""
+    for i = 1, #data do
+        if #str > 0 then str = str .. "," end
+        str = str .. tostring(data[i] - (data[i-1] or 0))
+    end
+    return str
 end
 
-function FastLogicRunnerRunner.decompressData(self, data)
-    return sm.MTFastLogic.CompressionUtil.stringToTable(data)
+function FastLogicRunnerRunner.decompressData(self, str)
+    local data = {}
+    for c in str:gmatch "%d+" do
+        data[#data+1] = tonumber(c) + (data[#data] or 0)
+    end
+    return data
 end

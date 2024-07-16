@@ -49,7 +49,7 @@ function FastLogicRunnerRunner.compressData(self, data)
     end
     for k, v in pairs(dataD) do
         if data[k] ~= v then
-            for i = 1, 10000 do
+            for i = 1, 100 do
                 print("WHAT THE HELL")
             end
         end

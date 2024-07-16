@@ -181,10 +181,10 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
     -- print(self.FastLogicRunner.blockInputs[runnrerId])
     -- print(self.FastLogicRunner.blockOutputs[runnrerId])
-    
     -- print(self.data.uuid)
     -- print(self.interactable.id)
     ----------------------------------------------
+    -- print("id: " .. tostring(runnrerId))
     -- print("------")
     -- local layers = self.FastLogicRunner:findBalencedLogic(runnrerId)
     -- print("id: " .. tostring(runnrerId))

@@ -38,7 +38,6 @@ function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedData)
 end
 
 function FastLogicRunnerRunner.compressData(self, data)
-    print(data)
     local str = ""
     for i = 1, #data do
         if #str > 0 then str = str .. "," end
@@ -47,14 +46,6 @@ function FastLogicRunnerRunner.compressData(self, data)
     local dataD = {}
     for c in str:gmatch "[-%d]%d+" do
         dataD[#dataD+1] = tonumber(c) + (dataD[#dataD] or 0)
-    end
-    print(dataD)
-    for k, v in pairs(dataD) do
-        if data[k] ~= v then
-            for i = 1, 1 do
-                print("WHAT THE HELL")
-            end
-        end
     end
     return str
 end

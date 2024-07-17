@@ -150,7 +150,7 @@ function FastLogicRealBlockManager.changeConnectionColor(self, id, connectionCol
     local uuid = self.creation.uuids[id]
     local block = self.creation.blocks[uuid]
     if (
-        #creation.AllFastBlocks[uuid].shape:getJoints() == 0 or
+        #self.creation.AllFastBlocks[uuid].shape:getJoints() == 0 or
         block.connectionColorId == connectionColorId or
         block == nil or
         (

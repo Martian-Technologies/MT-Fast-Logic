@@ -443,6 +443,14 @@ function string.uuid()
     return uuidIndex;
 end
 
+function string.uuidLarge()
+    local template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+    return string.gsub(template, '[xy]', function(c)
+        local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
+        return string.format('%x', v)
+    end)
+end
+
 function string.vecToString(vec, sep)
     if sep == nil then
         sep = ","
@@ -512,4 +520,12 @@ end
 
 function sm.MTUtil.colorToHexNoAlpha(color)
     return color:getHexStr():sub(1, -3)
+end
+
+function sm.color.hex(r, g, b)
+    return sm.color.new(r, g, b):getHexStr()
+end
+
+function sm.color.hex255(r, g, b)
+    return sm.color.hex(r/255, g/255, b/255)
 end

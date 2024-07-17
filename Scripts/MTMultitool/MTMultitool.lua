@@ -26,6 +26,8 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionShower.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BackupEngine.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/HoveringUI/HoveringUIManager.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/Flying.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/LogicConverter.lua")
@@ -530,6 +532,8 @@ local function triggerTool(self, primaryState, secondaryState, forceBuild, looki
 	elseif MTMultitool.internalModes[self.mode] == "TensorConnect" then
 		TensorConnect.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
 	end
+    -- always update HoveringUI
+    sm.HoveringUI.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
 end
 
 function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState, forceBuild)

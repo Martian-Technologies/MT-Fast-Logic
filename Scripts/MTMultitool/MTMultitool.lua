@@ -12,7 +12,7 @@ dofile("$CONTENT_DATA/Scripts/util/mathUtil.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/lib.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 
-dofile("$CONTENT_DATA/Scripts/MTMultitool/HoveringUI.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/HoveringUI/HoveringUI.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/DoMeleeState.lua")

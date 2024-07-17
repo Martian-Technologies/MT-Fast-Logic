@@ -1,22 +1,54 @@
 {
-   "6a9dbff5-7562-4e9a-99ae-3590ece88112" : {
-      "description" : "",
-      "title" : "Fast Logic Gate"
-   },
-   "d8b529ad-3865-40fa-b798-cb2868e5dc4d" : {
-      "description" : "",
-      "title" : "End Tick Button"
-   },
-   "db0bc11b-c083-4a6a-843f-73ac1033e6fe" : {
-      "description" : "",
-      "title" : "Fast Timer"
-   },
-   "dcb72c88-76cc-4fb2-87b7-b8a6b83f898" : {
-      "description" : "",
-      "title" : "Fast Warehouse Square Light"
-   },
    "018e4ca0-c5be-7f80-a80f-259c5951594b" : {
       "description" : "A logic multitool developed by MTech.",
       "title" : "MT Multitool"
+   },
+   "6a9dbff5-7562-4e9a-99ae-3590ece88112" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.\n\nColored Connections: The multitool in Colorizer mode can change the color of logic gate connection dots.\n\nSilicon: The multitool in Silicon Convert mode can convert parts of your creation to silicon. This will make your game less laggy and allow you to spawn much larger creations.",
+      "title" : "Fast Logic Gate"
+   },
+   "d8b529ad-3865-40fa-b798-cb2868e5dc4d" : {
+      "description" : "This block is used to end the current simulation tick.\n\nBy powering it by with a logic input it makes the creation only run one more simulation tick till the next game tick.\n\nThis is can be used to automatically syncing a clock to the speedup ticks",
+      "title" : "End Tick Button"
+   },
+   "d8b529ad-3865-40fa-b798-b8a6b83f898b" : {
+      "description" : "This block can be used to stop the simulation of Fast Logic.\n\nWhen pressing it the firsttime the simulation speed will be set to 0. Every time you press it after that it will step the simulation one tick.\n\nThis is useful when debugging a creation because you can see exactly what happens on every tick.",
+      "title" : "Single Tick Step Button"
+   },
+   "db0bc11b-c083-4a6a-843f-73ac1033e6fe" : {
+      "description" :"Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Timer"
+   },
+   "f36e03b4-eea7-4c0a-842d-225ed50e5635" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Warehouse Wall Light"
+   },
+   "da2a1835-8ef3-4bef-a16c-c3d38ffe3b34" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Packing Lamp"
+   },
+   "767a4a08-7471-465a-9dda-6e3c246fe3b1" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Warehouse Fluorescent Light"
+   },
+   "dcb72c88-76cc-4fb2-87b7-b8a6b83f898b" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Warehouse Square Light"
+   },
+   "e5b00d9a-e27f-4aff-ae74-612ac9edae07" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Warehouse Spotlight"
+   },
+   "6efc9636-e380-4c6e-ad95-79f1919ac1dc" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Warehouse Spot Small"
+   },
+   "31eac728-a2db-420a-8034-835229f42d4c" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Headlight"
+   },
+   "85caeefe-9935-42ae-83a4-8c1df6528758" : {
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "title" : "Fast Warehouse Spotlight"
    }
 }

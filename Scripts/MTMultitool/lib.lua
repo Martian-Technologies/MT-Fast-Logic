@@ -3,6 +3,12 @@ MTMultitoolLib = {
 }
 
 function MTMultitoolLib.getLocalCenter(shape)
+    if shape == nil then
+        return sm.vec3.new(0, 0, 0)
+    end
+    if not sm.exists(shape) then
+        return sm.vec3.new(0, 0, 0)
+    end
     return shape:getLocalPosition() + shape.xAxis * 0.5 + shape.yAxis * 0.5 + shape.zAxis * 0.5
 end
 

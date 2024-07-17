@@ -1,4 +1,5 @@
 dofile "../util/util.lua"
+dofile "SiliconSizes.lua"
 local string = string
 local table = table
 local type = type

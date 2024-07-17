@@ -24,7 +24,7 @@ for i in range(747):
     y = i//42*imageSize
     blit(logo, image, x, y)
 
-imageS = cv2.resize(image, (960, 960), interpolation=cv2.INTER_NEAREST)
+imageS = cv2.resize(image, (2048, int(2048*image.shape[0]/image.shape[1])), interpolation=cv2.INTER_NEAREST)
 cv2.imshow("Image", imageS)
 
 cv2.waitKey(0)

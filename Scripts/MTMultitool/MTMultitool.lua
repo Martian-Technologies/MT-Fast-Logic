@@ -2,7 +2,7 @@ MTMultitool = class()
 
 print("loading MTMultitool.lua")
 
-dofile("$CONTENT_DATA/Scripts/util.lua")
+dofile("../util/util.lua")
 
 dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
 
@@ -43,6 +43,21 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SeriesConnect.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/NtoNConnect.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/ParallelConnect.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/TensorConnect.lua")
+
+function clamp(value, min, max) -- needed for the game's swapFpAnimation function because it was returning the error:
+                                -- ----- Lua Error Traceback -----
+                                -- $GAME_DATA/Scripts/game/AnimationUtil.lua:131: in function 'swapFpAnimation'
+                                --     ...c976f4d/Scripts/MTMultitool/MTMultitool.lua:456: in function 'client_onUnequip' (Lua entered on line number: 424)
+                                -- ERROR: Z:\Jenkins\workspace\sm\ContraptionCommon\LuaManager.cpp:1520 Lua call buffer - failed to call callback 'client_onUnequip'
+                                -- ERROR: $GAME_DATA/Scripts/game/AnimationUtil.lua:131: attempt to call global 'clamp' (a nil value)
+    if value < min then
+        return min
+    end
+    if value > max then
+        return max
+    end
+    return value
+end
 
 local toolModelRends = { "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote.rend" }
 local toolAnimsThirdPerson = { "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote_tp_animlist.rend" }

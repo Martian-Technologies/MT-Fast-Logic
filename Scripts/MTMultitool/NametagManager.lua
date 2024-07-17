@@ -1,3 +1,5 @@
+dofile "../util/util.lua"
+
 NametagManager = {}
 
 function NametagManager.createController(multitool)
@@ -28,7 +30,7 @@ function NametagManager.createController(multitool)
             local distance = (camPos - newNametags[i].pos):length()
             local newNametag = newNametags[i]
             nametag:setWorldPosition(newNametag.pos - RangeOffset.rangeOffset * distance)
-            nametag:setText("Text", "#" .. sm.MTUtil.colorToHexNoAlpha(newNametag.color) .. newNametag.txt)
+            nametag:setText("Text", "#" .. MTMultitoolLib.colorToHexNoAlpha(newNametag.color) .. newNametag.txt)
         end
         self.nametagPositions = {}
         for i, nametag in pairs(newNametags) do

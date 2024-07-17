@@ -509,7 +509,3 @@ function sm.MTUtil.getOffset(rot)
 
     return offset
 end
-
-function sm.MTUtil.colorToHexNoAlpha(color)
-    return color:getHexStr():sub(1, -3)
-end

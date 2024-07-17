@@ -2,8 +2,9 @@ MTMultitool = class()
 
 print("loading MTMultitool.lua")
 
+dofile("$CONTENT_DATA/Scripts/util.lua")
+
 dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
-dofile("$SURVIVAL_DATA/Scripts/util.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/VertexRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlockSelector.lua")

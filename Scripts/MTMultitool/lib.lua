@@ -397,3 +397,7 @@ function RangeOffset.inject(multitool)
         RangeOffset.rangeOffset = sm.camera.getUp() * (0.00000011597 * (sm.camera.getFov() ^ 2.60339) + 0.005688879)
     end)
 end
+
+function MTMultitoolLib.colorToHexNoAlpha(color)
+    return color:getHexStr():sub(1, -3)
+end

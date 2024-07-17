@@ -4,7 +4,6 @@ import numpy as np
 def blit(source:np.ndarray, destination:np.ndarray, xPos:int, yPos:int):
     y1, y2 = yPos, yPos + source.shape[0]
     x1, x2 = xPos, xPos + source.shape[1]
-    print(source.shape)
     alpha_s = source[:, :, 3] / 255.0
     alpha_l = 1.0 - alpha_s
 

@@ -32,7 +32,7 @@
                 "y": 1,
                 "z": 1
             },
-            "name": "EndTickButton",
+            "name": "End Tick Button",
             "physicsMaterial": "Mechanical",
             "ratings": {
                 "buoyancy": 2,
@@ -58,7 +58,7 @@
                 "y": 1,
                 "z": 1
             },
-            "name": "TickStepButton",
+            "name": "Tick Step Button",
             "physicsMaterial": "Mechanical",
             "ratings": {
                 "buoyancy": 2,

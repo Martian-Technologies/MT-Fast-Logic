@@ -1,6 +1,25 @@
 dofile "../util/compressionUtil/CompressionUtil.lua"
 dofile "../util/compressionUtil/LibDeflate.lua"
 
+local function sendStatesToClients(self, changedUuidsArray)
+    local status, result = pcall(self.network.sendToClients, self.network, "client_updateTexturesAndStates",
+        self:compressData(changedUuidsArray))
+    if not status then
+        -- split changedUuids in two and try again
+        local half = math.floor(#changedUuidsArray / 2)
+        local t1 = {}
+        local t2 = {}
+        for i = 1, half do
+            t1[i] = changedUuidsArray[i]
+        end
+        for i = half + 1, #changedUuidsArray do
+            t2[i - half] = changedUuidsArray[i]
+        end
+        sendStatesToClients(self, t1)
+        sendStatesToClients(self, t2)
+    end
+end
+
 function FastLogicRunnerRunner.updatedDisplays(self)
     if 0 < #self.changedUuidsArray then
         local changedUuidsArray = {}
@@ -20,7 +39,8 @@ function FastLogicRunnerRunner.updatedDisplays(self)
             -- end
         end
         if #changedUuidsArray > 0 then
-            self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
+            -- self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
+            sendStatesToClients(self, changedUuidsArray)
             changedUuidsArray = {}
         end
         self.changedUuidsArray = {}

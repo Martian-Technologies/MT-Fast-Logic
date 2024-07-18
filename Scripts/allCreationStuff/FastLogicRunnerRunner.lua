@@ -3,6 +3,7 @@ dofile "../fastLogicRealBlockManager/FastLogicRealBlockManager.lua"
 dofile "../fastLogicAllBlockManager/FastLogicAllBlockManager.lua"
 dofile "../fastLogicBlock/FastLogicRunner.lua"
 dofile "../silicon/SiliconConverter.lua"
+dofile "../util/backupEngine.lua"
 dofile "CreationUtil.lua"
 local string = string
 local table = table
@@ -60,6 +61,12 @@ end
 
 function FastLogicRunnerRunner.client_sendMessage(self, message)
     sm.gui.chatMessage(message)
+end
+
+function FastLogicRunnerRunner.client_onCreate(self)
+    if sm.isHost then
+        sm.MTBackupEngine.cl_setUsername()
+    end
 end
 
 -- wantedType = "toSilicon" or "toFastLogic"

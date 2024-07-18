@@ -25,7 +25,6 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionShower.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
-dofile("$CONTENT_DATA/Scripts/MTMultitool/BackupEngine.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/Flying.lua")
 
@@ -139,7 +138,6 @@ function MTMultitool.client_onCreate(self)
     self.saveIdx = 1
 
     CallbackEngine.inject(self)
-    BackupEngine.inject(self)
 
     MTFlying.inject(self)
     ConnectionShower.inject(self)
@@ -827,15 +825,6 @@ function MTMultitool.server_volumePlace(self, data)
             end
         end
     end
-end
-
-
-function MTMultitool.sv_backupCreation(self, data)
-    BackupEngine.sv_backupCreation(self, data)
-end
-
-function MTMultitool.cl_saveBackup(self, data)
-    BackupEngine.cl_saveBackup(self, data)
 end
 
 function MTMultitool.server_callCallbackTrigger(self, data)

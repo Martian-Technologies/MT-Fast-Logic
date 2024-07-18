@@ -2,6 +2,7 @@
 -- moddifed
 dofile "../util/util.lua"
 dofile "../allCreationStuff/CreationUtil.lua"
+dofile "../util/backupEngine.lua"
 local string = string
 local table = table
 local type = type
@@ -50,6 +51,12 @@ end
 
 function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
     local jsontable = sm.creation.exportToTable(body, true, false) --'true, false' fix for qtimer reset bug?
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = true,
+        creationData = jsontable,
+        name = "Conversion Backup",
+        description = "Backup created by LogicConverter.lua. Converting to " .. wantedType,
+    })
     if wantedType == "FastLogic" then
         for i = 1, #jsontable.bodies do
             for j = 1, #jsontable.bodies[i].childs do

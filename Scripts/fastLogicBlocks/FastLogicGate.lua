@@ -104,3 +104,10 @@ function FastLogicGate.server_saveMode(self, mode)
     local modes = { "andBlocks", "orBlocks", "xorBlocks", "nandBlocks", "norBlocks", "xnorBlocks" }
     self.FastLogicAllBlockManager:changeBlockType(self.data.uuid, modes[self.data.mode + 1])
 end
+
+-- in this class rn because it only works for Logic Gates
+function FastLogicGate.client_onMelee(self, position, attacker, damage, power, direction, normal)
+    if sm.MTFastLogic.doMeleeState then
+        self.network:sendToServer("server_changeBlockState")
+    end
+end

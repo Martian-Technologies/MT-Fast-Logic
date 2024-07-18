@@ -207,12 +207,6 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- end
 end
 
-function BaseFastLogicBlock.client_onMelee(self, position, attacker, damage, power, direction, normal)
-    if sm.MTFastLogic.doMeleeState then
-        self.network:sendToServer("server_changeBlockState")
-    end
-end
-
 function BaseFastLogicBlock.server_changeBlockState(self)
     self.FastLogicRunner:externalSetBlockState(self.data.uuid, not self.state)
 end

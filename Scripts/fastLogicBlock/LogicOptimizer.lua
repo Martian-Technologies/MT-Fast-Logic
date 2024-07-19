@@ -17,7 +17,7 @@ function FastLogicRunner.optimizeLogic(self)
             id = id + 1
             if blockInputs[id] ~= false and blockInputs[id] ~= nil then
                 -- multi blocks
-                -- self:findMultiBlocks(id)
+                self:findMultiBlocks(id)
                 -- print(id)
             end
         end

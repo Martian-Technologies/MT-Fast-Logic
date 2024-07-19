@@ -135,12 +135,18 @@ end
 
 function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
     local blocksToFixInputData = {}
+    local multiBlockData = self.multiBlockData
+    local blockStates = self.blockStates
+    local blockOutputs = self.blockOutputs
     for i = 1, #idStatePairs do
         local id = idStatePairs[i][1]
-        self.blockStates[id] = idStatePairs[i][2]
+        if multiBlockData[id] ~= false then
+            self:internalRemoveBlock(multiBlockData[id])
+        end
+        blockStates[id] = idStatePairs[i][2]
         blocksToFixInputData[id] = true
-        for k = 1, #self.blockOutputs[id] do
-            blocksToFixInputData[self.blockOutputs[id][k]] = true
+        for k = 1, #blockOutputs[id] do
+            blocksToFixInputData[blockOutputs[id][k]] = true
         end
     end
     if withUpdates ~= false then

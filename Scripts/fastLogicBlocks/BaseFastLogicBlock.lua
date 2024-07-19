@@ -172,6 +172,23 @@ end
 
 function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
     local runnrerId = self.FastLogicRunner.hashedLookUp[self.data.uuid]
+    -- local totalTime = sm.MTUtil.Profiler.Time.get("doUpdate")
+    -- local totalCalls = sm.MTUtil.Profiler.Count.get("doUpdate")
+    -- local average = totalTime / totalCalls
+    -- local maxErrorPerCall = 0.0005
+    -- local standardDeviation = maxErrorPerCall / math.sqrt(3 * totalCalls)
+    -- print("Profiler (onUpdate):",
+    --     sm.MTUtil.Profiler.Time.get("doUpdate") / sm.MTUtil.Profiler.Count.get("doUpdate") * 1000000, "±",
+    --     standardDeviation * 1000000, "µs")
+    -- local fullLoopTime = sm.MTUtil.Profiler.Time.get("doUpdateFullLoop")
+    -- local fullLoopAverage = fullLoopTime / totalCalls
+    -- local standardDeviationFullLoop = maxErrorPerCall / math.sqrt(3 * totalCalls)
+    -- print("Profiler (fullLoop):",
+    --     fullLoopAverage * 1000000, "±",
+    --     standardDeviationFullLoop * 1000000, "µs")
+    -- print("Profiler (onUpdate % of fullLoop):", sm.MTUtil.Profiler.Time.getPrecent("doUpdate", "doUpdateFullLoop"))
+    -- sm.MTUtil.Profiler.Time.reset()
+    -- sm.MTUtil.Profiler.Count.reset()
     -- print(self.FastLogicRunner.blockStates[runnrerId])
     -- print(self.FastLogicRunner.countOfOnInputs[runnrerId])
     -- print(self.FastLogicRunner.countOfOnOtherInputs[runnrerId])

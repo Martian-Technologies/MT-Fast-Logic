@@ -134,7 +134,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     table.removeFromConstantKeysOnlyHash(self.hashData, self.unhashedLookUp[id])
 end
 
-function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates, alreadyDestroyed)
+function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
     local blocksToFixInputData = {}
     local multiBlockData = self.multiBlockData
     local blockStates = self.blockStates

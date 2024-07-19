@@ -314,8 +314,11 @@ function FastLogicRunner.update(self)
         end
         local sum = 0
         -- other
+        -- sm.MTUtil.Profiler.Time.on("doUpdateFullLoop")
         while self.updateTicks >= 2 do
+            -- sm.MTUtil.Profiler.Time.on("doUpdate")
             self:doUpdate()
+            -- sm.MTUtil.Profiler.Time.off("doUpdate")
             self.updateTicks = self.updateTicks - 1
             sum = 0
             for i = 1, #self.runningBlockLengths do
@@ -326,7 +329,9 @@ function FastLogicRunner.update(self)
             if sum == 0 and self.nextTimerOutputWait > 10000000 then
                 self.updateTicks = 1
             end
+            -- sm.MTUtil.Profiler.Count.increment("doUpdate")
         end
+        -- sm.MTUtil.Profiler.Time.off("doUpdateFullLoop")
         -- light
         local lightBlocks = self.blocksSortedByPath[self.pathIndexs["lightBlocks"]]
         for k = 1, #lightBlocks do

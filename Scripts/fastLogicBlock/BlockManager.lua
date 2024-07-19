@@ -48,11 +48,12 @@ end
 
 function FastLogicRunner.internalRemoveBlock(self, id)
     if self.runnableBlockPaths[id] == "multiBlocks" then
+        local multiData = self.multiBlockData[id]
+        multiData.isDead = true
         -- set new states of blocks
         local idStatePairs = self:internalGetMultiBlockInternalStates(id)
         self:internalSetBlockStates(idStatePairs)
         -- clear anything to do with multiBlock in timerData
-        local multiData = self.multiBlockData[id]
         local endBlockId = multiData[4][1]
         local timerData = self.timerData
         for i = 1, multiData[7] do
@@ -133,14 +134,14 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     table.removeFromConstantKeysOnlyHash(self.hashData, self.unhashedLookUp[id])
 end
 
-function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
+function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates, alreadyDestroyed)
     local blocksToFixInputData = {}
     local multiBlockData = self.multiBlockData
     local blockStates = self.blockStates
     local blockOutputs = self.blockOutputs
     for i = 1, #idStatePairs do
         local id = idStatePairs[i][1]
-        if multiBlockData[id] ~= false then
+        if withUpdates and multiBlockData[id] ~= false and multiBlockData[multiBlockData[id]].isDead == false then
             self:internalRemoveBlock(multiBlockData[id])
         end
         blockStates[id] = idStatePairs[i][2]

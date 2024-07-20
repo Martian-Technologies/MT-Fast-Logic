@@ -53,6 +53,7 @@ local connectionColors = {
 }
 
 local function injectElements(multitool)
+    local fovMult = sm.camera.getFov() / 90
     local self = multitool.colorizer
     local hUI = multitool.HoveringUI
     hUI.elements = {}
@@ -86,10 +87,10 @@ local function injectElements(multitool)
             table.insert(hUI.elements, {
                 name = "color_" .. i,
                 type = "customButton",
-                position = { a = (col - 5.5) * 0.07, e = (row) * 0.07 + 0.0 }, -- a = azimuth, e = elevation
+                position = { a = (col - 5.5) * 0.07 * fovMult, e = (row) * 0.07 * fovMult + 0.0 }, -- a = azimuth, e = elevation
                 color = connectionColors[i],
-                angleBoundHorizontal = 0.035,
-                angleBoundVertical = 0.035,
+                angleBoundHorizontal = 0.035 * fovMult,
+                angleBoundVertical = 0.035 * fovMult,
                 -- getText = function()
                 --     return "▉"
                 -- end,
@@ -117,11 +118,11 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "close",
         type = "button",
-        position = { a = 0.0, e = 0.07 * 5 }, -- a = azimuth, e = elevation
+        position = { a = 0.0, e = 0.07 * 5 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.9, 0.2, 0.2),
         text = "Close",
-        angleBoundHorizontal = 0.1,
-        angleBoundVertical = 0.05,
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = 0.05 * fovMult,
         onclick = function()
             multitool.colorizer.displayingGUI = false
         end,

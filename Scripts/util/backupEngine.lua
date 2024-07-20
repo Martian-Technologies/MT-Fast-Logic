@@ -41,7 +41,8 @@ function sm.MTBackupEngine.sv_backupCreation(data)
     if data.hasCreationData then
         creationData = data.creationData
     else
-        error("No creation data provided")
+        local body = data.body
+        creationData = sm.creation.exportToTable(body, true, true)
     end
     local backupsCoordinator = loadBCUC()
     local backupFilename
@@ -99,4 +100,27 @@ function sm.MTBackupEngine.sv_deleteOldBackups()
         end
     end
     saveBCUC(backupsCoordinator)
+end
+
+function sm.MTBackupEngine.cl_getBackups()
+    if not sm.isHost then
+        return {}
+    end
+    sm.MTBackupEngine.sv_deleteOldBackups()
+    return loadBCUC().backupsInUse
+end
+
+function sm.MTBackupEngine.cl_getBackupData(filename)
+    return sm.json.open(filename)
+end
+
+function sm.MTBackupEngine.sv_loadBackup(multitool, backupFilename)
+    local backupData = sm.json.open(backupFilename)
+    local creationData = backupData.creationData
+    local character = multitool.tool:getOwner().character
+    local creationBodies = sm.creation.importFromString(character:getWorld(), sm.json.writeJsonString(creationData),
+        character:getWorldPosition() + character:getDirection() * 8, sm.quat.new(0, 0, 0, 1))
+    for _, body in pairs(creationBodies) do
+        body:setDestructable(true)
+    end
 end

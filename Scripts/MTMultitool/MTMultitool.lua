@@ -15,6 +15,8 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/saveFile.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/HoveringUI/HoveringUI.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/BackupMenu.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/DoMeleeState.lua")
 
@@ -161,6 +163,8 @@ function MTMultitool.client_onCreate(self)
     NtoNConnect.inject(self)
     ParallelConnect.inject(self)
     TensorConnect.inject(self)
+
+    BackupMenu.inject(self)
 
     BlockSelector.inject(self)
     VertexRenderer.inject(self)
@@ -435,6 +439,9 @@ function MTMultitool.client_onEquip(self, animate)
 end
 
 function MTMultitool.client_onUnequip(self, animate)
+    if self.mode == "BackupMenu" then
+        self.mode = 3
+    end
     -- for _, func in pairs(self.subscribtions["client_onUnequip"]) do
     --     func(self, animate)
     -- end
@@ -471,6 +478,11 @@ function MTMultitool.client_onUnequip(self, animate)
 end
 
 function MTMultitool.client_onToggle(self)
+    HoveringUI.cleanUp(self)
+    if self.mode == "BackupMenu" then
+        self.mode = 3
+        return true
+    end
     if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
         SiliconConverterTool.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
@@ -510,7 +522,6 @@ function MTMultitool.client_onToggle(self)
             self.mode = #self.modes
         end
     until self.enabledModes[self.mode]
-    HoveringUI.cleanUp(self)
     return true
 end
 
@@ -521,6 +532,8 @@ local function triggerTool(self, primaryState, secondaryState, forceBuild, looki
 		SiliconConverterTool.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
 	elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+    elseif self.mode == "BackupMenu" then
+        BackupMenu.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
         ModeChanger.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "VolumePlacer" then
@@ -574,9 +587,15 @@ function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState,
 	end
 
     -- print("EEEEEEE")
-    sm.gui.setInteractionText("", sm.gui.getKeyBinding("NextCreateRotation", true), "Rotate Mode ",
-        "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-        MTMultitool.modes[self.mode] .. " (" .. modeOfEnabled .. "/" .. enabledModes .. ")</p>")
+    if MTMultitool.modes[self.mode] ~= nil then
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("NextCreateRotation", true), "Rotate Mode ",
+            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            MTMultitool.modes[self.mode] .. " (" .. modeOfEnabled .. "/" .. enabledModes .. ")</p>")
+    else
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("NextCreateRotation", true), "Rotate Mode ",
+            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            self.mode .. "</p>")
+    end
     -- print("EEEEEEEEEE")
 	return false, true
 end
@@ -885,4 +904,8 @@ end
 
 function MTMultitool.sv_receiveBlueprintPacket(self, data)
     BlueprintSpawner.sv_receiveBlueprintPacket(self, data)
+end
+
+function MTMultitool.sv_loadBackup(self, data)
+    sm.MTBackupEngine.sv_loadBackup(self, data)
 end

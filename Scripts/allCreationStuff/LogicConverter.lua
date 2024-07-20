@@ -52,8 +52,8 @@ end
 function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
     local jsontable = sm.creation.exportToTable(body, true, false) --'true, false' fix for qtimer reset bug?
     sm.MTBackupEngine.sv_backupCreation({
-        hasCreationData = true,
-        creationData = jsontable,
+        hasCreationData = false,
+        body = body,
         name = "Conversion Backup",
         description = "Backup created by LogicConverter.lua. Converting to " .. wantedType,
     })

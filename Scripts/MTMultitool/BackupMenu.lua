@@ -17,11 +17,12 @@ local function injectElements(multitool)
             type = "indicator",
             position = { a = 0, e = 0.07 * fovMult },
             color = sm.color.new(1, 0, 0),
-            getrender = function()
-                return {
-                    text = "No backups found :(",
-                    color = sm.color.new(1, 0, 0)
-                }
+            getText = function()
+                return "No backups found :("
+                -- {
+                --     text = "No backups found :(",
+                --     color = sm.color.new(1, 0, 0)
+                -- }
             end
         })
     else

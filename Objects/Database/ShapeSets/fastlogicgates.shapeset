@@ -15,7 +15,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_0",
@@ -39,7 +39,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_1",
@@ -63,7 +63,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_2",
@@ -87,7 +87,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_3",
@@ -111,7 +111,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_4",
@@ -135,7 +135,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_5",
@@ -159,7 +159,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_6",
@@ -183,7 +183,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_7",
@@ -207,7 +207,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_8",
@@ -231,7 +231,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_9",
@@ -255,7 +255,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_10",
@@ -279,7 +279,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_11",
@@ -303,7 +303,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_12",
@@ -327,7 +327,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_13",
@@ -351,7 +351,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_14",
@@ -375,7 +375,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_15",
@@ -399,7 +399,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_16",
@@ -423,7 +423,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_17",
@@ -447,7 +447,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_18",
@@ -471,7 +471,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_19",
@@ -495,7 +495,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_20",
@@ -519,7 +519,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_21",
@@ -543,7 +543,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_22",
@@ -567,7 +567,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_23",
@@ -591,7 +591,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_24",
@@ -615,7 +615,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_25",
@@ -638,7 +638,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_26",
@@ -662,7 +662,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_27",
@@ -686,7 +686,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_28",
@@ -710,7 +710,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_29",
@@ -734,7 +734,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_30",
@@ -758,7 +758,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_31",
@@ -782,7 +782,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_32",
@@ -806,7 +806,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_33",
@@ -830,7 +830,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_34",
@@ -854,7 +854,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_35",
@@ -878,7 +878,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_36",
@@ -902,7 +902,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_37",
@@ -926,7 +926,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_38",
@@ -950,7 +950,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_logicgate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicGate_39",

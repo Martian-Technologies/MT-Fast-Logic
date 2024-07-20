@@ -73,6 +73,12 @@ end
 -- localLocations shoud be in blocks not meters
 function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocations)
     if not sm.exists(body) then return end
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = body,
+        name = "Silicon Conversion Backup",
+        description = "Backup created by convertSilicon() in FastLogicRunnerRunner.lua. Converting to " .. wantedType,
+    })
     local creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
     local creation = sm.MTFastLogic.Creations[creationId]
     if creation == nil then return end

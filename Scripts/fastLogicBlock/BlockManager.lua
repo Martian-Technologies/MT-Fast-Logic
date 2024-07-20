@@ -141,7 +141,7 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
     local blockOutputs = self.blockOutputs
     for i = 1, #idStatePairs do
         local id = idStatePairs[i][1]
-        if withUpdates and multiBlockData[id] ~= false and multiBlockData[multiBlockData[id]].isDead == false then
+        if withUpdates ~= false and multiBlockData[id] ~= false and multiBlockData[multiBlockData[id]].isDead ~= true then
             self:internalRemoveBlock(multiBlockData[id])
         end
         blockStates[id] = idStatePairs[i][2]
@@ -504,6 +504,7 @@ function FastLogicRunner.revertBlockType(self, id)
 end
 
 function FastLogicRunner.shouldBeThroughBlock(self, id)
+    print(id)
     local pathId = self.runnableBlockPathIds[id]
     if self.numberOfBlockInputs[id] + self.numberOfOtherInputs[id] <= 1 then
         if pathId < 16 then
@@ -642,6 +643,7 @@ end
 
 function FastLogicRunner.externalSetBlockState(self, uuid, state)
     if self.hashedLookUp[uuid] ~= nil then
+        print("hammer")
         self:internalSetBlockStates({{self.hashedLookUp[uuid], state}})
     end
 end

@@ -47,7 +47,7 @@
 					"textureList": [
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_logicgate_dif.tga",
 						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_logicgate_asg.tga",
-						""
+						"$GAME_DATA/Objects/Textures/interactive/obj_interactive_logicgate_nor.tga"
 					]
 				}
 			}

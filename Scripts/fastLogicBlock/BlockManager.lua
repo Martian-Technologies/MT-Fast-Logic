@@ -504,7 +504,6 @@ function FastLogicRunner.revertBlockType(self, id)
 end
 
 function FastLogicRunner.shouldBeThroughBlock(self, id)
-    print(id)
     local pathId = self.runnableBlockPathIds[id]
     if self.numberOfBlockInputs[id] + self.numberOfOtherInputs[id] <= 1 then
         if pathId < 16 then
@@ -643,7 +642,6 @@ end
 
 function FastLogicRunner.externalSetBlockState(self, uuid, state)
     if self.hashedLookUp[uuid] ~= nil then
-        print("hammer")
         self:internalSetBlockStates({{self.hashedLookUp[uuid], state}})
     end
 end

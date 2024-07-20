@@ -30,7 +30,7 @@ local timerData = nil
 local timerLengths = nil
 local timerInputStates = nil
 local blockOutputs = nil
-local nextTimerOutputWait = nil
+local lastTimerOutputWait = nil
 local multiBlockData = nil
 local numberOfTimesRun = nil
 local runningBlocks1 = nil
@@ -83,7 +83,7 @@ function FastLogicRunner.makeDataArrays(self)
     self.hashedLookUp = self.hashData.hashedLookUp
     -- make arrays
     self.blocksRan = 0
-    self.nextTimerOutputWait = 0
+    self.lastTimerOutputWait = 0
     self.blockStates = table.makeArrayForHash(self.hashData)
     self.blockInputs = table.makeArrayForHash(self.hashData)
     self.lastBlockStates = table.makeArrayForHash(self.hashData, 0)
@@ -190,7 +190,7 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     timerLengths = self.timerLengths
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
-    nextTimerOutputWait = self.nextTimerOutputWait
+    lastTimerOutputWait = self.lastTimerOutputWait
     multiBlockData = self.multiBlockData
     if needsRunningBlocks == true then
         runningBlocks = self.runningBlocks
@@ -326,7 +326,7 @@ function FastLogicRunner.update(self)
                     sum = sum + self.runningBlockLengths[i]
                 end
             end
-            if sum == 0 and self.nextTimerOutputWait > 10000000 then
+            if sum == 0 and self.lastTimerOutputWait <= -1 then
                 self.updateTicks = 1
             end
             -- sm.MTUtil.Profiler.Count.increment("doUpdate")
@@ -467,7 +467,7 @@ function FastLogicRunner.doUpdate(self)
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] == 1) ~= timerInputStates[blockId] then
             timerInputStates[blockId] = not timerInputStates[blockId]
             timerData[timerLengths[blockId]][#timerData[timerLengths[blockId]] + 1] = blockId
-            nextTimerOutputWait = timerLengths[blockId] <= nextTimerOutputWait and timerLengths[blockId] + 1 or nextTimerOutputWait
+            lastTimerOutputWait = timerLengths[blockId] > lastTimerOutputWait and timerLengths[blockId] + 1 or lastTimerOutputWait
         end
     end
     runningBlockLengths[5] = 0
@@ -486,10 +486,9 @@ function FastLogicRunner.doUpdate(self)
 
         end
     end
-    if nextTimerOutputWait <= 1 then
-        nextTimerOutputWait = 100000000
+    if lastTimerOutputWait >= 0 then
+        self.lastTimerOutputWait = lastTimerOutputWait - 1
     end
-    self.nextTimerOutputWait = nextTimerOutputWait - 1
     --------------- multi block stuff ---------------
     local runningMultiBlockLengths = runningBlockLengths[16]
     -- through multi block input
@@ -640,11 +639,11 @@ function FastLogicRunner.doUpdate(self)
         if multiData[1] == 1 then
             local outputId = multiData[4][1]
             timerData[multiData[7]][#timerData[multiData[7]] + 1] = {blockStates[multiData[3][1]], multiData[4][1]}
-            nextTimerOutputWait = multiData[7] <= nextTimerOutputWait and multiData[7] + 1 or nextTimerOutputWait
+            lastTimerOutputWait = multiData[7] > lastTimerOutputWait and multiData[7] + 1 or lastTimerOutputWait
         elseif multiData[1] == 2 then
             local outputId = multiData[4][1]
             timerData[multiData[7]][#timerData[multiData[7]] + 1] = {not blockStates[multiData[3][1]], multiData[4][1]}
-            nextTimerOutputWait = multiData[7] <= nextTimerOutputWait and multiData[7] + 1 or nextTimerOutputWait
+            lastTimerOutputWait = multiData[7] > lastTimerOutputWait and multiData[7] + 1 or lastTimerOutputWait
         else
             print("no runner for multi block with id: " .. tostring(multiData[1]))
             didNotRunInternal = true

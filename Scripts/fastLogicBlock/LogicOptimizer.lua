@@ -18,9 +18,12 @@ function FastLogicRunner.optimizeLogic(self)
             if blockInputs[id] ~= false and blockInputs[id] ~= nil then
                 -- multi blocks
                 self:findMultiBlocks(id)
-                -- print(id)
             end
         end
+    end
+
+    if id == #blockInputs then
+        id = -10 * #blockInputs
     end
 
     self.blocksOptimized = id
@@ -107,7 +110,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
 
             self:updateLongestTimerToLength(length)
 
-            print("line block: " .. tostring(length))
+            -- print("line block: " .. tostring(length))
         end
     end
 end

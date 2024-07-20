@@ -164,12 +164,6 @@ function FastLogicRealBlockManager.changeConnectionColor(self, id, connectionCol
     ) then return end
     self.FastLogicAllBlockManager:changeConnectionColor(uuid, connectionColorId)
     local realBlock = sm.MTFastLogic.FastLogicBlockLookUp[uuid]
-    if realBlock == nil then
-        print("Block not found ope")
-        advPrint(sm.MTFastLogic.FastLogicBlockLookUp, 2)
-        print(uuid)
-        print(id)
-    end
     local body = realBlock.shape:getBody()
     realBlock:remove(false)
     local parents = realBlock.interactable:getParents()

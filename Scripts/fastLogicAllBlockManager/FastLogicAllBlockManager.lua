@@ -97,7 +97,7 @@ function FastLogicAllBlockManager.update(self)
         end
         for i = 1, dataToSetLength do
             local uuid = self.dataToSetToDo[i][1]
-            -- self.FastLogicRunner:externalShouldBeThroughBlock(uuid)
+            self.FastLogicRunner:externalShouldBeThroughBlock(uuid)
             self.FastLogicRunner:externalAddBlockToUpdate(uuid)
         end
     end

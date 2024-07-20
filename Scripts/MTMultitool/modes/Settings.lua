@@ -272,6 +272,22 @@ local function injectElements(multitool)
             return "Lets you smack the shit out of a Fast Logic gate with a hammer to pulse it for a tick."
         end,
     })
+
+    if sm.isHost then
+        table.insert(hUI.elements, {
+            name = "goToBackupMenu",
+            type = "button",
+            position = { a = math.pi / 8 * fovMult, e = 13 * math.pi / 90 * fovMult },
+            color = sm.color.new(0.2, 0.2, 0.9),
+            text = "Open Backup Menu",
+            angleBoundHorizontal = 0.1 * fovMult,
+            angleBoundVertical = math.pi / 90 / 2 * fovMult,
+            onclick = function()
+                HoveringUI.cleanUp(multitool)
+                multitool.mode = "BackupMenu"
+            end,
+        })
+    end
 end
 
 function Settings.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)

@@ -80,10 +80,12 @@ function Heatmap.server_onFixedUpdate(multitool, dt)
     -- numberOfTimesRun[runnerId] = 0
     local usageTable = {}
     for rID, usage in ipairs(numberOfTimesRun) do
-        local trueLoad = usage / FLR.numberOfUpdatesPerTick * FLR.numberOfBlockOutputs[rID]
-        usageTable[rID] = trueLoad
-        self.blockUsageSum[rID] = (self.blockUsageSum[rID] or 0) + trueLoad
-        numberOfTimesRun[rID] = 0
+        if FLR.numberOfBlockOutputs[rID] ~= false then
+            local trueLoad = usage / FLR.numberOfUpdatesPerTick * FLR.numberOfBlockOutputs[rID]
+            usageTable[rID] = trueLoad
+            self.blockUsageSum[rID] = (self.blockUsageSum[rID] or 0) + trueLoad
+            numberOfTimesRun[rID] = 0
+        end
     end
     table.insert(self.blockUsageTracker, usageTable)
     if #self.blockUsageTracker > 40 then

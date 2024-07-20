@@ -1,4 +1,4 @@
-ConnectionRaycaster = class()
+ConnectionRaycaster = ConnectionRaycaster or class()
 
 function ConnectionRaycaster:configure(maxDistance, connectionDotRadius, multitool)
     self.maxDistance = maxDistance + 0.5

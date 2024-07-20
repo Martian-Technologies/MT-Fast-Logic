@@ -1,4 +1,4 @@
-ConnectionRaycaster = class()
+ConnectionRaycaster = ConnectionRaycaster or class()
 
 function ConnectionRaycaster:configure(maxDistance, connectionDotRadius, multitool)
     self.maxDistance = maxDistance + 0.5
@@ -370,7 +370,7 @@ function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint
                 -- print("RADIUS")
                 -- print(math.min(bb.x, bb.y, bb.z)*4)
                 -- local rad = self.connectionDotRadius * math.min(bb.x, bb.y, bb.z)*4
-                local rad = math.min(bb.x, bb.y, bb.z) * 2
+                local rad = math.min(bb.x, bb.y, bb.z) * 2 - 0.1
                 -- print(rad)
                 local rad2 = rad * rad
                 -- print(self.connectionDotRadius2 * math.min(bb.x, bb.y, bb.z)*4)

@@ -529,6 +529,7 @@ end
 function FastLogicRunner.externalAddNonFastConnection(self, uuid)
     local id = self.hashedLookUp[uuid]
     if id ~= nil then
+        self:revertBlockType(id)
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] + 1
         self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)
@@ -538,6 +539,7 @@ end
 function FastLogicRunner.externalRemoveNonFastConnection(self, uuid)
     local id = self.hashedLookUp[uuid]
     if id ~= nil then
+        self:revertBlockType(id)
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] - 1
         self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)

@@ -8,14 +8,16 @@ local pairs = pairs
 dofile "../fastLogicBlock/FastLogicRunner.lua"
 
 function FastLogicRealBlockManager.checkForNewInputs(self)
-    for uuid, data in pairs(self.creation.AllNonFastBlocks) do
+    for id, data in pairs(self.creation.AllNonFastBlocks) do
         local isActive = data.interactable.active
         if data.currentState ~= isActive then
             data.currentState = isActive
             local stateNumber = isActive and 1 or -1
             local outputs = data.outputs
             for i = 1, #outputs do
-                self.FastLogicRunner:externalChangeNonFastOnInput(outputs[i], stateNumber)
+                local outputUuid = outputs[i]
+                self.FastLogicRunner:externalChangeNonFastOnInput(outputUuid, stateNumber)
+                sm.MTFastLogic.FastLogicBlockLookUp[outputUuid].activeInputs[id] = isActive
             end
         end
     end
@@ -68,6 +70,7 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
 
     if FastLogicRunner.isNew ~= nil and FastLogicRunner.isNew ~= 1 then return end
     if table.length(scanNext) > 0 then
+        bodyHasChanged = true
         for uuid, block in pairs(scanNext) do
             -- sm.MTUtil.Profiler.Time.on("checkForBodyUpdate" .. tostring(creationId))
             if block == nil or block.shape == nil then
@@ -97,14 +100,12 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                                 (inputUuidsHash[inputUuid] == nil or blockToConnect.outputsHash[uuid] == nil)
                             ) then
                                 newInputCount = newInputCount + 1
-                                bodyHasChanged = true
                                 FastLogicAllBlockManager:addOutput(inputUuid, uuid)
                             end
                         else
-                            newInputCount = newInputCount + 256
+                            newInputCount = newInputCount + 1
                             local nonFastBlock = AllNonFastBlocks[inputId]
                             if nonFastBlock == nil then
-                                bodyHasChanged = true
                                 local currentState = interactable.active
                                 nonFastBlock = {
                                     ["interactable"] = interactable,
@@ -113,29 +114,32 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                                     ["outputsHash"] = {[uuid] = true}
                                 }
                                 AllNonFastBlocks[inputId] = nonFastBlock
-                                FastLogicRunner:externalAddNonFastConnection(uuid)
-                                if currentState then
-                                    FastLogicRunner:externalAddNonFastOnInput(uuid)
-                                    activeInputs[inputId] = true
-                                else
-                                    activeInputs[inputId] = false
+                                if activeInputs[inputId] == nil then
+                                    FastLogicRunner:externalAddNonFastConnection(uuid)
+                                    if currentState then
+                                        FastLogicRunner:externalAddNonFastOnInput(uuid)
+                                        activeInputs[inputId] = true
+                                    else
+                                        activeInputs[inputId] = false
+                                    end
                                 end
                             end
                         end
                     end
                 end
-
-                local maxInputsRemoved = newInputCount - (inputsLength - inputUuidsLength)
-                if maxInputsRemoved > 0 then
-                    for i = 0, #inputUuids do
-                        local inputUuid = inputUuids[i]
-                        if inputsHash[ids[inputUuid]] == nil and blocks[inputUuid] ~= nil and blocks[inputUuid].isSilicon == false then
-                            FastLogicAllBlockManager:removeOutput(inputUuid, uuid)
-                            if maxInputsRemoved == 1 then
-                                break
-                            end
-                            maxInputsRemoved = maxInputsRemoved - 1
+                for i = 0, #inputUuids do
+                    local inputUuid = inputUuids[i]
+                    if inputsHash[ids[inputUuid]] == nil and blocks[inputUuid] ~= nil and blocks[inputUuid].isSilicon == false then
+                        FastLogicAllBlockManager:removeOutput(inputUuid, uuid)
+                    end
+                end
+                for k, v in pairs(activeInputs) do
+                    if AllNonFastBlocks[k] == nil then
+                        FastLogicRunner:externalRemoveNonFastConnection(uuid)
+                        if v then
+                            FastLogicRunner:externalRemoveNonFastOnInput(uuid)
                         end
+                        activeInputs[k] = nil
                     end
                 end
             end
@@ -150,7 +154,7 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
         -- print("time: " .. tostring(sm.MTUtil.Profiler.Time.get("checkForBodyUpdate" .. tostring(self.creationId))))
         -- print("count: " .. sm.MTUtil.Profiler.Count.get("checkForBodyUpdate" .. tostring(self.creationId)))
     end
-    if bodyHasChanged then                
+    if bodyHasChanged then
         for id, data in pairs(self.creation.AllNonFastBlocks) do
             -- sm.MTUtil.Profiler.Count.increment("2checkForBodyUpdate" .. tostring(creationId))
             -- sm.MTUtil.Profiler.Time.on("2checkForBodyUpdate" .. tostring(creationId))
@@ -167,12 +171,14 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                         newOutputsHash[uuid] = true
                         if outputsHash[uuid] == nil then
                             outputs[#outputs+1] = uuid
-                            FastLogicRunner:externalAddNonFastConnection(uuid)
-                            if state then
-                                FastLogicRunner:externalAddNonFastOnInput(uuid)
-                                AllFastBlocks[uuid].activeInputs[id] = true
-                            else
-                                AllFastBlocks[uuid].activeInputs[id] = false
+                            if AllFastBlocks[uuid].activeInputs[id] == nil then
+                                FastLogicRunner:externalAddNonFastConnection(uuid)
+                                if state then
+                                    FastLogicRunner:externalAddNonFastOnInput(uuid)
+                                    AllFastBlocks[uuid].activeInputs[id] = true
+                                else
+                                    AllFastBlocks[uuid].activeInputs[id] = false
+                                end
                             end
                         end
                     end
@@ -188,10 +194,10 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                         local block = AllFastBlocks[uuid]
                         if block ~= nil then
                             block.activeInputs[id] = nil
+                            FastLogicRunner:externalRemoveNonFastConnection(uuid)
                             if state then
                                 FastLogicRunner:externalRemoveNonFastOnInput(uuid)
                             end
-                            FastLogicRunner:externalRemoveNonFastConnection(uuid)
                         end
                     end
                 end
@@ -201,10 +207,10 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                     local block = AllFastBlocks[uuid]
                     if block ~= nil then
                         block.activeInputs[id] = nil
+                        FastLogicRunner:externalRemoveNonFastConnection(uuid)
                         if state then
                             FastLogicRunner:externalRemoveNonFastOnInput(uuid)
                         end
-                        FastLogicRunner:externalRemoveNonFastConnection(uuid)
                     end
                 end
                 AllNonFastBlocks[id] = nil

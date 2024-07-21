@@ -200,6 +200,9 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- print(self.FastLogicRunner.blockOutputs[runnrerId])
     -- print(self.data.uuid)
     -- print(self.interactable.id)
+    -- print(self.creation.blocks[self.data.uuid].inputsHash)
+    -- print(self.activeInputs)
+    -- print( self.creation.AllNonFastBlocks)
     ----------------------------------------------
     -- print("id: " .. tostring(runnrerId))
     -- print("------")
@@ -266,8 +269,10 @@ end
 function BaseFastLogicBlock.removeUuidData(self)
     for i = 1, #self.creation.blocks[self.data.uuid].inputs do
         local otherUuid = self.creation.blocks[self.data.uuid].inputs[i]
-        if self.creation.blocks[otherUuid].isSilicon then
-            return
+        if self.creation.blocks[otherUuid] ~= nil then
+            if self.creation.blocks[otherUuid].isSilicon then
+                return
+            end
         end
     end
     for i = 1, #self.creation.blocks[self.data.uuid].outputs do

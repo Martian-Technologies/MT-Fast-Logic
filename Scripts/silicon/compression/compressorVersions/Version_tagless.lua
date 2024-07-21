@@ -72,6 +72,7 @@ compressor.compressBlocks = function (siliconBlock)
 end
 
 compressor.decompressBlockData = function(siliconBlock, blockData)
+    if blockData == nil then return {} end
     blockData = sm.MTFastLogic.CompressionUtil.stringToTable(blockData)
     if blockData == nil then return {} end
     local colorIndexHash = blockData[2]

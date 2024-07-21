@@ -1,3 +1,13 @@
+---------------------------------------------------
+
+
+
+-- DOES NOT WORK RIGHT NOW DUE TO SILICON BLOCKS HAVING MORE THAN ONE BLOCK AT EACH POS
+
+
+
+---------------------------------------------------
+
 dofile "../../../util/compressionUtil/compressionUtil.lua"
 
 sm.MTFastLogic = sm.MTFastLogic or {}

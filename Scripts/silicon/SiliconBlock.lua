@@ -149,11 +149,12 @@ function SiliconBlock.server_onProjectile(self, position, airTime, velocity, pro
     -- print("time per rev: " .. tostring(sm.MTUtil.Profiler.Time.get("revertBlockType"..tostring(self.creationId)) / sm.MTUtil.Profiler.Count.get("revertBlockType"..tostring(self.creationId))))
     -- print("time: " .. tostring(sm.MTUtil.Profiler.Time.get("revertBlockType"..tostring(self.creationId))))
     -- print("count: " .. tostring(sm.MTUtil.Profiler.Count.get("revertBlockType"..tostring(self.creationId))))
-    sm.MTUtil.Profiler.Time.reset("checkForBodyUpdate" .. tostring(self.creationId))
-    sm.MTUtil.Profiler.Count.reset("checkForBodyUpdate" .. tostring(self.creationId))
-    sm.MTUtil.Profiler.Time.reset("2checkForBodyUpdate" .. tostring(self.creationId))
-    sm.MTUtil.Profiler.Count.reset("2checkForBodyUpdate" .. tostring(self.creationId))
+    -- sm.MTUtil.Profiler.Time.reset("checkForBodyUpdate" .. tostring(self.creationId))
+    -- sm.MTUtil.Profiler.Count.reset("checkForBodyUpdate" .. tostring(self.creationId))
+    -- sm.MTUtil.Profiler.Time.reset("2checkForBodyUpdate" .. tostring(self.creationId))
+    -- sm.MTUtil.Profiler.Count.reset("2checkForBodyUpdate" .. tostring(self.creationId))
     -- print(SiliconCompressor.compressBlocks(self))
+    print(self.storage:load())
 end
 
 function SiliconBlock.client_onTinker(self, character, state)

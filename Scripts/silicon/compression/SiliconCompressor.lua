@@ -9,7 +9,7 @@ dofile "compressorVersions/Version_tagless.lua"
 dofile "compressorVersions/Version_a.lua"
 dofile "compressorVersions/Version_b.lua"
 
-local highestVersion = "b"
+local highestVersion = "a"
 
 function SiliconCompressor.decompressBlockData(siliconBlock, blockData)
     if blockData == nil then return {} end

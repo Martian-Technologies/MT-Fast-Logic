@@ -307,6 +307,7 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChec
         end
         if skipChecksAndUpdates ~= true then
             self:shouldBeThroughBlock(idToDisconnect)
+            self:fixBlockInputData(id)
             self:internalAddBlockToUpdate(idToDisconnect)
         end
     end
@@ -433,6 +434,7 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
         end
 
         self:shouldBeThroughBlock(id)
+        self:fixBlockInputData(id)
         self:internalAddBlockToUpdate(id)
     end
 end
@@ -467,12 +469,13 @@ function FastLogicRunner.makeBlockAlt(self, id, blockType)
                 end
             end
         end
+        self:fixBlockInputData(id)
     end
 end
 
 function FastLogicRunner.revertBlockType(self, id)
     if self.altBlockData[id] ~= false then
-        sm.MTUtil.Profiler.Time.on("revertBlockType"..tostring(self.creationId))
+        -- sm.MTUtil.Profiler.Time.on("revertBlockType"..tostring(self.creationId))
         -- remove from multi blocks
         if self.multiBlockData[id] ~= false then
             self:internalRemoveBlock(self.multiBlockData[id])
@@ -497,9 +500,10 @@ function FastLogicRunner.revertBlockType(self, id)
                     end
                 end
             end
+            self:fixBlockInputData(id)
         end
-        sm.MTUtil.Profiler.Time.off("revertBlockType"..tostring(self.creationId))
-        sm.MTUtil.Profiler.Count.increment("revertBlockType"..tostring(self.creationId))
+        -- sm.MTUtil.Profiler.Time.off("revertBlockType"..tostring(self.creationId))
+        -- sm.MTUtil.Profiler.Count.increment("revertBlockType"..tostring(self.creationId))
     end
 end
 

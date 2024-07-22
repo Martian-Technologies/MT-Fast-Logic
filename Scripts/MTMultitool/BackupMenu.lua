@@ -27,7 +27,7 @@ local function injectElements(multitool)
         })
     else
         for i = 1, math.min(30, #backups) do
-            local backupFilename = backups[i]
+            local backupFilename = backups[#backups - i + 1]
             local backup = sm.MTBackupEngine.cl_getBackupData(backupFilename)
             local timeNow = os.time()
             local timeDiff = timeNow - backup.timeCreated

@@ -202,7 +202,9 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- print(self.interactable.id)
     -- print(self.creation.blocks[self.data.uuid].inputsHash)
     -- print(self.activeInputs)
-    -- print( self.creation.AllNonFastBlocks)
+    -- self.FastLogicRunner.fixBlockInputData = FastLogicRunner.fixBlockInputData
+    -- self.FastLogicRunner.internalChangeBlockType = FastLogicRunner.internalChangeBlockType
+    -- print(self.creation.AllNonFastBlocks)
     ----------------------------------------------
     -- print("id: " .. tostring(runnrerId))
     -- print("------")

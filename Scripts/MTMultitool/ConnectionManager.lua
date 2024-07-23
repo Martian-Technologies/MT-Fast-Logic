@@ -1,5 +1,7 @@
 ConnectionManager = {}
 
+dofile "FastLogicBlockColors.lua"
+
 function ConnectionManager.inject(multitool)
     multitool.ConnectionManager = {}
     local self = multitool.ConnectionManager
@@ -77,7 +79,13 @@ function ConnectionManager.client_onUpdate(multitool)
                     goto continue
                 end
 
-                local color = sm.color.new(1, 1, 1, 1)
+                -- local color = sm.color.new(1, 1, 1, 1)
+                local color = sm.MTFastLogic.FastLogicBlockColors[FastLogicAllBlockManager.blockUuidToConnectionColorID[tostring(task.from.uuid)]+1]
+                if color == nil then
+                    color = sm.color.new(1, 1, 1, 1)
+                else
+                    color = sm.color.new(color.r*0.7+0.3, color.g*0.7+0.3, color.b*0.7+0.3, 1)
+                end
                 if self.mode == "disconnect" then
                     color = sm.color.new(1, 0, 0, 1)
                 end

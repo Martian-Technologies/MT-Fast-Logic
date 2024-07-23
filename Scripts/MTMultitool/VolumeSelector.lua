@@ -38,12 +38,8 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
             "Select first corner" .. extraTooltip.selectOrigin .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final == nil then
-        sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Select second corner     ",
-            sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final ~= nil then
-        sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), self.actionWord .. "     ",
-            sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
         needToRaycast = false
     end
     if self.final ~= nil and self.modes ~= nil then
@@ -120,6 +116,14 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         local xWidth = x2 - x1
         local yWidth = y2 - y1
         local zWidth = z2 - z1
+        local sizeString = "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>("..(xWidth*4).." x "..(yWidth*4).." x "..(zWidth*4)..")</p>"
+        if self.origin ~= nil and self.final == nil then
+            sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Select second corner     "..sizeString.."     ",
+                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
+        elseif self.origin ~= nil and self.final ~= nil then
+            sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), self.actionWord .. "     "..sizeString.."     ",
+                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
+        end
         local stepsPerBlock = 2
         local xSteps = math.floor(xWidth / 0.25) * stepsPerBlock
         local ySteps = math.floor(yWidth / 0.25) * stepsPerBlock

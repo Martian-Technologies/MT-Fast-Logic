@@ -9,15 +9,27 @@ dofile "../fastLogicBlock/FastLogicRunner.lua"
 
 function FastLogicRealBlockManager.checkForNewInputs(self)
     for id, data in pairs(self.creation.AllNonFastBlocks) do
-        local isActive = data.interactable.active
-        if data.currentState ~= isActive then
-            data.currentState = isActive
-            local stateNumber = isActive and 1 or -1
-            local outputs = data.outputs
-            for i = 1, #outputs do
-                local outputUuid = outputs[i]
-                self.FastLogicRunner:externalChangeNonFastOnInput(outputUuid, stateNumber)
-                sm.MTFastLogic.FastLogicBlockLookUp[outputUuid].activeInputs[id] = isActive
+        if not sm.exists(data.interactable) then
+            if data.currentState then
+                local outputs = data.outputs
+                for i = 1, #outputs do
+                    local outputUuid = outputs[i]
+                    self.FastLogicRunner:externalChangeNonFastOnInput(outputUuid, -1)
+                    sm.MTFastLogic.FastLogicBlockLookUp[outputUuid].activeInputs[id] = nil
+                end
+            end
+            self.creation.AllNonFastBlocks[id] = nil
+        else
+            local isActive = data.interactable.active
+            if data.currentState ~= isActive then
+                data.currentState = isActive
+                local stateNumber = isActive and 1 or -1
+                local outputs = data.outputs
+                for i = 1, #outputs do
+                    local outputUuid = outputs[i]
+                    self.FastLogicRunner:externalChangeNonFastOnInput(outputUuid, stateNumber)
+                    sm.MTFastLogic.FastLogicBlockLookUp[outputUuid].activeInputs[id] = isActive
+                end
             end
         end
     end

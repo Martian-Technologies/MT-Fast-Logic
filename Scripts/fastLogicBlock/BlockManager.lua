@@ -550,7 +550,7 @@ function FastLogicRunner.internalAddNonFastOutput(self, interId, id)
         self:revertBlockType(id)
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] + 1
         if nonFastBlock[1] then
-            self.countOfOnOtherInputs = self.countOfOnOtherInputs + 1
+            self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] + 1
         end
         self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)
@@ -572,7 +572,7 @@ function FastLogicRunner.internalRemoveNonFastOutput(self, interId, id)
         self:revertBlockType(id)
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] - 1
         if nonFastBlock[1] then -- update state
-            self.countOfOnOtherInputs = self.countOfOnOtherInputs - 1
+            self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] - 1
         end
         self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)

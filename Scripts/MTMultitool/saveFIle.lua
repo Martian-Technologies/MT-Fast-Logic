@@ -28,7 +28,12 @@ function SaveFile.getSaveData(idx)
     if not sm.json.fileExists(path) then
         return table.deepCopy(defaultSave)
     end
-    local data = sm.json.open(path)
+    -- local data = sm.json.open(path)
+    -- pcall instead
+    local success, data = pcall(sm.json.open, path)
+    if not success then
+        return table.deepCopy(defaultSave)
+    end
     if data["version"] == nil then
         data["version"] = 1
     end

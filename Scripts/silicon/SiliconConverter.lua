@@ -27,22 +27,23 @@ function SiliconConverter.convertToSilicon(creationId, blockUuids) -- only for F
     for _, uuid in ipairs(blockUuids) do
         local block = blocks[uuid]
         if not block.isSilicon then
+            if (
+                creation.AllFastBlocks[uuid].type ~= "LogicGate" or
+                creation.FastLogicRunner:externalHasNonFastInputs(uuid) or
+                #creation.AllFastBlocks[uuid].shape:getJoints() > 0
+            ) then
+                goto continue
+            end
             for k, v in pairs(sm.MTFastLogic.FastLogicBlockLookUp[uuid].interactable:getChildren()) do
                 if v ~= nil and creation.uuids[v.id] == nil then
                     goto continue
                 end
             end
-            if (
-                creation.AllFastBlocks[uuid].type == "LogicGate" and
-                table.length(creation.AllFastBlocks[uuid].activeInputs) == 0 and
-                #creation.AllFastBlocks[uuid].shape:getJoints() == 0
-            ) then
-                local pos = string.vecToString(block.pos)
-                if blocksPosHash[pos] == nil then
-                    blocksPosHash[pos] = {}
-                end
-                blocksPosHash[pos][#blocksPosHash[pos]+1] = uuid
+            local pos = string.vecToString(block.pos)
+            if blocksPosHash[pos] == nil then
+                blocksPosHash[pos] = {}
             end
+            blocksPosHash[pos][#blocksPosHash[pos]+1] = uuid
             ::continue::
         end
     end

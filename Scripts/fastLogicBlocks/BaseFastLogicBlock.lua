@@ -26,7 +26,6 @@ function BaseFastLogicBlock.deepRescanSelf(self, noRemove)
             self.creation.AllFastBlocks[self.data.uuid] = nil
         end
     end
-    self.activeInputs = {}
     self.FastLogicRunner = nil
     self.creation = nil
     self.creationId = nil
@@ -67,7 +66,6 @@ end
 
 function BaseFastLogicBlock.getData(self)
     self.state = self.state or nil
-    self.activeInputs = self.activeInputs or {}
     self.removeAllData = self.removeAllData or true
     self:getCreationData()
     if self.creation.AllFastBlocks[self.data.uuid] == nil then
@@ -201,7 +199,6 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- print(self.data.uuid)
     -- print(self.interactable.id)
     -- print(self.creation.blocks[self.data.uuid].inputsHash)
-    -- print(self.activeInputs)
     -- self.FastLogicRunner.fixBlockInputData = FastLogicRunner.fixBlockInputData
     -- self.FastLogicRunner.internalChangeBlockType = FastLogicRunner.internalChangeBlockType
     -- print(self.creation.AllNonFastBlocks)

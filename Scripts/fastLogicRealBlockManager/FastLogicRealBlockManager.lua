@@ -122,14 +122,6 @@ function FastLogicRealBlockManager.setData(self, block, data)
         for _, v in pairs(parents) do
             if sm.exists(v) then
                 v:connect(block.interactable)
-                if self.creation.AllNonFastBlocks[v.id] ~= nil then
-                    if table.contains(self.creation.AllNonFastBlocks[v.id]["outputs"], block.data.uuid) then
-                        if block.activeInputs == nil then
-                            block.activeInputs = {}
-                        end
-                        block.activeInputs[v.id] = self.creation.AllNonFastBlocks[v.id]["currentState"]
-                    end
-                end
             end
         end
     end

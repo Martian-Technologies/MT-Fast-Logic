@@ -528,51 +528,57 @@ function FastLogicRunner.shouldBeThroughBlock(self, id)
     end
 end
 
---------------------------------------------------------
+function FastLogicRunner.getUpdatedIds(self)
+    local changed = {}
+    blockStates = self.blockStates
+    local lastBlockStates = self.lastBlockStates
+    for i = 1, #blockStates do
+        if lastBlockStates[i] ~= blockStates[i] then
+            lastBlockStates[i] = blockStates[i]
+            changed[#changed + 1] = i
+        end
+    end
+    return changed
+end
 
-function FastLogicRunner.externalAddNonFastConnection(self, uuid)
-    local id = self.hashedLookUp[uuid]
-    if id ~= nil then
+
+function FastLogicRunner.internalAddNonFastOutput(self, interId, id)
+    local nonFastBlock = self.nonFastBlocks[interId]
+    if nonFastBlock[3][id] == nil then
+        nonFastBlock[2][#nonFastBlock[2]+1] = id
+        nonFastBlock[3][id] = true
         self:revertBlockType(id)
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] + 1
+        if nonFastBlock[1] then
+            self.countOfOnOtherInputs = self.countOfOnOtherInputs + 1
+        end
         self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)
     end
 end
 
-function FastLogicRunner.externalRemoveNonFastConnection(self, uuid)
-    local id = self.hashedLookUp[uuid]
-    if id ~= nil then
+function FastLogicRunner.internalRemoveNonFastOutput(self, interId, id)
+    local nonFastBlock = self.nonFastBlocks[interId]
+    if nonFastBlock[3][id] ~= nil then
+        if #nonFastBlock[2] == 1 then -- if it is the last connection remove the nonFastBlock
+            -- remove block
+            self.nonFastBlocks[interId] = nil
+        else
+            -- remove data
+            table.removeValue(nonFastBlock[2], id)
+            nonFastBlock[3][id] = nil
+        end
+        -- remove connction
         self:revertBlockType(id)
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] - 1
+        if nonFastBlock[1] then -- update state
+            self.countOfOnOtherInputs = self.countOfOnOtherInputs - 1
+        end
         self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)
     end
 end
-
-function FastLogicRunner.externalAddNonFastOnInput(self, uuid)
-    local id = self.hashedLookUp[uuid]
-    if id ~= nil then
-        self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] + 1
-        self:internalAddBlockToUpdate(id)
-    end
-end
-
-function FastLogicRunner.externalRemoveNonFastOnInput(self, uuid)
-    local id = self.hashedLookUp[uuid]
-    if id ~= nil then
-        self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] - 1
-        self:internalAddBlockToUpdate(id)
-    end
-end
-
-function FastLogicRunner.externalChangeNonFastOnInput(self, uuid, amount)
-    local id = self.hashedLookUp[uuid]
-    if id ~= nil then
-        self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] + amount
-        self:internalAddBlockToUpdate(id)
-    end
-end
+--------------------------------------------------------
 
 function FastLogicRunner.externalAddBlock(self, block, skipChecksAndUpdates)
     if self.hashedLookUp[block.uuid] == nil then
@@ -656,4 +662,127 @@ function FastLogicRunner.externalShouldBeThroughBlock(self, uuid)
     if self.hashedLookUp[uuid] ~= nil then
         self:shouldBeThroughBlock(self.hashedLookUp[uuid])
     end
+end
+
+-- some NonFast fuctions dont need internals because they are not called internaly
+-- also it the code assumes that there are not erroes in the data that is being set to it
+
+function FastLogicRunner.externalAddNonFastBlock(self, interId, state, interactible)
+    local nonFastBlock = self.nonFastBlocks[interId]
+    if nonFastBlock == nil then
+        self.nonFastBlocks[interId] = {
+            state or false, -- there might not be a state given
+            {}, -- outputs
+            {}, -- outputs hash
+            interactible -- not read just stored for other classes to read
+        }
+    elseif state ~= nil then
+        self:externalSetNonFastBlockState(interId, state)
+    end
+end
+
+function FastLogicRunner.externalRemoveNonFastBlock(self, interId)
+    local nonFastBlock = self.nonFastBlocks[interId]
+    if nonFastBlock ~= nil then
+        local outputs = nonFastBlock[2]
+        local state = nonFastBlock[1]
+        for i = 1, #outputs do
+            local outputId = outputs[i]
+            self:revertBlockType(outputId)
+            if state then
+                self.countOfOnOtherInputs[output] = self.countOfOnOtherInputs[output] - 1
+            end
+            self.numberOfOtherInputs[outputId] = self.numberOfOtherInputs[outputId] - 1
+            self:shouldBeThroughBlock(outputId)
+            self:internalAddBlockToUpdate(outputId)
+        end
+        self.nonFastBlocks[interId] = nil
+    end
+end
+
+function FastLogicRunner.externalAddNonFastOutput(self, interId, uuid)
+    local id = self.hashedLookUp[uuid]
+    if id ~= nil then
+        self:internalAddNonFastOutput(interId, id)
+    end
+end
+
+function FastLogicRunner.externalRemoveNonFastOutput(self, interId, uuid)
+    local id = self.hashedLookUp[uuid]
+    if id ~= nil then
+        self:internalRemoveNonFastOutput(interId, id)
+    end
+end
+
+function FastLogicRunner.externalTurnNonFastBlockOn(self, interId)
+    local nonFastBlock = self.nonFastBlocks[interId]
+    if not nonFastBlock[1] then
+        nonFastBlock[1] = true
+        local outputs = nonFastBlock[2]
+        for i = 1, #outputs do
+            local outputId = outputs[i]
+            self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] + 1
+            self:internalAddBlockToUpdate(outputId)
+        end
+    end
+end
+
+function FastLogicRunner.externalTurnNonFastBlockOff(self, interId)
+    local nonFastBlock = self.nonFastBlocks[interId]
+    if nonFastBlock[1] then
+        nonFastBlock[1] = false
+        local outputs = nonFastBlock[2]
+        for i = 1, #outputs do
+            local outputId = outputs[i]
+            self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] - 1
+            self:internalAddBlockToUpdate(outputId)
+        end
+    end
+end
+
+function FastLogicRunner.externalSetNonFastBlockState(self, interId, state)
+    local nonFastBlock = self.nonFastBlocks[interId]
+    if nonFastBlock[1] ~= state then
+        nonFastBlock[1] = state
+        local stateNumber = state and 1 or -1
+        local outputs = nonFastBlock[2]
+        for i = 1, #outputs do
+            local outputId = outputs[i]
+            self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] + stateNumber
+            self:internalAddBlockToUpdate(outputId)
+        end
+    end
+end
+
+function FastLogicRunner.externalUpdateNonFastOutput(self, interId, allOutputUuids)
+    if #allOutputUuids == 0 then
+        self:externalRemoveNonFastBlock(interId)
+        return
+    end
+    local hashedLookUp = self.hashedLookUp
+    local nonFastBlock = self.nonFastBlocks[interId]
+    local outputs = nonFastBlock[2]
+    local outputsHash = nonFastBlock[3]
+    local allOutputIds = {}
+    for i = 1, #allOutputUuids do
+        local outputId = hashedLookUp[allOutputUuids[i]]
+        if outputId ~= nil then
+            if outputsHash[outputId] == nil then
+                self:internalAddNonFastOutput(interId, outputId)                
+            end
+            allOutputIds[outputId] = true
+        end
+    end
+    for i = 1, #outputs do
+        local outputId = outputs[i]
+        if allOutputIds[outputId] == nil then
+            self:internalRemoveNonFastOutput(interId, outputId)
+        end
+    end
+    
+end
+
+function FastLogicRunner.externalHasNonFastInputs(self, uuid)
+    local id = self.hashedLookUp[uuid]
+    return id ~= nil and self.numberOfOtherInputs[id] ~= 0
 end

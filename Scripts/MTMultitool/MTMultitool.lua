@@ -677,6 +677,7 @@ function MTMultitool.server_onFixedUpdate(self, dt)
     MTFlying.server_onFixedUpdate(self, dt)
     TensorConnect.server_onFixedUpdate(self, dt)
     Heatmap.server_onFixedUpdate(self, dt)
+    CopyPaste.server_onFixedUpdate(self, dt)
 end
 
 function MTMultitool.server_convertSilicon(self, data)

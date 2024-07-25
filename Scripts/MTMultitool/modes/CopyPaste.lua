@@ -14,6 +14,7 @@ function CopyPaste.inject(multitool)
     self.targeting = "subsurface" -- "subsurface" or "surface"
     self.shapeGroups = {}
     self.shapeVisualizations = {}
+    self.toCopyPastePackets = {}
 end
 
 local function renderLine(nametagsTable, origin, destination, color, spacing)
@@ -225,6 +226,39 @@ local function findPositionInIntIdMap(intIdMap, intId)
 end
 
 function CopyPaste.server_copyPaste(multitool, data)
+    local self = multitool.CopyPaste
+    local targetBody = data.body
+    local interactables = data.interactables
+    local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
+    if creation ~= nil then
+        for _, block in pairs(creation.AllFastBlocks) do
+            if table.contains(interactables, block.interactable:getId()) then
+                local s = sm.event.sendToInteractable(block.interactable, "removeUuidData")
+                if s == false then
+                end
+            end
+        end
+    end
+    table.insert(self.toCopyPastePackets, {
+        data = data,
+        tick = sm.game.getCurrentTick() + 1
+    })
+end
+
+function CopyPaste.server_onFixedUpdate(multitool)
+    local self = multitool.CopyPaste
+    if #self.toCopyPastePackets == 0 then
+        return
+    end
+    local data = self.toCopyPastePackets[1]
+    if sm.game.getCurrentTick() < data.tick then
+        return
+    end
+    table.remove(self.toCopyPastePackets, 1)
+    CopyPaste.doCopyPaste(multitool, data.data)
+end
+
+function CopyPaste.doCopyPaste(multitool, data)
     local interactables = data.interactables
     local vectors = data.vectors
     local targetBody = data.body
@@ -401,10 +435,14 @@ function CopyPaste.server_copyPaste(multitool, data)
             newShape.pos.y = newShape.pos.y + deltaP.y
             newShape.pos.z = newShape.pos.z + deltaP.z
             for intId, pList in pairs(originalPositionsTakenUpBySource) do
+                if intId ~= interactables[i] then
+                    goto continue2
+                end
                 for j = 1, #pList do
-                    local p = pList[j] + deltaP/4
+                    local p = pList[j] + deltaP / 4
                     intIdMap[p.x .. ";" .. p.y .. ";" .. p.z] = i + maxIntId
                 end
+                ::continue2::
             end
             newShape.controller.id = maxIntId + i
             newShape.controller.controllers = {}
@@ -492,7 +530,6 @@ function CopyPaste.server_copyPaste(multitool, data)
         end
         maxIntId = maxIntId + #interactables
     end)
-
     for i = 1, #relativeConnectionsToMake do
         local connection = relativeConnectionsToMake[i]
         if connection.type == "outgoing" then
@@ -649,10 +686,8 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     })
                 end
                 if primaryState == 1 then
-                    print(localPosition.x - 0.125 .. ";" .. localPosition.y - 0.125 .. ";" .. localPosition.z - 0.125)
                     local hitBlock = voxelMap
                     [localPosition.x - 0.125 .. ";" .. localPosition.y - 0.125 .. ";" .. localPosition.z - 0.125]
-                    print(voxelMap)
                     if hitBlock ~= nil and sm.exists(hitBlock) then
                         addShapes(multitool, { hitBlock })
                     end
@@ -975,7 +1010,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     range = nSteps
                 })
             end
-            sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true), "Click to select range ("..nSteps..")")
+            sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true), "Click to select range <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>("..(nSteps+1)..")</p>")
         else
             sm.gui.setInteractionText("Select range", sm.gui.getKeyBinding("Create", true), "Click to select range")
         end

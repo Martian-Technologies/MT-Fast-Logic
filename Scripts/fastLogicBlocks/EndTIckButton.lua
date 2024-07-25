@@ -30,6 +30,14 @@ function EndTickButton.client_onDestroy2(self)
 end
 
 function EndTickButton.client_onInteract(self, character, state)
+    local success, result = pcall(self.pcalled_client_onInteract, self, character, state)
+    if not success then
+        self:client_sendMessage("AN ERROR OCCURRED IN FAST LOGIC (id: 5). Please report to ItchyTrack on discord")
+        self:client_sendMessage(result)
+    end
+end
+
+function EndTickButton.pcalled_client_onInteract(self, character, state)
     self.FastLogicRunner:externalChangeNonFastOnInput(self.data.uuid, state and 1 or -1)
     self.FastLogicRunner:externalAddBlockToUpdate(self.data.uuid)
 end

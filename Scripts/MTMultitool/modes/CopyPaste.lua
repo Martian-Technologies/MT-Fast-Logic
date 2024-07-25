@@ -229,8 +229,10 @@ end
 function CopyPaste.server_copyPaste(multitool, data)
     local self = multitool.CopyPaste
     local targetBody = data.body
+    local creationTable = sm.creation.exportToTable(targetBody, true)
     local interactables = data.interactables
     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
+    local gatesToRestore = {}
     if creation ~= nil then
         for _, block in pairs(creation.AllFastBlocks) do
             if table.contains(interactables, block.interactable:getId()) then
@@ -240,6 +242,19 @@ function CopyPaste.server_copyPaste(multitool, data)
             end
         end
     end
+    for _, body in ipairs(creationTable.bodies) do
+        for _, shape in ipairs(body.childs) do
+            if shape.controller == nil then
+                goto continue
+            end
+            local intId = shape.controller.id
+            if table.contains(interactables, intId) then
+                gatesToRestore[intId] = shape.controller.data
+            end
+            ::continue::
+        end
+    end
+    data.gatesToRestore = gatesToRestore
     table.insert(self.toCopyPastePackets, {
         data = data,
         tick = sm.game.getCurrentTick() + 1
@@ -546,7 +561,7 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
         elseif connection.type == "ingoing" then
             local sourceIntId = intIdMap
-            [connection.from.x .. ";" .. connection.from.y .. ";" .. connection.from.z]
+                [connection.from.x .. ";" .. connection.from.y .. ";" .. connection.from.z]
             if sourceIntId ~= nil then
                 local sourceShape = everyShapeByIntId[sourceIntId]
                 if sourceShape ~= nil then
@@ -558,6 +573,23 @@ function CopyPaste.doCopyPaste(multitool, data)
                     })
                 end
             end
+        end
+    end
+
+    local gatesToRestore = data.gatesToRestore
+
+    -- advPrint(gatesToRestore, 100, 100, true)
+
+    for _, body in ipairs(creationTable.bodies) do
+        for _, shape in ipairs(body.childs) do
+            if shape.controller == nil then
+                goto continue
+            end
+            local intId = shape.controller.id
+            if table.contains(gatesToRestore, intId) then
+                shape.controller.data = gatesToRestore[gatesToRestore[intId]]
+            end
+            ::continue::
         end
     end
 
@@ -978,7 +1010,8 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             if localPosition ~= nil then
                 sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true), "Click to select step")
                 local vecColor = colorOrder[math.fmod(#self.vectors, #colorOrder) + 1]
-                renderVector(tags, self.activeBody:transformPoint(self.origin), self.activeBody:transformPoint(localPosition),
+                renderVector(tags, self.activeBody:transformPoint(self.origin),
+                    self.activeBody:transformPoint(localPosition),
                     vecColor, 0.025)
                 if primaryState == 1 then
                     table.insert(self.actions, {
@@ -1017,8 +1050,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
         elseif state == "confirm" then
             sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
                 "Change External Connections Policy: <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-                self.externalConnectionsPolicy .. "</p>")
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Confirm Copy/Paste")
+                self.externalConnectionsPolicy .. "</p>     ", sm.gui.getKeyBinding("Create", true), "Confirm Copy/Paste")
             if primaryState == 1 then
                 doCopyPaste(multitool)
                 CopyPaste.cleanUp(multitool)
@@ -1031,6 +1063,60 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 else
                     self.externalConnectionsPolicy = "absolute"
                 end
+            end
+            local siliconFound = false
+            -- local interactableIds = {}
+            -- for _, shape in ipairs(self.selectedShapes) do
+            for _, shape in ipairs(self.activeBody:getCreationShapes()) do
+                local shapeUuid = shape:getShapeUuid()
+                -- table.insert(interactableIds, shape.interactable:getId())
+                if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
+                    siliconFound = true
+                    break
+                end
+            end
+            -- if not siliconFound then
+            --     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(self.activeBody)]
+            --     if creation ~= nil then
+            --         for _, block in pairs(creation.AllFastBlocks) do
+            --             print(block)
+            --             if table.contains(interactableIds, block.interactable:getId()) then
+            --                 print("block in interactables")
+            --                 local inputs = block.inputs
+            --                 local outputs = block.outputs
+            --                 print(inputs)
+            --                 print(outputs)
+            --                 for _, input in pairs(inputs) do
+            --                     local block = creation.blocks[input]
+            --                     print("input", block)
+            --                     if block == nil then
+            --                         goto continue
+            --                     end
+            --                     if block.isSilicon then
+            --                         siliconFound = true
+            --                         goto endLoop
+            --                     end
+            --                     ::continue::
+            --                 end
+            --                 for _, output in pairs(outputs) do
+            --                     print("output", output)
+            --                     local block = creation.blocks[output]
+            --                     if block == nil then
+            --                         goto continue
+            --                     end
+            --                     if block.isSilicon then
+            --                         siliconFound = true
+            --                         goto endLoop
+            --                     end
+            --                     ::continue::
+            --                 end
+            --             end
+            --         end
+            --     end
+            --     ::endLoop::
+            -- end
+            if siliconFound then
+                sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p> Copying and pasting silicon-related blocks will lead to undefined behavior. <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>")
             end
         end
         for i = 1, #self.vectors do
@@ -1086,7 +1172,7 @@ function CopyPaste.cleanUp(multitool)
     self.shapeVisualizations = {}
     self.activeBody = nil
     multitool.VolumeSelector.body = nil
-    self.vectors = nil
+    self.vectors = {}
     self.actions = {}
     self.origin = nil
 end

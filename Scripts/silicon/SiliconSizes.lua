@@ -703,5 +703,10 @@ sm.MTFastLogic.SiliconBlocksShapeDB.sizeToUuid = {
 sm.MTFastLogic.SiliconBlocksShapeDB.uuidToSize = {}
 for s, u in pairs(sm.MTFastLogic.SiliconBlocksShapeDB.sizeToUuid) do
     local size = string.stringToVec(s, "x")
-    sm.MTFastLogic.SiliconBlocksShapeDB.uuidToSize[u] = {size.x, size.y, size.z}
+    sm.MTFastLogic.SiliconBlocksShapeDB.uuidToSize[u] = { size.x, size.y, size.z }
+end
+
+sm.MTFastLogic.SiliconBlocksShapeDB.allUuids = {}
+for _, u in pairs(sm.MTFastLogic.SiliconBlocksShapeDB.sizeToUuid) do
+    table.insert(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, u)
 end

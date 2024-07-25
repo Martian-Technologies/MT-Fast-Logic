@@ -15,6 +15,7 @@ function CopyPaste.inject(multitool)
     self.shapeGroups = {}
     self.shapeVisualizations = {}
     self.toCopyPastePackets = {}
+    self.externalConnectionsPolicy = "relative" -- "ignore" | "absolute" | "relative"
 end
 
 local function renderLine(nametagsTable, origin, destination, color, spacing)
@@ -191,7 +192,7 @@ local function doCopyPaste(multitool)
         interactables = interactables,
         vectors = vectors,
         body = self.activeBody,
-        externalConnections = "relative" -- "ignore" | "absolute" | "relative"
+        externalConnections = self.externalConnectionsPolicy -- "ignore" | "absolute" | "relative"
     }
     multitool.network:sendToServer("server_copyPaste", data)
 end
@@ -873,10 +874,10 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 canConfirm = true
                 self.vectors[#self.vectors].range = action.range
             end
-            -- if action.action == "confirm" then
-            --     doCopyPaste(multitool)
-            --     CopyPaste.cleanUp(multitool)
-            -- end
+            if action.action == "confirm" then
+                state = "confirm"
+                canConfirm = false
+            end
         end
         local localPosition, bodyhit = nil, nil
         local shapeHit = nil
@@ -895,7 +896,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 local z1 = localPosition.z - 0.125
                 local z2 = localPosition.z + 0.125
                 local width = 0.25
-                local stepsPerBlock = 2
+                local stepsPerBlock = 4
                 local steps = math.floor(width / 0.25) * stepsPerBlock
                 for i = 0, steps do
                     local x = x1 + i / stepsPerBlock * 0.25
@@ -1010,9 +1011,27 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     range = nSteps
                 })
             end
-            sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true), "Click to select range <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>("..(nSteps+1)..")</p>")
-        else
-            sm.gui.setInteractionText("Select range", sm.gui.getKeyBinding("Create", true), "Click to select range")
+            sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true),
+                "Click to select range <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>(" ..
+                (nSteps + 1) .. ")</p>")
+        elseif state == "confirm" then
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
+                "Change External Connections Policy: <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+                self.externalConnectionsPolicy .. "</p>")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Confirm Copy/Paste")
+            if primaryState == 1 then
+                doCopyPaste(multitool)
+                CopyPaste.cleanUp(multitool)
+            end
+            if MTMultitool.handleForceBuild(multitool, forceBuild) then
+                if self.externalConnectionsPolicy == "absolute" then
+                    self.externalConnectionsPolicy = "relative"
+                elseif self.externalConnectionsPolicy == "relative" then
+                    self.externalConnectionsPolicy = "ignore"
+                else
+                    self.externalConnectionsPolicy = "absolute"
+                end
+            end
         end
         for i = 1, #self.vectors do
             local vec = self.vectors[i]
@@ -1032,8 +1051,9 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
         if canConfirm then
             sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Confirm Copy/Paste")
             if MTMultitool.handleForceBuild(multitool, forceBuild) then
-                doCopyPaste(multitool)
-                CopyPaste.cleanUp(multitool)
+                table.insert(self.actions, {
+                    action = "confirm"
+                })
             end
         end
     end

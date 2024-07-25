@@ -85,6 +85,14 @@ function BaseFastLogicBlock.getData2(self)
 end
 
 function BaseFastLogicBlock.server_onCreate(self)
+    local success, result = pcall(self.pcalled_server_onCreate, self)
+    if not success then
+        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 5). Please report to ItchyTrack on discord")
+        self:sendMessageToAll(result)
+    end
+end
+
+function BaseFastLogicBlock.pcalled_server_onCreate(self)
     self:getCreationData()
     self.data = self.data or {}
     self.isFastLogic = true
@@ -116,6 +124,14 @@ function BaseFastLogicBlock.server_onCreate2(self)
 end
 
 function BaseFastLogicBlock.server_onDestroy(self)
+    local success, result = pcall(self.pcalled_server_onDestroy, self)
+    if not success then
+        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 6). Please report to ItchyTrack on discord")
+        self:sendMessageToAll(result)
+    end
+end
+
+function BaseFastLogicBlock.pcalled_server_onDestroy(self)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
     if self.creation ~= nil and sm.MTFastLogic.Creations[self.creationId] ~= nil then
         if self.creation.FastLogicRealBlockManager:checkForCreationDeletion() == false then

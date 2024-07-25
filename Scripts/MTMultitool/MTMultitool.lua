@@ -697,7 +697,15 @@ function MTMultitool.server_convertSilicon(self, data)
             end
         end
     end
-    sm.MTFastLogic.FastLogicRunnerRunner:convertSilicon(wantedType, data.originBody, positions)
+    local success, result = pcall(
+        sm.MTFastLogic.FastLogicRunnerRunner.convertSilicon,
+        sm.MTFastLogic.FastLogicRunnerRunner, wantedType, data.originBody, positions
+    )
+    if not success then
+        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 4). Please report to ItchyTrack on discord")
+        self:sendMessageToAll(result)
+    end
+    
     -- print(wantedType)
     -- print(origin)
     -- print(positions)

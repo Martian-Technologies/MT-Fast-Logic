@@ -28,7 +28,11 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         if self.bodiesToConvert ~= nil then
             if self.bodiesToConvert[1] ~= nil then
                 for i = 1, #self.bodiesToConvert[1] do
-                    self:convertBodyInternal(self.bodiesToConvert[1][i].body, self.bodiesToConvert[1][i].wantedType)
+                    local success, result = pcall(self.convertBodyInternal, self, self.bodiesToConvert[1][i].body, self.bodiesToConvert[1][i].wantedType)
+                    if not success then
+                        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 1). Please report to ItchyTrack on discord")
+                        self:sendMessageToAll(result)
+                    end
                 end
             end
             self.bodiesToConvert[1] = self.bodiesToConvert[2]
@@ -36,9 +40,17 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         end
         self.changedUuidsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
-            v.FastLogicRealBlockManager:update()
+            local success, result = pcall(v.FastLogicRealBlockManager.update, v.FastLogicRealBlockManager)
+            if not success then
+                self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 2). Please report to ItchyTrack on discord")
+                self:sendMessageToAll(result)
+            end
         end
-        self:updatedDisplays()
+        local success, result = pcall(self.updatedDisplays, self)
+        if not success then
+            self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 3). Please report to ItchyTrack on discord")
+            self:sendMessageToAll(result)
+        end
     end
 end
 
@@ -57,6 +69,10 @@ end
 
 function FastLogicRunnerRunner.server_onrefresh(self)
     self:server_onCreate()
+end
+
+function FastLogicRunnerRunner.sendMessageToAll(self, message)
+    self.network:sendToClients("client_sendMessage", message)
 end
 
 function FastLogicRunnerRunner.client_sendMessage(self, message)

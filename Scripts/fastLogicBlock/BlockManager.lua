@@ -550,7 +550,7 @@ function FastLogicRunner.internalAddNonFastOutput(self, interId, id)
         self:revertBlockType(id)
         self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] + 1
         if nonFastBlock[1] then
-            self.countOfOnOtherInputs = self.countOfOnOtherInputs + 1
+            self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] + 1
         end
         self:shouldBeThroughBlock(id)
         self:internalAddBlockToUpdate(id)
@@ -568,14 +568,16 @@ function FastLogicRunner.internalRemoveNonFastOutput(self, interId, id)
             table.removeValue(nonFastBlock[2], id)
             nonFastBlock[3][id] = nil
         end
-        -- remove connction
-        self:revertBlockType(id)
-        self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] - 1
-        if nonFastBlock[1] then -- update state
-            self.countOfOnOtherInputs = self.countOfOnOtherInputs - 1
+        if self.numberOfOtherInputs[id] ~= false then
+            -- remove connction
+            self:revertBlockType(id)
+            self.numberOfOtherInputs[id] = self.numberOfOtherInputs[id] - 1
+            if nonFastBlock[1] then -- update state
+                self.countOfOnOtherInputs[id] = self.countOfOnOtherInputs[id] - 1
+            end
+            self:shouldBeThroughBlock(id)
+            self:internalAddBlockToUpdate(id)
         end
-        self:shouldBeThroughBlock(id)
-        self:internalAddBlockToUpdate(id)
     end
 end
 --------------------------------------------------------
@@ -688,13 +690,15 @@ function FastLogicRunner.externalRemoveNonFastBlock(self, interId)
         local state = nonFastBlock[1]
         for i = 1, #outputs do
             local outputId = outputs[i]
-            self:revertBlockType(outputId)
-            if state then
-                self.countOfOnOtherInputs[output] = self.countOfOnOtherInputs[output] - 1
+            if self.numberOfOtherInputs[outputId] ~= false then
+                self:revertBlockType(outputId)
+                self.numberOfOtherInputs[outputId] = self.numberOfOtherInputs[outputId] - 1
+                if state then
+                    self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] - 1
+                end
+                self:shouldBeThroughBlock(outputId)
+                self:internalAddBlockToUpdate(outputId)
             end
-            self.numberOfOtherInputs[outputId] = self.numberOfOtherInputs[outputId] - 1
-            self:shouldBeThroughBlock(outputId)
-            self:internalAddBlockToUpdate(outputId)
         end
         self.nonFastBlocks[interId] = nil
     end
@@ -719,10 +723,16 @@ function FastLogicRunner.externalTurnNonFastBlockOn(self, interId)
     if not nonFastBlock[1] then
         nonFastBlock[1] = true
         local outputs = nonFastBlock[2]
-        for i = 1, #outputs do
+        local i = 1
+        while i <= #outputs do
             local outputId = outputs[i]
-            self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] + 1
-            self:internalAddBlockToUpdate(outputId)
+            if self.countOfOnOtherInputs[outputId] ~= false then
+                self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] + 1
+                self:internalAddBlockToUpdate(outputId)
+                i = i + 1
+            else
+                table.remove(outputs, i)
+            end
         end
     end
 end
@@ -732,10 +742,16 @@ function FastLogicRunner.externalTurnNonFastBlockOff(self, interId)
     if nonFastBlock[1] then
         nonFastBlock[1] = false
         local outputs = nonFastBlock[2]
-        for i = 1, #outputs do
+        local i = 1
+        while i <= #outputs do
             local outputId = outputs[i]
-            self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] - 1
-            self:internalAddBlockToUpdate(outputId)
+            if self.countOfOnOtherInputs[outputId] ~= false then
+                self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] - 1
+                self:internalAddBlockToUpdate(outputId)
+                i = i + 1
+            else
+                table.remove(outputs, i)
+            end
         end
     end
 end
@@ -746,10 +762,16 @@ function FastLogicRunner.externalSetNonFastBlockState(self, interId, state)
         nonFastBlock[1] = state
         local stateNumber = state and 1 or -1
         local outputs = nonFastBlock[2]
-        for i = 1, #outputs do
+        local i = 1
+        while i <= #outputs do
             local outputId = outputs[i]
-            self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] + stateNumber
-            self:internalAddBlockToUpdate(outputId)
+            if self.countOfOnOtherInputs[outputId] ~= false then
+                self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] + stateNumber
+                self:internalAddBlockToUpdate(outputId)
+                i = i + 1
+            else
+                table.remove(outputs, i)
+            end
         end
     end
 end
@@ -768,14 +790,14 @@ function FastLogicRunner.externalUpdateNonFastOutput(self, interId, allOutputUui
         local outputId = hashedLookUp[allOutputUuids[i]]
         if outputId ~= nil then
             if outputsHash[outputId] == nil then
-                self:internalAddNonFastOutput(interId, outputId)                
+                self:internalAddNonFastOutput(interId, outputId)
             end
             allOutputIds[outputId] = true
         end
     end
     for i = 1, #outputs do
         local outputId = outputs[i]
-        if allOutputIds[outputId] == nil then
+        if allOutputIds[outputId] == nil or self.countOfOnOtherInputs[outputId] == false then
             self:internalRemoveNonFastOutput(interId, outputId)
         end
     end
@@ -784,5 +806,5 @@ end
 
 function FastLogicRunner.externalHasNonFastInputs(self, uuid)
     local id = self.hashedLookUp[uuid]
-    return id ~= nil and self.numberOfOtherInputs[id] ~= 0
+    return id ~= nil and self.numberOfOtherInputs[id] ~= false and self.numberOfOtherInputs[id] ~= 0
 end

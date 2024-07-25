@@ -480,9 +480,7 @@ end
 function sm.MTUtil.getOffset(rot)
     local xAxisSimple = rot.xAxis.x + rot.xAxis.y * 2 + rot.xAxis.z * 3
 	local zAxisSimple = rot.zAxis.x + rot.zAxis.y * 2 + rot.zAxis.z * 3
-	
 	local offset = sm.vec3.new(0,0,0)
-	
 	if  (zAxisSimple ==  2 and (xAxisSimple == -1 or xAxisSimple == -3)) or
 		(zAxisSimple ==  3 and (xAxisSimple ==  2 or xAxisSimple == -1)) or
 		(zAxisSimple == -1 and (xAxisSimple ~= 1 and xAxisSimple ~= -1)) or
@@ -490,15 +488,13 @@ function sm.MTUtil.getOffset(rot)
 		(zAxisSimple == -3 and (xAxisSimple == -1 or xAxisSimple == -2)) then
 			offset.x = -1
 	end
-	
 	if  (zAxisSimple ==  1 and (xAxisSimple ==  3 or xAxisSimple == -2)) or
 		(zAxisSimple ==  3 and (xAxisSimple == -1 or xAxisSimple == -2)) or
 		(zAxisSimple == -1 and (xAxisSimple == -2 or xAxisSimple == -3)) or
 		(zAxisSimple == -2 and (xAxisSimple ~= 2 and xAxisSimple ~= -2)) or
 		(zAxisSimple == -3 and (xAxisSimple ==  1 or xAxisSimple == -2)) then
 			offset.y = -1 
-	end                   
-	                      
+	end
 	if  (zAxisSimple ==  1 and (xAxisSimple == -2 or xAxisSimple == -3)) or
 		(zAxisSimple ==  2 and (xAxisSimple ==  1 or xAxisSimple == -3)) or
 		(zAxisSimple == -1 and (xAxisSimple ==  2 or xAxisSimple == -3)) or
@@ -506,6 +502,5 @@ function sm.MTUtil.getOffset(rot)
 		(zAxisSimple == -3 and (xAxisSimple ~= 3 and xAxisSimple ~= -3)) then
 			offset.z = -1
 	end
-
     return offset
 end

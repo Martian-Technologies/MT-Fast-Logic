@@ -35,7 +35,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
     end
     if self.origin == nil and self.final == nil then
         sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true),
-            "Select first corner" .. extraTooltip.selectOrigin .. betaTextEnd)
+            "Select first corner" .. (extraTooltip.selectOrigin or "") .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final == nil then
         needToRaycast = true

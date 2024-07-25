@@ -302,7 +302,7 @@ end
 function MTMultitoolLib.getVoxelMap(body, override_cache)
     if MTMultitoolLib.voxelMapHash[body:getId()] and not override_cache then
         local hashValue = MTMultitoolLib.voxelMapHash[body:getId()]
-        if os.clock() - hashValue.time < 5 then
+        if not body:hasChanged(hashValue.tick) then
             return hashValue.voxelMap
         end
     end
@@ -319,7 +319,7 @@ function MTMultitoolLib.getVoxelMap(body, override_cache)
 
     MTMultitoolLib.voxelMapHash[body:getId()] = {
         voxelMap = voxelMap,
-        time = os.clock()
+        tick = sm.game.getCurrentTick()
     }
 
     -- print(voxelMap)
@@ -365,9 +365,9 @@ function MTMultitoolLib.getOccupiedBlocks(shape)
 end
 
 function MTMultitoolLib.getVoxelMapMultidotblocks(body)
-    if MTMultitoolLib.voxelMapHash[body:getId().."multidotblocks"] then
-        local hashValue = MTMultitoolLib.voxelMapHash[body:getId().."multidotblocks"]
-        if os.clock() - hashValue.time < 5 then
+    if MTMultitoolLib.voxelMapHash[body:getId() .. "multidotblocks"] then
+        local hashValue = MTMultitoolLib.voxelMapHash[body:getId() .. "multidotblocks"]
+        if not body:hasChanged(hashValue.tick) then
             return hashValue.voxelMap
         end
     end
@@ -388,9 +388,41 @@ function MTMultitoolLib.getVoxelMapMultidotblocks(body)
         end
     end
 
-    MTMultitoolLib.voxelMapHash[body:getId().."multidotblocks"] = {
+    MTMultitoolLib.voxelMapHash[body:getId() .. "multidotblocks"] = {
         voxelMap = voxelMap,
-        time = os.clock()
+        tick = sm.game.getCurrentTick()
+    }
+
+    return voxelMap
+end
+
+function MTMultitoolLib.getVoxelMapInteractableIds(body)
+    if MTMultitoolLib.voxelMapHash[body:getId() .. "intIds"] then
+        local hashValue = MTMultitoolLib.voxelMapHash[body:getId() .. "intIds"]
+        if not body:hasChanged(hashValue.tick) then
+            return hashValue.voxelMap
+        end
+    end
+
+    local interactables = body:getInteractables()
+    local voxelMap = {}
+    -- print("__________________________________________________________")
+    local halfBlock = sm.vec3.new(0.125, 0.125, 0.125)
+    for _, interactable in pairs(interactables) do
+        -- local position = MTMultitoolLib.getLocalCenter(interactable:getShape()) / 4 - halfBlock
+        -- local indexString = position.x .. ";" .. position.y .. ";" .. position.z
+        -- voxelMap[indexString] = interactable:getShape()
+        local positions = MTMultitoolLib.getOccupiedBlocks(interactable:getShape())
+        for i, p in pairs(positions) do
+            local pos = p / 4 - halfBlock
+            local indexString = pos.x .. ";" .. pos.y .. ";" .. pos.z
+            voxelMap[indexString] = interactable:getId()
+        end
+    end
+
+    MTMultitoolLib.voxelMapHash[body:getId() .. "intIds"] = {
+        voxelMap = voxelMap,
+        tick = sm.game.getCurrentTick()
     }
 
     return voxelMap

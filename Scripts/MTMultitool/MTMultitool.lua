@@ -39,6 +39,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Merger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Colorizer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Heatmap.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/DecoderMaker.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/CopyPaste.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SingleConnect.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SeriesConnect.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/NtoNConnect.lua")
@@ -83,6 +84,7 @@ local defaultEnabledModes = {
     true,
     true,
     true,
+    true,
 }
 
 MTMultitool.modes = {
@@ -95,6 +97,7 @@ MTMultitool.modes = {
     "Colorizer",
     "Heatmap",
     "Decoder Maker",
+    "Copy Paste",
     "Single",
     "Series",
 	"N to N",
@@ -112,6 +115,7 @@ MTMultitool.internalModes = {
     "Colorizer",
     "Heatmap",
     "DecoderMaker",
+    "CopyPaste",
     "SingleConnect",
     "SeriesConnect",
     "NtoNConnect",
@@ -158,6 +162,7 @@ function MTMultitool.client_onCreate(self)
     Colorizer.inject(self)
     Heatmap.inject(self)
     DecoderMaker.inject(self)
+    CopyPaste.inject(self)
     SingleConnect.inject(self)
     SeriesConnect.inject(self)
     NtoNConnect.inject(self)
@@ -242,9 +247,9 @@ function MTMultitool.client_onUpdate(self, dt)
     if os.clock() - self.lastSettingsRepull > 1 then
         self:repullSettings()
     end
-	for _, func in pairs(self.subscriptions["client_onUpdate"]) do
-		func(self, dt)
-	end
+    for _, func in pairs(self.subscriptions["client_onUpdate"]) do
+        func(self, dt)
+    end
     for _, modeIndex in pairs(MTMultitool.forceOn) do
         self.enabledModes[modeIndex] = true
     end
@@ -281,7 +286,7 @@ function MTMultitool.client_onUpdate(self, dt)
         print("Error in unsafeOnUpdateStuff: " .. result)
     end
     -- BlockSelector.client_onUpdate(self)
-	-- ConnectionManager.client_onUpdate(self)
+    -- ConnectionManager.client_onUpdate(self)
     -- VertexRenderer.client_onUpdate(self)
     success, result = pcall(BlockSelector.client_onUpdate, self)
     if not success then
@@ -300,48 +305,55 @@ function MTMultitool.client_onUpdate(self, dt)
         print("Error in Heatmap.client_onUpdate: " .. result)
     end
 
-	local isSprinting =  self.tool:isSprinting()
+    local isSprinting = self.tool:isSprinting()
 
     if self.tool:isLocal() then
-		if self.equipped then
-			if isSprinting and self.firstPersonAnimations.currentAnimation ~= "sprintInto" and self.firstPersonAnimations.currentAnimation ~= "sprintIdle" then
-				swapFpAnimation( self.firstPersonAnimations, "sprintExit", "sprintInto", 0.0 )
-			elseif not self.tool:isSprinting() and ( self.firstPersonAnimations.currentAnimation == "sprintIdle" or self.firstPersonAnimations.currentAnimation == "sprintInto" ) then
-				swapFpAnimation( self.firstPersonAnimations, "sprintInto", "sprintExit", 0.0 )
-			end
-		end
-		updateFpAnimations( self.firstPersonAnimations, self.equipped, dt )
-	end
+        if self.equipped then
+            if isSprinting and self.firstPersonAnimations.currentAnimation ~= "sprintInto" and self.firstPersonAnimations.currentAnimation ~= "sprintIdle" then
+                swapFpAnimation(self.firstPersonAnimations, "sprintExit", "sprintInto", 0.0)
+            elseif not self.tool:isSprinting() and (self.firstPersonAnimations.currentAnimation == "sprintIdle" or self.firstPersonAnimations.currentAnimation == "sprintInto") then
+                swapFpAnimation(self.firstPersonAnimations, "sprintInto", "sprintExit", 0.0)
+            end
+        end
+        updateFpAnimations(self.firstPersonAnimations, self.equipped, dt)
+    end
 
     if not self.equipped then
-		if self.wantEquipped then
-			self.wantEquipped = false
-			self.equipped = true
-		end
-		return true
-	end
+        if self.wantEquipped then
+            self.wantEquipped = false
+            self.equipped = true
+        end
+        return true
+    end
 
     local totalWeight = 0.0
-	for name, animation in pairs( self.thirdPersonAnimations.animations ) do
-		animation.time = animation.time + dt
+    for name, animation in pairs(self.thirdPersonAnimations.animations) do
+        animation.time = animation.time + dt
 
-		if name == self.thirdPersonAnimations.currentAnimation then
-			animation.weight = math.min( animation.weight + ( self.thirdPersonAnimations.blendSpeed * dt ), 1.0 )
+        if name == self.thirdPersonAnimations.currentAnimation then
+            animation.weight = math.min(animation.weight + (self.thirdPersonAnimations.blendSpeed * dt), 1.0)
 
-			if animation.time >= animation.info.duration - self.blendTime then
-				if name == "pickup" then
-					setTpAnimation( self.thirdPersonAnimations, "idle", 0.001 )
-				elseif animation.nextAnimation ~= "" then
-					setTpAnimation( self.thirdPersonAnimations, animation.nextAnimation, 0.001 )
-				end
-			end
-		else
-			animation.weight = math.max( animation.weight - ( self.thirdPersonAnimations.blendSpeed * dt ), 0.0 )
-		end
+            if animation.time >= animation.info.duration - self.blendTime then
+                if name == "pickup" then
+                    setTpAnimation(self.thirdPersonAnimations, "idle", 0.001)
+                elseif animation.nextAnimation ~= "" then
+                    setTpAnimation(self.thirdPersonAnimations, animation.nextAnimation, 0.001)
+                end
+            end
+        else
+            animation.weight = math.max(animation.weight - (self.thirdPersonAnimations.blendSpeed * dt), 0.0)
+        end
 
-		totalWeight = totalWeight + animation.weight
-	end
-	return true
+        totalWeight = totalWeight + animation.weight
+    end
+    return true
+end
+
+function MTMultitool.client_onReload(self)
+    if self.internalModes[self.mode] == "CopyPaste" then
+        CopyPaste.client_onReload(self)
+    end
+    return true
 end
 
 function MTMultitool.loadAnimations(self)
@@ -457,6 +469,8 @@ function MTMultitool.client_onUnequip(self, animate)
         Merger.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
         Colorizer.cleanNametags(self)
+    elseif MTMultitool.internalModes[self.mode] == "CopyPaste" then
+        CopyPaste.cleanNametags(self)
     end
     HoveringUI.cleanUp(self)
 	BlockSelector.client_onUnequip(self)
@@ -497,6 +511,8 @@ function MTMultitool.client_onToggle(self)
         VolumePlacer.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "DecoderMaker" then
         DecoderMaker.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "CopyPaste" then
+        CopyPaste.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "SingleConnect" then
         SingleConnect.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "SeriesConnect" then
@@ -546,6 +562,8 @@ local function triggerTool(self, primaryState, secondaryState, forceBuild, looki
         Heatmap.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "DecoderMaker" then
         DecoderMaker.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+    elseif MTMultitool.internalModes[self.mode] == "CopyPaste" then
+        CopyPaste.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SingleConnect" then
         SingleConnect.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SeriesConnect" then
@@ -908,4 +926,8 @@ end
 
 function MTMultitool.sv_loadBackup(self, data)
     sm.MTBackupEngine.sv_loadBackup(self, data)
+end
+
+function MTMultitool.server_copyPaste(self, data)
+    CopyPaste.server_copyPaste(self, data)
 end

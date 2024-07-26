@@ -202,16 +202,19 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
 
     self.nametagUpdate(tags)
 
+    local doNotConfirm = false
     if primaryState == 1 then
         if self.origin == nil then
             self.origin = localPosition
             self.body = bodyhit
+            doNotConfirm = true
         elseif self.final == nil then
             self.final = localPosition
+            doNotConfirm = true
         end
     end
-    if self.origin ~= nil and self.final ~= nil then
-            if primaryState == 1 or not self.doConfirm then
+    if (self.origin ~= nil) and (self.final ~= nil) and (not doNotConfirm) then
+        if (primaryState == 1) or (not self.doConfirm) then
             local result = {
                 origin = self.origin,
                 final = self.final,

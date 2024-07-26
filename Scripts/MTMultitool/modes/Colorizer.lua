@@ -105,6 +105,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
         multitool.VolumeSelector.isBeta = false
         multitool.VolumeSelector.selectionMode = "inside"
         multitool.VolumeSelector.previewColor = sm.MTFastLogic.FastLogicBlockColors[self.selectedColor]
+        multitool.VolumeSelector.doConfirm = true
 
 
         -- print("Colorizer")

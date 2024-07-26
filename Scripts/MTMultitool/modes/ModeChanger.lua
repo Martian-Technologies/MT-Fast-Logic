@@ -24,6 +24,7 @@ function ModeChanger.trigger(multitool, primaryState, secondaryState, forceBuild
     multitool.VolumeSelector.actionWord = "Change Mode"
     multitool.VolumeSelector.isBeta = false
     multitool.VolumeSelector.selectionMode = "inside"
+    multitool.VolumeSelector.doConfirm = true
 
     local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
     if result == nil then

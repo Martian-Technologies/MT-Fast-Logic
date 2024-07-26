@@ -14,6 +14,7 @@ function VolumeSelector.inject(multitool)
     self.index = 1
     self.previewColor = sm.color.new(1, 1, 1, 1)
     self.selectionMode = "inside" -- "inside" or "outside"
+    self.doConfirm = true
     self.nametagUpdate = NametagManager.createController(multitool)
 end
 
@@ -207,7 +208,10 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
             self.body = bodyhit
         elseif self.final == nil then
             self.final = localPosition
-        else
+        end
+    end
+    if self.origin ~= nil and self.final ~= nil then
+            if primaryState == 1 or not self.doConfirm then
             local result = {
                 origin = self.origin,
                 final = self.final,
@@ -240,6 +244,7 @@ end
 
 function VolumeSelector.cleanUp(multitool)
     local self = multitool.VolumeSelector
+    self.doConfirm = true
     self.origin = nil
     self.body = nil
     self.final = nil

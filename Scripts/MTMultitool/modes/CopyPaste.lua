@@ -746,6 +746,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 vs.selectionMode = "inside"
             end
             vs.actionWord = "Add Shapes"
+            vs.doConfirm = false
             local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
             if result ~= nil then
                 local halfBlock = 0.125

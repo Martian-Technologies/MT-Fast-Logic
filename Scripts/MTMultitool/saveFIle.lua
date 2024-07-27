@@ -3,10 +3,14 @@ SaveFile = {}
 function SaveFile.getSavePath(idx)
     local playerUsername = sm.localPlayer.getPlayer():getName()
     local allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+    local allClaracters = {}
+    for i = 1, #allowedCharacters do
+        allClaracters[string.sub(allowedCharacters, i, i)] = true
+    end
     local saveFile = "$CONTENT_DATA/MTMultitoolSavefile_"
     for i = 1, #playerUsername do
         local char = string.sub(playerUsername, i, i)
-        if string.find(allowedCharacters, char) then
+        if table.contains(allClaracters, char) then
             saveFile = saveFile .. char
         end
     end

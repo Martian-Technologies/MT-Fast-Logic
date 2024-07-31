@@ -229,7 +229,7 @@ end
 function CopyPaste.server_copyPaste(multitool, data)
     local self = multitool.CopyPaste
     local targetBody = data.body
-    local creationTable = sm.creation.exportToTable(targetBody, true)
+    local creationTable = sm.creation.exportToTable(targetBody, true, false)
     local interactables = data.interactables
     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
     local gatesToRestore = {}
@@ -281,17 +281,37 @@ function CopyPaste.doCopyPaste(multitool, data)
     local targetBodyObject = nil
     local externalConnections = data.externalConnections
     local intIdMap = MTMultitoolLib.getVoxelMapInteractableIds(targetBody)
-    local creationTable = sm.creation.exportToTable(targetBody, true)
+    local creationTable = sm.creation.exportToTable(targetBody, true, false)
     local generatedShapes = {}
     local originalPositionsTakenUpBySource = {}
     local tensor = {}
+
+    -- local worldpos = targetBody.worldPosition
+    -- local worldrot = targetBody.worldRotation
+    -- local world = targetBody:getWorld()
+
+    -- local shapes = targetBody:getCreationShapes()
+    -- for _, shape in pairs(shapes) do
+    --     shape:destroyShape()
+    -- end
+    -- local jsonString = sm.json.writeJsonString(creationTable)
+
+    -- sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
+
+-- end if false then
+
     for i = 1, #vectors do
         table.insert(tensor, vectors[i].nSteps)
     end
     local maxIntId = 0
     local everyShapeByIntId = {}
+
+    local jointShapeIndex = 0
+    local maxJointIndexToNotIncrement = 0
     for _, body in ipairs(creationTable.bodies) do
         for _, shape in ipairs(body.childs) do
+            shape.jointShapeIndex = jointShapeIndex
+            jointShapeIndex = jointShapeIndex + 1
             if shape.controller == nil then
                 goto continue
             end
@@ -299,6 +319,7 @@ function CopyPaste.doCopyPaste(multitool, data)
             everyShapeByIntId[intId] = shape
             if table.contains(interactables, intId) then
                 targetBodyObject = body
+                maxJointIndexToNotIncrement = jointShapeIndex - 1
             end
             if intId > maxIntId then
                 maxIntId = intId
@@ -306,6 +327,8 @@ function CopyPaste.doCopyPaste(multitool, data)
             ::continue::
         end
     end
+
+    print("maxJointIndexToNotIncrement", maxJointIndexToNotIncrement)
     local externalConnectionsIngoing = {}
     local externalConnectionsOutgoing = {}
     if externalConnections == "absolute" then
@@ -425,6 +448,8 @@ function CopyPaste.doCopyPaste(multitool, data)
 
     local relativeConnectionsToMake = {}
 
+    local nShapesAdded = 0
+
     iterateTensor(tensor, function(number)
         local isAllZero = true
         for i = 1, #number do
@@ -539,6 +564,7 @@ function CopyPaste.doCopyPaste(multitool, data)
             everyShapeByIntId[newShape.controller.id] = newShape
             
             table.insert(newShapes, newShape)
+            nShapesAdded = nShapesAdded + 1
             ::continue::
         end
         for i = 1, #newShapes do
@@ -593,6 +619,17 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
     end
 
+    if creationTable.joints ~= nil then
+        for _, joint in ipairs(creationTable.joints) do
+            if joint.childA > maxJointIndexToNotIncrement then
+                joint.childA = joint.childA + nShapesAdded
+            end
+            if joint.childB > maxJointIndexToNotIncrement then
+                joint.childB = joint.childB + nShapesAdded
+            end
+        end
+    end
+
     local worldpos = targetBody.worldPosition
     local worldrot = targetBody.worldRotation
     local world = targetBody:getWorld()
@@ -602,7 +639,8 @@ function CopyPaste.doCopyPaste(multitool, data)
         shape:destroyShape()
     end
     local jsonString = sm.json.writeJsonString(creationTable)
-    sm.creation.importFromString(world, jsonString, targetBody.worldPosition, targetBody.worldRotation, false)
+
+    sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
 end
 
 function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -1068,12 +1106,14 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             local siliconFound = false
             -- local interactableIds = {}
             -- for _, shape in ipairs(self.selectedShapes) do
-            for _, shape in ipairs(self.activeBody:getCreationShapes()) do
-                local shapeUuid = shape:getShapeUuid()
-                -- table.insert(interactableIds, shape.interactable:getId())
-                if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
-                    siliconFound = true
-                    break
+            if self.activeBody ~= nil then
+                for _, shape in ipairs(self.activeBody:getCreationShapes()) do
+                    local shapeUuid = shape:getShapeUuid()
+                    -- table.insert(interactableIds, shape.interactable:getId())
+                    if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
+                        siliconFound = true
+                        break
+                    end
                 end
             end
             -- if not siliconFound then

@@ -51,7 +51,6 @@ end
 
 function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
     local jsontable = sm.creation.exportToTable(body, true, false) --'true, false' fix for qtimer reset bug?
-    advPrint(jsontable, 100, 100, true)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
@@ -331,7 +330,6 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
         shape:destroyShape()
     end
 
-    advPrint(jsontable, 100, 100, true)
     local jsonstring = sm.json.writeJsonString(jsontable)
     sm.creation.importFromString(world, jsonstring, worldpos, worldrot, false)
 end

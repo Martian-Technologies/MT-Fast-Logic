@@ -52,8 +52,6 @@ function FastTimer.gui_createNewGui(self)
         self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastTimer.layout")
         self.gui:createVerticalSlider("Ticks", 41, self.client_seconds, "gui_changedTickSlider")
         self.gui:createVerticalSlider("Seconds", 60, self.client_ticks, "gui_changedSecondSlider")
-        self.gui:setSliderPosition("Ticks", self.client_ticks)
-        self.gui:setSliderPosition("Seconds", self.client_seconds)
         self:gui_update()
     end
 end
@@ -72,8 +70,10 @@ end
 
 function FastTimer.gui_update(self)
     self.gui:setText("SecondsText", string.format("%02d", self.client_seconds + (self.client_ticks == 40 and 1 or 0)))
-    self.gui:setText("MillisecondsText", string.format("%03d", self.client_ticks * 1000))
+    self.gui:setText("MillisecondsText", string.format("%03d", self.client_ticks*25))
     self.gui:setText("TicksText", tostring(self.client_seconds * 40 + self.client_ticks) .. " TICKS")
+    self.gui:setSliderPosition("Ticks", self.client_ticks)
+    self.gui:setSliderPosition("Seconds", self.client_seconds)
 end
 
 function FastTimer.client_onClientDataUpdate(self, data)

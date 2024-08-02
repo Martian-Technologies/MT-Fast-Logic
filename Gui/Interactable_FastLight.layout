@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <MyGUI type="Layout" version="3.2.0">
-    <Widget type="Widget" skin="BackgroundInteractableNarrow" align="Default" name="MainPanel" position_real="0.00234375 0 0.260156 0.313889">
+    <Widget type="Widget" skin="BackgroundInteractableNarrow" align="Center" name="MainPanel" position_real="0.369922 0.3430555 0.260156 0.313889">
         <Property key="NeedKey" value="false" />
         <Property key="NeedMouse" value="true" />
         <Property key="InheritsAlpha" value="false" />
@@ -11,7 +11,7 @@
             <Property key="NeedKey" value="false" />
             <Property key="NeedMouse" value="false" />
         </Widget>
-        <Widget type="Window" skin="PanelEmpty" name="Slider" position_real="0.0990991 0.646018 0.798799 0.234513">
+        <Widget type="Window" skin="PanelEmpty" name="Luminance" position_real="0.0990991 0.646018 0.798799 0.234513">
             <Property key="Range" value="20" />
             <Property key="NeedKey" value="false" />
         </Widget>

@@ -52,37 +52,45 @@ end
 function FastLight.gui_createNewGui(self)
     if self.gui == nil then
         self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLight.layout")
-        self.gui:createVerticalSlider("Luminance", 41, self.client_luminance, "gui_changedSlider")
+        self.gui:createVerticalSlider("Luminance", 11, self.client_luminance/10, "gui_changedSlider")
         self:gui_update()
     end
 end
 
 function FastLight.gui_changedSlider(self, pos)
-    self.client_ticks = pos
+    self.client_luminance = pos * 10
     self:gui_update()
-    self.network:sendToServer("server_saveTime", { ticks = self.client_ticks, seconds = self.client_seconds })
+    self.network:sendToServer("server_saveLuminance", self.client_luminance)
 end
 
 function FastLight.gui_update(self)
-    self.gui:setSliderPosition("Luminance", self.client_luminance)
+    self.gui:setSliderPosition("Luminance", self.client_luminance/10)
 end
 
 
 function FastLight.client_onClientDataUpdate(self, data)
     self.client_luminance = data.luminance
-    self:client_updateTexture()
+    self:client_updateTexture(nil, self.client_luminance)
 end
 
-function FastLight.client_updateTexture(self, state)
+function FastLight.client_updateTexture(self, state, luminance)
+    local doUpdate = false
     if state == nil then
         state = self.client_state or false
+    elseif self.client_state ~= state then
+        doUpdate = true
     end
-    if self.client_state ~= state then
+    if luminance == nil then
+        luminance = self.client_luminance or 10
+    else
+        doUpdate = true
+    end
+    if doUpdate then
         self.client_state = state
         if state then
-            self.interactable:setUvFrameIndex(6 + mode)
+            self.interactable:setPoseWeight(0, 1)
         else
-            self.interactable:setUvFrameIndex(0 + mode)
+            self.interactable:setPoseWeight(0, 0)
         end
     end
 end

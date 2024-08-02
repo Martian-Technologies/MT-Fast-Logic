@@ -11,11 +11,6 @@ dofile "FastLogicRunnerLoop.lua"
 dofile "BalancedLogicFinder.lua"
 dofile "LogicOptimizer.lua"
 
--- locals for fast read
-local table = table
-local ipairs = ipairs
-local pairs = pairs
-
 function FastLogicRunner.getNew(creationId)
     print("new logic runner")
     local new = table.deepCopy(FastLogicRunner)

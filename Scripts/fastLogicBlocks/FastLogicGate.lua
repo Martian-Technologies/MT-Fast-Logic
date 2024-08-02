@@ -56,6 +56,23 @@ function FastLogicGate.client_onDestroy2(self)
     end
 end
 
+function FastLogicGate.client_onInteract(self, character, state)
+    if state then
+        self:gui_createNewGui()
+        self.gui:open()
+    end
+end
+
+function FastLogicGate.gui_createNewGui()
+    if self.gui == nil then
+        self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLogicGate.layout")
+        for modeName, _ in pairs(modes) do
+            self.gui:setButtonCallback(modeName, "gui_selectButton")
+        end
+        self:gui_selectButton(indexToMode[self.client_modeIndex])
+    end
+end
+
 function FastLogicGate.gui_selectButton(self, mode)
     if self.client_modeIndex ~= nil then
         -- clear old gui selection
@@ -64,21 +81,6 @@ function FastLogicGate.gui_selectButton(self, mode)
     self.client_modeIndex = modeToIndex[mode]
     self.gui:setText("DescriptionText", descriptions[mode])
     self.network:sendToServer("server_saveMode", self.client_modeIndex)
-end
-
-function FastLogicGate.client_onInteract(self, character, state)
-    if state then
-        -- create new gui
-        if self.gui == nil then
-            self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLogicGate.layout")
-            for modeName, _ in pairs(modes) do
-                self.gui:setButtonCallback(modeName, "gui_selectButton")
-            end
-            self:gui_selectButton(indexToMode[self.client_modeIndex])
-        end
-        -- open gui
-        self.gui:open()
-    end
 end
 
 function FastLogicGate.client_onClientDataUpdate(self, mode)

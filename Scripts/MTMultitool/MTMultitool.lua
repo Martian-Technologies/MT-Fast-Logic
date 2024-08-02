@@ -98,7 +98,7 @@ MTMultitool.modes = {
     "Heatmap",
     "Decoder Maker",
     "Copy Paste",
-    "Single",
+    "Multipoint",
     "Series",
 	"N to N",
     "Parallel",
@@ -178,7 +178,6 @@ function MTMultitool.client_onCreate(self)
 
     VertexRenderer.subscribe(self, function() return BlockSelector.addVertexPoints(self) end)
     VertexRenderer.subscribe(self, ConnectionManager.createVertexSubsription(self))
-    VertexRenderer.subscribe(self, SingleConnect.createVertexSubsription(self)) -- TODO: remove vertex subscription
 
     -- BlockSelector.tool = self.tool
     -- BlockSelector.client_onCreate()
@@ -352,6 +351,8 @@ end
 function MTMultitool.client_onReload(self)
     if self.internalModes[self.mode] == "CopyPaste" then
         CopyPaste.client_onReload(self)
+    elseif self.internalModes[self.mode] == "SingleConnect" then
+        SingleConnect.client_onReload(self)
     end
     return true
 end

@@ -30,9 +30,6 @@ function FastLight.server_onDestroy2(self)
     self.creation.FastLights[self.data.uuid] = nil
 end
 
-function FastLight.client_onCreate2(self)
-end
-
 function FastLight.client_onDestroy2(self)
     -- if self.gui then
     --     self.gui:destroy()
@@ -83,11 +80,21 @@ function FastLight.client_onClientDataUpdate(self, data)
     self:client_updateTexture()
 end
 
-function FastLight.client_updateTexture(self)
-    if self.interactable.active then
-        self.interactable:setPoseWeight(0, 1)
-    else
-        self.interactable:setPoseWeight(0, 0)
+function FastLight.client_onCreate2(self)
+    self.client_state = self.client_state or false
+end
+
+function FastLight.client_updateTexture(self, state)
+    if state == nil then
+        state = self.client_state or false
+    end
+    if self.client_state ~= state then
+        self.client_state = state
+        if state then
+            self.interactable:setUvFrameIndex(6 + mode)
+        else
+            self.interactable:setUvFrameIndex(0 + mode)
+        end
     end
 end
 

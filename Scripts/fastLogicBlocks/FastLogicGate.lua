@@ -6,6 +6,26 @@ dofile "BaseFastLogicBlock.lua"
 
 FastLogicGate = table.deepCopyTo(BaseFastLogicBlock, (FastLogicGate or {}))
 
+local indexToMode = { "And", "Or", "Xor", "Nand", "Nor", "Xnor" }
+
+local modeToIndex = {
+    ["And"] = 1,
+    ["Or"] = 2,
+    ["Xor"] = 3,
+    ["Nand"] = 4,
+    ["Nor"] = 5,
+    ["Xnor"] = 6
+}
+
+local descriptions = {
+    ["And"] = "Active if all of the linked triggers are active",
+    ["Or"] = "Active if any of the linked triggers are active",
+    ["Xor"] = "Active if an odd number of linked triggers are active",
+    ["Nand"] = "Active if any of the linked triggers are inactive",
+    ["Nor"] = "Active if all of the linked triggers are inactive",
+    ["Xnor"] = "Active if an even number of linked triggers are active"
+}
+
 function FastLogicGate.getData2(self)
     self.creation.FastLogicGates[self.data.uuid] = self
 end
@@ -26,8 +46,8 @@ function FastLogicGate.server_onDestroy2(self)
 end
 
 function FastLogicGate.client_onCreate2(self)
-    self.client_mode = self.client_mode
-    self.client_state = self.client_state
+    self.client_modeIndex = self.client_modeIndex or 1
+    self.client_state = self.client_state or false
 end
 
 function FastLogicGate.client_onDestroy2(self)
@@ -36,41 +56,27 @@ function FastLogicGate.client_onDestroy2(self)
     end
 end
 
-function FastLogicGate.gui_init(self)
-    if self.gui == nil then
-        self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLogicGate.layout")
-        self.guimodes = {
-            { name = "And",  description = "Active if all of the linked triggers are active" },
-            { name = "Or",   description = "Active if any of the linked triggers are active" },
-            { name = "Xor",  description = "Active if an odd number of linked triggers are active" },
-            { name = "Nand", description = "Active if any of the linked triggers are inactive" },
-            { name = "Nor",  description = "Active if all of the linked triggers are inactive" },
-            { name = "Xnor", description = "Active if an even number of linked triggers are active" }
-        }
-        local btnNames = { "And", "Or", "Xor", "Nand", "Nor", "Xnor" }
-        for _, btnName in pairs(btnNames) do
-            self.gui:setButtonCallback(btnName, "gui_buttonCallback")
-        end
+function FastLogicGate.gui_selectButton(self, mode)
+    if self.client_modeIndex ~= nil then
+        -- clear old gui selection
+        self.gui:setButtonState(indexToMode[self.client_modeIndex], false)
     end
-end
-
-function FastLogicGate.gui_buttonCallback(self, btnName)
-    for i = 1, #self.guimodes do
-        local name = self.guimodes[i].name
-        self.gui:setButtonState(name, name == btnName)
-        if name == btnName then
-            self.client_mode = i - 1
-            self.gui:setText("DescriptionText", self.guimodes[i].description)
-        end
-    end
-    self.network:sendToServer("server_saveMode", self.client_mode)
+    self.client_modeIndex = modeToIndex[mode]
+    self.gui:setText("DescriptionText", descriptions[mode])
+    self.network:sendToServer("server_saveMode", self.client_modeIndex)
 end
 
 function FastLogicGate.client_onInteract(self, character, state)
     if state then
-        self:gui_init()
-        local btnNames = { "And", "Or", "Xor", "Nand", "Nor", "Xnor" }
-        self:gui_buttonCallback(btnNames[self.client_mode + 1])
+        -- create new gui
+        if self.gui == nil then
+            self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLogicGate.layout")
+            for modeName, _ in pairs(modes) do
+                self.gui:setButtonCallback(modeName, "gui_selectButton")
+            end
+            self:gui_selectButton(indexToMode[self.client_modeIndex])
+        end
+        -- open gui
         self.gui:open()
     end
 end
@@ -81,18 +87,18 @@ end
 
 function FastLogicGate.client_updateTexture(self, state, mode)
     if state == nil then
-        state = self.client_state or false
+        state = self.client_state
     end
     if mode == nil then
-        mode = self.client_mode or 0
+        mode = self.client_modeIndex
     end
-    if self.client_state ~= state or client_mode ~= mode then
+    if self.client_state ~= state or self.client_modeIndex ~= mode then
         self.client_state = state
-        self.client_mode = mode
+        self.client_modeIndex = mode
         if state then
-            self.interactable:setUvFrameIndex(6 + mode)
+            self.interactable:setUvFrameIndex(6 + mode - 1)
         else
-            self.interactable:setUvFrameIndex(0 + mode)
+            self.interactable:setUvFrameIndex(0 + mode - 1)
         end
     end
 end
@@ -102,7 +108,7 @@ function FastLogicGate.server_saveMode(self, mode)
     self.network:setClientData(self.data.mode)
     self.storage:save(self.data)
     local modes = { "andBlocks", "orBlocks", "xorBlocks", "nandBlocks", "norBlocks", "xnorBlocks" }
-    self.FastLogicAllBlockManager:changeBlockType(self.data.uuid, modes[self.data.mode + 1])
+    self.FastLogicAllBlockManager:changeBlockType(self.data.uuid, modes[self.data.mode])
 end
 
 -- in this class rn because it only works for Logic Gates

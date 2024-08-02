@@ -75,6 +75,8 @@ sm.MTFastLogic.CompressionUtil.numberToType = {
     [5] = "xnorBlocks",
 }
 
+
+-- makes a table into a string for compression.This works on table onlu if they are very simple (not looping refrences and data types other than string, number, and table)
 function sm.MTFastLogic.CompressionUtil.tableToString(table)
     local str = ""
     local i = 1
@@ -112,6 +114,7 @@ function sm.MTFastLogic.CompressionUtil.tableToString(table)
     return str --string.sub(str, 2, -1)
 end
 
+-- undoes tableToString to got from a compressed string to a table
 function sm.MTFastLogic.CompressionUtil.stringToTable(str)
     local tbl = {}
     local chunk = ""
@@ -205,4 +208,56 @@ function sm.MTFastLogic.CompressionUtil.stringToTable(str)
         stringIndex = stringIndex + 1
     end
     return tbl
+end
+
+-- faster than tableToString but only works on 1d arrays of numbers
+function sm.MTFastLogic.CompressionUtil.arrayToString(data)
+    local str = ""
+    for i = 1, #data do
+        if #str > 0 then str = str .. "," end
+        str = str .. tostring(data[i] - (data[i-1] or 0))
+    end
+    return str
+end
+
+-- faster than stringToTable but only works on strings made with arrayToString
+function sm.MTFastLogic.CompressionUtil.stringToArray(str)
+    local data = {}
+    for c in str:gmatch "[-%d]%d*" do
+        data[#data+1] = tonumber(c) + (data[#data] or 0)
+    end
+    return data
+end
+
+-- faster than tableToString but only works on 1d hashTables allowing numbers and strings
+function sm.MTFastLogic.CompressionUtil.hashToString(data)
+    local str = ""
+    for k, v in pairs(data) do
+        if #str > 0 then str = str .. "," end
+        if type(k) == "number" then
+            k = "'" .. tostring(k)
+        end
+        if type(v) == "number" then
+            v = "'" .. tostring(v)
+        end
+        str = str .. k .. ":" .. v
+    end
+    return str
+end
+
+-- faster than stringToTable but only works on strings made with hashToString
+function sm.MTFastLogic.CompressionUtil.stringToHash(str)
+    local data = {}
+    local key = nil
+    for c in str:gmatch "[all TODO make this all chars abd numbers]" do
+        if string.sub(c, 1, 1) == "'" then
+            c = tonumber(string.sub(c, 2, #c))
+        end
+        if key == nil then
+            key = c
+        else
+            data[key] = c
+        end
+    end
+    return data
 end

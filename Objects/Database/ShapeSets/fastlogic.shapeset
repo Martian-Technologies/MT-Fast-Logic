@@ -74,6 +74,54 @@
             },
             "sticky": "-Y",
             "uuid": "d8b529ad-3865-40fa-b798-b8a6b83f898b"
-        }
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ee2222",
+            "name": "Fast Logic Memory",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicBlockMemory",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicBlockMemory.lua"
+            },
+            "uuid": "1d4f99c0-1df8-4acb-9fd4-f3437062016c",
+            "showInInventory": true
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "df7f01",
+            "name": "Fast Logic Block Interface",
+            "physicsMaterial": "Mechanical",
+            "ratings": {
+                "density": 2,
+                "durability": 3,
+                "friction": 5,
+                "buoyancy": 2
+            },
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
+            "rotationSet": "PropYZ",
+            "scripted": {
+                "classname": "FastLogicBlockInterface",
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+            },
+            "uuid": "ce73327a-1cf9-49cc-9ee7-e63110ccc43f",
+            "showInInventory": true
+        },
     ]
 }

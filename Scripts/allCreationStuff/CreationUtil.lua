@@ -16,6 +16,8 @@ function CreationUtil.MakeCreationData(creationId, body, lastSeenSpeed)
         FastLogicRunner = FastLogicRunner.getNew(creationId),
         FastLogicGates = {},
         FastTimers = {},
+        FastLogicBlockMemorys = {},
+        FastLogicBlockInterfaces = {},
         EndTickButtons = {},
         FastLights = {},
         BlocksToScan = {},

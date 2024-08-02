@@ -23,9 +23,6 @@ function EndTickButton.server_onDestroy2(self)
     self.creation.EndTickButtons[self.data.uuid] = nil
 end
 
-function EndTickButton.client_onCreate2(self)
-end
-
 function EndTickButton.client_onDestroy2(self)
 end
 
@@ -42,10 +39,20 @@ function EndTickButton.pcalled_client_onInteract(self, character, state)
     self.FastLogicRunner:externalAddBlockToUpdate(self.data.uuid)
 end
 
-function EndTickButton.client_updateTexture(self)
-    if self.interactable.active then
-        self.interactable:setPoseWeight(0, 1)
-    else
-        self.interactable:setPoseWeight(0, 0)
+function EndTickButton.client_onCreate2(self)
+    self.client_state = self.client_state or false
+end
+
+function EndTickButton.client_updateTexture(self, state)
+    if state == nil then
+        state = self.client_state or false
+    end
+    if self.client_state ~= state then
+        self.client_state = state
+        if state then
+            self.interactable:setUvFrameIndex(6 + mode)
+        else
+            self.interactable:setUvFrameIndex(0 + mode)
+        end
     end
 end

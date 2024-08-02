@@ -30,9 +30,8 @@ function FastTimer.server_onDestroy2(self)
 end
 
 function FastTimer.client_onCreate2(self)
-    self.guidata = {}
-    self.guidata.seconds = 0
-    self.guidata.ticks = 0
+    self.client_seconds = 0
+    self.client_ticks = 0
 end
 
 function FastTimer.client_onDestroy2(self)
@@ -41,56 +40,47 @@ function FastTimer.client_onDestroy2(self)
     end
 end
 
-function FastTimer.gui_init(self)
-    if self.gui == nil then
-        self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastTimer.layout")
-        self.gui:createVerticalSlider("Ticks", 41, self.guidata.ticks, "gui_tickSlider")
-        self.gui:createVerticalSlider("Seconds", 60, self.guidata.seconds, "gui_secondSlider")
-        self:gui_update()
-    end
-end
-
-function FastTimer.gui_tickSlider(self, pos)
-    self.guidata.ticks = pos
-    self:gui_update()
-    self.network:sendToServer("server_saveTime", { ticks = self.guidata.ticks, seconds = self.guidata.seconds })
-end
-
-function FastTimer.gui_secondSlider(self, pos)
-    self.guidata.seconds = pos
-    self:gui_update()
-    self.network:sendToServer("server_saveTime", { ticks = self.guidata.ticks, seconds = self.guidata.seconds })
-end
-
-function FastTimer.gui_update(self)
-    local seconds = self.guidata.seconds
-    local ticks = self.guidata.ticks / 40
-    if self.guidata.ticks == 40 then
-        seconds = seconds + 1
-        ticks = 0
-    end
-    ticks = ticks * 1000
-    local totalticks = self.guidata.seconds * 40 + self.guidata.ticks
-    self.gui:setText("SecondsText", string.format("%02d", seconds))
-    self.gui:setText("MillisecondsText", string.format("%03d", ticks))
-    self.gui:setText("TicksText", tostring(totalticks) .. " TICKS")
-end
-
 function FastTimer.client_onInteract(self, character, state)
     if state then
-        self:gui_init()
-        self:gui_update()
+        self:gui_createNewGui()
         self.gui:open()
     end
 end
 
-function FastTimer.client_onClientDataUpdate(self, data)
-    self.guidata.seconds = data.seconds
-    self.guidata.ticks = data.ticks
+function FastTimer.gui_createNewGui(self)
+    if self.gui == nil then
+        self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastTimer.layout")
+        self.gui:createVerticalSlider("Ticks", 41, self.client_seconds, "gui_changedTickSlider")
+        self.gui:createVerticalSlider("Seconds", 60, self.client_ticks, "gui_changedSecondSlider")
+        self:gui_update()
+    end
+end
 
+function FastTimer.gui_changedTickSlider(self, pos)
+    self.client_ticks = pos
+    self:gui_update()
+    self.network:sendToServer("server_saveTime", { ticks = self.client_ticks, seconds = self.client_seconds })
+end
+
+function FastTimer.gui_changedSecondSlider(self, pos)
+    self.client_seconds = pos
+    self:gui_update()
+    self.network:sendToServer("server_saveTime", { ticks = self.client_ticks, seconds = self.client_seconds })
+end
+
+function FastTimer.gui_update(self)
+    self.gui:setText("SecondsText", string.format("%02d", self.client_seconds + (self.client_ticks == 40 and 1 or 0)))
+    self.gui:setText("MillisecondsText", string.format("%03d", self.client_ticks*25))
+    self.gui:setText("TicksText", tostring(self.client_seconds * 40 + self.client_ticks) .. " TICKS")
+    self.gui:setSliderPosition("Ticks", self.client_ticks)
+    self.gui:setSliderPosition("Seconds", self.client_seconds)
+end
+
+function FastTimer.client_onClientDataUpdate(self, data)
+    self.client_seconds = data.seconds
+    self.client_ticks = data.ticks
     if self.gui then
-        self.gui:setSliderPosition("Ticks", self.guidata.ticks)
-        self.gui:setSliderPosition("Seconds", self.guidata.seconds)
+        self:gui_update()
     end
 end
 

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="BackgroundInteractableNarrow" align="Default" name="MainPanel" position_real="0.00234375 0 0.260156 0.313889">
+        <Property key="NeedKey" value="false" />
+        <Property key="NeedMouse" value="true" />
+        <Property key="InheritsAlpha" value="false" />
+        <Widget type="TextBox" skin="TextBox" align="Default" position_real="0.0990991 0.146018 0.798799 0.146018">
+            <Property key="Caption" value="#{CONTROLLER_LIGHT_TITLE}" />
+            <Property key="FontName" value="SM_HeaderLarge_Wide" />
+            <Property key="TextAlign" value="Center" />
+            <Property key="NeedKey" value="false" />
+            <Property key="NeedMouse" value="false" />
+        </Widget>
+        <Widget type="Window" skin="PanelEmpty" name="Slider" position_real="0.0990991 0.646018 0.798799 0.234513">
+            <Property key="Range" value="20" />
+            <Property key="NeedKey" value="false" />
+        </Widget>
+        <Widget type="ImageBox" skin="ImageBox" align="Default" name="Value" position_real="0.444444 0.376106 0.108108 0.185841">
+            <Property key="Caption" value="1" />
+            <Property key="FontName" value="Default" />
+            <Property key="TextAlign" value="Center" />
+            <Property key="NeedKey" value="false" />
+            <Property key="NeedMouse" value="false" />
+            <Property key="ImageResource" value="IconsLampSpritesheet" />
+            <Property key="ImageGroup" value="IconsLampSpritesheet" />
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings />
+</MyGUI>

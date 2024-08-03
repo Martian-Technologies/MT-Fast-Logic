@@ -744,12 +744,12 @@ function MTMultitool.server_changeModes(self, data)
                 if table.contains(MTGateUUIDs, shape.uuid) then
                     local interactable = shape:getInteractable()
                     if interactable ~= nil then
-                        sm.event.sendToInteractable(interactable, "server_saveMode", mode - 1)
+                        sm.event.sendToInteractable(interactable, "server_saveMode", mode)
                     end
                 elseif shape.uuid == VinclingUUID then
                     local interactable = shape:getInteractable()
                     if interactable ~= nil then
-                        sm.event.sendToInteractable(interactable, "sv_saveMode", mode - 1)
+                        sm.event.sendToInteractable(interactable, "sv_saveMode", mode)
                     end
                 elseif shape.uuid == VanillaGateUUID then
                     local interactable = shape:getInteractable()

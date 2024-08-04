@@ -261,7 +261,7 @@ function CopyPaste.server_copyPaste(multitool, data)
     })
 end
 
-function CopyPaste.server_onFixedUpdate(multitool)
+function CopyPaste.server_onFixedUpdate(multitool, dt)
     local self = multitool.CopyPaste
     if #self.toCopyPastePackets == 0 then
         return

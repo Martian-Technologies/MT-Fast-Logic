@@ -70,21 +70,21 @@ sm.tool.preloadRenderables( toolAnimsThirdPerson )
 sm.tool.preloadRenderables( toolAnimsFirstPerson )
 
 local defaultEnabledModes = {
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
+    true, -- Fast Logic Convert
+    true, -- Silicon Convert
+    true, -- Settings
+    true, -- Mode Changer
+    true, -- Volume Placer
+    true, -- Merger
+    true, -- Colorizer
+    false, -- Heatmap
+    false, -- Decoder Maker
+    -- true, -- Copy Paste
+    true, -- Multipoint
+    true, -- Series
+    true, -- N to N
+    true, -- Parallel
+    true, -- Tensor
 }
 
 MTMultitool.modes = {
@@ -97,7 +97,7 @@ MTMultitool.modes = {
     "Colorizer",
     "Heatmap",
     "Decoder Maker",
-    "Copy Paste",
+    -- "Copy Paste",
     "Multipoint",
     "Series",
 	"N to N",
@@ -115,7 +115,7 @@ MTMultitool.internalModes = {
     "Colorizer",
     "Heatmap",
     "DecoderMaker",
-    "CopyPaste",
+    -- "CopyPaste",
     "SingleConnect",
     "SeriesConnect",
     "NtoNConnect",

@@ -231,6 +231,15 @@ function CopyPaste.doCopyPaste(multitool, data)
             shape.jointShapeIndex = jointShapeIndex
             jointShapeIndex = jointShapeIndex + 1
             if shape.controller == nil then
+                for _, nonInt in ipairs(shapes) do
+                    if tostring(nonInt.uuid) == shape.shapeId then
+                        print(nonInt.localPosition, shape.pos)
+                        if nonInt.localPosition.x == shape.pos.x and nonInt.localPosition.y == shape.pos.y and nonInt.localPosition.z == shape.pos.z then
+                            targetBodyObject = body
+                            goto continue
+                        end
+                    end
+                end
                 goto continue
             end
             local intId = shape.controller.id
@@ -288,9 +297,11 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
         end
     end
+    print("AAAAA")
     if targetBodyObject == nil then
         return
     end
+    print(2)
     local targetBodyShapes = targetBodyObject.childs
     local internalShapesOrdered = {}
     for i = 1, #interactables do
@@ -319,13 +330,14 @@ function CopyPaste.doCopyPaste(multitool, data)
             local shapePos = shape.pos
             for _, nonInt in ipairs(shapes) do
                 print(nonInt)
-                if tostring(nonInt.shapeId) ~= shapeUuid then
-                    goto continue
+                if tostring(nonInt.uuid) ~= shapeUuid then
+                    goto continue2
                 end
-                if nonInt.pos.x ~= shapePos.x * 4 or nonInt.pos.y ~= shapePos.y * 4 or nonInt.pos.z ~= shapePos.z * 4 then
-                    goto continue
+                if nonInt.localPosition.x ~= shapePos.x or nonInt.localPosition.y ~= shapePos.y or nonInt.localPosition.z ~= shapePos.z then
+                    goto continue2
                 end
                 table.insert(extraShapesToCopy, shape)
+                ::continue2::
             end
             goto continue
         end
@@ -378,6 +390,7 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
         ::continue::
     end
+    print(extraShapesToCopy)
 
     local relativeConnectionsToMake = {}
 

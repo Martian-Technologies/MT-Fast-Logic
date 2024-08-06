@@ -31,63 +31,67 @@ function FastLight.server_onDestroy2(self)
 end
 
 function FastLight.client_onCreate2(self)
+    self.client_state = self.client_state or false
+    self.client_luminance = self.client_luminance or 10
 end
 
 function FastLight.client_onDestroy2(self)
-    -- if self.gui then
-    --     self.gui:destroy()
-    -- end
+    if self.gui then
+        self.gui:destroy()
+    end
 end
 
--- function FastLight.gui_init(self)
---     if self.gui == nil then
---         self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLight.layout")
---         self.guimodes = {
---             { name = "And",  description = "Active if all of the linked triggers are active" },
---             { name = "Or",   description = "Active if any of the linked triggers are active" },
---             { name = "Xor",  description = "Active if an odd number of linked triggers are active" },
---             { name = "Nand", description = "Active if any of the linked triggers are inactive" },
---             { name = "Nor",  description = "Active if all of the linked triggers are inactive" },
---             { name = "Xnor", description = "Active if an even number of linked triggers are active" }
---         }
---         local btnNames = { "And", "Or", "Xor", "Nand", "Nor", "Xnor" }
---         for _, btnName in pairs(btnNames) do
---             self.gui:setButtonCallback(btnName, "gui_buttonCallback")
---         end
---     end
--- end
 
--- function FastLight.gui_buttonCallback(self, btnName)
---     for i = 1, #self.guimodes do
---         local name = self.guimodes[i].name
---         self.gui:setButtonState(name, name == btnName)
---         if name == btnName then
---             self.client_mode = i - 1
---             self.gui:setText("DescriptionText", self.guimodes[i].description)
---         end
---     end
---     self.network:sendToServer("server_saveMode", self.client_mode)
--- end
+function FastLight.client_onInteract(self, character, state)
+    if state then
+        self:gui_createNewGui()
+        self.gui:open()
+    end
+end
 
--- function FastLight.client_onInteract(self, character, state)
---     if state then
---         self:gui_init()
---         local btnNames = { "And", "Or", "Xor", "Nand", "Nor", "Xnor" }
---         self:gui_buttonCallback(btnNames[self.client_mode + 1])
---         self.gui:open()
---     end
--- end
+function FastLight.gui_createNewGui(self)
+    if self.gui == nil then
+        self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLight.layout")
+        self.gui:createVerticalSlider("Luminance", 11, self.client_luminance/10, "gui_changedSlider")
+        self:gui_update()
+    end
+end
+
+function FastLight.gui_changedSlider(self, pos)
+    self.client_luminance = pos * 10
+    self:gui_update()
+    self.network:sendToServer("server_saveLuminance", self.client_luminance)
+end
+
+function FastLight.gui_update(self)
+    self.gui:setSliderPosition("Luminance", self.client_luminance/10)
+end
+
 
 function FastLight.client_onClientDataUpdate(self, data)
     self.client_luminance = data.luminance
-    self:client_updateTexture()
+    self:client_updateTexture(nil, self.client_luminance)
 end
 
-function FastLight.client_updateTexture(self)
-    if self.interactable.active then
-        self.interactable:setPoseWeight(0, 1)
+function FastLight.client_updateTexture(self, state, luminance)
+    local doUpdate = false
+    if state == nil then
+        state = self.client_state or false
+    elseif self.client_state ~= state then
+        doUpdate = true
+    end
+    if luminance == nil then
+        luminance = self.client_luminance or 10
     else
-        self.interactable:setPoseWeight(0, 0)
+        doUpdate = true
+    end
+    if doUpdate then
+        self.client_state = state
+        if state then
+            self.interactable:setPoseWeight(0, 1)
+        else
+            self.interactable:setPoseWeight(0, 0)
+        end
     end
 end
 

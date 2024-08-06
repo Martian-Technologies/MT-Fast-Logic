@@ -70,21 +70,21 @@ sm.tool.preloadRenderables( toolAnimsThirdPerson )
 sm.tool.preloadRenderables( toolAnimsFirstPerson )
 
 local defaultEnabledModes = {
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
+    true, -- Fast Logic Convert
+    true, -- Silicon Convert
+    true, -- Settings
+    true, -- Mode Changer
+    true, -- Volume Placer
+    true, -- Merger
+    true, -- Colorizer
+    false, -- Heatmap
+    false, -- Decoder Maker
+    true, -- Copy Paste
+    true, -- Multipoint
+    true, -- Series
+    true, -- N to N
+    true, -- Parallel
+    true, -- Tensor
 }
 
 MTMultitool.modes = {
@@ -98,7 +98,7 @@ MTMultitool.modes = {
     "Heatmap",
     "Decoder Maker",
     "Copy Paste",
-    "Single",
+    "Multipoint",
     "Series",
 	"N to N",
     "Parallel",
@@ -178,7 +178,6 @@ function MTMultitool.client_onCreate(self)
 
     VertexRenderer.subscribe(self, function() return BlockSelector.addVertexPoints(self) end)
     VertexRenderer.subscribe(self, ConnectionManager.createVertexSubsription(self))
-    VertexRenderer.subscribe(self, SingleConnect.createVertexSubsription(self)) -- TODO: remove vertex subscription
 
     -- BlockSelector.tool = self.tool
     -- BlockSelector.client_onCreate()
@@ -352,6 +351,8 @@ end
 function MTMultitool.client_onReload(self)
     if self.internalModes[self.mode] == "CopyPaste" then
         CopyPaste.client_onReload(self)
+    elseif self.internalModes[self.mode] == "SingleConnect" then
+        SingleConnect.client_onReload(self)
     end
     return true
 end
@@ -743,12 +744,12 @@ function MTMultitool.server_changeModes(self, data)
                 if table.contains(MTGateUUIDs, shape.uuid) then
                     local interactable = shape:getInteractable()
                     if interactable ~= nil then
-                        sm.event.sendToInteractable(interactable, "server_saveMode", mode - 1)
+                        sm.event.sendToInteractable(interactable, "server_saveMode", mode)
                     end
                 elseif shape.uuid == VinclingUUID then
                     local interactable = shape:getInteractable()
                     if interactable ~= nil then
-                        sm.event.sendToInteractable(interactable, "sv_saveMode", mode - 1)
+                        sm.event.sendToInteractable(interactable, "sv_saveMode", mode)
                     end
                 elseif shape.uuid == VanillaGateUUID then
                     local interactable = shape:getInteractable()

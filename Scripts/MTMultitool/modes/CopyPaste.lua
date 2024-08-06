@@ -1,3 +1,5 @@
+dofile "../TensorUtil.lua"
+
 CopyPaste = {}
 
 function CopyPaste.inject(multitool)
@@ -16,74 +18,6 @@ function CopyPaste.inject(multitool)
     self.shapeVisualizations = {}
     self.toCopyPastePackets = {}
     self.externalConnectionsPolicy = "relative" -- "ignore" | "absolute" | "relative"
-end
-
-local function renderLine(nametagsTable, origin, destination, color, spacing)
-    local delta = destination - origin
-    local dotCount = math.min(50, math.ceil(delta:length() / spacing))
-    for i = 0, dotCount do
-        table.insert(nametagsTable, {
-            pos = origin + delta * (i / dotCount),
-            color = color,
-            txt = "•"
-        })
-    end
-end
-
-local colorOrder = {
-    sm.color.new(1, 0, 0, 1),
-    sm.color.new(0, 1, 0, 1),
-    sm.color.new(0, 0, 1, 1),
-    sm.color.new(1, 1, 0, 1),
-    sm.color.new(1, 0, 1, 1),
-    sm.color.new(0, 1, 1, 1),
-    sm.color.new(1, 1, 1, 1),
-    sm.color.new(0.5, 0, 0, 1),
-    sm.color.new(0, 0.5, 0, 1),
-    sm.color.new(0, 0, 0.5, 1),
-    sm.color.new(0.5, 0.5, 0, 1),
-    sm.color.new(0.5, 0, 0.5, 1),
-    sm.color.new(0, 0.5, 0.5, 1),
-    sm.color.new(0.5, 0.5, 0.5, 1),
-    sm.color.new(1, 0.5, 0, 1),
-    sm.color.new(1, 0, 0.5, 1),
-    sm.color.new(0, 1, 0.5, 1),
-    sm.color.new(0.5, 1, 0, 1),
-    sm.color.new(0.5, 0, 1, 1),
-    sm.color.new(0, 0.5, 1, 1),
-    sm.color.new(1, 0.5, 0.5, 1),
-    sm.color.new(0.5, 1, 0.5, 1),
-    sm.color.new(0.5, 0.5, 1, 1),
-    sm.color.new(1, 1, 0.5, 1),
-    sm.color.new(1, 0.5, 1, 1),
-    sm.color.new(0.5, 1, 1, 1),
-}
-
-local function renderVector(nametagsTable, origin, destination, color, spacing)
-    -- print('-----------------------------------------------------------')
-    if origin == nil or destination == nil then
-        return
-    end
-    if origin.x == destination.x and origin.y == destination.y and origin.z == destination.z then
-        return
-    end
-    local delta = destination - origin
-    renderLine(nametagsTable, origin, destination, color, spacing)
-    -- find the 2 vectors perpendicular to the delta vector
-    local v1 = sm.vec3.new(0, 0, 0)
-    if delta.x == 0 and delta.y == 0 then
-        v1 = sm.vec3.new(1, 0, 0)
-    else
-        v1 = sm.vec3.new(-delta.y, delta.x, 0):normalize()
-    end
-    local v2 = delta:cross(v1):normalize()
-    local theta = os.clock() * 5
-    local radius = 0.05
-    local backVec = destination - delta:normalize() * radius * 2
-    local arrowLeft = backVec + v1 * radius * math.cos(theta) + v2 * radius * math.sin(theta)
-    local arrowRight = backVec + v1 * radius * math.cos(theta + math.pi) + v2 * radius * math.sin(theta + math.pi)
-    renderLine(nametagsTable, destination, arrowLeft, color, spacing)
-    renderLine(nametagsTable, destination, arrowRight, color, spacing)
 end
 
 local plasticUuid = sm.uuid.new("628b2d61-5ceb-43e9-8334-a4135566df7a")
@@ -174,11 +108,14 @@ local function doCopyPaste(multitool)
     local self = multitool.CopyPaste
     local vectors = {}
     local interactables = {}
+    local shapes = {}
     for i = 1, #self.selectedShapes do
         local shape = self.selectedShapes[i]
         local interactable = shape:getInteractable()
         if interactable ~= nil then
             table.insert(interactables, interactable:getId())
+        else
+            table.insert(shapes, shape)
         end
     end
     for i = 1, #self.vectors do
@@ -190,32 +127,12 @@ local function doCopyPaste(multitool)
     end
     local data = {
         interactables = interactables,
+        shapes = shapes,
         vectors = vectors,
         body = self.activeBody,
         externalConnections = self.externalConnectionsPolicy -- "ignore" | "absolute" | "relative"
     }
     multitool.network:sendToServer("server_copyPaste", data)
-end
-
-local function iterateTensor(tensor, func)
-    local number = {}
-    for i = 1, #tensor do
-        table.insert(number, 0)
-    end
-    while number[#number] <= tensor[#tensor] do
-        -- print(number)
-        func(number)
-        number[1] = number[1] + 1
-        for i = 1, #number do
-            if number[i] > tensor[i] then
-                if i == #number then
-                    break
-                end
-                number[i] = 0
-                number[i + 1] = number[i + 1] + 1
-            end
-        end
-    end
 end
 
 local function findPositionInIntIdMap(intIdMap, intId)
@@ -229,7 +146,7 @@ end
 function CopyPaste.server_copyPaste(multitool, data)
     local self = multitool.CopyPaste
     local targetBody = data.body
-    local creationTable = sm.creation.exportToTable(targetBody, true)
+    local creationTable = sm.creation.exportToTable(targetBody, true, false)
     local interactables = data.interactables
     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
     local gatesToRestore = {}
@@ -261,7 +178,7 @@ function CopyPaste.server_copyPaste(multitool, data)
     })
 end
 
-function CopyPaste.server_onFixedUpdate(multitool)
+function CopyPaste.server_onFixedUpdate(multitool, dt)
     local self = multitool.CopyPaste
     if #self.toCopyPastePackets == 0 then
         return
@@ -276,29 +193,60 @@ end
 
 function CopyPaste.doCopyPaste(multitool, data)
     local interactables = data.interactables
+    local shapes = data.shapes
     local vectors = data.vectors
     local targetBody = data.body
     local targetBodyObject = nil
     local externalConnections = data.externalConnections
     local intIdMap = MTMultitoolLib.getVoxelMapInteractableIds(targetBody)
-    local creationTable = sm.creation.exportToTable(targetBody, true)
+    local creationTable = sm.creation.exportToTable(targetBody, true, false)
     local generatedShapes = {}
     local originalPositionsTakenUpBySource = {}
     local tensor = {}
+
+    -- local worldpos = targetBody.worldPosition
+    -- local worldrot = targetBody.worldRotation
+    -- local world = targetBody:getWorld()
+
+    -- local shapes = targetBody:getCreationShapes()
+    -- for _, shape in pairs(shapes) do
+    --     shape:destroyShape()
+    -- end
+    -- local jsonString = sm.json.writeJsonString(creationTable)
+
+    -- sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
+
+-- end if false then
+
     for i = 1, #vectors do
         table.insert(tensor, vectors[i].nSteps)
     end
     local maxIntId = 0
     local everyShapeByIntId = {}
+
+    local jointShapeIndex = 0
+    local maxJointIndexToNotIncrement = 0
     for _, body in ipairs(creationTable.bodies) do
         for _, shape in ipairs(body.childs) do
+            shape.jointShapeIndex = jointShapeIndex
+            jointShapeIndex = jointShapeIndex + 1
             if shape.controller == nil then
+                for _, nonInt in ipairs(shapes) do
+                    if tostring(nonInt.uuid) == shape.shapeId then
+                        print(nonInt.localPosition, shape.pos)
+                        if nonInt.localPosition.x == shape.pos.x and nonInt.localPosition.y == shape.pos.y and nonInt.localPosition.z == shape.pos.z then
+                            targetBodyObject = body
+                            goto continue
+                        end
+                    end
+                end
                 goto continue
             end
             local intId = shape.controller.id
             everyShapeByIntId[intId] = shape
             if table.contains(interactables, intId) then
                 targetBodyObject = body
+                maxJointIndexToNotIncrement = jointShapeIndex - 1
             end
             if intId > maxIntId then
                 maxIntId = intId
@@ -306,6 +254,8 @@ function CopyPaste.doCopyPaste(multitool, data)
             ::continue::
         end
     end
+
+    print("maxJointIndexToNotIncrement", maxJointIndexToNotIncrement)
     local externalConnectionsIngoing = {}
     local externalConnectionsOutgoing = {}
     if externalConnections == "absolute" then
@@ -347,9 +297,11 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
         end
     end
+    print("AAAAA")
     if targetBodyObject == nil then
         return
     end
+    print(2)
     local targetBodyShapes = targetBodyObject.childs
     local internalShapesOrdered = {}
     for i = 1, #interactables do
@@ -368,9 +320,25 @@ function CopyPaste.doCopyPaste(multitool, data)
     end
 
     local internalConnections = {}
+    local extraShapesToCopy = {}
+    print("EEEE")
     for i = 1, #targetBodyShapes do
         local shape = targetBodyShapes[i]
+        print(shape)
         if shape.controller == nil then
+            local shapeUuid = shape.shapeId
+            local shapePos = shape.pos
+            for _, nonInt in ipairs(shapes) do
+                print(nonInt)
+                if tostring(nonInt.uuid) ~= shapeUuid then
+                    goto continue2
+                end
+                if nonInt.localPosition.x ~= shapePos.x or nonInt.localPosition.y ~= shapePos.y or nonInt.localPosition.z ~= shapePos.z then
+                    goto continue2
+                end
+                table.insert(extraShapesToCopy, shape)
+                ::continue2::
+            end
             goto continue
         end
         local intId = shape.controller.id
@@ -422,10 +390,13 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
         ::continue::
     end
+    print(extraShapesToCopy)
 
     local relativeConnectionsToMake = {}
 
-    iterateTensor(tensor, function(number)
+    local nShapesAdded = 0
+
+    sm.MTTensorUtil.iterateTensor(tensor, function(number)
         local isAllZero = true
         for i = 1, #number do
             if number[i] ~= 0 then
@@ -441,6 +412,14 @@ function CopyPaste.doCopyPaste(multitool, data)
             deltaP = deltaP + vectors[i].step * number[i]
         end
         local newShapes = {}
+        for i = 1, #extraShapesToCopy do
+            local nonInt = extraShapesToCopy[i]
+            local newShape = table.deepCopy(nonInt)
+            newShape.pos.x = newShape.pos.x + deltaP.x
+            newShape.pos.y = newShape.pos.y + deltaP.y
+            newShape.pos.z = newShape.pos.z + deltaP.z
+            table.insert(newShapes, newShape)
+        end
         for i = 1, #interactables do
             local shape = internalShapesOrdered[i]
             if shape == false then
@@ -539,6 +518,7 @@ function CopyPaste.doCopyPaste(multitool, data)
             everyShapeByIntId[newShape.controller.id] = newShape
             
             table.insert(newShapes, newShape)
+            nShapesAdded = nShapesAdded + 1
             ::continue::
         end
         for i = 1, #newShapes do
@@ -593,6 +573,17 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
     end
 
+    if creationTable.joints ~= nil then
+        for _, joint in ipairs(creationTable.joints) do
+            if joint.childA > maxJointIndexToNotIncrement then
+                joint.childA = joint.childA + nShapesAdded
+            end
+            if joint.childB > maxJointIndexToNotIncrement then
+                joint.childB = joint.childB + nShapesAdded
+            end
+        end
+    end
+
     local worldpos = targetBody.worldPosition
     local worldrot = targetBody.worldRotation
     local world = targetBody:getWorld()
@@ -602,7 +593,8 @@ function CopyPaste.doCopyPaste(multitool, data)
         shape:destroyShape()
     end
     local jsonString = sm.json.writeJsonString(creationTable)
-    sm.creation.importFromString(world, jsonString, targetBody.worldPosition, targetBody.worldRotation, false)
+
+    sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
 end
 
 function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -753,7 +745,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 local body = result.body
                 local originLocal = result.origin
                 local finalLocal = result.final
-                local voxelMap = MTMultitoolLib.getVoxelMap(body, true)
+                local voxelMap = MTMultitoolLib.getVoxelMapShapes(body, true)
                 local x = math.min(originLocal.x, finalLocal.x) - halfBlock
                 local y = math.min(originLocal.y, finalLocal.y) - halfBlock
                 local z = math.min(originLocal.z, finalLocal.z) - halfBlock
@@ -1010,8 +1002,8 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
         elseif state == "selectStep" then
             if localPosition ~= nil then
                 sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true), "Click to select step")
-                local vecColor = colorOrder[math.fmod(#self.vectors, #colorOrder) + 1]
-                renderVector(tags, self.activeBody:transformPoint(self.origin),
+                local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(#self.vectors, #sm.MTTensorUtil.colorOrder) + 1]
+                sm.MTTensorUtil.renderVector(tags, self.activeBody:transformPoint(self.origin),
                     self.activeBody:transformPoint(localPosition),
                     vecColor, 0.025)
                 if primaryState == 1 then
@@ -1022,7 +1014,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 end
             end
         elseif state == "selectRange" then
-            local vecColor = colorOrder[math.fmod(#self.vectors, #colorOrder)]
+            local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(#self.vectors, #sm.MTTensorUtil.colorOrder)]
             local closestDistance, closestPosition, nSteps = MathUtil.closestPassBetweenContinuousRayAndDiscreteRay(
                 sm.camera.getPosition(),
                 sm.camera.getDirection(),
@@ -1035,7 +1027,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     goto continue
                 end
                 local newPos = self.activeBody:transformPoint(self.origin) + self.vectors[#self.vectors].globalStep * i
-                renderVector(tags, prevPos, newPos, vecColor, 0.025)
+                sm.MTTensorUtil.renderVector(tags, prevPos, newPos, vecColor, 0.025)
                 prevPos = newPos
                 ::continue::
             end
@@ -1068,12 +1060,14 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             local siliconFound = false
             -- local interactableIds = {}
             -- for _, shape in ipairs(self.selectedShapes) do
-            for _, shape in ipairs(self.activeBody:getCreationShapes()) do
-                local shapeUuid = shape:getShapeUuid()
-                -- table.insert(interactableIds, shape.interactable:getId())
-                if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
-                    siliconFound = true
-                    break
+            if self.activeBody ~= nil then
+                for _, shape in ipairs(self.activeBody:getCreationShapes()) do
+                    local shapeUuid = shape:getShapeUuid()
+                    -- table.insert(interactableIds, shape.interactable:getId())
+                    if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
+                        siliconFound = true
+                        break
+                    end
                 end
             end
             -- if not siliconFound then
@@ -1129,7 +1123,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                         goto continue
                     end
                     local newPos = self.activeBody:transformPoint(self.origin) + vec.globalStep * j
-                    renderVector(tags, prevPos, newPos, colorOrder[math.fmod(i, #colorOrder)], 0.025)
+                    sm.MTTensorUtil.renderVector(tags, prevPos, newPos, sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder)], 0.025)
                     prevPos = newPos
                     ::continue::
                 end

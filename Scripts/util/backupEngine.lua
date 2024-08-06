@@ -1,11 +1,16 @@
 sm.MTBackupEngine = sm.MTBackupEngine or {}
 
-local function getBCUCfilename()local playerUsername = sm.MTBackupEngine.username
+local function getBCUCfilename()
+    local playerUsername = sm.MTBackupEngine.username
     local allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+    local allClaracters = {}
+    for i = 1, #allowedCharacters do
+        allClaracters[string.sub(allowedCharacters, i, i)] = true
+    end
     local backupsCoordinatorFilename = "$CONTENT_DATA/Backups/BackupCoordinator_"
     for i = 1, #playerUsername do
         local char = string.sub(playerUsername, i, i)
-        if string.find(allowedCharacters, char) then
+        if table.contains(allClaracters, char) then
             backupsCoordinatorFilename = backupsCoordinatorFilename .. char
         end
     end

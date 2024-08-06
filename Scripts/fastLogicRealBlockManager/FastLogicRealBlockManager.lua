@@ -90,12 +90,12 @@ function FastLogicRealBlockManager.createPartWithData(self, block, body)
 end
 
 local typeToNumber = {
-    andBlocks=0,
-    orBlocks=1,
-    xorBlocks=2,
-    nandBlocks=3,
-    norBlocks=4,
-    xnorBlocks=5,
+    andBlocks=1,
+    orBlocks=2,
+    xorBlocks=3,
+    nandBlocks=4,
+    norBlocks=5,
+    xnorBlocks=6,
 }
 
 function FastLogicRealBlockManager.setData(self, block, data)
@@ -133,7 +133,7 @@ function FastLogicRealBlockManager.setData(self, block, data)
         end
     end
     sm.event.sendToInteractable(block.interactable, "server_saveMode", typeToNumber[data.type])
-    block.data.mode = typeToNumber[data.type]
+    block.data.mode = typeToNumber[data.type] - 1
     self.needDisplayUpdate[#self.needDisplayUpdate+1] = block.data.uuid
     self.displayedBlockStates[block.data.uuid] = nil
 end

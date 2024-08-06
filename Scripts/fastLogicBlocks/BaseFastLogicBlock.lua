@@ -259,7 +259,7 @@ function BaseFastLogicBlock.server_changeSpeed(self, isCrouching)
     self:sendMessageToAll("UpdatesPerTick = " .. tostring(self.creation.FastLogicRunner.numberOfUpdatesPerTick))
 end
 
-function BaseFastLogicBlock.client_updateTexture(self)
+function BaseFastLogicBlock.client_updateTexture(self, state)
 end
 
 function BaseFastLogicBlock.sendMessageToAll(self, message)

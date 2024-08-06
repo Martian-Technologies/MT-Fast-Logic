@@ -5,7 +5,7 @@ dofile "../util/compressionUtil/LibDeflate.lua"
 
 local function sendStatesToClients(self, changedUuidsArray)
     local status, result = pcall(self.network.sendToClients, self.network, "client_updateTexturesAndStates",
-        table.arrayToString(changedUuidsArray))
+        sm.MTFastLogic.CompressionUtil.arrayToString(changedUuidsArray))
     if not status then
         -- split changedUuids in two and try again
         local half = math.floor(#changedUuidsArray / 2)
@@ -45,7 +45,7 @@ function FastLogicRunnerRunner.updatedDisplays(self)
 end
 
 function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedData)
-    changedData = table.stringToArray(changedData)
+    changedData = sm.MTFastLogic.CompressionUtil.stringToArray(changedData)
     for i = 1, #changedData do
         local block = sm.MTFastLogic.client_FastLogicBlockLookUp[math.floor(changedData[i] / 2)]
         if block ~= nil then

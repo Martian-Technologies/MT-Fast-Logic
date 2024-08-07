@@ -418,7 +418,9 @@ function CopyPaste.doCopyPaste(multitool, data)
             newShape.pos.x = newShape.pos.x + deltaP.x
             newShape.pos.y = newShape.pos.y + deltaP.y
             newShape.pos.z = newShape.pos.z + deltaP.z
+            newShape.joints = nil
             table.insert(newShapes, newShape)
+            nShapesAdded = nShapesAdded + 1
         end
         for i = 1, #interactables do
             local shape = internalShapesOrdered[i]
@@ -429,6 +431,7 @@ function CopyPaste.doCopyPaste(multitool, data)
             newShape.pos.x = newShape.pos.x + deltaP.x
             newShape.pos.y = newShape.pos.y + deltaP.y
             newShape.pos.z = newShape.pos.z + deltaP.z
+            newShape.joints = nil
             for intId, pList in pairs(originalPositionsTakenUpBySource) do
                 if intId ~= interactables[i] then
                     goto continue2
@@ -583,6 +586,8 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
         end
     end
+
+    -- advPrint(creationTable, 100, 100, true)
 
     local worldpos = targetBody.worldPosition
     local worldrot = targetBody.worldRotation

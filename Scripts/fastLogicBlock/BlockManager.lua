@@ -530,7 +530,7 @@ end
 
 function FastLogicRunner.getUpdatedIds(self)
     local changed = {}
-    blockStates = self.blockStates
+    local  q blockStates = self.blockStates
     local lastBlockStates = self.lastBlockStates
     for i = 1, #blockStates do
         if lastBlockStates[i] ~= blockStates[i] then

@@ -66,9 +66,9 @@ function FastLogicRunner.makeDataArrays(self)
         "norThroughBlocks",          -- 4
         "timerBlocks",               -- 5
         "andBlocks",                 -- 6
-        "none",                      -- 7
+        "memoryBlocks",              -- 7
         "orBlocks",                  -- 8
-        "none",                      -- 9
+        "interfaceBlocks",           -- 9
         "xorBlocks",                 -- 10
         "nandBlocks",                -- 11
         "none",                      -- 12
@@ -107,14 +107,14 @@ function FastLogicRunner.makeDataArrays(self)
         18,    -- 4
         false, -- 5
         19,    -- 6
-        19,    -- 7
+        false, -- 7
         20,    -- 8
-        20,    -- 9
+        false, -- 9
         21,    -- 10
         22,    -- 11
-        22,    -- 12
+        false, -- 12
         23,    -- 13
-        23,    -- 14
+        false, -- 14
         24,    -- 15
         false, -- 16
         false, -- 17
@@ -132,10 +132,10 @@ end
 
 function FastLogicRunner.doLastTickUpdates(self)
     local multiBlocks = self.blocksSortedByPath[16]
-    blockOutputs = self.blockOutputs
-    blockStates = self.blockStates
-    multiBlockData = self.multiBlockData
-    runnableBlockPathIds = self.runnableBlockPathIds
+    local blockOutputs = self.blockOutputs
+    local blockStates = self.blockStates
+    local multiBlockData = self.multiBlockData
+    local runnableBlockPathIds = self.runnableBlockPathIds
     for i = 1, #multiBlocks do
         local multiBlockId = multiBlocks[i]
         local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)

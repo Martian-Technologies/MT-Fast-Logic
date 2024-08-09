@@ -4,6 +4,8 @@ dofile "../util/compressionUtil/compressionUtil.lua"
 dofile "BaseFastLogicBlock.lua"
 
 FastLogicBlockMemory = table.deepCopyTo(BaseFastLogicBlock, (FastLogicBlockMemory or class()))
+FastLogicBlockMemory.colorNormal = sm.color.new(0xf00000ff)
+FastLogicBlockMemory.colorHighlight = sm.color.new(0xf53d00ff)
 FastLogicBlockMemory.maxParentCount = -1 -- infinite
 FastLogicBlockMemory.maxChildCount = -1  -- infinite
 
@@ -15,8 +17,13 @@ function FastLogicBlockMemory.server_onCreate2(self)
     self.type = "BlockMemory"
     if self.storage:load() ~= nil then
         local data = self.storage:load()
-        self.data.memory = data.memory
-        self.memory = sm.MTUtil.compressionUtil.stringToHash(data.memory)
+        if data.memory == nil then
+            self.data.memory = ""
+            self.memory = {}
+        else
+            self.data.memory = data.memory
+            self.memory = sm.MTFastLogic.CompressionUtil.stringToHash(data.memory)
+        end
     else
         self.data.memory = ""
         self.memory = {}
@@ -33,6 +40,6 @@ end
 
 function FastLogicBlockMemory.server_saveMemory(self, memory)
     self.memory = memory
-    self.data.memory = sm.MTUtil.compressionUtil.hashToString(memory)
+    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
     self.storage:save(self.data)
 end

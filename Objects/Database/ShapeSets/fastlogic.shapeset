@@ -105,7 +105,7 @@
                 "y": 1,
                 "z": 1
             },
-            "color": "df7f01",
+            "color": "2aff41",
             "name": "Fast Logic Block Interface",
             "physicsMaterial": "Mechanical",
             "ratings": {
@@ -118,10 +118,10 @@
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicBlockInterface",
-                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
+                "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicBlockInterface.lua"
             },
             "uuid": "ce73327a-1cf9-49cc-9ee7-e63110ccc43f",
             "showInInventory": true
-        },
+        }
     ]
 }

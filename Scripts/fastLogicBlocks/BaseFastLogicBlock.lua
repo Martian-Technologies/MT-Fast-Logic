@@ -1,4 +1,5 @@
--- dofile "../util/util.lua"
+dofile "../util/util.lua"
+dofile "../util/compressionUtil/compressionUtil.lua"
 -- dofile "../allCreationStuff/CreationUtil.lua"
 local string = string
 local table = table

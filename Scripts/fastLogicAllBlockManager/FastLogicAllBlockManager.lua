@@ -154,6 +154,10 @@ function FastLogicAllBlockManager.addBlock(self, block)
         self:makeBlockData("EndTickButtons", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color, 0, false, false)
     elseif block.type == "Light" then
         self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color, 0, false, false)
+    elseif block.type == "Interface" then
+        self:makeBlockData("interfaceBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
+    elseif block.type == "BlockMemory" then
+        self:makeBlockData("memoryBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
     end
 end
 

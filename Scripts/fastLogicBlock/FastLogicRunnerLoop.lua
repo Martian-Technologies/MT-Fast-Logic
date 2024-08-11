@@ -59,8 +59,6 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     timerLengths = self.timerLengths
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
-    
-    
     if needsRunningBlocks == true then
         lastTimerOutputWait = self.lastTimerOutputWait
         multiBlockData = self.multiBlockData
@@ -529,7 +527,7 @@ function FastLogicRunner.doUpdate(self)
             if blockStates[multiData[10]] then
                 local addressBlocks = multiData[8]
                 local dataBlocks = multiData[9]
-                local address = 0
+                local address = 1
                 local data = 0
                 for i = 1, #addressBlocks do
                     local id = addressBlocks[i]
@@ -544,7 +542,11 @@ function FastLogicRunner.doUpdate(self)
                     end
                 end
                 local ramBlockId = multiData[7]
-                ramBlockData[ramBlockId][address] = data
+                if data == 0 then
+                    ramBlockData[ramBlockId][address] = nil
+                else
+                    ramBlockData[ramBlockId][address] = data
+                end
                 local j = 1
                 local outputInterfaces = ramBlockOtherData[ramBlockId][1]
                 while j <= #outputInterfaces do
@@ -552,17 +554,20 @@ function FastLogicRunner.doUpdate(self)
                     if multiBlockData[outputInterfaceId] == false then
                         table.remove(outputInterfaces, j)
                     else
-                        j = j +1
-                        runningMultiBlockLengths = runningMultiBlockLengths + 1
-                        runningBlocks[16][runningMultiBlockLengths] = outputInterfaceId
+                        j = j + 1
+                        if ramOutputMultiBlocksHash[outputInterfaceId] == nil then
+                            ramOutputMultiBlocksHash[outputInterfaceId] = true
+                            ramOutputMultiBlocksLength = ramOutputMultiBlocksLength + 1
+                            ramOutputMultiBlocks[ramOutputMultiBlocksLength] = outputInterfaceId
+                        end
                     end
                 end
             end
         elseif multiData[1] == 4 then -- ram block output
             if ramOutputMultiBlocksHash[blockId] == nil then
                 ramOutputMultiBlocksHash[blockId] = true
-                ramOutputMultiBlocksLenght = ramOutputMultiBlocksLenght + 1
-                ramOutputMultiBlocks[ramOutputMultiBlocksLenght] = blockId
+                ramOutputMultiBlocksLength = ramOutputMultiBlocksLength + 1
+                ramOutputMultiBlocks[ramOutputMultiBlocksLength] = blockId
             end
         else
             print("no runner for multi block with id: " .. tostring(multiData[1]))
@@ -576,14 +581,12 @@ function FastLogicRunner.doUpdate(self)
                 local outputs = blockOutputs[id]
                     for j = 1, #outputs do
                         local outputId = outputs[j]
-                        -- if outputId ~= -1 then
-                            if nextRunningBlocks[outputId] ~= nextRunningIndex then
-                                nextRunningBlocks[outputId] = nextRunningIndex
-                                local pathId = runnableBlockPathIds[outputId]
-                                runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
-                                runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
-                            end
-                        -- end
+                        if nextRunningBlocks[outputId] ~= nextRunningIndex then
+                            nextRunningBlocks[outputId] = nextRunningIndex
+                            local pathId = runnableBlockPathIds[outputId]
+                            runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
+                            runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
+                        end
                     end
                 end
             end
@@ -595,7 +598,7 @@ function FastLogicRunner.doUpdate(self)
         local multiData = multiBlockData[ramOutputMultiBlocks[k]]
         local addressBlocks = multiData[8]
         local dataBlocks = multiData[9]
-        local address = 0
+        local address = 1
         for i = 1, #addressBlocks do
             local id = addressBlocks[i]
             if blockStates[id] then

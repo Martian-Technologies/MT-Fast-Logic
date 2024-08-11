@@ -61,6 +61,8 @@ function FastLogicRunner.makeDataArrays(self)
     self.ramBlockData = table.makeArrayForHash(self.hashData)
     self.ramBlockOtherData = table.makeArrayForHash(self.hashData)
     self.nonFastBlocks = {}
+    self.interfacesToMake = {}
+    self.interfacesToMakeHash = {}
     self.pathNames = {
         "EndTickButtons",            -- 1
         "lightBlocks",               -- 2
@@ -144,23 +146,26 @@ function FastLogicRunner.doLastTickUpdates(self)
     local runnableBlockPathIds = self.runnableBlockPathIds
     for i = 1, #multiBlocks do
         local multiBlockId = multiBlocks[i]
-        local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)
-        local idStatePairs = data[2]
-        local lastIdStatePairs = data[1]
-        if idStatePairs == nil then
-            idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
-        end
-        local blocks = multiBlockData[multiBlockId][2]
-        for j = 1, #lastIdStatePairs do
-            local outputs = blockOutputs[lastIdStatePairs[j][1]]
-            local state = lastIdStatePairs[j][2]
-            for k = 1, #outputs do
-                local id = outputs[k]
-                if runnableBlockPathIds[id] == 2 then
-                    blockStates[id] = state
+        local multiData = multiBlockData[multiBlockId]
+        if multiData[1] == 1 or multiData[1] == 2 then
+            local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)
+            local idStatePairs = data[2]
+            local lastIdStatePairs = data[1]
+            if idStatePairs == nil then
+                idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
+            end
+            local blocks = multiData[2]
+            for j = 1, #lastIdStatePairs do
+                local outputs = blockOutputs[lastIdStatePairs[j][1]]
+                local state = lastIdStatePairs[j][2]
+                for k = 1, #outputs do
+                    local id = outputs[k]
+                    if runnableBlockPathIds[id] == 2 then
+                        blockStates[id] = state
+                    end
                 end
             end
+            self:internalSetBlockStates(idStatePairs, false)
         end
-        self:internalSetBlockStates(idStatePairs, false)
     end
 end

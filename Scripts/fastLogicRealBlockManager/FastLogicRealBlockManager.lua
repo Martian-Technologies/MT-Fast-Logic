@@ -38,7 +38,6 @@ function FastLogicRealBlockManager.update(self)
     self.creation.lastBodyUpdate = sm.game.getCurrentTick()
     -- check switches and other inputs
     self:checkForNewInputs()
-
     -- run
     local updatedGates = self.FastLogicAllBlockManager:update()
     table.appendTable(updatedGates, self.needDisplayUpdate)

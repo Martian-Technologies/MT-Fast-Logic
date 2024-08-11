@@ -106,8 +106,10 @@ function FastLogicAllBlockManager.update(self)
     self.dataToSetDelay1 = self.dataToSetDelay2
     self.dataToSetDelay2 = self.dataToSetDelay3
     self.dataToSetDelay3 = {}
+    -- create interfaces
+    self.FastLogicRunner:makeAllRamInterfaces()
     -- run fast gates
-    self.creation.FastLogicRunner:update()
+    self.FastLogicRunner:update()
     -- do state updates
     local realBlocksToUpdate = {}
     local updatedIds = self.FastLogicRunner:getUpdatedIds()

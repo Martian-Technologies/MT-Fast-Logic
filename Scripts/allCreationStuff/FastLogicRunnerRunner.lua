@@ -40,6 +40,7 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
         end
         self.changedUuidsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
+            -- v.FastLogicRealBlockManager:update()
             local success, result = pcall(v.FastLogicRealBlockManager.update, v.FastLogicRealBlockManager)
             if not success then
                 self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 2). Please report to ItchyTrack on discord")

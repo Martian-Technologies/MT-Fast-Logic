@@ -79,15 +79,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         end
         -- do removal
         for i = 1, #multiData[2] do
-            local blockId = multiData[2][i]
-            if multiBlockType == 3 or multiBlockType == 4 then
-                local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[blockId]]
-                if interfaceBlock ~= nil then
-                    interfaceBlock.error = "none"
-                end
-                self:internalSetBlockState(blockId, false)
-            end
-            self.multiBlockData[blockId] = false
+            self.multiBlockData[multiData[2][i]] = false
         end
         for i = 1, #multiData[3] do
             local blockId = multiData[3][i]
@@ -95,7 +87,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
             self:shouldBeThroughBlock(blockId)
             self:internalFindRamInterfaces(blockId)
         end
-        if multiData[1] == 1 then
+        if multiData[1] == 1 or multiData[1] == 2 then
             for i = 1, #multiData[3] do
                 local blockId = multiData[3][i]
                 -- update blockOutputs
@@ -150,9 +142,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     self.timerInputStates[id] = false
     self.altBlockData[id] = false
     self.multiBlockData[id] = false
-
     table.removeFromConstantKeysOnlyHash(self.hashData, self.unhashedLookUp[id])
-    ::continue::
 end
 
 function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
@@ -185,8 +175,9 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
     local timerData = self.timerData
     local multiData = self.multiBlockData[multiBlockId]
     local idStatePairs = {} -- fill with states to set/update
-    if multiData[1] == nil then
-    elseif multiData[1] == 1 or multiData[1] == 2 then
+    local multiBlockType = multiData[1]
+    if multiBlockType == nil then
+    elseif multiBlockType == 1 or multiBlockType == 2 then
         local state = blockStates[multiData[3][1]]
         local endBlockId = multiData[4][1]
         idStatePairs[#idStatePairs+1] = {multiData[3][1], state}
@@ -204,13 +195,21 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
                 idStatePairs[#idStatePairs+1] = {id, blockStates[id]}
                 break
             end
-            
             if runnableBlockPathIds[id] == 4 then
                 state = not state
             elseif runnableBlockPathIds[id] ~= 3 then
-                print("this should never happen (internalGetMultiBlockInternalStates, multiData[1] = 1 or 2)")
+                print("this should never happen (internalGetMultiBlockInternalStates, multiBlockType = 1 or 2)")
             end
             idStatePairs[#idStatePairs+1] = {id, state}
+        end
+    elseif multiBlockType == 3 or multiBlockType == 4 then
+        for i = 1, #multiData[2] do
+            local id = multiData[2][i]
+            local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[id]]
+            if interfaceBlock ~= nil then
+                interfaceBlock.error = "none"
+            end
+            idStatePairs[#idStatePairs+1] = {id, false}
         end
     else
     end
@@ -254,26 +253,46 @@ function FastLogicRunner.internalFindRamInterfaces(self, blockId, pastCheckHash)
     local runnableBlockPaths = self.runnableBlockPaths
     local path = runnableBlockPaths[blockId]
     if path == "BlockMemory" then
-        local outputs = self.blockOutputs[blockId]
-        for i = 1, #outputs do
-            local outputId = outputs[i]
-            if runnableBlockPaths[outputId] == "Address" then
-                self:internalMakeRamInterface(outputId, blockId)
+        if self.interfacesToMakeHash[blockId] == nil then
+            self.interfacesToMake[#self.interfacesToMake+1] = blockId
+            self.interfacesToMakeHash[blockId] = true
+            local outputs = self.blockOutputs[blockId]
+            for i = 1, #outputs do
+                local outputId = outputs[i]
+                if runnableBlockPaths[outputId] == "interfaceMultiBlockInput" then
+                    self:revertBlockType(outputId)
+                end
             end
         end
     elseif (
         path == "Address" or
         path == "DataIn" or
         path == "DataOut" or
-        path == "WriteData"
+        path == "WriteData" or
+        path == "interfaceMultiBlockInput"
     ) then
         local inputs = self.blockInputs[blockId]
         for i = 1, #inputs do
             self:internalFindRamInterfaces(inputs[i], pastCheckHash)
         end
-    elseif path == "interfaceMultiBlockInput" then
-        self:revertBlockType(blockId)
     end
+end
+
+function FastLogicRunner.makeAllRamInterfaces(self)
+    for j = 1, #self.interfacesToMake do
+        local blockId = self.interfacesToMake[j]
+        local outputs = self.blockOutputs[blockId]
+        if outputs ~= false then
+            for i = 1, #outputs do
+                local outputId = outputs[i]
+                if self.runnableBlockPaths[outputId] == "Address" then
+                    self:internalMakeRamInterface(outputId, blockId)
+                end
+            end
+        end
+    end
+    self.interfacesToMake = {}
+    self.interfacesToMakeHash = {}
 end
 
 function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryBlockId)
@@ -312,13 +331,14 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
         if numberOfOutputs == 0 then
             done = true
         else
+            local numberOfBlockOutputs = self.numberOfBlockOutputs
             local outputs = blockOutputs[idToCheckNext]
             local numberOfOutputs = #outputs
             for i = 1, numberOfOutputs do
                 local outputId = outputs[i]
                 local path = runnableBlockPaths[outputId]
                 if path == "Address" then
-                    if numberOfOutputs > 1 then
+                    if numberOfBlockOutputs[outputId] > 1 then
                         allBlockFound[#allBlockFound+1] = outputId
                         for j = 1, #allBlockFound do
                             local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]
@@ -348,7 +368,7 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                         return
                     end
                 elseif path == "DataIn" then
-                    if numberOfOutputs > 1 then
+                    if numberOfBlockOutputs[outputId] > 1 then
                         allBlockFound[#allBlockFound+1] = outputId
                         for j = 1, #allBlockFound do
                             local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]
@@ -397,7 +417,7 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                         return
                     end
                 elseif path == "WriteData" then
-                    if numberOfOutputs > 1 then
+                    if numberOfBlockOutputs[outputId] > 1 then
                         allBlockFound[#allBlockFound+1] = outputId
                         for j = 1, #allBlockFound do
                             local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]
@@ -452,7 +472,6 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
             if interfaceBlock ~= nil then
                 interfaceBlock.error = {8, searchStage}
             end
-            self:internalSetBlockState(allBlockFound[j], false)
         end
         return
     end
@@ -685,9 +704,6 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
         path = self.pathIndexs[path]
     end
     if (self.runnableBlockPathIds[id] ~= path and self.altBlockData[id] == nil) or (self.altBlockData[id] ~= path and self.altBlockData[id] ~= nil) then
-        if self.multiBlockData[id] ~= false then
-            self:internalRemoveBlock(self.multiBlockData[id])
-        end
         self.altBlockData[id] = false
         local oldPath = self.runnableBlockPathIds[id]
         -- remove old

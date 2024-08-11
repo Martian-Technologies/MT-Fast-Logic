@@ -90,7 +90,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_memory.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicBlockMemory",
@@ -114,7 +114,7 @@
                 "friction": 5,
                 "buoyancy": 2
             },
-            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_gate.rend",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/fast_logic_interface.rend",
             "rotationSet": "PropYZ",
             "scripted": {
                 "classname": "FastLogicBlockInterface",

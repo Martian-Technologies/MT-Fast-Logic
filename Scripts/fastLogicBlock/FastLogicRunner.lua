@@ -58,6 +58,8 @@ function FastLogicRunner.makeDataArrays(self)
     self.altBlockData = table.makeArrayForHash(self.hashData)
     self.multiBlockData = table.makeArrayForHash(self.hashData)
     self.numberOfTimesRun = table.makeArrayForHash(self.hashData, 0)
+    self.ramBlockData = table.makeArrayForHash(self.hashData)
+    self.ramBlockOtherData = table.makeArrayForHash(self.hashData)
     self.nonFastBlocks = {}
     self.pathNames = {
         "EndTickButtons",            -- 1
@@ -66,14 +68,14 @@ function FastLogicRunner.makeDataArrays(self)
         "norThroughBlocks",          -- 4
         "timerBlocks",               -- 5
         "andBlocks",                 -- 6
-        "memoryBlocks",              -- 7
+        "Address",                   -- 7
         "orBlocks",                  -- 8
-        "interfaceBlocks",           -- 9
+        "DataIn",                    -- 9
         "xorBlocks",                 -- 10
         "nandBlocks",                -- 11
-        "none",                      -- 12
+        "DataOut",                   -- 12
         "norBlocks",                 -- 13
-        "none",                      -- 14
+        "WriteData",                 -- 14
         "xnorBlocks",                -- 15
         "multiBlocks",               -- 16
         "throughMultiBlockInput",    -- 17
@@ -84,7 +86,9 @@ function FastLogicRunner.makeDataArrays(self)
         "nandMultiBlockInput",       -- 22
         "norMultiBlockInput",        -- 23
         "xnorMultiBlockInput",       -- 24
-        "blockStateSetterBlocks",    -- 25
+        "stateSetterBlocks",         -- 25
+        "BlockMemory",               -- 26
+        "interfaceMultiBlockInput"   -- 27
     }
     self.pathIndexs = {}
     for index, path in pairs(self.pathNames) do
@@ -107,14 +111,14 @@ function FastLogicRunner.makeDataArrays(self)
         18,    -- 4
         false, -- 5
         19,    -- 6
-        false, -- 7
+        27,    -- 7
         20,    -- 8
-        false, -- 9
+        27,    -- 9
         21,    -- 10
         22,    -- 11
         false, -- 12
         23,    -- 13
-        false, -- 14
+        27,    -- 14
         24,    -- 15
         false, -- 16
         false, -- 17
@@ -126,6 +130,8 @@ function FastLogicRunner.makeDataArrays(self)
         false, -- 23
         false, -- 24
         false, -- 25
+        false, -- 26
+        false, -- 27
     }
     self:updateLongestTimer()
 end

@@ -1,13 +1,22 @@
 dofile "../util/util.lua"
 dofile "BaseFastLogicBlock.lua"
 
+sm.interactable.connectionType.fastLogicInterface = math.pow(2, 27)
+
 FastLogicBlockInterface = table.deepCopyTo(BaseFastLogicBlock, (FastLogicBlockInterface or class()))
 FastLogicBlockInterface.colorNormal = sm.color.new(0x0fdf00ff)
 FastLogicBlockInterface.colorHighlight = sm.color.new(0x07f500ff)
-FastLogicBlockInterface.maxParentCount = -1 -- infinite
-FastLogicBlockInterface.maxChildCount = -1  -- infinite
+FastLogicBlockInterface.connectionOutput = (
+    FastLogicBlockInterface.connectionOutput + sm.interactable.connectionType.fastLogicInterface
+)
+FastLogicBlockInterface.connectionInput = (
+    FastLogicBlockInterface.connectionInput + sm.interactable.connectionType.fastLogicInterface
+)
+
 
 local modes = { "Address", "DataIn", "DataOut", "WriteData" }
+local modeNames = { "Address", "Data In", "Data Out", "Write Data" }
+local modeNamesForErrors = { "Address", "Data Out", "Data In", "Write Data" }
 
 local indexToMode = { "Address", "DataIn", "DataOut", "WriteData" }
 
@@ -31,6 +40,7 @@ end
 
 function FastLogicBlockInterface.server_onCreate2(self)
     self.type = "Interface"
+    self.error = self.error or "none"
     if self.storage:load() ~= nil then
         self.data.mode = self.storage:load().mode or (self.data.mode or 1)
     else
@@ -73,58 +83,112 @@ function FastLogicBlockInterface.gui_createNewGui(self)
 end
 
 function FastLogicBlockInterface.gui_update(self)
-    print(self.client_modeIndex)
     local wantedMode = indexToMode[self.client_modeIndex]
     for i = 1, #indexToMode do
         if self.client_modeIndex == i then
-            print("set")
             self.gui:setButtonState(wantedMode, true)
-            self.gui:setText("DescriptionText", descriptions[wantedMode])
         else
             self.gui:setButtonState(indexToMode[i], false)
         end
     end
+    self.gui:setText("DescriptionText", "")
+    self.network:sendToServer("sever_getError")
+end
+
+function FastLogicBlockInterface.makeErrorMessage(self)
+    if self.error == nil then return "Valid Interface" end
+    if self.error == "none" then return "No Interface Found" end
+    local type = self.error[1]
+    local stage = self.error[2]
+    if type == 1 then
+        return "Address has to many outputs. Max 1"
+    elseif type == 2 then
+        return modeNamesForErrors[stage] .. " can't output to Address"
+    elseif type == 3 then
+        return "Data In has to many outputs. Max 1"
+    elseif type == 4 then
+        return modeNamesForErrors[stage] .. " can't output to Data Out"
+    elseif type == 5 then
+        return "Write Data has to many outputs. Max 1"
+    elseif type == 6 then
+        return modeNamesForErrors[stage] .. " can't output to Write Data"
+    elseif type == 7 then
+        return "ERROR: Interface code never stopped looping! Report to ItchyTrack"
+    elseif type == 8 then
+        return "Interface can't end with " .. modes[stage]
+    elseif type == 9 then
+        return "Invalid interface"
+    else
+        return "Unknow error??"
+    end
+end
+
+function FastLogicBlockInterface.sever_getError(self)
+    self.network:sendToClients("client_setError", self:makeErrorMessage())
+end
+
+function FastLogicBlockInterface.client_setError(self, error)
+    if self.gui == nil then return end
+    self.gui:setText("DescriptionText", error)
 end
 
 function FastLogicBlockInterface.gui_selectButton(self, mode)
     self.client_modeIndex = modeToIndex[mode]
-    self:gui_update()
     self.network:sendToServer("server_saveMode", self.client_modeIndex)
+    self:gui_update()
 end
 
 function FastLogicBlockInterface.client_onClientDataUpdate(self, mode)
-    print("mode:", mode)
     self:client_updateTexture(nil, mode)
-    print(self.client_modeIndex)
 end
 
 function FastLogicBlockInterface.client_updateTexture(self, state, mode)
-    print("got:", mode)
     local doUpdate = false
-    -- if state == nil then
-    --     state = self.client_state
-    -- elseif self.client_state ~= state then
-    --     doUpdate = true
-    -- end
+    if state == nil then
+        state = self.client_state
+    elseif self.client_state ~= state then
+        doUpdate = true
+    end
     if mode == nil then
         mode = self.client_modeIndex
     else
         doUpdate = true
     end
     if doUpdate then
-    -- self.client_state = state
+        self.client_state = state
         self.client_modeIndex = mode
-    --     if state then
-    --         self.interactable:setUvFrameIndex(6 + mode - 1)
-    --     else
-    --         self.interactable:setUvFrameIndex(0 + mode - 1)
-    --     end
+        if state then
+            self.interactable:setUvFrameIndex(6 + mode - 1)
+        else
+            self.interactable:setUvFrameIndex(0 + mode - 1)
+        end
     end
+    -- local doUpdate = false
+    -- -- if state == nil then
+    -- --     state = self.client_state
+    -- -- elseif self.client_state ~= state then
+    -- --     doUpdate = true
+    -- -- end
+    -- if mode == nil then
+    --     mode = self.client_modeIndex
+    -- else
+    --     doUpdate = true
+    -- end
+    -- if doUpdate then
+    -- -- self.client_state = state
+    --     self.client_modeIndex = mode
+    -- --     if state then
+    -- --         self.interactable:setUvFrameIndex(6 + mode - 1)
+    -- --     else
+    -- --         self.interactable:setUvFrameIndex(0 + mode - 1)
+    -- --     end
+    -- end
 end
 
 function FastLogicBlockInterface.server_saveMode(self, mode)
     self.data.mode = mode
     self.network:setClientData(mode)
     self.storage:save(self.data)
-    -- self.FastLogicAllBlockManager:changeBlockType(self.data.uuid, modes[mode])
+    self.error = "none"
+    self.FastLogicAllBlockManager:changeBlockType(self.data.uuid, modes[mode])
 end

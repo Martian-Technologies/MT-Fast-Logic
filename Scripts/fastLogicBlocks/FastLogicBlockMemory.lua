@@ -3,11 +3,13 @@ dofile "../util/compressionUtil/compressionUtil.lua"
 
 dofile "BaseFastLogicBlock.lua"
 
+sm.interactable.connectionType.fastLogicInterface = math.pow(2, 27)
+
 FastLogicBlockMemory = table.deepCopyTo(BaseFastLogicBlock, (FastLogicBlockMemory or class()))
 FastLogicBlockMemory.colorNormal = sm.color.new(0xf00000ff)
 FastLogicBlockMemory.colorHighlight = sm.color.new(0xf53d00ff)
-FastLogicBlockMemory.maxParentCount = -1 -- infinite
-FastLogicBlockMemory.maxChildCount = -1  -- infinite
+FastLogicBlockMemory.connectionInput = 0
+FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface
 
 function FastLogicBlockMemory.getData2(self)
     self.creation.FastLogicBlockMemorys[self.data.uuid] = self
@@ -39,7 +41,16 @@ function FastLogicBlockMemory.client_updateTexture(self)
 end
 
 function FastLogicBlockMemory.server_saveMemory(self, memory)
-    self.memory = memory
+    table.copyTo(self.memory, memory)
     self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
     self.storage:save(self.data)
+end
+
+function FastLogicBlockMemory.server_saveHeldMemory(self)
+    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
+    self.storage:save(self.data)
+end
+
+function FastLogicBlockMemory.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
+    print(self.memory)
 end

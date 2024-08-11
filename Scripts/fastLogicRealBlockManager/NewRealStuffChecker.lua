@@ -102,6 +102,7 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                     end
                 end
             end
+            ::continue::
         end
         for id, data in pairs(FastLogicRunner.nonFastBlocks) do
             local interactable = data[4]

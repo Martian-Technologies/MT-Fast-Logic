@@ -249,7 +249,7 @@ end
 function sm.MTFastLogic.CompressionUtil.stringToHash(str)
     local data = {}
     local key = nil
-    for c in str:gmatch "[all TODO make this all chars abd numbers]" do
+    for c in str:gmatch "['][%a%d]+" do
         if string.sub(c, 1, 1) == "'" then
             c = tonumber(string.sub(c, 2, #c))
         end
@@ -257,6 +257,7 @@ function sm.MTFastLogic.CompressionUtil.stringToHash(str)
             key = c
         else
             data[key] = c
+            key = nil
         end
     end
     return data

@@ -98,6 +98,7 @@ function FastLogicAllBlockManager.update(self)
         for i = 1, dataToSetLength do
             local uuid = self.dataToSetToDo[i][1]
             self.FastLogicRunner:externalShouldBeThroughBlock(uuid)
+            self.FastLogicRunner:externalFindRamInterfaces(uuid)
             self.FastLogicRunner:externalAddBlockToUpdate(uuid)
         end
     end
@@ -155,9 +156,17 @@ function FastLogicAllBlockManager.addBlock(self, block)
     elseif block.type == "Light" then
         self:makeBlockData("lightBlocks", block.data.uuid, pos, rot, block:getParentUuids(), {}, block.interactable.active, block.shape.color, 0, false, false)
     elseif block.type == "Interface" then
-        self:makeBlockData("interfaceBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
+        if (block.data.mode == 1) then
+            self:makeBlockData("Address", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
+        elseif (block.data.mode == 2) then
+            self:makeBlockData("DataIn", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
+        elseif (block.data.mode == 3) then
+            self:makeBlockData("DataOut", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
+        elseif (block.data.mode == 4) then
+            self:makeBlockData("WriteData", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
+        end
     elseif block.type == "BlockMemory" then
-        self:makeBlockData("memoryBlocks", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
+        self:makeBlockData("BlockMemory", block.data.uuid, pos, rot, block:getParentUuids(), block:getChildUuids(), block.interactable.active, block.shape.color, 0, false, false)
     end
 end
 

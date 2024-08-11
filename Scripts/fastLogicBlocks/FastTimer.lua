@@ -2,7 +2,7 @@ dofile "BaseFastLogicBlock.lua"
 dofile "../util/util.lua"
 
 FastTimer = table.deepCopyTo(BaseFastLogicBlock, (FastTimer or class()))
-FastTimer.maxParentCount = 1 -- infinite
+FastTimer.maxParentCount = 1
 FastTimer.maxChildCount = -1  -- infinite
 
 function FastTimer.getData2(self)

@@ -292,8 +292,10 @@ function BaseFastLogicBlock.removeUuidData(self)
     end
     for i = 1, #self.creation.blocks[self.data.uuid].outputs do
         local otherUuid = self.creation.blocks[self.data.uuid].outputs[i]
-        if self.creation.blocks[otherUuid].isSilicon then
-            return
+        if self.creation.blocks[otherUuid] ~= nil then
+            if self.creation.blocks[otherUuid].isSilicon then
+                return
+            end
         end
     end
     local uuid = self.data.uuid

@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="LogicGateBG" position_real="0.21875 0.207593 0.5625 0.463889" align="Center" name="MainPanel">
+        <Property key="NeedKey" value="false"/>
+        <Property key="NeedMouse" value="true"/>
+        <Property key="InheritsAlpha" value="false"/>
+        <Widget type="TextBox" skin="TextBox" position_real="0 0.0898204 1 0.0978044">
+            <Property key="Caption" value="Interface"/>
+            <Property key="FontName" value="SM_HeaderLarge_Wide"/>
+            <Property key="TextAlign" value="Center"/>
+            <Property key="NeedKey" value="false"/>
+            <Property key="NeedMouse" value="false"/>
+        </Widget>
+        <Widget type="Button" skin="LogicGateButtons" position_real="0.0462963 0.357285 0.132407 0.285429" name="Address">
+            <Property key="FontName" value="SM_ButtonSmall"/>
+            <Property key="Caption" value="ADDRESS"/>
+            <Property key="TextAlign" value="Center"/>
+            <!-- <Widget type="ImageBox" skin="ImageBox" position_real="0.244755 0.307692 0.475524 0.370629" name="LogicIcon">
+                <Property key="ImageResource" value="LogicGateIcons"/>
+                <Property key="ImageName" value="and"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget> -->
+        </Widget>
+        <Widget type="Button" skin="LogicGateButtons" position_real="0.193519 0.357285 0.132407 0.285429" name="DataIn">
+            <Property key="FontName" value="SM_ButtonSmall"/>
+            <Property key="Caption" value="DATA IN"/>
+            <Property key="TextAlign" value="Center"/>
+            <!-- <Widget type="ImageBox" skin="ImageBox" position_real="0.244755 0.307692 0.475524 0.370629" name="LogicIcon">
+                <Property key="ImageResource" value="LogicGateIcons"/>
+                <Property key="ImageName" value="or"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget> -->
+        </Widget>
+        <Widget type="Button" skin="LogicGateButtons" position_real="0.341667 0.357285 0.132407 0.285429" name="DataOut">
+            <Property key="FontName" value="SM_ButtonSmall"/>
+            <Property key="Caption" value="DATA OUT"/>
+            <Property key="TextAlign" value="Center"/>
+            <!-- <Widget type="ImageBox" skin="ImageBox" position_real="0.244755 0.307692 0.475524 0.370629" name="LogicIcon">
+                <Property key="ImageResource" value="LogicGateIcons"/>
+                <Property key="ImageName" value="xor"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget> -->
+        </Widget>
+        <Widget type="Button" skin="LogicGateButtons" position_real="0.48889 0.357285 0.132407 0.285429" name="WriteData">
+            <Property key="FontName" value="SM_ButtonSmall"/>
+            <Property key="Caption" value="WRITE DATA"/>
+            <Property key="TextAlign" value="Center"/>
+            <!-- <Widget type="ImageBox" skin="ImageBox" position_real="0.244755 0.307692 0.475524 0.370629" name="LogicIcon">
+                <Property key="ImageResource" value="LogicGateIcons"/>
+                <Property key="ImageName" value="xor"/>
+                <Property key="NeedKey" value="false"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget> -->
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position_real="0.0527778 0.758483 0.582407 0.149701" name="DescriptionText">
+            <Property key="FontName" value="SM_TextSmall"/>
+            <Property key="Caption" value="#{CONTROLLER_LOGIC_DESCRIPTION_AND}"/>
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings/>
+</MyGUI>

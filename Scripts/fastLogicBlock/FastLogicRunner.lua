@@ -58,7 +58,11 @@ function FastLogicRunner.makeDataArrays(self)
     self.altBlockData = table.makeArrayForHash(self.hashData)
     self.multiBlockData = table.makeArrayForHash(self.hashData)
     self.numberOfTimesRun = table.makeArrayForHash(self.hashData, 0)
+    self.ramBlockData = table.makeArrayForHash(self.hashData)
+    self.ramBlockOtherData = table.makeArrayForHash(self.hashData)
     self.nonFastBlocks = {}
+    self.interfacesToMake = {}
+    self.interfacesToMakeHash = {}
     self.pathNames = {
         "EndTickButtons",            -- 1
         "lightBlocks",               -- 2
@@ -66,14 +70,14 @@ function FastLogicRunner.makeDataArrays(self)
         "norThroughBlocks",          -- 4
         "timerBlocks",               -- 5
         "andBlocks",                 -- 6
-        "none",                      -- 7
+        "Address",                   -- 7
         "orBlocks",                  -- 8
-        "none",                      -- 9
+        "DataIn",                    -- 9
         "xorBlocks",                 -- 10
         "nandBlocks",                -- 11
-        "none",                      -- 12
+        "DataOut",                   -- 12
         "norBlocks",                 -- 13
-        "none",                      -- 14
+        "WriteData",                 -- 14
         "xnorBlocks",                -- 15
         "multiBlocks",               -- 16
         "throughMultiBlockInput",    -- 17
@@ -84,7 +88,9 @@ function FastLogicRunner.makeDataArrays(self)
         "nandMultiBlockInput",       -- 22
         "norMultiBlockInput",        -- 23
         "xnorMultiBlockInput",       -- 24
-        "blockStateSetterBlocks",    -- 25
+        "stateSetterBlocks",         -- 25
+        "BlockMemory",               -- 26
+        "interfaceMultiBlockInput"   -- 27
     }
     self.pathIndexs = {}
     for index, path in pairs(self.pathNames) do
@@ -107,14 +113,14 @@ function FastLogicRunner.makeDataArrays(self)
         18,    -- 4
         false, -- 5
         19,    -- 6
-        19,    -- 7
+        27,    -- 7
         20,    -- 8
-        20,    -- 9
+        27,    -- 9
         21,    -- 10
         22,    -- 11
-        22,    -- 12
+        false, -- 12
         23,    -- 13
-        23,    -- 14
+        27,    -- 14
         24,    -- 15
         false, -- 16
         false, -- 17
@@ -126,35 +132,40 @@ function FastLogicRunner.makeDataArrays(self)
         false, -- 23
         false, -- 24
         false, -- 25
+        false, -- 26
+        false, -- 27
     }
     self:updateLongestTimer()
 end
 
 function FastLogicRunner.doLastTickUpdates(self)
     local multiBlocks = self.blocksSortedByPath[16]
-    blockOutputs = self.blockOutputs
-    blockStates = self.blockStates
-    multiBlockData = self.multiBlockData
-    runnableBlockPathIds = self.runnableBlockPathIds
+    local blockOutputs = self.blockOutputs
+    local blockStates = self.blockStates
+    local multiBlockData = self.multiBlockData
+    local runnableBlockPathIds = self.runnableBlockPathIds
     for i = 1, #multiBlocks do
         local multiBlockId = multiBlocks[i]
-        local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)
-        local idStatePairs = data[2]
-        local lastIdStatePairs = data[1]
-        if idStatePairs == nil then
-            idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
-        end
-        local blocks = multiBlockData[multiBlockId][2]
-        for j = 1, #lastIdStatePairs do
-            local outputs = blockOutputs[lastIdStatePairs[j][1]]
-            local state = lastIdStatePairs[j][2]
-            for k = 1, #outputs do
-                local id = outputs[k]
-                if runnableBlockPathIds[id] == 2 then
-                    blockStates[id] = state
+        local multiData = multiBlockData[multiBlockId]
+        if multiData[1] == 1 or multiData[1] == 2 then
+            local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)
+            local idStatePairs = data[2]
+            local lastIdStatePairs = data[1]
+            if idStatePairs == nil then
+                idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
+            end
+            local blocks = multiData[2]
+            for j = 1, #lastIdStatePairs do
+                local outputs = blockOutputs[lastIdStatePairs[j][1]]
+                local state = lastIdStatePairs[j][2]
+                for k = 1, #outputs do
+                    local id = outputs[k]
+                    if runnableBlockPathIds[id] == 2 then
+                        blockStates[id] = state
+                    end
                 end
             end
+            self:internalSetBlockStates(idStatePairs, false)
         end
-        self:internalSetBlockStates(idStatePairs, false)
     end
 end

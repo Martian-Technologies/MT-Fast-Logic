@@ -18,7 +18,7 @@ logo = cv2.imread(r"Gui\MT_logo.png", cv2.IMREAD_UNCHANGED)
 
 imageSize = 96
 
-for i in range(747):
+for i in range(749):
     x = i%42*imageSize
     y = i//42*imageSize
     blit(logo, image, x, y)

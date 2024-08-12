@@ -99,8 +99,6 @@ function FastLogicRunner.findMultiBlocks(self, id)
 
             local multiBlockId = self:internalAddMultiBlock(isNot and 2 or 1)
 
-            self:makeBlockAlt(blocks[1], self.toMultiBlockInput[self.runnableBlockPathIds[blocks[1]]])
-            
             self:internalAddBlockToMultiBlock(blocks[1], multiBlockId, true, false)
             self.multiBlockData[multiBlockId][7] = length
             for i = 2, #blocks-1 do

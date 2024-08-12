@@ -38,13 +38,17 @@ function FastLogicRealBlockManager.update(self)
     self.creation.lastBodyUpdate = sm.game.getCurrentTick()
     -- check switches and other inputs
     self:checkForNewInputs()
-
     -- run
     local updatedGates = self.FastLogicAllBlockManager:update()
     table.appendTable(updatedGates, self.needDisplayUpdate)
     self.needDisplayUpdate = {}
     -- update states of fast gates
     self:updateDisplay(updatedGates)
+
+    for k, v in pairs(self.creation.FastLogicBlockMemorys) do
+        sm.event.sendToInteractable(v.interactable, "server_saveHeldMemory")
+        v:server_saveHeldMemory()
+    end
     -- sm.MTUtil.Profiler.Time.off("update" .. tostring(self.creationId))
     -- print("update" .. tostring(self.creationId) .. ": " .. tostring(sm.MTUtil.Profiler.Time.get("update" .. tostring(self.creationId))))
     -- sm.MTUtil.Profiler.Time.reset("update" .. tostring(self.creationId))

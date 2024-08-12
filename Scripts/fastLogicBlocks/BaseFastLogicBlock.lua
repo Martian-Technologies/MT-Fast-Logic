@@ -1,4 +1,5 @@
--- dofile "../util/util.lua"
+dofile "../util/util.lua"
+dofile "../util/compressionUtil/compressionUtil.lua"
 -- dofile "../allCreationStuff/CreationUtil.lua"
 local string = string
 local table = table
@@ -203,9 +204,10 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- print("Profiler (onUpdate % of fullLoop):", sm.MTUtil.Profiler.Time.getPrecent("doUpdate", "doUpdateFullLoop"))
     -- sm.MTUtil.Profiler.Time.reset()
     -- sm.MTUtil.Profiler.Count.reset()
+    -- real data
+    -- print(runnrerId)
     -- print(self.FastLogicRunner.blockStates[runnrerId])
-    -- print(self.FastLogicRunner.countOfOnInputs[runnrerId])
-    -- print(self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
+    -- print(self.FastLogicRunner.countOfOnInputs[runnrerId] + self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
     -- print(self.FastLogicRunner.numberOfBlockInputs[runnrerId])
     -- print(self.FastLogicRunner.numberOfOtherInputs[runnrerId])
     -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
@@ -292,8 +294,10 @@ function BaseFastLogicBlock.removeUuidData(self)
     end
     for i = 1, #self.creation.blocks[self.data.uuid].outputs do
         local otherUuid = self.creation.blocks[self.data.uuid].outputs[i]
-        if self.creation.blocks[otherUuid].isSilicon then
-            return
+        if self.creation.blocks[otherUuid] ~= nil then
+            if self.creation.blocks[otherUuid].isSilicon then
+                return
+            end
         end
     end
     local uuid = self.data.uuid

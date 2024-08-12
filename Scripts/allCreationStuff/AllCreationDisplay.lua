@@ -1,9 +1,11 @@
+dofile "../util/util.lua"
+
 dofile "../util/compressionUtil/CompressionUtil.lua"
 dofile "../util/compressionUtil/LibDeflate.lua"
 
 local function sendStatesToClients(self, changedUuidsArray)
     local status, result = pcall(self.network.sendToClients, self.network, "client_updateTexturesAndStates",
-        self:compressData(changedUuidsArray))
+        sm.MTFastLogic.CompressionUtil.arrayToString(changedUuidsArray))
     if not status then
         -- split changedUuids in two and try again
         local half = math.floor(#changedUuidsArray / 2)
@@ -33,13 +35,8 @@ function FastLogicRunnerRunner.updatedDisplays(self)
                     sm.MTFastLogic.FastLogicBlockLookUp[self.changedUuidsArray[i]].id * 2 + stateNumber
                 )
             end
-            -- if #changedUuidsArray > 10000 then
-            --     self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
-            --     changedUuidsArray = {}
-            -- end
         end
         if #changedUuidsArray > 0 then
-            -- self.network:sendToClients("client_updateTexturesAndStates", self:compressData(changedUuidsArray))
             sendStatesToClients(self, changedUuidsArray)
             changedUuidsArray = {}
         end
@@ -48,28 +45,11 @@ function FastLogicRunnerRunner.updatedDisplays(self)
 end
 
 function FastLogicRunnerRunner.client_updateTexturesAndStates(self, changedData)
-    changedData = self:decompressData(changedData)
+    changedData = sm.MTFastLogic.CompressionUtil.stringToArray(changedData)
     for i = 1, #changedData do
         local block = sm.MTFastLogic.client_FastLogicBlockLookUp[math.floor(changedData[i] / 2)]
         if block ~= nil then
             block:client_updateTexture(changedData[i] % 2 == 1)
         end
     end
-end
-
-function FastLogicRunnerRunner.compressData(self, data)
-    local str = ""
-    for i = 1, #data do
-        if #str > 0 then str = str .. "," end
-        str = str .. tostring(data[i] - (data[i-1] or 0))
-    end
-    return str
-end
-
-function FastLogicRunnerRunner.decompressData(self, str)
-    local data = {}
-    for c in str:gmatch "[-%d]%d*" do
-        data[#data+1] = tonumber(c) + (data[#data] or 0)
-    end
-    return data
 end

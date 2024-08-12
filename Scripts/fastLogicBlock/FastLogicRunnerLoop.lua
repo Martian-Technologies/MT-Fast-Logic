@@ -17,9 +17,14 @@ local blockOutputs = nil
 local lastTimerOutputWait = nil
 local multiBlockData = nil
 local numberOfTimesRun = nil
+local ramBlockData = nil
+local ramBlockOtherData = nil
+local unhashedLookUp = nil
+local FastLogicBlockMemorys = nil
 local runningBlocks1 = nil
 local runningBlocks3 = nil
 local runningBlocks4 = nil
+local runningBlocks5 = nil
 local runningBlocks6 = nil
 local runningBlocks7 = nil
 local runningBlocks8 = nil
@@ -30,7 +35,7 @@ local runningBlocks12 = nil
 local runningBlocks13 = nil
 local runningBlocks14 = nil
 local runningBlocks15 = nil
-local runningBlocks5 = nil
+local runningBlocks16 = nil
 local runningBlocks17 = nil
 local runningBlocks18 = nil
 local runningBlocks19 = nil
@@ -39,7 +44,8 @@ local runningBlocks21 = nil
 local runningBlocks22 = nil
 local runningBlocks23 = nil
 local runningBlocks24 = nil
-local runningBlocks16 = nil
+local runningBlocks26 = nil
+local runningBlocks27 = nil
 
 function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     nextRunningBlocks = self.nextRunningBlocks
@@ -56,13 +62,18 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     timerLengths = self.timerLengths
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
-    lastTimerOutputWait = self.lastTimerOutputWait
-    multiBlockData = self.multiBlockData
     if needsRunningBlocks == true then
+        FastLogicBlockMemorys = self.creation.FastLogicBlockMemorys
+        unhashedLookUp = self.unhashedLookUp
+        lastTimerOutputWait = self.lastTimerOutputWait
+        multiBlockData = self.multiBlockData
+        ramBlockData = self.ramBlockData
+        ramBlockOtherData = self.ramBlockOtherData
         runningBlocks = self.runningBlocks
         runningBlocks1 = runningBlocks[1]
         runningBlocks3 = runningBlocks[3]
         runningBlocks4 = runningBlocks[4]
+        runningBlocks5 = runningBlocks[5]
         runningBlocks6 = runningBlocks[6]
         runningBlocks7 = runningBlocks[7]
         runningBlocks8 = runningBlocks[8]
@@ -73,7 +84,7 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
         runningBlocks13 = runningBlocks[13]
         runningBlocks14 = runningBlocks[14]
         runningBlocks15 = runningBlocks[15]
-        runningBlocks5 = runningBlocks[5]
+        runningBlocks16 = runningBlocks[16]
         runningBlocks17 = runningBlocks[17]
         runningBlocks18 = runningBlocks[18]
         runningBlocks19 = runningBlocks[19]
@@ -82,7 +93,8 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
         runningBlocks22 = runningBlocks[22]
         runningBlocks23 = runningBlocks[23]
         runningBlocks24 = runningBlocks[24]
-        runningBlocks16 = runningBlocks[16]
+        runningBlocks26 = runningBlocks[26]
+        runningBlocks27 = runningBlocks[27]
         numberOfTimesRun = self.numberOfTimesRun
     end
 end
@@ -321,11 +333,11 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks17[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] == 1) ~= blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
     end
@@ -336,11 +348,11 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks18[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] == numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId]) == blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
     end
@@ -352,11 +364,11 @@ function FastLogicRunner.doUpdate(self)
         local sumCountOfOnInputs = countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]
         if (sumCountOfOnInputs > 0 and sumCountOfOnInputs == numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId]) ~= blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
     end
@@ -367,14 +379,13 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks20[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0) ~= blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
-        k = k + 1
     end
     runningBlockLengths[20] = 0
     -- xor multi block input
@@ -383,11 +394,11 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks21[k]
         if ((countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]) % 2 == 1) ~= blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
     end
@@ -399,11 +410,11 @@ function FastLogicRunner.doUpdate(self)
         local sumCountOfOnInputs = countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]
         if (sumCountOfOnInputs > 0 and sumCountOfOnInputs == numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId]) == blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
     end
@@ -414,11 +425,11 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks23[k]
         if (countOfOnInputs[blockId] == 0 and countOfOnOtherInputs[blockId] == 0 and numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId] > 0) ~= blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
     end
@@ -432,16 +443,34 @@ function FastLogicRunner.doUpdate(self)
                 (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]) % 2 == 0
             ) ~= blockStates[blockId] then
             local multiBlockId = multiBlockData[blockId]
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
                 nextRunningBlocks[multiBlockId] = lastRunningIndex
-                multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
             end
         end
     end
     runningBlockLengths[24] = 0
+    -- interface multi block input
+    for k = 1, runningBlockLengths[27] do
+        self.blocksRan = self.blocksRan + 1
+        local blockId = runningBlocks27[k]
+        local multiBlockId = multiBlockData[blockId]
+        if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
+            runningMultiBlockLengths = runningMultiBlockLengths + 1
+            runningBlocks[16][runningMultiBlockLengths] = multiBlockId
+            nextRunningBlocks[multiBlockId] = lastRunningIndex
+        end
+        if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0) ~= blockStates[blockId] then
+            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+        end
+    end
+    runningBlockLengths[27] = 0
     -- multi blocks
+    local ramOutputMultiBlocks = {}
+    local ramOutputMultiBlocksLength = 0
+    local ramOutputMultiBlocksHash = {}
     for k = 1, runningMultiBlockLengths do
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks16[k]
@@ -449,25 +478,73 @@ function FastLogicRunner.doUpdate(self)
         for i = 1, #multiData[5] do
             local id = multiData[5][i]
             blockStates[id] = not blockStates[id]
-            local stateNumber = blockStates[id] and 1 or -1
-            local outputs = blockOutputs[id]
-            for j = 1, #outputs do
-                local outputId = outputs[j]
-                if outputId ~= -1 then
-                    countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
+            if runnableBlockPathIds[id] ~= 27 then
+                local stateNumber = blockStates[id] and 1 or -1
+                local outputs = blockOutputs[id]
+                for j = 1, #outputs do
+                    local outputId = outputs[j]
+                    if outputId ~= -1 then
+                        countOfOnInputs[outputId] = countOfOnInputs[outputId] + stateNumber
+                    end
                 end
             end
         end
         local didNotRunInternal = false
         -- run internal
-        if multiData[1] == 1 then
+        if multiData[1] == 1 then -- line
             local outputId = multiData[4][1]
             timerData[multiData[7]][#timerData[multiData[7]] + 1] = {blockStates[multiData[3][1]], multiData[4][1]}
             lastTimerOutputWait = multiData[7] > lastTimerOutputWait and multiData[7] + 1 or lastTimerOutputWait
-        elseif multiData[1] == 2 then
+        elseif multiData[1] == 2 then -- not line
             local outputId = multiData[4][1]
             timerData[multiData[7]][#timerData[multiData[7]] + 1] = {not blockStates[multiData[3][1]], multiData[4][1]}
             lastTimerOutputWait = multiData[7] > lastTimerOutputWait and multiData[7] + 1 or lastTimerOutputWait
+        elseif multiData[1] == 3 then -- ram block input
+            local ramBlockId = multiData[7]
+            if blockStates[multiData[10]] and not blockStates[ramBlockId] then
+                local address = 1
+                local addressBlocks = multiData[8]
+                for i = 1, #addressBlocks do
+                    local id = addressBlocks[i]
+                    if blockStates[id] then
+                        address = address + math.pow(2, i-1)
+                    end
+                end
+                local data = 0
+                local dataBlocks = multiData[9]
+                for i = 1, #dataBlocks do
+                    local id = dataBlocks[i]
+                    if blockStates[id] then
+                        data = data + math.pow(2, i-1)
+                    end
+                end
+                if data == 0 then
+                    ramBlockData[ramBlockId][address] = nil
+                else
+                    ramBlockData[ramBlockId][address] = data
+                end
+                local outputInterfaces = ramBlockOtherData[ramBlockId][1]
+                local j = 1
+                while j <= #outputInterfaces do
+                    local outputInterfaceId = outputInterfaces[j]
+                    if multiBlockData[outputInterfaceId] == false then
+                        table.remove(outputInterfaces, j)
+                    else
+                        j = j + 1
+                        if ramOutputMultiBlocksHash[outputInterfaceId] == nil then
+                            ramOutputMultiBlocksHash[outputInterfaceId] = true
+                            ramOutputMultiBlocksLength = ramOutputMultiBlocksLength + 1
+                            ramOutputMultiBlocks[ramOutputMultiBlocksLength] = outputInterfaceId
+                        end
+                    end
+                end
+            end
+        elseif multiData[1] == 4 then -- ram block output
+            if ramOutputMultiBlocksHash[blockId] == nil then
+                ramOutputMultiBlocksHash[blockId] = true
+                ramOutputMultiBlocksLength = ramOutputMultiBlocksLength + 1
+                ramOutputMultiBlocks[ramOutputMultiBlocksLength] = blockId
+            end
         else
             print("no runner for multi block with id: " .. tostring(multiData[1]))
             didNotRunInternal = true
@@ -475,23 +552,80 @@ function FastLogicRunner.doUpdate(self)
 
         if didNotRunInternal then -- run blocks
             for i = 1, #multiData[3] do
-                local outputs = blockOutputs[multiData[3][i]]
-                for j = 1, #outputs do
-                    local outputId = outputs[j]
-                    -- if outputId ~= -1 then
+                local id = multiData[3][i]
+                if runnableBlockPathIds[id] ~= 27 then
+                local outputs = blockOutputs[id]
+                    for j = 1, #outputs do
+                        local outputId = outputs[j]
                         if nextRunningBlocks[outputId] ~= nextRunningIndex then
                             nextRunningBlocks[outputId] = nextRunningIndex
                             local pathId = runnableBlockPathIds[outputId]
                             runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
                             runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
                         end
-                    -- end
+                    end
                 end
             end
         end
         multiBlockData[blockId][5] = {}
     end
     runningBlockLengths[16] = 0
+    -- ram block reset
+    for k = 1, runningBlockLengths[26] do
+        self.blocksRan = self.blocksRan + 1
+        local blockId = runningBlocks26[k]
+        local state = blockStates[blockId]
+        if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0) ~= state then
+            blockStates[blockId] = not state
+            if state == false then
+                local newData = {}
+                ramBlockData[blockId] = newData
+                FastLogicBlockMemorys[unhashedLookUp[blockId]].memory = newData
+                local outputInterfaces = ramBlockOtherData[blockId][1]
+                local j = 1
+                while j <= #outputInterfaces do
+                    local outputInterfaceId = outputInterfaces[j]
+                    if multiBlockData[outputInterfaceId] == false then
+                        table.remove(outputInterfaces, j)
+                    else
+                        j = j + 1
+                        if ramOutputMultiBlocksHash[outputInterfaceId] == nil then
+                            ramOutputMultiBlocksHash[outputInterfaceId] = true
+                            ramOutputMultiBlocksLength = ramOutputMultiBlocksLength + 1
+                            ramOutputMultiBlocks[ramOutputMultiBlocksLength] = outputInterfaceId
+                        end
+                    end
+                end
+            end
+        end
+    end
+    runningBlockLengths[26] = 0
+    -- ram outputs
+    for k = 1, ramOutputMultiBlocksLength do
+        local multiData = multiBlockData[ramOutputMultiBlocks[k]]
+        local data = 0
+        if multiData[10] == nil or blockStates[multiData[10]] then
+            local addressBlocks = multiData[8]
+            local address = 1
+            for i = 1, #addressBlocks do
+                local id = addressBlocks[i]
+                if blockStates[id] then
+                    address = address + math.pow(2, i-1)
+                end
+            end
+            data = self.ramBlockData[multiData[7]][address] or 0
+        end
+        local dataBlocks = multiData[9]
+        for i = 1, #dataBlocks do
+            local id = dataBlocks[i]
+            if (data%2 >= 1) ~= blockStates[id] then
+                newBlockStatesLength = newBlockStatesLength + 1
+                newBlockStates[newBlockStatesLength] = id
+            end
+            data = data / 2
+        end
+    end
+    -- update alll
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
         local state = not blockStates[id]

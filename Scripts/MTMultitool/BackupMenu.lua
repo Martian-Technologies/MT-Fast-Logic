@@ -27,8 +27,7 @@ local function injectElements(multitool)
         })
     else
         for i = 1, math.min(30, #backups) do
-            local backupFilename = backups[#backups - i + 1]
-            local backup = sm.MTBackupEngine.cl_getBackupData(backupFilename)
+            local backup = backups[#backups - i + 1]
             local timeNow = os.time()
             local timeDiff = timeNow - backup.timeCreated
             local backupString = backup.name .. " - " .. backup.description .. " - created " .. timeDiff .. " seconds ago"
@@ -41,7 +40,7 @@ local function injectElements(multitool)
                 angleBoundVertical = 0.035 / 2 * fovMult,
                 color = sm.color.new(1, 1, 1),
                 onclick = function()
-                    multitool.network:sendToServer("sv_loadBackup", backupFilename)
+                    multitool.network:sendToServer("sv_loadBackup", backup.backupFilename)
                 end
             })
         end

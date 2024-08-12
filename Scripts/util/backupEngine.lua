@@ -1,16 +1,18 @@
+dofile "compressionUtil/compressionUtil.lua"
+
 sm.MTBackupEngine = sm.MTBackupEngine or {}
 
 local function getBCUCfilename()
     local playerUsername = sm.MTBackupEngine.username
     local allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-    local allClaracters = {}
+    local allCharacters = {}
     for i = 1, #allowedCharacters do
-        allClaracters[string.sub(allowedCharacters, i, i)] = true
+        allCharacters[string.sub(allowedCharacters, i, i)] = true
     end
     local backupsCoordinatorFilename = "$CONTENT_DATA/Backups/BackupCoordinator_"
     for i = 1, #playerUsername do
         local char = string.sub(playerUsername, i, i)
-        if table.contains(allClaracters, char) then
+        if allCharacters[char] then
             backupsCoordinatorFilename = backupsCoordinatorFilename .. char
         end
     end
@@ -25,18 +27,56 @@ end
 local function loadBCUC()
     local filenameBCUC = getBCUCfilename()
     if not sm.json.fileExists(filenameBCUC) then
+        -- saveBCUC({
+        --     version = 1,
+        --     backupsInUse = {},
+        --     unusedBackups = {}
+        -- })
         saveBCUC({
-            version = 1,
-            backupsInUse = {},
-            unusedBackups = {}
+            version = 2,
+            backups = {},
+            unusedBackupFilenames = {}
         })
     end
     local data = sm.json.open(filenameBCUC)
-    if data.unusedBackups == nil then
-        data.unusedBackups = {}
+    if data.version == 1 then
+        if data.unusedBackups == nil then
+            data.unusedBackups = {}
+        end
+        if data.backupsInUse == nil then
+            data.backupsInUse = {}
+        end
+        local newData = {
+            version = 2,
+            backups = {},
+            unusedBackupFilenames = {}
+        }
+        for _, backupFilename in pairs(data.backupsInUse) do
+            local backupData = sm.json.open(backupFilename)
+            if not backupData.isPinned and os.time() - backupData.timeCreated > 604800 then
+                table.insert(newData.unusedBackupFilenames, backupFilename)
+            else
+                table.insert(newData.backups, {
+                    name = backupData.name,
+                    description = backupData.description,
+                    creationType = backupData.creationType,
+                    timeCreated = backupData.timeCreated,
+                    isPinned = backupData.isPinned,
+                    backupFilename = backupFilename
+                })
+            end
+        end
+        for _, backupFilename in pairs(data.unusedBackups) do
+            table.insert(newData.unusedBackupFilenames, backupFilename)
+        end
+        saveBCUC(newData)
+        return newData
     end
-    if data.backupsInUse == nil then
-        data.backupsInUse = {}
+    if data.backups == nil then
+        data.backups = {}
+    end
+    if data.unusedBackupFilenames == nil then
+        data.unusedBackupFilenames = {}
     end
     return data
 end
@@ -51,23 +91,36 @@ function sm.MTBackupEngine.sv_backupCreation(data)
     end
     local backupsCoordinator = loadBCUC()
     local backupFilename
-    if #backupsCoordinator.unusedBackups == 0 then
+    if #backupsCoordinator.unusedBackupFilenames == 0 then
         backupFilename = "$CONTENT_DATA/Backups/Backup_" .. tostring(sm.uuid.new()) .. ".json"
-        table.insert(backupsCoordinator.backupsInUse, backupFilename)
     else
-        backupFilename = backupsCoordinator.unusedBackups[#backupsCoordinator.unusedBackups]
-        table.remove(backupsCoordinator.unusedBackups, #backupsCoordinator.unusedBackups)
-        table.insert(backupsCoordinator.backupsInUse, backupFilename)
+        backupFilename = backupsCoordinator.unusedBackupFilenames[#backupsCoordinator.unusedBackupFilenames]
+        table.remove(backupsCoordinator.unusedBackupFilenames, #backupsCoordinator.unusedBackupFilenames)
     end
-    saveBCUC(backupsCoordinator)
-    local backupData = {
-        version = 1,
+    table.insert(backupsCoordinator.backups, {
         name = data.name or "Unnamed",
         description = data.description or "No description",
         creationType = data.creationType or "Unknown",
         timeCreated = os.time(),
         isPinned = data.isPinned or false,
-        creationData = creationData
+        backupFilename = backupFilename
+    })
+    saveBCUC(backupsCoordinator)
+    -- local backupData = {
+    --     version = 1,
+    --     name = data.name or "Unnamed",
+    --     description = data.description or "No description",
+    --     creationType = data.creationType or "Unknown",
+    --     timeCreated = os.time(),
+    --     isPinned = data.isPinned or false,
+    --     creationData = creationData
+    -- }
+    local stringifiedCreationData = sm.json.writeJsonString(creationData)
+    local compressedCreationData = sm.MTFastLogic.CompressionUtil.LibDeflate:EncodeForPrint(sm.MTFastLogic.CompressionUtil
+    .LibDeflate:CompressDeflate(stringifiedCreationData))
+    local backupData = {
+        version = 2,
+        creationData = compressedCreationData
     }
     sm.json.save(backupData, backupFilename)
 end
@@ -84,7 +137,7 @@ function sm.MTBackupEngine.sv_deleteBackup(uuid)
     for i, backup in pairs(backupsCoordinator.backupsInUse) do
         if backup == backupFilename then
             table.remove(backupsCoordinator.backupsInUse, i)
-            table.insert(backupsCoordinator.unusedBackups, backupFilename)
+            table.insert(backupsCoordinator.unusedBackupFilenames, backupFilename)
             saveBCUC(backupsCoordinator)
             return
         end
@@ -96,13 +149,18 @@ function sm.MTBackupEngine.sv_deleteOldBackups()
     -- delete all unpinned backups older than 1 week
     local backupsCoordinator = loadBCUC()
     local currentTime = os.time()
-    for i = #backupsCoordinator.backupsInUse, 1, -1 do
-        local backupFilename = backupsCoordinator.backupsInUse[i]
-        local backupData = sm.json.open(backupFilename)
-        if not backupData.isPinned and currentTime - backupData.timeCreated > 604800 then
-            table.remove(backupsCoordinator.backupsInUse, i)
-            table.insert(backupsCoordinator.unusedBackups, backupFilename)
+    for i = #backupsCoordinator.backups, 1, -1 do
+        local backup = backupsCoordinator.backups[i]
+        if not backup.isPinned and currentTime - backup.timeCreated > 604800 then
+            table.remove(backupsCoordinator.backups, i)
+            table.insert(backupsCoordinator.unusedBackupFilenames, backup.backupFilename)
         end
+        -- local backupFilename = backupsCoordinator.backupsInUse[i]
+        -- local backupData = sm.json.open(backupFilename)
+        -- if not backupData.isPinned and currentTime - backupData.timeCreated > 604800 then
+        --     table.remove(backupsCoordinator.backupsInUse, i)
+        --     table.insert(backupsCoordinator.unusedBackups, backupFilename)
+        -- end
     end
     saveBCUC(backupsCoordinator)
 end
@@ -112,16 +170,20 @@ function sm.MTBackupEngine.cl_getBackups()
         return {}
     end
     sm.MTBackupEngine.sv_deleteOldBackups()
-    return loadBCUC().backupsInUse
-end
-
-function sm.MTBackupEngine.cl_getBackupData(filename)
-    return sm.json.open(filename)
+    return loadBCUC().backups
 end
 
 function sm.MTBackupEngine.sv_loadBackup(multitool, backupFilename)
     local backupData = sm.json.open(backupFilename)
-    local creationData = backupData.creationData
+    local creationData = nil
+    if backupData.version == 1 then
+        creationData = backupData.creationData
+    elseif backupData.version == 2 then
+        local compressedCreationData = backupData.creationData
+        local stringifiedCreationData = sm.MTFastLogic.CompressionUtil.LibDeflate:DecompressDeflate(
+            sm.MTFastLogic.CompressionUtil.LibDeflate:DecodeForPrint(compressedCreationData))
+        creationData = sm.json.parseJsonString(stringifiedCreationData)
+    end
     local character = multitool.tool:getOwner().character
     local creationBodies = sm.creation.importFromString(character:getWorld(), sm.json.writeJsonString(creationData),
         character:getWorldPosition() + character:getDirection() * 8, sm.quat.new(0, 0, 0, 1))

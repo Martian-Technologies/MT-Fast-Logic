@@ -64,7 +64,7 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
     --"FastLogic" or "VanillaLogic"
     local body = data.body
     local wantedType = data.wantedType
-    if wantedType == "VanillaLogic" then
+    if wantedType == "VanillaLogic" and data.overrideUuidClear ~= true then
         local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(data.body)]
         if creation ~= nil then
             for _, block in pairs(creation.AllFastBlocks) do
@@ -88,6 +88,20 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
         else
             sm.MTFastLogic.FastLogicRunnerRunner:convertToVanillaInternal(body)
         end
+    end
+end
+
+function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = body,
+        name = "Conversion Backup",
+        description = "Backup created by LogicConverter.lua. Converting to " .. wantedType,
+    })
+    if wantedType == "FastLogic" then
+        sm.MTFastLogic.FastLogicRunnerRunner:convertToFastInternal(body)
+    else
+        sm.MTFastLogic.FastLogicRunnerRunner:convertToVanillaInternal(body)
     end
 end
 

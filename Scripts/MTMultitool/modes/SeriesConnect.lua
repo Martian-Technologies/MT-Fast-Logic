@@ -55,11 +55,10 @@ function SeriesConnect.trigger(multitool, primaryState, secondaryState, forceBui
     local self = multitool.SeriesConnect
     local selfData = self.data
     if #selfData.selected < 2 then
-        multitool.BlockSelector.enabled = true
+        multitool.SelectionModeController.modeActive = "BlockSelector"
     else
-        multitool.BlockSelector.enabled = false
+        multitool.SelectionModeController.modeActive = nil
     end
-    multitool.VolumeSelector.enabled = false
     if primaryState == 1 then
         if #selfData.selected < 2 then
             if lookingAt ~= nil then

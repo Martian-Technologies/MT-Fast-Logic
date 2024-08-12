@@ -12,8 +12,7 @@ end
 
 function Heatmap.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.Heatmap
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = false
+    multitool.SelectionModeController.modeActive = nil
     if self.creationTracking ~= nil then
         sm.gui.setInteractionText("Heatmap is tracking a creation.     ", sm.gui.getKeyBinding("Attack", true),
             "Stop tracking")

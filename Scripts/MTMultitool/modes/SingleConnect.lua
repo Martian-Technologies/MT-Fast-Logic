@@ -12,8 +12,7 @@ end
 
 function SingleConnect.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.SingleConnect
-    multitool.BlockSelector.enabled = true
-    multitool.VolumeSelector.enabled = false
+    multitool.SelectionModeController.modeActive = "BlockSelector"
     if primaryState > 0 then
         if self.operationState == nil then
             if table.contains(self.selectedSource, lookingAt) then

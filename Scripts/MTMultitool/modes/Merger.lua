@@ -7,8 +7,7 @@ end
 
 function Merger.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.Merger
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = true
+    multitool.SelectionModeController.modeActive = "VolumeSelector"
 
     multitool.VolumeSelector.modes = nil
     multitool.VolumeSelector.isBeta = false

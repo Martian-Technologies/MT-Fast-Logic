@@ -90,8 +90,7 @@ end
 
 function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.colorizer
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = not self.displayingGUI
+    multitool.SelectionModeController.modeActive = "VolumeSelector"
 
     local hasForceBuilt = MTMultitool.handleForceBuild(multitool, forceBuild)
     if hasForceBuilt then

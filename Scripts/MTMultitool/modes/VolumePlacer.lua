@@ -7,8 +7,7 @@ end
 
 function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.VolumePlacer
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = true
+    multitool.SelectionModeController.modeActive = "VolumeSelector"
 
     multitool.VolumeSelector.modes = { "vanilla", "fast" }
     multitool.VolumeSelector.modesNice = { "Vanilla Logic", "Fast Logic" }

@@ -16,8 +16,7 @@ end
 
 function ModeChanger.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.ModeChanger
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = true
+    multitool.SelectionModeController.modeActive = "VolumeSelector"
 
     multitool.VolumeSelector.modes = { 1, 2, 3, 4, 5, 6 }
     multitool.VolumeSelector.modesNice = ModeChanger.modes

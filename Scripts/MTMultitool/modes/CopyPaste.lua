@@ -17,7 +17,7 @@ function CopyPaste.inject(multitool)
     self.shapeGroups = {}
     self.shapeVisualizations = {}
     self.toCopyPastePackets = {}
-    self.externalConnectionsPolicy = "relative" -- "ignore" | "absolute" | "relative"
+    self.externalConnectionsPolicy = "absolute" -- "ignore" | "absolute" | "relative"
 end
 
 local plasticUuid = sm.uuid.new("628b2d61-5ceb-43e9-8334-a4135566df7a")
@@ -145,50 +145,51 @@ end
 
 function CopyPaste.server_copyPaste(multitool, data)
     local self = multitool.CopyPaste
-    local targetBody = data.body
-    local creationTable = sm.creation.exportToTable(targetBody, true, false)
-    local interactables = data.interactables
-    local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
-    local gatesToRestore = {}
-    if creation ~= nil then
-        for _, block in pairs(creation.AllFastBlocks) do
-            if table.contains(interactables, block.interactable:getId()) then
-                local s = sm.event.sendToInteractable(block.interactable, "removeUuidData")
-                if s == false then
-                end
-            end
-        end
-    end
-    for _, body in ipairs(creationTable.bodies) do
-        for _, shape in ipairs(body.childs) do
-            if shape.controller == nil then
-                goto continue
-            end
-            local intId = shape.controller.id
-            if table.contains(interactables, intId) then
-                gatesToRestore[intId] = shape.controller.data
-            end
-            ::continue::
-        end
-    end
-    data.gatesToRestore = gatesToRestore
-    table.insert(self.toCopyPastePackets, {
-        data = data,
-        tick = sm.game.getCurrentTick() + 1
-    })
+    -- local targetBody = data.body
+    -- local creationTable = sm.creation.exportToTable(targetBody, true, false)
+    -- local interactables = data.interactables
+    -- local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
+    -- local gatesToRestore = {}
+    -- if creation ~= nil then
+    --     for _, block in pairs(creation.AllFastBlocks) do
+    --         if table.contains(interactables, block.interactable:getId()) then
+    --             local s = sm.event.sendToInteractable(block.interactable, "removeUuidData")
+    --             if s == false then
+    --             end
+    --         end
+    --     end
+    -- end
+    -- for _, body in ipairs(creationTable.bodies) do
+    --     for _, shape in ipairs(body.childs) do
+    --         if shape.controller == nil then
+    --             goto continue
+    --         end
+    --         local intId = shape.controller.id
+    --         if table.contains(interactables, intId) then
+    --             gatesToRestore[intId] = shape.controller.data
+    --         end
+    --         ::continue::
+    --     end
+    -- end
+    -- data.gatesToRestore = gatesToRestore
+    -- table.insert(self.toCopyPastePackets, {
+    --     data = data,
+    --     tick = sm.game.getCurrentTick() + 1
+    -- })
+    CopyPaste.doCopyPaste(multitool, data)
 end
 
 function CopyPaste.server_onFixedUpdate(multitool, dt)
-    local self = multitool.CopyPaste
-    if #self.toCopyPastePackets == 0 then
-        return
-    end
-    local data = self.toCopyPastePackets[1]
-    if sm.game.getCurrentTick() < data.tick then
-        return
-    end
-    table.remove(self.toCopyPastePackets, 1)
-    CopyPaste.doCopyPaste(multitool, data.data)
+    -- local self = multitool.CopyPaste
+    -- if #self.toCopyPastePackets == 0 then
+    --     return
+    -- end
+    -- local data = self.toCopyPastePackets[1]
+    -- if sm.game.getCurrentTick() < data.tick then
+    --     return
+    -- end
+    -- table.remove(self.toCopyPastePackets, 1)
+    -- CopyPaste.doCopyPaste(multitool, data.data)
 end
 
 function CopyPaste.doCopyPaste(multitool, data)
@@ -203,6 +204,39 @@ function CopyPaste.doCopyPaste(multitool, data)
     local generatedShapes = {}
     local originalPositionsTakenUpBySource = {}
     local tensor = {}
+
+
+    local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
+    local interactableModes = {}
+    if creation ~= nil then
+        for _, intId in ipairs(interactables) do
+            local uuid = creation.uuids[intId]
+            if uuid == nil then
+                goto continue
+            end
+            local block = creation.blocks[uuid]
+            local type = block.type
+            if type ~= nil then
+                local integerType = 0
+                if type == "andBlocks" then
+                    integerType = 0
+                elseif type == "orBlocks" then
+                    integerType = 1
+                elseif type == "xorBlocks" then
+                    integerType = 2
+                elseif type == "nandBlocks" then
+                    integerType = 3
+                elseif type == "norBlocks" then
+                    integerType = 4
+                elseif type == "xnorBlocks" then
+                    integerType = 5
+                end
+                interactableModes[intId] = integerType
+            end
+            ::continue::
+        end
+    end
+
 
     -- local worldpos = targetBody.worldPosition
     -- local worldrot = targetBody.worldRotation
@@ -233,7 +267,6 @@ function CopyPaste.doCopyPaste(multitool, data)
             if shape.controller == nil then
                 for _, nonInt in ipairs(shapes) do
                     if tostring(nonInt.uuid) == shape.shapeId then
-                        print(nonInt.localPosition, shape.pos)
                         if nonInt.localPosition.x == shape.pos.x and nonInt.localPosition.y == shape.pos.y and nonInt.localPosition.z == shape.pos.z then
                             targetBodyObject = body
                             goto continue
@@ -255,7 +288,6 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
     end
 
-    print("maxJointIndexToNotIncrement", maxJointIndexToNotIncrement)
     local externalConnectionsIngoing = {}
     local externalConnectionsOutgoing = {}
     if externalConnections == "absolute" then
@@ -297,11 +329,9 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
         end
     end
-    print("AAAAA")
     if targetBodyObject == nil then
         return
     end
-    print(2)
     local targetBodyShapes = targetBodyObject.childs
     local internalShapesOrdered = {}
     for i = 1, #interactables do
@@ -321,15 +351,12 @@ function CopyPaste.doCopyPaste(multitool, data)
 
     local internalConnections = {}
     local extraShapesToCopy = {}
-    print("EEEE")
     for i = 1, #targetBodyShapes do
         local shape = targetBodyShapes[i]
-        print(shape)
         if shape.controller == nil then
             local shapeUuid = shape.shapeId
             local shapePos = shape.pos
             for _, nonInt in ipairs(shapes) do
-                print(nonInt)
                 if tostring(nonInt.uuid) ~= shapeUuid then
                     goto continue2
                 end
@@ -390,7 +417,6 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
         ::continue::
     end
-    print(extraShapesToCopy)
 
     local relativeConnectionsToMake = {}
 
@@ -443,6 +469,9 @@ function CopyPaste.doCopyPaste(multitool, data)
                 ::continue2::
             end
             newShape.controller.id = maxIntId + i
+            if interactableModes[interactables[i]] ~= nil then
+                newShape.controller.data = sm.MTFastLogic.LogicConverter.vGateModesToFGateModes[interactableModes[interactables[i]]]
+            end
             newShape.controller.controllers = {}
             for j = 1, #internalConnections do
                 local connection = internalConnections[j]
@@ -479,15 +508,6 @@ function CopyPaste.doCopyPaste(multitool, data)
                             to = destinationPos,
                             type = "outgoing"
                         })
-                        -- print(destinationPos)
-                        -- local destinationIntId = intIdMap
-                        -- [destinationPos.x .. ";" .. destinationPos.y .. ";" .. destinationPos.z]
-                        -- print(destinationIntId)
-                        -- if destinationIntId ~= nil then
-                        --     table.insert(newShape.controller.controllers, {
-                        --         id = destinationIntId
-                        --     })
-                        -- end
                     end
                 end
 
@@ -559,19 +579,15 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
     end
 
-    local gatesToRestore = data.gatesToRestore
-
-    -- advPrint(gatesToRestore, 100, 100, true)
-
     for _, body in ipairs(creationTable.bodies) do
         for _, shape in ipairs(body.childs) do
             if shape.controller == nil then
                 goto continue
             end
             local intId = shape.controller.id
-            if table.contains(gatesToRestore, intId) then
-                shape.controller.data = gatesToRestore[gatesToRestore[intId]]
-            end
+            -- if table.contains(gatesToRestore, intId) then
+            --     shape.controller.data = gatesToRestore[gatesToRestore[intId]]
+            -- end
             ::continue::
         end
     end
@@ -586,8 +602,6 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
         end
     end
-
-    -- advPrint(creationTable, 100, 100, true)
 
     local worldpos = targetBody.worldPosition
     local worldrot = targetBody.worldRotation
@@ -612,8 +626,8 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             effect:setRotation(shape.worldRotation)
         end
     end
-    -- advPrint(self, 3, 100, true)
-    multitool.BlockSelector.enabled = false
+
+    multitool.SelectionModeController.modeActive = nil
     self.activeBody = nil
     if #self.selectedShapes > 0 then
         if sm.exists(self.selectedShapes[1]) then
@@ -723,10 +737,8 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     end
                 end
             end
-            multitool.VolumeSelector.enabled = false
         else
-            -- print("region")
-            multitool.VolumeSelector.enabled = true
+            multitool.SelectionModeController.modeActive = "VolumeSelector"
             local vs = multitool.VolumeSelector
             if self.activeBody ~= nil then
                 vs.body = self.activeBody
@@ -1075,46 +1087,6 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     end
                 end
             end
-            -- if not siliconFound then
-            --     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(self.activeBody)]
-            --     if creation ~= nil then
-            --         for _, block in pairs(creation.AllFastBlocks) do
-            --             print(block)
-            --             if table.contains(interactableIds, block.interactable:getId()) then
-            --                 print("block in interactables")
-            --                 local inputs = block.inputs
-            --                 local outputs = block.outputs
-            --                 print(inputs)
-            --                 print(outputs)
-            --                 for _, input in pairs(inputs) do
-            --                     local block = creation.blocks[input]
-            --                     print("input", block)
-            --                     if block == nil then
-            --                         goto continue
-            --                     end
-            --                     if block.isSilicon then
-            --                         siliconFound = true
-            --                         goto endLoop
-            --                     end
-            --                     ::continue::
-            --                 end
-            --                 for _, output in pairs(outputs) do
-            --                     print("output", output)
-            --                     local block = creation.blocks[output]
-            --                     if block == nil then
-            --                         goto continue
-            --                     end
-            --                     if block.isSilicon then
-            --                         siliconFound = true
-            --                         goto endLoop
-            --                     end
-            --                     ::continue::
-            --                 end
-            --             end
-            --         end
-            --     end
-            --     ::endLoop::
-            -- end
             if siliconFound then
                 sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p> Copying and pasting silicon-related blocks will lead to undefined behavior. <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>")
             end

@@ -8,8 +8,7 @@ end
 
 function SiliconConverterTool.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt_NOTUSED)
     local self = multitool.SiliconConverter
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = true
+    multitool.SelectionModeController.modeActive = "VolumeSelector"
 
     multitool.VolumeSelector.modes = { "toSilicon", "toFastLogic" }
     multitool.VolumeSelector.modesNice = { "To Silicon", "To Fast Logic" }

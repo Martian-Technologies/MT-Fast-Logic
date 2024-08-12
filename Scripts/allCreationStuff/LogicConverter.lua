@@ -8,6 +8,9 @@ local table = table
 local type = type
 local pairs = pairs
 
+sm.MTFastLogic = sm.MTFastLogic or {}
+sm.MTFastLogic.LogicConverter = sm.MTFastLogic.LogicConverter or {}
+
 local letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 local vLightsToFLights = {
@@ -25,7 +28,7 @@ for k, v in pairs(vLightsToFLights) do
     fLightsToVLights[v] = k
 end
 
-local vGateModesToFGateModes = {
+sm.MTFastLogic.LogicConverter.vGateModesToFGateModes = {
     [0] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgA",
     [1] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgB",
     [2] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgC",
@@ -34,7 +37,7 @@ local vGateModesToFGateModes = {
     [5] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgF",
 }
 local fGateModesToVGateModes = {}
-for k, v in pairs(vGateModesToFGateModes) do
+for k, v in pairs(sm.MTFastLogic.LogicConverter.vGateModesToFGateModes) do
     fGateModesToVGateModes[v] = k
 end
 
@@ -204,7 +207,7 @@ function FastLogicRunnerRunner.convertToFastInternal(self, bodyToGetData)
             local child = body.childs[j]
             if child.shapeId == "9f0f56e8-2c31-4d83-996c-d00a9b296c3f" then --Vanilla Gate
                 child.shapeId = "6a9dbff5-7562-4e9a-99ae-3590ece88112"
-                child.controller.data = vGateModesToFGateModes[child.controller.mode]
+                child.controller.data = sm.MTFastLogic.LogicConverter.vGateModesToFGateModes[child.controller.mode]
                 child.controller.mode = nil
                 child.controller.active = nil
             elseif child.shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f" then --Vanilla Timer

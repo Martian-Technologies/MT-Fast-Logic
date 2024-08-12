@@ -25,7 +25,7 @@ end
 
 function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local tags = {}
-    multitool.VolumeSelector.enabled = false
+    multitool.SelectionModeController.modeActive = nil
     multitool.ConnectionManager.displayMode = "slow"
     local self = multitool.TensorConnect
     local selfData = self.data
@@ -46,7 +46,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             sm.gui.setInteractionText("Select the origin of destination tensor", sm.gui.getKeyBinding("Create", true),
                 "Select")
         end
-        multitool.BlockSelector.enabled = true
+        multitool.SelectionModeController.modeActive = "BlockSelector"
         if primaryState == 1 then
             if lookingAt ~= nil then
                 selfData.actions[#selfData.actions + 1] = {
@@ -57,7 +57,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             end
         end
     elseif selfData.nextAction == "nextVector" then
-        multitool.BlockSelector.enabled = true
+        multitool.SelectionModeController.modeActive = "BlockSelector"
         if selfData.selecting == "to" then
             if selfData.toOrigin:getBody():isOnLift() then
                 multitool.BlockSelector.bodyConstraint = selfData.toOrigin:getBody():getCreationBodies()
@@ -123,8 +123,6 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             end
         end
     elseif selfData.nextAction == "setVectorRange" then
-        multitool.BlockSelector.enabled = false
-
         local origin = selfData.fromOrigin
         local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsFrom, #sm.MTTensorUtil.colorOrder)]
         if selfData.selecting == "to" then
@@ -200,7 +198,6 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
             multitool.ConnectionManager.mode .. "<p>")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Connect")
-        multitool.BlockSelector.enabled = false
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)
         end
@@ -214,7 +211,6 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
             multitool.ConnectionManager.mode .. "<p>")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Connect (preview unavailable)")
-        multitool.BlockSelector.enabled = false
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)
         end

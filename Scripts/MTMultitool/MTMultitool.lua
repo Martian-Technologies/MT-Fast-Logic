@@ -6,6 +6,8 @@ dofile("../util/util.lua")
 
 dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/SelectionModeController.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/VertexRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/BlockSelector.lua")
 dofile("$CONTENT_DATA/Scripts/util/util.lua")
@@ -21,6 +23,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/BlueprintSpawner.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/DoMeleeState.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/VolumeSelector.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/BetterVolumeSelector.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
 
@@ -151,7 +154,10 @@ function MTMultitool.client_onCreate(self)
 
     HoveringUI.inject(self)
 
+    SelectionModeController.inject(self)
+
     VolumeSelector.inject(self)
+    BetterVolumeSelector.inject(self)
 
     LogicConverter.inject(self)
     SiliconConverterTool.inject(self)
@@ -543,6 +549,7 @@ function MTMultitool.client_onToggle(self)
 end
 
 local function triggerTool(self, primaryState, secondaryState, forceBuild, lookingAt)
+    SelectionModeController.trigger(self)
 	if MTMultitool.internalModes[self.mode] == "LogicConverter" then
         LogicConverter.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then

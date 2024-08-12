@@ -204,8 +204,7 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
         local y = cameraAtVec.y
         self.startAngle = math.atan2(y, x)
     end
-    multitool.BlockSelector.enabled = false
-    multitool.VolumeSelector.enabled = false
+    multitool.SelectionModeController.modeActive = nil
     multitool.tool:setCrossHairAlpha(0.7)
 
     local elements = self.elements

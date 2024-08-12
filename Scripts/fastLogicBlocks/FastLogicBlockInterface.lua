@@ -115,9 +115,13 @@ function FastLogicBlockInterface.makeErrorMessage(self)
     elseif type == 7 then
         return "ERROR: Interface code never stopped looping! Report to ItchyTrack"
     elseif type == 8 then
-        return "Interface can't end with " .. modes[stage]
+        return "Interface can't end with " .. modeNamesForErrors[stage]
     elseif type == 9 then
         return "Invalid interface"
+    elseif type == 10 then
+        return "Interface can't end with " .. modeNamesForErrors[stage] .. " without a Write Data"
+    elseif type == 11 then
+        return "Interface can't end with " .. modeNamesForErrors[stage] .. " without Data In blocks"
     else
         return "Unknow error??"
     end
@@ -163,26 +167,6 @@ function FastLogicBlockInterface.client_updateTexture(self, state, mode)
             self.interactable:setUvFrameIndex(0 + mode - 1)
         end
     end
-    -- local doUpdate = false
-    -- -- if state == nil then
-    -- --     state = self.client_state
-    -- -- elseif self.client_state ~= state then
-    -- --     doUpdate = true
-    -- -- end
-    -- if mode == nil then
-    --     mode = self.client_modeIndex
-    -- else
-    --     doUpdate = true
-    -- end
-    -- if doUpdate then
-    -- -- self.client_state = state
-    --     self.client_modeIndex = mode
-    -- --     if state then
-    -- --         self.interactable:setUvFrameIndex(6 + mode - 1)
-    -- --     else
-    -- --         self.interactable:setUvFrameIndex(0 + mode - 1)
-    -- --     end
-    -- end
 end
 
 function FastLogicBlockInterface.server_saveMode(self, mode)

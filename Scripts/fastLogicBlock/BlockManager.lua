@@ -39,10 +39,7 @@ function FastLogicRunner.internalAddBlock(self, path, id, state, timerLength, sk
             self.timerInputStates[id] = false
             self:updateLongestTimer()
         elseif pathName == "BlockMemory" then
-            local ramBlock = self.creation.FastLogicBlockMemorys[self.unhashedLookUp[id]]
-            if ramBlock ~= nil then
-                self.ramBlockData[id] = ramBlock.memory
-            end
+            self.ramBlockData[id] = self.creation.FastLogicBlockMemorys[self.unhashedLookUp[id]].memory
             self.ramBlockOtherData[id] = {{}, false}
         end
         if skipChecksAndUpdates ~= true then
@@ -392,6 +389,12 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                         allBlockFound[#allBlockFound+1] = outputId
                         idToCheckNext = outputId
                         goto continue
+                    elseif searchStage == 4 then
+                        dataBlocks[#dataBlocks+1] = outputId
+                        allBlockFound[#allBlockFound+1] = outputId
+                        searchStage = 3
+                        idToCheckNext = outputId
+                        goto continue
                     end
                 elseif path == "DataOut" then
                     if searchStage == 1 then
@@ -403,6 +406,12 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                     elseif searchStage == 2 then
                         dataBlocks[#dataBlocks+1] = outputId
                         allBlockFound[#allBlockFound+1] = outputId
+                        idToCheckNext = outputId
+                        goto continue
+                    elseif searchStage == 4 then
+                        dataBlocks[#dataBlocks+1] = outputId
+                        allBlockFound[#allBlockFound+1] = outputId
+                        searchStage = 2
                         idToCheckNext = outputId
                         goto continue
                     else
@@ -428,15 +437,21 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                         end
                         return
                     end
-                    if searchStage == 3 then
+                    if searchStage == 1 then
+                        writeBlock = outputId
+                        allBlockFound[#allBlockFound+1] = outputId
+                        idToCheckNext = outputId
+                        searchStage = 4
+                        goto continue
+                    elseif searchStage == 2 then
+                        -- nothing keep checking outputs
+                    elseif searchStage == 3 then
                         writeBlock = outputId
                         allBlockFound[#allBlockFound+1] = outputId
                         searchStage = 4
                         done = true
                         idToCheckNext = outputId
                         goto continue
-                    elseif searchStage == 2 then
-                        -- nothing keep checking outputs
                     else
                         allBlockFound[#allBlockFound+1] = outputId
                         for j = 1, #allBlockFound do
@@ -466,11 +481,11 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
             return
         end
     end
-    if searchStage == 1 or searchStage == 3 then
+    if searchStage == 1 or (searchStage == 3 and writeBlock == nil) or (searchStage == 4 and #dataBlocks == 0) then
         for j = 1, #allBlockFound do
             local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]
             if interfaceBlock ~= nil then
-                interfaceBlock.error = {8, searchStage}
+                interfaceBlock.error = {(searchStage == 3) and 10 or ((searchStage == 4) and 11 or 8), searchStage}
             end
         end
         return
@@ -482,7 +497,7 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
         end
     end
 
-    local multiBlockId = self:internalAddMultiBlock((searchStage == 4) and 3 or 4)
+    local multiBlockId = self:internalAddMultiBlock((searchStage == 2) and 4 or 3)
     self.multiBlockData[multiBlockId][7] = memoryBlockId
     self.multiBlockData[multiBlockId][8] = addressBlocks
     self.multiBlockData[multiBlockId][9] = dataBlocks
@@ -491,7 +506,18 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
         self:internalAddBlockToMultiBlock(id, multiBlockId, true)
         self:internalAddBlockToUpdate(id)
     end
-    if searchStage == 4 then
+    if searchStage == 2 then
+        for i = 1, #dataBlocks do
+            local id = dataBlocks[i]
+            self:internalAddBlockToMultiBlock(id, multiBlockId, false, true)
+        end
+        if writeBlock ~= nil then
+            self:internalAddBlockToMultiBlock(writeBlock, multiBlockId, true)
+            self:internalAddBlockToUpdate(writeBlock)
+            self.multiBlockData[multiBlockId][10] = writeBlock
+        end
+        self.ramBlockOtherData[memoryBlockId][1][#self.ramBlockOtherData[memoryBlockId][1]+1] = multiBlockId
+    else
         for i = 1, #dataBlocks do
             local id = dataBlocks[i]
             self:internalAddBlockToMultiBlock(id, multiBlockId, true)
@@ -500,12 +526,6 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
         self:internalAddBlockToMultiBlock(writeBlock, multiBlockId, true)
         self:internalAddBlockToUpdate(writeBlock)
         self.multiBlockData[multiBlockId][10] = writeBlock
-    else
-        for i = 1, #dataBlocks do
-            local id = dataBlocks[i]
-            self:internalAddBlockToMultiBlock(id, multiBlockId, false, true)
-        end
-        self.ramBlockOtherData[memoryBlockId][1][#self.ramBlockOtherData[memoryBlockId][1]+1] = multiBlockId
     end
 end
 
@@ -609,18 +629,21 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChec
 end
 
 function FastLogicRunner.fixBlockInputData(self, id)
-        if self.numberOfBlockInputs[id] == 0 then
-            self.countOfOnInputs[id] = 0
-        else
-            self.countOfOnInputs[id] = 0
-            for i = 1, self.numberOfBlockInputs[id] do
-                local inputId = self.blockInputs[id][i]
-                local pathId = self.runnableBlockPathIds[inputId]
-                if pathId ~= 7 and pathId ~= 9 and pathId ~= 14 and pathId ~= 27 and self.blockStates[inputId] then
-                    self.countOfOnInputs[id] = self.countOfOnInputs[id] + 1
-                end
+    if self.numberOfBlockInputs[id] == 0 then
+        self.countOfOnInputs[id] = 0
+    else
+        self.countOfOnInputs[id] = 0
+        for i = 1, self.numberOfBlockInputs[id] do
+            local inputId = self.blockInputs[id][i]
+            local pathId = self.runnableBlockPathIds[inputId]
+            if (
+                (pathId ~= 7 and pathId ~= 9 and pathId ~= 14 and pathId ~= 27 and pathId ~= 26) and
+                self.blockStates[inputId]
+            ) then
+                self.countOfOnInputs[id] = self.countOfOnInputs[id] + 1
             end
         end
+    end
     self:internalAddBlockToUpdate(id)
 end
 

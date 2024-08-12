@@ -8,7 +8,7 @@ sm.interactable.connectionType.fastLogicInterface = math.pow(2, 27)
 FastLogicBlockMemory = table.deepCopyTo(BaseFastLogicBlock, (FastLogicBlockMemory or class()))
 FastLogicBlockMemory.colorNormal = sm.color.new(0xf00000ff)
 FastLogicBlockMemory.colorHighlight = sm.color.new(0xf53d00ff)
-FastLogicBlockMemory.connectionInput = 0
+FastLogicBlockMemory.connectionInput = sm.interactable.connectionType.logic
 FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface
 
 function FastLogicBlockMemory.getData2(self)
@@ -37,7 +37,15 @@ function FastLogicBlockMemory.server_onDestroy2(self)
     self.creation.FastLogicBlockMemorys[self.data.uuid] = nil
 end
 
-function FastLogicBlockMemory.client_updateTexture(self)
+function FastLogicBlockMemory.client_updateTexture(self, state)
+    if self.client_state ~= state then
+        self.client_state = state
+        if state then
+            self.interactable:setUvFrameIndex(0)
+        else
+            self.interactable:setUvFrameIndex(6)
+        end
+    end
 end
 
 function FastLogicBlockMemory.server_saveMemory(self, memory)

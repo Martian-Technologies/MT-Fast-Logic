@@ -10,7 +10,7 @@ local pairs = pairs
 
 local letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
-local vlightsToFlights = {
+local vLightsToFLights = {
     ["e91b0bf2-dafa-439e-a503-286e91461bb0"] = "f36e03b4-eea7-4c0a-842d-225ed50e5635",
     ["1e2485d7-f600-406e-b348-9f0b7c1f5077"] = "da2a1835-8ef3-4bef-a16c-c3d38ffe3b34",
     ["7b2c96af-a4a1-420e-9370-ea5b58f23a7e"] = "767a4a08-7471-465a-9dda-6e3c246fe3b1",
@@ -20,10 +20,42 @@ local vlightsToFlights = {
     ["ed27f5e2-cac5-4a32-a5d9-49f116acc6af"] = "31eac728-a2db-420a-8034-835229f42d4c",
     ["695d66c8-b937-472d-8bc2-f3d72dd92879"] = "85caeefe-9935-42ae-83a4-8c1df6528758"
 }
-local flightsToVlights = {}
-for v,f in pairs(vlightsToFlights) do
-    flightsToVlights[f] = v
+local fLightsToVLights = {}
+for k, v in pairs(vLightsToFLights) do
+    fLightsToVLights[v] = k
 end
+
+local vGateModesToFGateModes = {
+    [0] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgA",
+    [1] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgB",
+    [2] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgC",
+    [3] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgD",
+    [4] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgE",
+    [5] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgF",
+}
+local fGateModesToVGateModes = {}
+for k, v in pairs(vGateModesToFGateModes) do
+    fGateModesToVGateModes[v] = k
+end
+
+local vLightLumsToFLightLums = {
+    [10] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgK",
+    [20] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgU",
+    [30] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQge",
+    [40] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgo",
+    [50] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgy",
+    [60] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQg8",
+    [70] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhG",
+    [80] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhQ",
+    [90] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQha",
+    [100] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhk",
+}
+local fLightLumsToVLightLums = {}
+for k, v in pairs(vLightLumsToFLightLums) do
+    fLightLumsToVLightLums[v] = k
+end
+
+local fLogicGatesUuidHash = FastLogicAllBlockManager.blockUuidToConnectionColorID
 
 function FastLogicRunnerRunner.server_convertBody(self, data)
     --"FastLogic" or "VanillaLogic"
@@ -32,304 +64,248 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
     if wantedType == "VanillaLogic" then
         local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(data.body)]
         if creation ~= nil then
-            local i = 0
             for _, block in pairs(creation.AllFastBlocks) do
-                i = i + 1
-                local s = sm.event.sendToInteractable(block.interactable, "removeUuidData")
-                if s == false then
-                end
+                sm.event.sendToInteractable(block.interactable, "removeUuidData")
             end
             if sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2] == nil then
                 sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2] = {}
             end
-            sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2][#sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2]+1] = data
+            sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2][#sm.MTFastLogic.FastLogicRunnerRunner.bodiesToConvert[2] + 1] =
+            data
         end
     else
-        sm.MTFastLogic.FastLogicRunnerRunner:convertBodyInternal(body, wantedType)
+        sm.MTBackupEngine.sv_backupCreation({
+            hasCreationData = false,
+            body = body,
+            name = "Conversion Backup",
+            description = "Backup created by LogicConverter.lua. Converting to " .. wantedType,
+        })
+        if wantedType == "FastLogic" then
+            sm.MTFastLogic.FastLogicRunnerRunner:convertToFastInternal(body)
+        else
+            sm.MTFastLogic.FastLogicRunnerRunner:convertToVanillaInternal(body)
+        end
     end
 end
 
-function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
-    local jsontable = sm.creation.exportToTable(body, true, false) --'true, false' fix for qtimer reset bug?
-    sm.MTBackupEngine.sv_backupCreation({
-        hasCreationData = false,
-        body = body,
-        name = "Conversion Backup",
-        description = "Backup created by LogicConverter.lua. Converting to " .. wantedType,
-    })
-    if wantedType == "FastLogic" then
-        for i = 1, #jsontable.bodies do
-            for j = 1, #jsontable.bodies[i].childs do
-                if jsontable.bodies[i].childs[j].shapeId == "9f0f56e8-2c31-4d83-996c-d00a9b296c3f" then --Vanilla Gate
-                    jsontable.bodies[i].childs[j].shapeId = "6a9dbff5-7562-4e9a-99ae-3590ece88112"
+function FastLogicRunnerRunner.convertToVanillaInternal(self, bodyToGetData)
+    local creationJson = sm.creation.exportToTable(bodyToGetData, true)
+    for i = 1, #creationJson.bodies do
+        local body = creationJson.bodies[i]
+        for j = 1, #body.childs do
+            local child = body.childs[j]
+            if fLogicGatesUuidHash[child.shapeId] ~= nil then -- Fast Gate
+                local mode = fGateModesToVGateModes[child.controller.data]
+                if mode == nil then
+                    goto continue
+                end
+                child.shapeId = "9f0f56e8-2c31-4d83-996c-d00a9b296c3f"
+                child.controller.mode = mode
+                child.controller.active = false
+                child.controller.data = nil
+            elseif child.shapeId == "db0bc11b-c083-4a6a-843f-73ac1033e6fe" then --Fast Timer
+                -- LOTS of base64 converting and extracting corresponding bits of seconds & ticks
 
-                    local mode = jsontable.bodies[i].childs[j].controller.mode
-                    local childdata
-                    if mode == 0 then
-                        childdata = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgA"
-                    elseif mode == 1 then
-                        childdata = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgB"
-                    elseif mode == 2 then
-                        childdata = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgC"
-                    elseif mode == 3 then
-                        childdata = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgD"
-                    elseif mode == 4 then
-                        childdata = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgE"
-                    elseif mode == 5 then
-                        childdata = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgF"
-                    end
-
-                    jsontable.bodies[i].childs[j].controller.data = childdata
-                    jsontable.bodies[i].childs[j].controller.mode = nil
-                    jsontable.bodies[i].childs[j].controller.active = nil
-                elseif jsontable.bodies[i].childs[j].shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f" then --Vanilla Timer
-                    jsontable.bodies[i].childs[j].shapeId = "db0bc11b-c083-4a6a-843f-73ac1033e6fe"
-
-                    local childdata = "0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA"
-                    local binarr = {}
-                    local bincount = 1
-                    for k = #childdata, 1, -1 do
-                        local char = string.sub(childdata, k, k)
-                        local index, _ = string.find(letters, char)
-                        for l = 0, 5 do
-                            if bit.band(index, 2 ^ l) > 0 then
-                                binarr[bincount] = 1
-                                bincount = bincount + 1
-                            else
-                                binarr[bincount] = 0
-                                bincount = bincount + 1
-                            end
-                        end
-                    end
-
-                    local seconds = 4 + jsontable.bodies[i].childs[j].controller.seconds
-                    for i = 5, 10 do
-                        if bit.band(seconds, 2 ^ (i - 5)) > 0 then
-                            binarr[i] = 1
+                local childdata = child.controller.data
+                local binarr = {}
+                local bincount = 1
+                for k = #childdata, 1, -1 do
+                    local char = string.sub(childdata, k, k)
+                    local index, _ = string.find(letters, char)
+                    for l = 0, 5 do
+                        if bit.band(index, 2 ^ l) > 0 then
+                            binarr[bincount] = 1
+                            bincount = bincount + 1
                         else
-                            binarr[i] = 0
-                        end
-                    end
-                    local ticks = 16 + jsontable.bodies[i].childs[j].controller.ticks
-                    for i = 117, 122 do
-                        if bit.band(ticks, 2 ^ (i - 117)) > 0 then
-                            binarr[i] = 1
-                        else
-                            binarr[i] = 0
-                        end
-                    end
-
-                    local newchilddata = childdata
-                    bincount = 1
-                    for k = #childdata, 1, -1 do
-                        local index = 0
-                        for l = 0, 5 do
-                            if binarr[bincount] == 1 then
-                                index = index + 2 ^ l
-                            end
+                            binarr[bincount] = 0
                             bincount = bincount + 1
                         end
-                        --childdata[k] = b[index]
-                        local char = string.sub(letters, index, index)
-                        newchilddata = string.replace_char(k, newchilddata, char)
                     end
-
-                    jsontable.bodies[i].childs[j].controller.data = newchilddata
-                    jsontable.bodies[i].childs[j].controller.active = nil
-                    jsontable.bodies[i].childs[j].controller.seconds = nil
-                    jsontable.bodies[i].childs[j].controller.ticks = nil
-                elseif vlightsToFlights[jsontable.bodies[i].childs[j].shapeId] ~= nil then --Vanilla Light
-                    jsontable.bodies[i].childs[j].shapeId = vlightsToFlights[jsontable.bodies[i].childs[j].shapeId]
-                    local childdata = nil
-                    local luminance = jsontable.bodies[i].childs[j].controller.luminance
-                    if luminance == 10 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgK"
-                    elseif luminance == 20 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgU"
-                    elseif luminance == 30 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQge"
-                    elseif luminance == 40 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgo"
-                    elseif luminance == 50 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgy"
-                    elseif luminance == 60 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQg8"
-                    elseif luminance == 70 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhG"
-                    elseif luminance == 80 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhQ"
-                    elseif luminance == 90 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQha"
-                    elseif luminance == 100 then
-                        childdata = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhk"
-                    end
-                    jsontable.bodies[i].childs[j].controller.data = childdata
-                    jsontable.bodies[i].childs[j].controller.coneAngle = nil
-                    jsontable.bodies[i].childs[j].controller.luminance = nil
                 end
-            end
-        end
-    elseif wantedType == "VanillaLogic" then
-        for i = 1, #jsontable.bodies do
-            for j = 1, #jsontable.bodies[i].childs do
-                if table.contains(FastLogicAllBlockManager.fastLogicGateBlockUuids, jsontable.bodies[i].childs[j].shapeId) then
-                    local childdata = jsontable.bodies[i].childs[j].controller.data
-                    local mode
-                    if childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgA" then
-                        mode = 0
-                    elseif childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgB" then
-                        mode = 1
-                    elseif childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgC" then
-                        mode = 2
-                    elseif childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgD" then
-                        mode = 3
-                    elseif childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgE" then
-                        mode = 4
-                    elseif childdata == "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgF" then
-                        mode = 5
-                    else
-                        -- sm.gui.chatMessage("#ff0000Fatal error while converting Fast Gates, please send a screenshot of this to ItchyTrack")
-                        -- sm.gui.chatMessage(childdata)
-                        goto continue
-                    end
-
-                    jsontable.bodies[i].childs[j].shapeId = "9f0f56e8-2c31-4d83-996c-d00a9b296c3f"
-                    jsontable.bodies[i].childs[j].controller.mode = mode
-                    jsontable.bodies[i].childs[j].controller.active = false
-                    jsontable.bodies[i].childs[j].controller.data = nil
-                elseif jsontable.bodies[i].childs[j].shapeId == "db0bc11b-c083-4a6a-843f-73ac1033e6fe" then --fasttimer
-                    -- LOTS of base64 converting and extracting corresponding bits of seconds & ticks
-
-                    local childdata = jsontable.bodies[i].childs[j].controller.data
-
-                    --WORKING 8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzCAAEAAAABXRpY2tzCAg
-                    --WORKING 8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzCAAEAAAABXRpY2tzCBk
-                    --NOT WORK 0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA
-                    --NOT WORK 0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA
-                    --childdata = string.sub(childdata, 1, -1)
-                    local binarr = {}
-                    local bincount = 1
-                    for k = #childdata, 1, -1 do
-                        local char = string.sub(childdata, k, k)
-                        local index, _ = string.find(letters, char)
-                        for l = 0, 5 do
-                            if bit.band(index, 2 ^ l) > 0 then
-                                binarr[bincount] = 1
-                                bincount = bincount + 1
-                            else
-                                binarr[bincount] = 0
-                                bincount = bincount + 1
-                            end
+                -- Everything in strings
+                local binstr = table.concat(binarr)
+                -- Everything in tables
+                local seconds
+                local ticks
+                if string.sub(childdata, 1, 37) == '8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzC' then
+                    --identical_different
+                    seconds = 0
+                    for k = 99, 104 do
+                        if binarr[k] == 1 then
+                            seconds = seconds + 2 ^ (k - 99)
                         end
                     end
-
-                    -- Everything in strings
-                    local binstr = table.concat(binarr)
-                    --local secondbinstr = string.sub(binstr, 5, 10)
-                    --local tickbinstr = string.sub(binstr, 117, 122)
-
-                    -- Everything in tables
-                    local seconds
-                    local ticks
-                    if string.sub(childdata, 1, 37) == '8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzC' then
-                        --8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzC_AAEAAAABXRpY2tzCAg
-                        --8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzC_DAEAAAABXRpY2tzCCA
-                        --8BhMVUEAAAABBQAAAAICAAAAA4BzZWNvbmRzC_DsEAAAABXRpY2tzCCg
-                        --identical_different
-                        seconds = 0
-                        for i = 99, 104 do                       -- used to be bits 5-10    |   99-104
-                            if binarr[i] == 1 then
-                                seconds = seconds + 2 ^ (i - 99) --used to be i - 5   |   i - 99
-                            end
+                    seconds = seconds - 16              --remove Offset
+                    ticks = 0
+                    for k = 3, 8 do
+                        if binarr[k] == 1 then
+                            ticks = ticks + 2 ^ (k - 3)
                         end
-                        seconds = seconds - 16              --remove Offset
-                        ticks = 0
-                        for i = 3, 8 do                     -- used to be bits 117-122       |    3-8
-                            if binarr[i] == 1 then
-                                ticks = ticks + 2 ^ (i - 3) --used to be i - 117     |    i - 3
-                            end
-                        end
-                        ticks = ticks - 16 --remove Offset --used to be -16
-                    elseif string.sub(childdata, 1, 33) == '0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzC' then
-                        --0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzC_AAEAAAAB3NlY29uZHMIAA
-                        --0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzC_CgEAAAAB3NlY29uZHMIOw
-                        seconds = 0
-                        for i = 5, 10 do                        -- used to be bits 5-10    |   99-104
-                            if binarr[i] == 1 then
-                                seconds = seconds + 2 ^ (i - 5) --used to be i - 5   |   i - 99
-                            end
-                        end
-                        seconds = seconds - 4                 --remove Offset
-                        ticks = 0
-                        for i = 117, 122 do                   -- used to be bits 117-122       |    3-8
-                            if binarr[i] == 1 then
-                                ticks = ticks + 2 ^ (i - 117) --used to be i - 117     |    i - 3
-                            end
-                        end
-                        ticks = ticks - 16 --remove Offset --used to be -16
-                    else
-                        -- sm.gui.chatMessage("#ff0000Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
-                        -- sm.gui.chatMessage(childdata)
-                        goto continue
                     end
-
-                    if (seconds < 0) or (seconds > 59) or (ticks < 0) or (ticks > 40) then
-                        sm.gui.chatMessage("#ff0000Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
-                        sm.gui.chatMessage(childdata .. " " .. seconds .. " " .. ticks)
-                        return
+                    ticks = ticks - 16 --remove Offset
+                elseif string.sub(childdata, 1, 33) == '0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzC' then
+                    seconds = 0
+                    for k = 5, 10 do
+                        if binarr[k] == 1 then
+                            seconds = seconds + 2 ^ (k - 5)
+                        end
                     end
-                    jsontable.bodies[i].childs[j].shapeId = "8f7fd0e7-c46e-4944-a414-7ce2437bb30f"
-                    jsontable.bodies[i].childs[j].controller.data = nil
-                    jsontable.bodies[i].childs[j].controller.active = false
-                    jsontable.bodies[i].childs[j].controller.seconds = seconds
-                    jsontable.bodies[i].childs[j].controller.ticks = ticks
-                elseif flightsToVlights[jsontable.bodies[i].childs[j].shapeId] ~= nil then --Fast Light
-                    local luminance = 50
-                    local childdata = jsontable.bodies[i].childs[j].controller.data
-                    if childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgK" then
-                        luminance = 10
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgU" then
-                        luminance = 20
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQge" then
-                        luminance = 30
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgo" then
-                        luminance = 40
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgy" then
-                        luminance = 50
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQg8" then
-                        luminance = 60
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhG" then
-                        luminance = 70
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhQ" then
-                        luminance = 80
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQha" then
-                        luminance = 90
-                    elseif childdata == "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhk" then
-                        luminance = 100
-                    else
-                        -- sm.gui.chatMessage("#ff0000Fatal error while converting Fast Warehouse Square Lights, please send a screenshot of this to ItchyTrack")
-                        -- sm.gui.chatMessage(childdata)
-                        goto continue
+                    seconds = seconds - 4                 --remove Offset
+                    ticks = 0
+                    for k = 117, 122 do
+                        if binarr[k] == 1 then
+                            ticks = ticks + 2 ^ (k - 117)
+                        end
                     end
-                    jsontable.bodies[i].childs[j].shapeId = flightsToVlights[jsontable.bodies[i].childs[j].shapeId]
-                    jsontable.bodies[i].childs[j].controller.luminance = luminance
-                    jsontable.bodies[i].childs[j].controller.data = nil
+                    ticks = ticks - 16 --remove Offset
+                else
+                    goto continue
                 end
-                ::continue::
+
+                if (seconds < 0) or (seconds > 59) or (ticks < 0) or (ticks > 40) then
+                    sm.gui.chatMessage("Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
+                    sm.gui.chatMessage(childdata .. " " .. seconds .. " " .. ticks)
+                    return
+                end
+                child.shapeId = "8f7fd0e7-c46e-4944-a414-7ce2437bb30f"
+                child.controller.data = nil
+                child.controller.active = false
+                child.controller.seconds = seconds
+                child.controller.ticks = ticks
+            elseif fLightsToVLights[child.shapeId] ~= nil then --Fast Light
+                local luminance = fLightLumsToVLightLums[child.controller.data]
+                if luminance == nil then
+                    goto continue
+                end
+                child.shapeId = fLightsToVLights[child.shapeId]
+                child.controller.luminance = luminance
+                child.controller.data = nil
             end
+            ::continue::
         end
     end
-
-    -- removing old body & spawning the new one
-    local worldpos = body.worldPosition
-    local worldrot = body.worldRotation
-    local world = body:getWorld()
-
-    local shapes = body:getCreationShapes()
-    for _, shape in pairs(shapes) do
+    -- save old body pos, rot, and, world
+    local bodyPos = bodyToGetData.worldPosition
+    local bodyRot = bodyToGetData.worldRotation
+    local world = bodyToGetData:getWorld()
+    -- destroy old body
+    for _, shape in pairs(bodyToGetData:getCreationShapes()) do
         shape:destroyShape()
     end
-
-    local jsonstring = sm.json.writeJsonString(jsontable)
-    sm.creation.importFromString(world, jsonstring, worldpos, worldrot, false)
+    -- spawn new body
+    sm.creation.importFromString(world, sm.json.writeJsonString(creationJson), bodyPos, bodyRot)
 end
+
+function FastLogicRunnerRunner.convertToFastInternal(self, bodyToGetData)
+    local creationJson = sm.creation.exportToTable(bodyToGetData, true)
+    for i = 1, #creationJson.bodies do
+        local body = creationJson.bodies[i]
+        for j = 1, #body.childs do
+            local child = body.childs[j]
+            if child.shapeId == "9f0f56e8-2c31-4d83-996c-d00a9b296c3f" then --Vanilla Gate
+                child.shapeId = "6a9dbff5-7562-4e9a-99ae-3590ece88112"
+                child.controller.data = vGateModesToFGateModes[child.controller.mode]
+                child.controller.mode = nil
+                child.controller.active = nil
+            elseif child.shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f" then --Vanilla Timer
+                child.shapeId = "db0bc11b-c083-4a6a-843f-73ac1033e6fe"
+                
+                local childdata = "0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA"
+                local binarr = {}
+                local bincount = 1
+                for k = #childdata, 1, -1 do
+                    local char = string.sub(childdata, k, k)
+                    local index, _ = string.find(letters, char)
+                    for l = 0, 5 do
+                        if bit.band(index, 2 ^ l) > 0 then
+                            binarr[bincount] = 1
+                            bincount = bincount + 1
+                        else
+                            binarr[bincount] = 0
+                            bincount = bincount + 1
+                        end
+                    end
+                end
+
+                local seconds = 4 + child.controller.seconds
+                for i = 5, 10 do
+                    if bit.band(seconds, 2 ^ (i - 5)) > 0 then
+                        binarr[i] = 1
+                    else
+                        binarr[i] = 0
+                    end
+                end
+                local ticks = 16 + child.controller.ticks
+                for i = 117, 122 do
+                    if bit.band(ticks, 2 ^ (i - 117)) > 0 then
+                        binarr[i] = 1
+                    else
+                        binarr[i] = 0
+                    end
+                end
+
+                local newchilddata = childdata
+                bincount = 1
+                for k = #childdata, 1, -1 do
+                    local index = 0
+                    for l = 0, 5 do
+                        if binarr[bincount] == 1 then
+                            index = index + 2 ^ l
+                        end
+                        bincount = bincount + 1
+                    end
+                    --childdata[k] = b[index]
+                    local char = string.sub(letters, index, index)
+                    newchilddata = string.replace_char(k, newchilddata, char)
+                end
+
+                child.controller.data = newchilddata
+                child.controller.active = nil
+                child.controller.seconds = nil
+                child.controller.ticks = nil
+            elseif vLightsToFLights[child.shapeId] ~= nil then --Vanilla Light
+                child.shapeId = vLightsToFLights[child.shapeId]
+                child.controller.data = vLightLumsToFLightLums[child.controller.luminance]
+                child.controller.coneAngle = nil
+                child.controller.luminance = nil
+            -- elseif child.shapeId == "0eb09225-11c7-4178-b87a-9fdf7343f472" then -- Fast Ram
+            --     self:convertQuickInterfacesAndRamFastLogic(bodyToGetData, creationJson, child.controller.id)
+            end
+        end
+    end
+    -- save old body pos, rot, and, world
+    local bodyPos = bodyToGetData.worldPosition
+    local bodyRot = bodyToGetData.worldRotation
+    local world = bodyToGetData:getWorld()
+    -- destroy old body
+    for _, shape in pairs(bodyToGetData:getCreationShapes()) do
+        shape:destroyShape()
+    end
+    -- spawn new body
+    sm.creation.importFromString(world, sm.json.writeJsonString(creationJson), bodyPos, bodyRot)
+end
+
+function FastLogicRunnerRunner.convertQuickInterfacesAndRamFastLogic(self, bodyToGetData, creationJson, ramBlockId)
+    
+end
+
+function FastLogicRunnerRunner.getBlocksJsonPosFromJsonWithIds(self, creationJson, idHash)
+    for i = 1, #creationJson.bodies do
+        local body = creationJson.bodies[i]
+        for j = 1, #body.childs do
+            if idHash[body.childs[j].controller.id] ~= nil then
+                idHash[body.childs[j].controller.id] = {i, j}
+            end
+        end
+    end
+    return idHash
+end
+
+function FastLogicRunnerRunner.getFastInteractablesFromIds()
+    
+end
+
+function FastLogicRunnerRunner.getQuickInteractablesFromIds()
+    
+end
+

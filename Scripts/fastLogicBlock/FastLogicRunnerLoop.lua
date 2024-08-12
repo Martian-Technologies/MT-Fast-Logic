@@ -523,8 +523,8 @@ function FastLogicRunner.doUpdate(self)
                 else
                     ramBlockData[ramBlockId][address] = data
                 end
-                local j = 1
                 local outputInterfaces = ramBlockOtherData[ramBlockId][1]
+                local j = 1
                 while j <= #outputInterfaces do
                     local outputInterfaceId = outputInterfaces[j]
                     if multiBlockData[outputInterfaceId] == false then
@@ -570,6 +570,36 @@ function FastLogicRunner.doUpdate(self)
         multiBlockData[blockId][5] = {}
     end
     runningBlockLengths[16] = 0
+    -- ram block reset
+    for k = 1, runningBlockLengths[26] do
+        self.blocksRan = self.blocksRan + 1
+        local blockId = runningBlocks26[k]
+        local state = blockStates[blockId]
+        if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0) ~= state then
+            blockStates[blockId] = not state
+            if state == false then
+                local newData = {}
+                ramBlockData[blockId] = newData
+                FastLogicBlockMemorys[unhashedLookUp[blockId]].memory = newData
+                local outputInterfaces = ramBlockOtherData[blockId][1]
+                local j = 1
+                while j <= #outputInterfaces do
+                    local outputInterfaceId = outputInterfaces[j]
+                    if multiBlockData[outputInterfaceId] == false then
+                        table.remove(outputInterfaces, j)
+                    else
+                        j = j + 1
+                        if ramOutputMultiBlocksHash[outputInterfaceId] == nil then
+                            ramOutputMultiBlocksHash[outputInterfaceId] = true
+                            ramOutputMultiBlocksLength = ramOutputMultiBlocksLength + 1
+                            ramOutputMultiBlocks[ramOutputMultiBlocksLength] = outputInterfaceId
+                        end
+                    end
+                end
+            end
+        end
+    end
+    runningBlockLengths[26] = 0
     -- ram outputs
     for k = 1, ramOutputMultiBlocksLength do
         local multiData = multiBlockData[ramOutputMultiBlocks[k]]
@@ -595,21 +625,6 @@ function FastLogicRunner.doUpdate(self)
             data = data / 2
         end
     end
-    -- ram block reset
-    for k = 1, runningBlockLengths[26] do
-        self.blocksRan = self.blocksRan + 1
-        local blockId = runningBlocks26[k]
-        local state = blockStates[blockId]
-        if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0) ~= state then
-            blockStates[blockId] = not state
-            if state == false then
-                local newData = {}
-                ramBlockData[blockId] = newData
-                FastLogicBlockMemorys[unhashedLookUp[blockId]].memory = newData
-            end
-        end
-    end
-    runningBlockLengths[26] = 0
     -- update alll
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]

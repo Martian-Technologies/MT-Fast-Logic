@@ -50,5 +50,13 @@
    "85caeefe-9935-42ae-83a4-8c1df6528758" : {
       "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
       "title" : "Fast Warehouse Spotlight"
+   },
+   "1d4f99c0-1df8-4acb-9fd4-f3437062016c" : {
+      "description" : "This block allows for highly compact memory. Used with Interface blocks.\n\nInput: Make a line of Address gates then one Data Write gate and a line of Data In Gates. Connect these all in series going out from the Memory.\n\nOutput: Make a line of Address gates then a line of Data Out Gates. Connect these in series like the input. You can disable the output with a Data Write gate inbetween the Address and Data.",
+      "title" : "Fast Logic Memory"
+   },
+   "ce73327a-1cf9-49cc-9ee7-e63110ccc43f" : {
+      "description" : "This is used to interface with the Fast Logic Memory.\n\nPress E to select Address, Data In, Data Out, or Write Data",
+      "title" : "Fast Logic Interface"
    }
 }

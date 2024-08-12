@@ -242,12 +242,24 @@ function ConnectionShower.client_onUpdate(multitool)
                 if connection == interactable then
                     goto continue
                 end
+                if connection == nil then
+                    goto continue
+                end
+                if connection:getShape() == nil then
+                    goto continue
+                end
                 table.insert(positionsAsInput, connection:getShape():getWorldPosition())
                 ::continue::
             end
             for _, connection in pairs(outputConnections) do
                 if connection == interactable then
                     selfWired = true
+                    goto continue
+                end
+                if connection == nil then
+                    goto continue
+                end
+                if connection:getShape() == nil then
                     goto continue
                 end
                 table.insert(positionsAsOutput, connection:getShape():getWorldPosition())

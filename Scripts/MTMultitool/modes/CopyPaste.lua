@@ -205,6 +205,12 @@ function CopyPaste.doCopyPaste(multitool, data)
     local originalPositionsTakenUpBySource = {}
     local tensor = {}
 
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreation = false,
+        body = targetBody,
+        name = "CopyPaste Backup",
+        description = "Backup created by CopyPaste.lua",
+    })
 
     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
     local interactableModes = {}

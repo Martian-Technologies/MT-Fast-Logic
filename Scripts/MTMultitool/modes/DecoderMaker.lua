@@ -4,101 +4,134 @@ function DecoderMaker.inject(multitool)
     multitool.DecoderMaker = {}
     local self = multitool.DecoderMaker
     self.nametagUpdate = NametagManager.createController(multitool)
-    self.listOfNormalInputs = {}
-    self.listOfInvertedInputs = {}
+    self.normalStart = nil
+    self.normalEnd = nil
+    self.invertedStart = nil
+    self.invertedEnd = nil
     self.outputOrigin = nil
-    self.outputFirst = nil
-    self.mode = "normal"
+    self.outputStep = nil
 end
 
 function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.DecoderMaker
-    multitool.ConnectionManager.displayMode = "slow"
-    local needToUpdateNametags = false
-    multitool.SelectionModeController.modeActive = "BlockSelector"
-    if self.outputFirst ~= nil and self.outputOrigin ~= nil then
-        if primaryState == 1 then
-            DecoderMaker.calculatePreview(multitool)
-            ConnectionManager.commitPreview(multitool)
-            DecoderMaker.cleanUp(multitool)
-        end
+    if self.normalStart == nil then
+        multitool.SelectionModeController.modeActive = "BlockSelector"
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the start of the normal input")
+    elseif self.normalEnd == nil then
+        multitool.SelectionModeController.modeActive = "BlockSelector"
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the end of the normal input")
+    elseif self.invertedStart == nil then
+        multitool.SelectionModeController.modeActive = "BlockSelector"
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the start of the inverted input")
+    elseif self.invertedEnd == nil then
+        multitool.SelectionModeController.modeActive = "BlockSelector"
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the end of the inverted input")
+    elseif self.outputOrigin == nil then
+        multitool.SelectionModeController.modeActive = "BlockSelector"
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the origin of the output row of gates")
+    elseif self.outputStep == nil then
+        multitool.SelectionModeController.modeActive = "BlockSelector"
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the next gate in the output row")
+    else
+        multitool.SelectionModeController.modeActive = nil
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Press to build the decoder")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Toggle",
+            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            multitool.ConnectionManager.mode .. "<p>")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)
         end
     end
-    if self.mode == "normal" then
-        -- print(primaryState)
-        if primaryState == 1 and lookingAt ~= nil then
-            table.insert(self.listOfNormalInputs, lookingAt)
-            needToUpdateNametags = true
+    local updateNametags = false
+    if primaryState == 1 then
+        if self.normalStart == nil then
+            self.normalStart = lookingAt
+        elseif self.normalEnd == nil then
+            self.normalEnd = lookingAt
+        elseif self.invertedStart == nil then
+            self.invertedStart = lookingAt
+        elseif self.invertedEnd == nil then
+            self.invertedEnd = lookingAt
+        elseif self.outputOrigin == nil then
+            self.outputOrigin = lookingAt
+        elseif self.outputStep == nil then
+            self.outputStep = lookingAt
+            DecoderMaker.calculatePreview(multitool)
+        else
+            ConnectionManager.commitPreview(multitool)
+            DecoderMaker.cleanUp(multitool)
         end
-        if secondaryState == 1 then
-            if #self.listOfNormalInputs > 0 then
-                table.remove(self.listOfNormalInputs)
-                needToUpdateNametags = true
-            end
+        updateNametags = true
+    elseif secondaryState == 1 then
+        if self.outputStep ~= nil then
+            self.outputStep = nil
+            multitool.ConnectionManager.preview = {}
+        elseif self.outputOrigin ~= nil then
+            self.outputOrigin = nil
+        elseif self.invertedEnd ~= nil then
+            self.invertedEnd = nil
+        elseif self.invertedStart ~= nil then
+            self.invertedStart = nil
+        elseif self.normalEnd ~= nil then
+            self.normalEnd = nil
+        elseif self.normalStart ~= nil then
+            self.normalStart = nil
         end
-        if MTMultitool.handleForceBuild(multitool, forceBuild) then
-            self.mode = "inverted"
-            needToUpdateNametags = true
-        end
+        updateNametags = true
     end
-    if self.mode == "inverted" then
-        if primaryState == 1 and lookingAt ~= nil then
-            if #self.listOfInvertedInputs < #self.listOfNormalInputs then
-                table.insert(self.listOfInvertedInputs, lookingAt)
-                needToUpdateNametags = true
+    if updateNametags then
+        local tags = {}
+        if self.normalStart ~= nil then
+            if self.normalEnd == nil then
+                table.insert(tags, {
+                    pos = self.normalStart:getWorldPosition(),
+                    color = sm.color.new(0, 1, 0, 1),
+                    txt = "n0"
+                })
             else
-                -- select the output origin
-                if self.outputOrigin == nil then
-                    self.outputOrigin = lookingAt
-                    needToUpdateNametags = true
-                elseif self.outputFirst == nil then
-                    self.outputFirst = lookingAt
-                    needToUpdateNametags = true
+                local normalSequence = MTMultitoolLib.findSequeceOfGates(self.normalStart, self.normalEnd)
+                for i, shape in pairs(normalSequence) do
+                    local worldPosition = shape:getWorldPosition()
+                    table.insert(tags, {
+                        pos = worldPosition,
+                        color = sm.color.new(0, 1, 0, 1),
+                        txt = string.format("n%d", i - 1)
+                    })
                 end
             end
         end
-        if secondaryState == 1 then
-            if self.outputFirst ~= nil then
-                self.outputFirst = nil
-                needToUpdateNametags = true
-            elseif self.outputOrigin ~= nil then
-                self.outputOrigin = nil
-                needToUpdateNametags = true
-            elseif #self.listOfInvertedInputs > 0 then
-                table.remove(self.listOfInvertedInputs)
-                needToUpdateNametags = true
+        if self.invertedStart ~= nil then
+            if self.invertedEnd == nil then
+                table.insert(tags, {
+                    pos = self.invertedStart:getWorldPosition(),
+                    color = sm.color.new(1, 0, 0, 1),
+                    txt = "i0"
+                })
             else
-                self.mode = "normal"
-                needToUpdateNametags = true
-            end
-        end
-    end
-    if needToUpdateNametags then
-        local color = sm.color.new(1, 1, 1, 1)
-        local tags = {}
-        for i, input in ipairs(self.listOfNormalInputs) do
-            if input ~= nil then
-                table.insert(tags, { pos = input:getWorldPosition(), txt = "i" .. i, color = color })
-            end
-        end
-        for i, input in ipairs(self.listOfInvertedInputs) do
-            if input ~= nil then
-                table.insert(tags, { pos = input:getWorldPosition(), txt = "i" .. i .. "'", color = color })
+                local invertedSequence = MTMultitoolLib.findSequeceOfGates(self.invertedStart, self.invertedEnd)
+                for i, shape in pairs(invertedSequence) do
+                    local worldPosition = shape:getWorldPosition()
+                    table.insert(tags, {
+                        pos = worldPosition,
+                        color = sm.color.new(1, 0, 0, 1),
+                        txt = string.format("i%d", i - 1)
+                    })
+                end
             end
         end
         if self.outputOrigin ~= nil then
-            table.insert(tags, { pos = self.outputOrigin:getWorldPosition(), txt = "o", color = color })
+            table.insert(tags, {
+                pos = self.outputOrigin:getWorldPosition(),
+                color = sm.color.new(0, 0, 1, 1),
+                txt = "o0"
+            })
         end
-        if self.outputFirst ~= nil then
-            table.insert(tags, { pos = self.outputFirst:getWorldPosition(), txt = "o'", color = color })
-        end
-        if self.outputFirst ~= nil and self.outputOrigin ~= nil then
-            -- generate connection preview
-            DecoderMaker.calculatePreview(multitool)
-        else
-            multitool.ConnectionManager.preview = {}
+        if self.outputStep ~= nil then
+            table.insert(tags, {
+                pos = self.outputStep:getWorldPosition(),
+                color = sm.color.new(0, 0, 1, 1),
+                txt = "o1"
+            })
         end
         self.nametagUpdate(tags)
     end
@@ -106,14 +139,16 @@ end
 
 function DecoderMaker.calculatePreview(multitool)
     local self = multitool.DecoderMaker
-    if self.outputFirst == nil or self.outputOrigin == nil then
+    if self.outputStep == nil or self.outputOrigin == nil then
         multitool.ConnectionManager.preview = {}
         return
     end
     local voxelGrid = MTMultitoolLib.createVoxelGrid(self.outputOrigin:getBody())
-    local outputDelta = MTMultitoolLib.getLocalCenter(self.outputFirst) -
+    local outputDelta = MTMultitoolLib.getLocalCenter(self.outputStep) -
         MTMultitoolLib.getLocalCenter(self.outputOrigin)
-    local numOutputs = 2 ^ #self.listOfNormalInputs
+    local listOfNormalInputs = MTMultitoolLib.findSequeceOfGates(self.normalStart, self.normalEnd)
+    local listOfInvertedInputs = MTMultitoolLib.findSequeceOfGates(self.invertedStart, self.invertedEnd)
+    local numOutputs = 2 ^ #listOfNormalInputs
     multitool.ConnectionManager.preview = {}
     local originPosition = MTMultitoolLib.getLocalCenter(self.outputOrigin)
     for i = 0, numOutputs - 1 do
@@ -122,15 +157,15 @@ function DecoderMaker.calculatePreview(multitool)
         -- convert i to binary
         local binary = {}
         local num = i
-        for j = 1, #self.listOfNormalInputs do
+        for j = 1, #listOfNormalInputs do
             table.insert(binary, num % 2)
             num = math.floor(num / 2)
         end
-        for j = 1, #self.listOfNormalInputs do
+        for j = 1, #listOfNormalInputs do
             if binary[j] == 0 then
-                table.insert(inputs, self.listOfInvertedInputs[j])
+                table.insert(inputs, listOfInvertedInputs[j])
             else
-                table.insert(inputs, self.listOfNormalInputs[j])
+                table.insert(inputs, listOfNormalInputs[j])
             end
         end
         for j, input in ipairs(inputs) do
@@ -148,10 +183,11 @@ end
 function DecoderMaker.cleanUp(multitool)
     local self = multitool.DecoderMaker
     self.nametagUpdate(nil)
-    self.listOfNormalInputs = {}
-    self.listOfInvertedInputs = {}
+    self.normalStart = nil
+    self.normalEnd = nil
+    self.invertedStart = nil
+    self.invertedEnd = nil
     self.outputOrigin = nil
-    self.outputFirst = nil
-    self.mode = "normal"
+    self.outputStep = nil
     multitool.ConnectionManager.preview = {}
 end

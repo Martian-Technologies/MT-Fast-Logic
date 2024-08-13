@@ -127,8 +127,16 @@ end
 function BaseFastLogicBlock.server_onDestroy(self)
     local success, result = pcall(self.pcalled_server_onDestroy, self)
     if not success then
-        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 6). Please report to ItchyTrack on discord")
-        self:sendMessageToAll(result)
+        sm.event.sendToTool(
+            sm.MTFastLogic.FastLogicRunnerRunner.tool,
+            "sendMessageToAll",
+            "AN ERROR OCCURRED IN FAST LOGIC (id: 6). Please report to ItchyTrack on discord"
+        )
+        sm.event.sendToTool(
+            sm.MTFastLogic.FastLogicRunnerRunner.tool,
+            "sendMessageToAll",
+            result
+        )
     end
 end
 

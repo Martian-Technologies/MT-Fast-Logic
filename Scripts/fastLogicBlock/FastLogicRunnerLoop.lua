@@ -21,6 +21,7 @@ local ramBlockData = nil
 local ramBlockOtherData = nil
 local unhashedLookUp = nil
 local FastLogicBlockMemorys = nil
+local multiBlockInputMultiBlockId = nil
 local runningBlocks1 = nil
 local runningBlocks3 = nil
 local runningBlocks4 = nil
@@ -63,6 +64,7 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
     if needsRunningBlocks == true then
+        multiBlockInputMultiBlockId = self.multiBlockInputMultiBlockId
         FastLogicBlockMemorys = self.creation.FastLogicBlockMemorys
         unhashedLookUp = self.unhashedLookUp
         lastTimerOutputWait = self.lastTimerOutputWait
@@ -332,8 +334,9 @@ function FastLogicRunner.doUpdate(self)
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks17[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] == 1) ~= blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -347,8 +350,9 @@ function FastLogicRunner.doUpdate(self)
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks18[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] == numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId]) == blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -363,8 +367,9 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks19[k]
         local sumCountOfOnInputs = countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]
         if (sumCountOfOnInputs > 0 and sumCountOfOnInputs == numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId]) ~= blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -378,8 +383,9 @@ function FastLogicRunner.doUpdate(self)
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks20[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0) ~= blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -393,8 +399,9 @@ function FastLogicRunner.doUpdate(self)
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks21[k]
         if ((countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]) % 2 == 1) ~= blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -409,8 +416,9 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks22[k]
         local sumCountOfOnInputs = countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]
         if (sumCountOfOnInputs > 0 and sumCountOfOnInputs == numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId]) == blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -424,8 +432,9 @@ function FastLogicRunner.doUpdate(self)
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks23[k]
         if (countOfOnInputs[blockId] == 0 and countOfOnOtherInputs[blockId] == 0 and numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId] > 0) ~= blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -442,8 +451,9 @@ function FastLogicRunner.doUpdate(self)
                 numberOfBlockInputs[blockId] + numberOfOtherInputs[blockId] > 0 and
                 (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId]) % 2 == 0
             ) ~= blockStates[blockId] then
-            local multiBlockId = multiBlockData[blockId]
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local multiBlockId = multiBlockInputMultiBlockId[blockId]
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
             if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
                 runningMultiBlockLengths = runningMultiBlockLengths + 1
                 runningBlocks[16][runningMultiBlockLengths] = multiBlockId
@@ -456,14 +466,15 @@ function FastLogicRunner.doUpdate(self)
     for k = 1, runningBlockLengths[27] do
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks27[k]
-        local multiBlockId = multiBlockData[blockId]
+        local multiBlockId = multiBlockInputMultiBlockId[blockId]
         if nextRunningBlocks[multiBlockId] ~= lastRunningIndex then
             runningMultiBlockLengths = runningMultiBlockLengths + 1
             runningBlocks[16][runningMultiBlockLengths] = multiBlockId
             nextRunningBlocks[multiBlockId] = lastRunningIndex
         end
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] > 0) ~= blockStates[blockId] then
-            multiBlockData[multiBlockId][5][#multiBlockData[multiBlockId][5]+1] = blockId
+            local mutliBlockNextRunningBlocks = multiBlockData[multiBlockId][5]
+            mutliBlockNextRunningBlocks[#mutliBlockNextRunningBlocks+1] = blockId
         end
     end
     runningBlockLengths[27] = 0

@@ -14,9 +14,11 @@ function FastLogicRunner.internalAddBlockToMultiBlock(self, id, multiBlockId, is
     local multiBlockData = self.multiBlockData
     local multiData = multiBlockData[multiBlockId]
     if multiBlockData[id] == false then
-        multiBlockData[id] = multiBlockId
-        multiData[2][#multiData[2]+1] = id
+        multiBlockData[id] = {[multiBlockId]=true}
+    else
+        multiBlockData[id][multiBlockId] = true
     end
+    multiData[2][#multiData[2]+1] = id
     if isInput then
         local multiBlockInputType = self.toMultiBlockInput[self.runnableBlockPathIds[id]]
         if multiBlockInputType ~= false then

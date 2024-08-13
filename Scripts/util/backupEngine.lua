@@ -2,61 +2,91 @@ dofile "compressionUtil/compressionUtil.lua"
 
 sm.MTBackupEngine = sm.MTBackupEngine or {}
 
-local function getBCUCfilename()
+local allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+local allCharacters = {}
+for i = 1, #allowedCharacters do
+    allCharacters[string.sub(allowedCharacters, i, i)] = true
+end
+
+local playerNameHash = {}
+local function getPlayerName()
     local playerUsername = sm.MTBackupEngine.username
-    local allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-    local allCharacters = {}
-    for i = 1, #allowedCharacters do
-        allCharacters[string.sub(allowedCharacters, i, i)] = true
+    if playerNameHash[playerUsername] ~= nil then
+        return playerNameHash[playerUsername]
     end
-    local backupsCoordinatorFilename = "$CONTENT_DATA/Backups/BackupCoordinator_"
+    local name = ""
     for i = 1, #playerUsername do
         local char = string.sub(playerUsername, i, i)
         if allCharacters[char] then
-            backupsCoordinatorFilename = backupsCoordinatorFilename .. char
+            name = name .. char
         end
     end
-    backupsCoordinatorFilename = backupsCoordinatorFilename .. ".json"
-    return backupsCoordinatorFilename
+    playerNameHash[playerUsername] = name
+    return name
 end
 
-local function saveBCUC(data)
-    sm.json.save(data, getBCUCfilename())
+local function getBCUCfilenameOLD()
+    local backupsCoordinatorFilename = "$CONTENT_DATA/Backups/BackupCoordinator_"
+    return backupsCoordinatorFilename .. getPlayerName() ..  ".json"
 end
 
-local function loadBCUC()
-    local filenameBCUC = getBCUCfilename()
-    if not sm.json.fileExists(filenameBCUC) then
-        -- saveBCUC({
-        --     version = 1,
-        --     backupsInUse = {},
-        --     unusedBackups = {}
-        -- })
-        saveBCUC({
-            version = 2,
-            backups = {},
-            unusedBackupFilenames = {}
-        })
+local coordinatorFileName = "$CONTENT_DATA/Backups/AllBackupCoordinator.json"
+
+
+
+local function saveCoordinator(data)
+    sm.json.save(data, coordinatorFileName)
+end
+
+local function loadCoordinator()
+    local allData
+    if not sm.json.fileExists(coordinatorFileName) then
+        local filenameBCUC = getBCUCfilenameOLD()
+        if sm.json.fileExists(filenameBCUC) then
+            allData = {
+                version = 1,
+                players = {
+                    [getPlayerName()] = sm.json.open(filenameBCUC)
+                }
+            }
+        else
+            allData = {
+                version = 1,
+                players = {}
+            }
+        end
+        saveCoordinator(allData)
+    else
+        allData = sm.json.open(coordinatorFileName)
     end
-    local data = sm.json.open(filenameBCUC)
-    if data.version == 1 then
-        if data.unusedBackups == nil then
-            data.unusedBackups = {}
+    return allData
+end
+
+local function savePlayerCoordinator(data)
+    local allData = loadCoordinator()
+    allData.players[getPlayerName()] = data
+    saveCoordinator(allData)
+end
+
+local function correctOldVersions(playerData)
+    if playerData.version == 1 then
+        if playerData.unusedBackups == nil then
+            playerData.unusedBackups = {}
         end
-        if data.backupsInUse == nil then
-            data.backupsInUse = {}
+        if playerData.backupsInUse == nil then
+            playerData.backupsInUse = {}
         end
-        local newData = {
+        local newPlayerData = {
             version = 2,
             backups = {},
             unusedBackupFilenames = {}
         }
-        for _, backupFilename in pairs(data.backupsInUse) do
+        for _, backupFilename in pairs(playerData.backupsInUse) do
             local backupData = sm.json.open(backupFilename)
             if not backupData.isPinned and os.time() - backupData.timeCreated > 604800 then
-                table.insert(newData.unusedBackupFilenames, backupFilename)
+                table.insert(newPlayerData.unusedBackupFilenames, backupFilename)
             else
-                table.insert(newData.backups, {
+                table.insert(newPlayerData.backups, {
                     name = backupData.name,
                     description = backupData.description,
                     creationType = backupData.creationType,
@@ -66,19 +96,36 @@ local function loadBCUC()
                 })
             end
         end
-        for _, backupFilename in pairs(data.unusedBackups) do
-            table.insert(newData.unusedBackupFilenames, backupFilename)
+        for _, backupFilename in pairs(playerData.unusedBackups) do
+            table.insert(newPlayerData.unusedBackupFilenames, backupFilename)
         end
-        saveBCUC(newData)
-        return newData
+        return newPlayerData, true
     end
-    if data.backups == nil then
-        data.backups = {}
+    if playerData.backups == nil then
+        playerData.backups = {}
     end
-    if data.unusedBackupFilenames == nil then
-        data.unusedBackupFilenames = {}
+    if playerData.unusedBackupFilenames == nil then
+        playerData.unusedBackupFilenames = {}
     end
-    return data
+    return playerData, false
+end
+
+local function loadPlayerCoordinator()
+    local allData = loadCoordinator()
+    if allData.players[getPlayerName()] == nil then
+        allData.players[getPlayerName()] = {
+            version = 2,
+            backups = {},
+            unusedBackupFilenames = {}
+        }
+        saveCoordinator(allData)
+    end
+    local playerData, doSave = correctOldVersions(allData.players[getPlayerName()])
+    if doSave then
+        allData.players[getPlayerName()] = playerData
+        saveCoordinator(allData)
+    end
+    return playerData
 end
 
 function sm.MTBackupEngine.sv_backupCreation(data)
@@ -89,7 +136,7 @@ function sm.MTBackupEngine.sv_backupCreation(data)
         local body = data.body
         creationData = sm.creation.exportToTable(body, true, true)
     end
-    local backupsCoordinator = loadBCUC()
+    local backupsCoordinator = loadPlayerCoordinator()
     local backupFilename
     if #backupsCoordinator.unusedBackupFilenames == 0 then
         backupFilename = "$CONTENT_DATA/Backups/Backup_" .. tostring(sm.uuid.new()) .. ".json"
@@ -105,7 +152,7 @@ function sm.MTBackupEngine.sv_backupCreation(data)
         isPinned = data.isPinned or false,
         backupFilename = backupFilename
     })
-    saveBCUC(backupsCoordinator)
+    savePlayerCoordinator(backupsCoordinator)
     -- local backupData = {
     --     version = 1,
     --     name = data.name or "Unnamed",
@@ -132,13 +179,13 @@ end
 
 function sm.MTBackupEngine.sv_deleteBackup(uuid)
     -- we cannot actually delete files, but we can mark them as unused
-    local backupsCoordinator = loadBCUC()
+    local backupsCoordinator = loadPlayerCoordinator()
     local backupFilename = "$CONTENT_DATA/Backups/Backup_" .. uuid .. ".json"
     for i, backup in pairs(backupsCoordinator.backupsInUse) do
         if backup == backupFilename then
             table.remove(backupsCoordinator.backupsInUse, i)
             table.insert(backupsCoordinator.unusedBackupFilenames, backupFilename)
-            saveBCUC(backupsCoordinator)
+            savePlayerCoordinator(backupsCoordinator)
             return
         end
     end
@@ -147,7 +194,7 @@ end
 
 function sm.MTBackupEngine.sv_deleteOldBackups()
     -- delete all unpinned backups older than 1 week
-    local backupsCoordinator = loadBCUC()
+    local backupsCoordinator = loadPlayerCoordinator()
     local currentTime = os.time()
     for i = #backupsCoordinator.backups, 1, -1 do
         local backup = backupsCoordinator.backups[i]
@@ -162,7 +209,7 @@ function sm.MTBackupEngine.sv_deleteOldBackups()
         --     table.insert(backupsCoordinator.unusedBackups, backupFilename)
         -- end
     end
-    saveBCUC(backupsCoordinator)
+    savePlayerCoordinator(backupsCoordinator)
 end
 
 function sm.MTBackupEngine.cl_getBackups()
@@ -170,7 +217,7 @@ function sm.MTBackupEngine.cl_getBackups()
         return {}
     end
     sm.MTBackupEngine.sv_deleteOldBackups()
-    return loadBCUC().backups
+    return loadPlayerCoordinator().backups
 end
 
 function sm.MTBackupEngine.sv_loadBackup(multitool, backupFilename)

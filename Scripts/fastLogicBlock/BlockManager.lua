@@ -94,11 +94,12 @@ function FastLogicRunner.internalRemoveBlock(self, id)
             self:shouldBeThroughBlock(blockId)
             self:internalFindRamInterfaces(blockId)
         end
-    elseif self.multiBlockData[id] ~= false then
-        for k,_  in pairs(self.multiBlockData[id]) do
-            self:internalRemoveBlock(k)
-        end
     else
+        if self.multiBlockData[id] ~= false then
+            for k,_  in pairs(self.multiBlockData[id]) do
+                self:internalRemoveBlock(k)
+            end
+        end
         local inputs = self.blockInputs[id]
         if inputs ~= false then
             local inputId = inputs[1]

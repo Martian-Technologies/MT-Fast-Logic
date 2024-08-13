@@ -59,6 +59,7 @@ function FastLogicRunner.makeDataArrays(self)
     self.longestTimer = 0
     self.altBlockData = table.makeArrayForHash(self.hashData)
     self.multiBlockData = table.makeArrayForHash(self.hashData)
+    self.multiBlockInputMultiBlockId = table.makeArrayForHash(self.hashData)
     self.numberOfTimesRun = table.makeArrayForHash(self.hashData, 0)
     self.ramBlockData = table.makeArrayForHash(self.hashData)
     self.ramBlockOtherData = table.makeArrayForHash(self.hashData)

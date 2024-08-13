@@ -12,19 +12,22 @@ end
 
 function FastLogicRunner.internalAddBlockToMultiBlock(self, id, multiBlockId, isInput, isOutput)
     local multiBlockData = self.multiBlockData
+    local multiData = multiBlockData[multiBlockId]
     if multiBlockData[id] == false then
         multiBlockData[id] = multiBlockId
-        multiBlockData[multiBlockId][2][#multiBlockData[multiBlockId][2]+1] = id
+        multiData[2][#multiData[2]+1] = id
     end
-    if isInput and (multiBlockData[id] == false or not table.contains(multiBlockData[multiBlockId][3], id))then
-        if self.toMultiBlockInput[self.runnableBlockPathIds[id]] ~= false then
-            self:makeBlockAlt(id, self.toMultiBlockInput[self.runnableBlockPathIds[id]])
+    if isInput then
+        local multiBlockInputType = self.toMultiBlockInput[self.runnableBlockPathIds[id]]
+        if multiBlockInputType ~= false then
+            self:makeBlockAlt(id, multiBlockInputType)
         end
         self:externalAddBlockToUpdate(id)
-        multiBlockData[multiBlockId][3][#multiBlockData[multiBlockId][3]+1] = id
+        multiData[3][#multiData[3]+1] = id
+        self.multiBlockInputMultiBlockId[id] = multiBlockId
     end
-    if isOutput and (self.multiBlockData[id] == false or not table.contains(multiBlockData[multiBlockId][4], id)) then
-        multiBlockData[multiBlockId][4][#multiBlockData[multiBlockId][4]+1] = id
+    if isOutput then
+        multiData[4][#multiData[4]+1] = id
     end
 end
 

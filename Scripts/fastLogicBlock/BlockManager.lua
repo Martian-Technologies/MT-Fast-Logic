@@ -32,7 +32,8 @@ function FastLogicRunner.internalAddBlock(self, path, id, state, timerLength, sk
     self.countOfOnOtherInputs[id] = 0
     if pathName == "multiBlocks" then
         self.multiBlockData[id] = {0, {}, {}, {}, {}, 0} -- id, all blocks, inputs, outputs,
-                                                         -- block to update (dont mess with this), score, otherdata...
+                                                         -- blocks to update (dont mess with this), score,
+                                                         -- otherdata (different per multiBlock) ...
     else
         self.multiBlockData[id] = false
         if pathName == "timerBlocks" then

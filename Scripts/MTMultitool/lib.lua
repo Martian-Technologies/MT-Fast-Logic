@@ -367,6 +367,9 @@ function MTMultitoolLib.getOccupiedBlocks(shape)
     local xAxis = shape:getXAxis()
     local yAxis = shape:getYAxis()
     local zAxis = shape:getZAxis()
+    if xSize == 1 and ySize == 1 and zSize == 1 then
+        return {origin + xAxis * 0.5 + yAxis * 0.5 + zAxis * 0.5}
+    end
     for x = 0, xSize - 1 do
         for y = 0, ySize - 1 do
             for z = 0, zSize - 1 do
@@ -393,32 +396,44 @@ function MTMultitoolLib.getOccupiedBlocks(shape)
 end
 
 function MTMultitoolLib.getVoxelMapMultidotblocks(body)
+    local interactables = nil
+    local gotInteractables = false
     if MTMultitoolLib.voxelMapHash[body:getId() .. "multidotblocks"] then
         local hashValue = MTMultitoolLib.voxelMapHash[body:getId() .. "multidotblocks"]
         if not body:hasChanged(hashValue.tick) then
             return hashValue.voxelMap
         end
+        interactables = body:getInteractables()
+        if #interactables == hashValue.numInts then
+            hashValue.tick = sm.game.getCurrentTick()
+            return hashValue.voxelMap
+        end
+        gotInteractables = true
     end
 
-    local interactables = body:getInteractables()
+    if not gotInteractables then
+        interactables = body:getInteractables()
+    end
+
     local voxelMap = {}
     -- print("__________________________________________________________")
     local halfBlock = sm.vec3.new(0.125, 0.125, 0.125)
     for _, interactable in pairs(interactables) do
+        local shape = interactable:getShape()
         -- local position = MTMultitoolLib.getLocalCenter(interactable:getShape()) / 4 - halfBlock
         -- local indexString = position.x .. ";" .. position.y .. ";" .. position.z
         -- voxelMap[indexString] = interactable:getShape()
         local positions = MTMultitoolLib.getOccupiedBlocks(interactable:getShape())
         for i, p in pairs(positions) do
             local pos = p / 4 - halfBlock
-            local indexString = pos.x .. ";" .. pos.y .. ";" .. pos.z
-            voxelMap[indexString] = interactable:getShape()
+            voxelMap[pos.x .. ";" .. pos.y .. ";" .. pos.z] = shape
         end
     end
 
     MTMultitoolLib.voxelMapHash[body:getId() .. "multidotblocks"] = {
         voxelMap = voxelMap,
-        tick = sm.game.getCurrentTick()
+        tick = sm.game.getCurrentTick(),
+        numInts = #interactables
     }
 
     return voxelMap

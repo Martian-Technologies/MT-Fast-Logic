@@ -3,10 +3,12 @@ local string = string
 local table = table
 local type = type
 local pairs = pairs
+local sm = sm
 
 FastLogicRunner = FastLogicRunner or {}
 
 dofile "BlockManager.lua"
+dofile "MultiBlockManager.lua"
 dofile "FastLogicRunnerLoop.lua"
 dofile "BalancedLogicFinder.lua"
 dofile "LogicOptimizer.lua"

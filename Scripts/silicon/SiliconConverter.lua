@@ -5,6 +5,7 @@ local string = string
 local table = table
 local type = type
 local pairs = pairs
+local sm = sm
 
 SiliconConverter = SiliconConverter or {}
 

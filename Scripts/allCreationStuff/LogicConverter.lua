@@ -7,6 +7,7 @@ local string = string
 local table = table
 local type = type
 local pairs = pairs
+local sm = sm
 
 sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.LogicConverter = sm.MTFastLogic.LogicConverter or {}

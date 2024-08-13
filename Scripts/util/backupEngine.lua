@@ -214,10 +214,8 @@ function sm.MTBackupEngine.sv_deleteOldBackups()
                 goto continue
             end
             if backup.creationId ~= nil then -- only keep backups of the same creation every 2 min
-                print(backup.timeCreated)
                 if backupCreationIdUpdateHash[backup.creationId] ~= nil then
                     local timeDif = backupCreationIdUpdateHash[backup.creationId] - backup.timeCreated
-                    print(timeDif)
                     if timeDif < 120 and timeDif >= 0 then -- > 0 just in case
                         table.remove(backupsCoordinator.backups, i)
                         table.insert(backupsCoordinator.unusedBackupFilenames, backup.backupFilename)

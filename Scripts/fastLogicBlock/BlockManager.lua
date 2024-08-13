@@ -834,8 +834,7 @@ function FastLogicRunner.shouldBeThroughBlock(self, id)
     local pathId = self.runnableBlockPathIds[id]
     if self.numberOfBlockInputs[id] + self.numberOfOtherInputs[id] <= 1 then
         if (
-            pathId < 16 and pathId ~= 7 and pathId ~= 9 and pathId ~= 12 and pathId ~= 14 and
-            pathId ~= 7 and pathId ~= 9 and pathId ~= 12 and pathId ~= 14
+            pathId < 16 and pathId ~= 7 and pathId ~= 9 and pathId ~= 12 and pathId ~= 14
         ) then
             if pathId >= 11 then    -- nand nor xnor
                 self:makeBlockAlt(id, 4)

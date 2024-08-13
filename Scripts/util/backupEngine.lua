@@ -1,6 +1,9 @@
 dofile "compressionUtil/compressionUtil.lua"
+dofile "../allCreationStuff/CreationUtil.lua"
 
 sm.MTBackupEngine = sm.MTBackupEngine or {}
+
+local cleanNeedCountDown = 10
 
 local allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 local allCharacters = {}
@@ -31,8 +34,6 @@ local function getBCUCfilenameOLD()
 end
 
 local coordinatorFileName = "$CONTENT_DATA/Backups/AllBackupCoordinator.json"
-
-
 
 local function saveCoordinator(data)
     sm.json.save(data, coordinatorFileName)
@@ -130,10 +131,10 @@ end
 
 function sm.MTBackupEngine.sv_backupCreation(data)
     local creationData
+    local body = data.body
     if data.hasCreationData then
         creationData = data.creationData
     else
-        local body = data.body
         creationData = sm.creation.exportToTable(body, true, true)
     end
     local backupsCoordinator = loadPlayerCoordinator()
@@ -150,7 +151,8 @@ function sm.MTBackupEngine.sv_backupCreation(data)
         creationType = data.creationType or "Unknown",
         timeCreated = os.time(),
         isPinned = data.isPinned or false,
-        backupFilename = backupFilename
+        backupFilename = backupFilename,
+        creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
     })
     savePlayerCoordinator(backupsCoordinator)
     -- local backupData = {
@@ -170,6 +172,12 @@ function sm.MTBackupEngine.sv_backupCreation(data)
         creationData = compressedCreationData
     }
     sm.json.save(backupData, backupFilename)
+    if cleanNeedCountDown == 0 then
+        cleanNeedCountDown = 10
+        sm.MTBackupEngine.sv_deleteOldBackups()
+    else
+        cleanNeedCountDown = cleanNeedCountDown - 1
+    end
 end
 
 function sm.MTBackupEngine.cl_setUsername()
@@ -196,18 +204,38 @@ function sm.MTBackupEngine.sv_deleteOldBackups()
     -- delete all unpinned backups older than 1 week
     local backupsCoordinator = loadPlayerCoordinator()
     local currentTime = os.time()
+    local backupCreationIdUpdateHash = {}
     for i = #backupsCoordinator.backups, 1, -1 do
         local backup = backupsCoordinator.backups[i]
-        if not backup.isPinned and currentTime - backup.timeCreated > 604800 then
-            table.remove(backupsCoordinator.backups, i)
-            table.insert(backupsCoordinator.unusedBackupFilenames, backup.backupFilename)
+        if not backup.isPinned then
+            if currentTime - backup.timeCreated > 604800 then
+                table.remove(backupsCoordinator.backups, i)
+                table.insert(backupsCoordinator.unusedBackupFilenames, backup.backupFilename)
+                goto continue
+            end
+            if backup.creationId ~= nil then -- only keep backups of the same creation every 2 min
+                print(backup.timeCreated)
+                if backupCreationIdUpdateHash[backup.creationId] ~= nil then
+                    local timeDif = backupCreationIdUpdateHash[backup.creationId] - backup.timeCreated
+                    print(timeDif)
+                    if timeDif < 120 and timeDif >= 0 then -- > 0 just in case
+                        table.remove(backupsCoordinator.backups, i)
+                        table.insert(backupsCoordinator.unusedBackupFilenames, backup.backupFilename)
+                        goto continue
+                    end
+                    backupCreationIdUpdateHash[backup.creationId] = backup.timeCreated
+                else
+                    backupCreationIdUpdateHash[backup.creationId] = backup.timeCreated
+                end
+            end
+            -- local backupFilename = backupsCoordinator.backupsInUse[i]
+            -- local backupData = sm.json.open(backupFilename)
+            -- if not backupData.isPinned and currentTime - backupData.timeCreated > 604800 then
+            --     table.remove(backupsCoordinator.backupsInUse, i)
+            --     table.insert(backupsCoordinator.unusedBackups, backupFilename)
+            -- end
         end
-        -- local backupFilename = backupsCoordinator.backupsInUse[i]
-        -- local backupData = sm.json.open(backupFilename)
-        -- if not backupData.isPinned and currentTime - backupData.timeCreated > 604800 then
-        --     table.remove(backupsCoordinator.backupsInUse, i)
-        --     table.insert(backupsCoordinator.unusedBackups, backupFilename)
-        -- end
+        ::continue::
     end
     savePlayerCoordinator(backupsCoordinator)
 end

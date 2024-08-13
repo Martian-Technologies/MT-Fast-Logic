@@ -636,7 +636,7 @@ function FastLogicRunner.doUpdate(self)
             data = data / 2
         end
     end
-    -- update alll
+    -- update all
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
         local state = not blockStates[id]

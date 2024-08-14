@@ -233,14 +233,18 @@ end
 function sm.MTFastLogic.CompressionUtil.hashToString(data)
     local str = ""
     for k, v in pairs(data) do
-        if #str > 0 then str = str .. "," end
+        if #str > 0 then str = str end
         if type(k) == "number" then
             k = "'" .. tostring(k)
+        else
+            k = ":" .. k
         end
         if type(v) == "number" then
             v = "'" .. tostring(v)
+        else
+            v = ":" .. v
         end
-        str = str .. k .. ":" .. v
+        str = str .. k .. v
     end
     return str
 end
@@ -249,7 +253,7 @@ end
 function sm.MTFastLogic.CompressionUtil.stringToHash(str)
     local data = {}
     local key = nil
-    for c in str:gmatch "['][%a%d]+" do
+    for c in str:gmatch "[']?[%a%d]+" do
         if string.sub(c, 1, 1) == "'" then
             c = tonumber(string.sub(c, 2, #c))
         end

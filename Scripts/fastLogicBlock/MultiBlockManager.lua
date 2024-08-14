@@ -403,4 +403,26 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
     end
 end
 
+function FastLogicRunner.internalUpdateRamInterfaces(self, id)
+    local multiBlockData = self.multiBlockData
+    local outputInterfaces = self.ramBlockOtherData[id][1]
+    local j = 1
+    while j <= #outputInterfaces do
+        local outputInterfaceId = outputInterfaces[j]
+        if multiBlockData[outputInterfaceId] == false then
+            table.remove(outputInterfaces, j)
+        else
+            self:internalAddBlockToUpdate(multiBlockData[outputInterfaceId][3][1])
+            j = j + 1
+        end
+    end
+end
+
+function FastLogicRunner.externalUpdateRamInterfaces(self, uuid)
+    local id = self.hashedLookUp[uuid]
+    if id ~= nil then
+        self:internalUpdateRamInterfaces(id)
+    end
+end
+
 ------------- ram -------------

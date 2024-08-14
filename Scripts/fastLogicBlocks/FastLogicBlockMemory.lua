@@ -49,7 +49,18 @@ function FastLogicBlockMemory.client_updateTexture(self, state)
 end
 
 function FastLogicBlockMemory.server_saveMemory(self, memory)
-    table.copyTo(self.memory, memory)
+    if type(memory) == "string" then
+        memory = sm.MTFastLogic.CompressionUtil.stringToHash(memory)
+    end
+    -- clear mem
+    for k,_ in pairs(self.memory) do
+        self.memory[k] = nil
+    end
+    -- save mem
+    table.copyTo(memory, self.memory)
+    -- update interfaces
+    self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
+    -- compress mem
     self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
     self.storage:save(self.data)
 end
@@ -61,4 +72,51 @@ end
 
 function FastLogicBlockMemory.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
     print(self.memory)
+end
+
+function FastLogicBlockMemory.client_onInteract(self, character, state)
+    if state then
+        if not sm.json.fileExists("$CONTENT_DATA/memoryBlockData/data.json") then
+            sm.gui.chatMessage("Can't find file at $CONTENT_DATA/memoryBlockData/data.json")
+            return
+        end
+        local allData = sm.json.open("$CONTENT_DATA/memoryBlockData/data.json")
+        local data = allData[string.sub(self.shape:getColor():getHexStr(), 0, 6)]
+        if data == nil then
+            data = allData.data
+        end
+        if data == nil then
+            sm.gui.chatMessage(
+                "Could not read data in memoryBlockData/data.json\nMake sure its formatted:" ..
+                "\n{\n    \"data\": [],\n    \"color hex 1\": [],\n    \"color hex 2\": [],\n    ...\n}"
+            )
+            return
+        end
+        local memory = {}
+        local validValues = 0
+        local invalidValue = 0
+        for k,v in pairs(data) do
+            if type(v) == "string" then
+                v = tonumber(v)
+            end
+            if type(k) == "string" then
+                k = tonumber(k)
+            end
+            if type(k) == "number" and type(v) == "number" then
+                memory[k] = v
+                validValues = validValues + 1
+            else
+                invalidValue = invalidValue + 1
+            end
+        end
+        sm.gui.chatMessage(
+            "Imported: " ..
+            tostring(validValues) ..
+            " values.   Fail to import: " ..
+            tostring(invalidValue) ..
+            " values."
+        )
+        memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
+        self.network:sendToServer("server_saveMemory", memory)
+    end
 end

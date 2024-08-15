@@ -404,10 +404,10 @@ function MTMultitoolLib.getVoxelMapMultidotblocks(body)
             return hashValue.voxelMap
         end
         interactables = body:getInteractables()
-        if #interactables == hashValue.numInts then
-            hashValue.tick = sm.game.getCurrentTick()
-            return hashValue.voxelMap
-        end
+        -- if #interactables == hashValue.numInts then
+        --     hashValue.tick = sm.game.getCurrentTick()
+        --     return hashValue.voxelMap
+        -- end
         gotInteractables = true
     end
 

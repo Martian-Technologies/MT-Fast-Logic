@@ -38,11 +38,31 @@ function FastLogicRunner.findBalencedLogic(self, id)
             layers[i] = {}
         end
     end
-    return layers
+    local outputBlocks = {}
+    local outputHash = {}
+    local farthestOutput = nil
+    for i = 1, #layers do
+        local layer = layers[i]
+        for j = 1, #layer do
+            local blockId = layer[j]
+            for k = 1, #self.blockOutputs[blockId] do
+                if layerHash[self.blockOutputs[blockId][k]] == nil then
+                    outputBlocks[#outputBlocks+1] = blockId
+                    outputHash[blockId] = layerHash[blockId]
+                    if farthestOutput == nil or layerHash[farthestOutput] < layerHash[blockId] then
+                        farthestOutput = blockId
+                    end
+                    break
+                end
+            end
+        end
+    end
+
+    return layers, layerHash, outputBlocks, outputHash, farthestOutput
 end
 
 function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan, layerIndexLimits, blockSources)
-    print("scan: " .. tostring(id))
+    -- print("scan: " .. tostring(id))
     -- get layer index
     local layerIndex = layerHash[id]
     if layerIndex == nil then return end
@@ -52,7 +72,7 @@ function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan,
     for i = 1, #outputs do
         local outputId = outputs[i]
         -- it does not connect to it self
-        local outputId2 
+        local outputId2
         local outputs2 = self.blockOutputs[outputId]
         for i2 = 1, #outputs2 do
             outputId2 = outputs2[i2]
@@ -60,7 +80,7 @@ function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan,
                 break
             end
         end
-        if outputId2 ~= outputId then
+        if outputId2 ~= outputId and (self.numberOfOtherInputs[outputId] == 0) then
             if layerHash[outputId] == nil then
                 -- add block
                 outputsToAdd[#outputsToAdd+1] = outputId
@@ -76,20 +96,20 @@ function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan,
                     elseif wantedOutputLayerIndex ~= outputLayerIndex then
                         if wantedOutputLayerIndex > outputLayerIndex then
                             if blockSources[id][outputId] == nil then
-                                print({layerIndex, outputLayerIndex, id, outputId})
-                                print("a1")
+                                -- print({layerIndex, outputLayerIndex, id, outputId})
+                                -- print("a1")
                                 self:BL_deleteBlockAndOutputs(outputId, layers, layerHash, blocksToScan, blockSources)
                                 if layerHash[id] == nil then return end
                             else
-                                print({layerIndex, outputLayerIndex, id, outputId})
-                                print("b1")
+                                -- print({layerIndex, outputLayerIndex, id, outputId})
+                                -- print("b1")
                                 self:BL_deleteBlockAndInputs(id, layers, layerHash, blocksToScan, blockSources, outputLayerIndex)
                                 return
                             end
 
                         elseif wantedOutputLayerIndex < outputLayerIndex then
-                            print({layerIndex, outputLayerIndex, id, outputId})
-                            print("here")
+                            -- print({layerIndex, outputLayerIndex, id, outputId})
+                            -- print("here")
                         end
                     end
                 end
@@ -111,7 +131,7 @@ function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan,
                     break
                 end
             end
-            if inputsId2 ~= inputsId then
+            if inputsId2 ~= inputsId and (self.numberOfOtherInputs[outputId] == 0 or layerIndex == 2) then
                 if layerHash[inputsId] == nil then
                     -- add block
                     inputsToAdd[#inputsToAdd+1] = inputsId
@@ -126,22 +146,22 @@ function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan,
                     elseif wantedIntputLayerIndex ~= intputLayerIndex then
                         if wantedIntputLayerIndex > intputLayerIndex then
                             if blockSources[id][inputsId] == nil then
-                                print({layerIndex, intputLayerIndex, id, inputsId})
-                                print("a")
+                                -- print({layerIndex, intputLayerIndex, id, inputsId})
+                                -- print("a")
                                 -- print(id)
                                 -- print(inputsId)
                                 -- print(blockSources)
                                 self:BL_deleteBlockAndOutputs(id, layers, layerHash, blocksToScan, blockSources)
                                 return
                             else
-                                print({layerIndex, intputLayerIndex, id, inputsId})
-                                print("b")
+                                -- print({layerIndex, intputLayerIndex, id, inputsId})
+                                -- print("b")
                                 self:BL_deleteBlockAndOutputs(id, layers, layerHash, blocksToScan, blockSources)
                                 return
                             end
                         elseif wantedIntputLayerIndex < intputLayerIndex then
-                            print({layerIndex, intputLayerIndex, id, inputsId})
-                            print("c")
+                            -- print({layerIndex, intputLayerIndex, id, inputsId})
+                            -- print("c")
                             self:BL_deleteBlockAndOutputs(id, layers, layerHash, blocksToScan, blockSources)
                             return
                         end
@@ -154,7 +174,7 @@ function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan,
             local inputsId = inputsToAdd[i]
             local index = layerIndex - self:BL_getBlockTime(inputsId)
             if index >= 1 then
-                print("added in: " .. tostring(inputsId))
+                -- print("added in: " .. tostring(inputsId))
                 local layer = layers[index]
                 if layer == nil then
                     layers[index] = {inputsId}
@@ -167,42 +187,47 @@ function FastLogicRunner.BL_scanBlock(self, id, layers, layerHash, blocksToScan,
                 layerHash[inputsId] = index
                 blocksToScan[#blocksToScan+1] = inputsId
                 if blockSources[id] == nil then
-                    print(id)
-                    print(outputId)
-                    print(blockSources[id])
-                    print("BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD")
-                end
+                    -- print(id)
+                    -- print(outputId)
+                    -- print(blockSources[id])
+                    -- print("BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD")
+                else
+                
                 local sources = table.copy(blockSources[id])
                 sources[id] = true
                 blockSources[inputsId] = sources
+            end
             end
         end
     end
     -- add outputs
     for i = 1, #outputsToAdd do
         local outputId = outputsToAdd[i]
-        print("added out: " .. tostring(outputId))
+        -- print("added out: " .. tostring(outputId))
         local index = layerIndex + self:BL_getBlockTime(id)
         local layer = layers[index]
-        if layer == nil then
-            layers[index] = {outputId}
-            if layerIndexLimits[1] < index then
-                layerIndexLimits[1] = index
+        if layer == 1 or self.numberOfOtherInputs[outputId] == 0 then
+            if layer == nil then
+                layers[index] = {outputId}
+                if layerIndexLimits[1] < index then
+                    layerIndexLimits[1] = index
+                end
+            else
+                layer[#layer+1] = outputId
             end
-        else
-            layer[#layer+1] = outputId
+            layerHash[outputId] = index
+            blocksToScan[#blocksToScan+1] = outputId
+            if blockSources[id] == nil then
+                -- print(id)
+                -- print(outputId)
+                -- print(blockSources[id])
+                -- print("BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD")
+            else
+            local sources = table.copy(blockSources[id])
+            sources[id] = true
+            blockSources[outputId] = sources
+            end
         end
-        layerHash[outputId] = index
-        blocksToScan[#blocksToScan+1] = outputId
-        if blockSources[id] == nil then
-            print(id)
-            print(outputId)
-            print(blockSources[id])
-            print("BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD_BAD")
-        end
-        local sources = table.copy(blockSources[id])
-        sources[id] = true
-        blockSources[outputId] = sources
     end
     
 end
@@ -210,7 +235,7 @@ end
 function FastLogicRunner.BL_deleteBlockAndInputs(self, id, layers, layerHash, blocksToScan, blockSources, count)
     -- remove block
     local layerIndex = layerHash[id]
-    print("remove in: " .. tostring(id) .. " Count: " .. tostring(count))
+    -- print("remove in: " .. tostring(id) .. " Count: " .. tostring(count))
     if layerIndex == 1 then return end
     layerHash[id] = nil
     table.removeValue(layers[layerIndex], id)
@@ -241,7 +266,7 @@ function FastLogicRunner.BL_deleteBlockAndOutputs(self, id, layers, layerHash, b
     -- remove block
     local layerIndex = layerHash[id]
     if layerIndex == 1 then return end
-    print("remove out: " .. tostring(id) .. " Count: " .. tostring(count))
+    -- print("remove out: " .. tostring(id) .. " Count: " .. tostring(count))
     layerHash[id] = nil
     table.removeValue(layers[layerIndex], id)
     table.removeValue(blocksToScan, id)

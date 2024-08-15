@@ -24,9 +24,8 @@ function FastLogicRunner.optimizeLogic(self)
     end
 
     if id == #blockInputs then
-        id = -10 * #blockInputs
+        id = -4 * #blockInputs
     end
-
     self.blocksOptimized = id
 end
 
@@ -85,7 +84,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             goto checkCanBeInputAgain
         end
         if #blocks >= 4 then
-            local length = -1
+            local length = 0
             local isNot = false
             for i = 1, #blocks do
                 if self.runnableBlockPathIds[blocks[i]] == 5 then
@@ -101,15 +100,52 @@ function FastLogicRunner.findMultiBlocks(self, id)
             local multiBlockId = self:internalAddMultiBlock(isNot and 2 or 1)
 
             self:internalAddBlockToMultiBlock(blocks[1], multiBlockId, true, false)
-            self.multiBlockData[multiBlockId][7] = length
+            self.multiBlockData[multiBlockId][6] = length
             for i = 2, #blocks-1 do
                 self:internalAddBlockToMultiBlock(blocks[i], multiBlockId, false, false)
             end
             self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
 
             self:updateLongestTimerToLength(length)
-
-            -- print("line block: " .. tostring(length))
+            return
+        end
+    end
+    if false and id == 3 and self.multiBlockData[id] == false then
+        local layers, layerHash, outputBlocks, outputHash, farthestOutput = self:findBalencedLogic(id)
+        local makeBalanced = farthestOutput ~= nil
+        local outputBlockTimes = {}
+        for i = 1, #outputBlocks do
+            if layerHash[outputBlocks[i]] == 1 then
+                print("cant have input block be output")
+                makeBalanced = false
+                break
+            end
+            outputBlockTimes[i] = layerHash[outputBlocks[i]] + 1
+        end
+        if makeBalanced then
+            local multiBlockId = self:internalAddMultiBlock(5)
+            local inputs = layers[1]
+            for i = 1, #inputs do
+                local intputId = inputs[i]
+                self:internalAddBlockToMultiBlock(intputId, multiBlockId, true, false)
+            end
+            for i = 2, #layers do
+                local layer = layers[i]
+                for j = 1, #layer do
+                    local blockId = layer[j]
+                    if outputHash[blockId] == nil then
+                        self:internalAddBlockToMultiBlock(blockId, multiBlockId, false, false)
+                    else
+                        self:internalAddBlockToMultiBlock(blockId, multiBlockId, false, true)
+                    end
+                end
+            end
+            local length = layerHash[farthestOutput] + 1
+            self.multiBlockData[multiBlockId][6] = length
+            self.multiBlockData[multiBlockId][7] = {}
+            self.multiBlockData[multiBlockId][8] = farthestOutput
+            self.multiBlockData[multiBlockId][9] = outputBlockTimes
+            self:updateLongestTimerToLength(length)
         end
     end
 end

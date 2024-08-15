@@ -82,7 +82,7 @@ local defaultEnabledModes = {
     true, -- Colorizer
     false, -- Heatmap
     false, -- Decoder Maker
-    true, -- Copy Paste
+    -- true, -- Copy Paste
     true, -- Multipoint
     true, -- Series
     true, -- N to N
@@ -100,7 +100,7 @@ MTMultitool.modes = {
     "Colorizer",
     "Heatmap",
     "Decoder Maker",
-    "Copy Paste",
+    -- "Copy Paste",
     "Multipoint",
     "Series",
 	"N to N",
@@ -118,7 +118,7 @@ MTMultitool.internalModes = {
     "Colorizer",
     "Heatmap",
     "DecoderMaker",
-    "CopyPaste",
+    -- "CopyPaste",
     "SingleConnect",
     "SeriesConnect",
     "NtoNConnect",

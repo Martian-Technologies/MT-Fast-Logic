@@ -32,7 +32,7 @@ function FastLogicRunner.internalAddBlock(self, path, id, state, timerLength, sk
     self.countOfOnOtherInputs[id] = 0
     if pathName == "multiBlocks" then
         self.multiBlockData[id] = {0, {}, {}, {}, {}, 0} -- id, all blocks, inputs, outputs,
-                                                         -- blocks to update (dont mess with this), score,
+                                                         -- blocks to update (dont mess with this), max time,
                                                          -- otherdata (different per multiBlock) ...
     else
         self.multiBlockData[id] = false
@@ -65,14 +65,16 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         -- clear anything to do with multiBlock in timerData
         local endBlockId = multiData[4][1]
         local timerData = self.timerData
-        for i = 1, multiData[7] do
+        for i = 1, multiData[6] do
             local timeDataAtTime = timerData[i]
             if timeDataAtTime == nil then goto continue end
             for k = 1, #timeDataAtTime do
                 local item = timeDataAtTime[k]
-                if type(item) ~= "number" and type(item[1]) == "boolean" and item[2] == endBlockId then
-                    table.remove(timeDataAtTime, k)
-                    break
+                if type(item) ~= "number" then
+                    local itemId = item[2]
+                    if multiBlockData[itemId] ~= false and multiBlockData[itemId][id] then
+                        table.remove(timeDataAtTime, k)
+                    end
                 end
             end
             ::continue::

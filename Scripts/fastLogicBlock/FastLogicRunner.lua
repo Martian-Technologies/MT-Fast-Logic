@@ -141,34 +141,72 @@ function FastLogicRunner.makeDataArrays(self)
     self:updateLongestTimer()
 end
 
+local doLastTickDecompress = {
+    true,
+    true,
+    false,
+    false,
+    false,
+}
+
 function FastLogicRunner.doLastTickUpdates(self)
     local multiBlocks = self.blocksSortedByPath[16]
     local blockOutputs = self.blockOutputs
     local blockStates = self.blockStates
     local multiBlockData = self.multiBlockData
     local runnableBlockPathIds = self.runnableBlockPathIds
-    for i = 1, #multiBlocks do
-        local multiBlockId = multiBlocks[i]
+    local timerData = self.timerData
+    for j = 1, #multiBlocks do
+        local multiBlockId = multiBlocks[j]
         local multiData = multiBlockData[multiBlockId]
-        if multiData[1] == 1 or multiData[1] == 2 then
-            local data = self:internalGetLastMultiBlockInternalStates(multiBlockId)
-            local idStatePairs = data[2]
-            local lastIdStatePairs = data[1]
-            if idStatePairs == nil then
-                idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
-            end
-            local blocks = multiData[2]
-            for j = 1, #lastIdStatePairs do
-                local outputs = blockOutputs[lastIdStatePairs[j][1]]
-                local state = lastIdStatePairs[j][2]
-                for k = 1, #outputs do
-                    local id = outputs[k]
-                    if runnableBlockPathIds[id] == 2 then
-                        blockStates[id] = state
+        local multiBlockType = multiData[1]
+        if doLastTickDecompress[multiBlockType] then
+            if multiData[1] == 1 or multiData[1] == 2 then
+                local state = blockStates[multiData[3][1]]
+                local endBlockId = multiData[4][1]
+                for i = 2, multiData[6] do
+                    local id = multiData[2][i]
+                    local timeDataAtTime = timerData[multiData[6]-i+1]
+                    for k = 1, #timeDataAtTime do
+                        local item = timeDataAtTime[k]
+                        if type(item) ~= "number" and item[2] == endBlockId then
+                            state = not state
+                            break
+                        end
+                    end
+                    if runnableBlockPathIds[id] == 4 then
+                        state = not state
+                    end
+                    blockStates[id] = state
+                    local outputs = blockOutputs[multiData[2][i-1]]
+                    for k = 1, #outputs do
+                        local id = outputs[k]
+                        if runnableBlockPathIds[id] == 2 then
+                            blockStates[id] = state
+                        end
+                    end
+                    if self.nextRunningBlocks[id] >= self.nextRunningIndex - 1 then
+                        break
                     end
                 end
+            else
+                local lastIdStatePairs, idStatePairs = self:internalGetLastMultiBlockInternalStates(multiBlockId)
+                if idStatePairs == nil then
+                    idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
+                end
+                local blocks = multiData[2]
+                for j = 1, #lastIdStatePairs do
+                    local outputs = blockOutputs[lastIdStatePairs[j][1]]
+                    local state = lastIdStatePairs[j][2]
+                    for k = 1, #outputs do
+                        local id = outputs[k]
+                        if runnableBlockPathIds[id] == 2 then
+                            blockStates[id] = state
+                        end
+                    end
+                end
+                self:internalSetBlockStates(idStatePairs, false)
             end
-            self:internalSetBlockStates(idStatePairs, false)
         end
     end
 end

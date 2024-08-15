@@ -153,27 +153,34 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
     local multiBlockData = self.multiBlockData
     local blockStates = self.blockStates
     local blockOutputs = self.blockOutputs
-    for i = 1, #idStatePairs do
-        local id = idStatePairs[i][1]
-        if withUpdates ~= false then
-            local multiBlockIds = multiBlockData[id]
-            if multiBlockIds ~= false then
-                for k,_ in pairs(multiBlockIds) do
-                    if multiBlockData[k].isDead ~= true then
-                        self:internalRemoveBlock(k)
+    if withUpdates ~= false then
+        for i = 1, #idStatePairs do
+            local id = idStatePairs[i][1]
+            if withUpdates ~= false then
+                local multiBlockIds = multiBlockData[id]
+                if multiBlockIds ~= false then
+                    for k,_ in pairs(multiBlockIds) do
+                        if multiBlockData[k].isDead ~= true then
+                            self:internalRemoveBlock(k)
+                        end
                     end
                 end
             end
+            blockStates[id] = idStatePairs[i][2]
+            blocksToFixInputData[id] = true
+            for k = 1, #blockOutputs[id] do
+                blocksToFixInputData[blockOutputs[id][k]] = true
+            end
         end
-        blockStates[id] = idStatePairs[i][2]
-        blocksToFixInputData[id] = true
-        for k = 1, #blockOutputs[id] do
-            blocksToFixInputData[blockOutputs[id][k]] = true
+        if withUpdates ~= false then
+            for id, _ in pairs(blocksToFixInputData) do
+                self:fixBlockInputData(id)
+            end
         end
-    end
-    if withUpdates ~= false then
-        for id, _ in pairs(blocksToFixInputData) do
-            self:fixBlockInputData(id)
+    else
+        for i = 1, #idStatePairs do
+            local id = idStatePairs[i][1]
+            blockStates[id] = idStatePairs[i][2]
         end
     end
 end

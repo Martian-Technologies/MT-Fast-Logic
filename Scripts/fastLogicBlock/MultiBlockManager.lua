@@ -104,7 +104,7 @@ function FastLogicRunner.internalGetLastMultiBlockInternalStates(self, multiBloc
         end
     else
     end
-    return {lastIdStatePairs, idStatePairs} -- if idStatePairs is also calulated here return idStatePairs else nil
+    return lastIdStatePairs, idStatePairs -- if idStatePairs is also calulated here return idStatePairs else nil
 end
 
 

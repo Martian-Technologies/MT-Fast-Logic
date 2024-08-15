@@ -1,22 +1,7 @@
 {
-    "data": [
-        1,
-        3,
-        5,
-        7
-    ],
-    "ffffff": {
-        "1": 3,
-        "4": 5,
-        "10": 32
-    },
-    "000000": [
-        "2",
-        4,
-        6,
-        "2",
-        "must be numbers",
-        "Please Subscribe"
-    ]
+    "data": [],
+    "color hex 1": {},
+    "color hex 2": {},
+    "color hex ...": {}
 }
 

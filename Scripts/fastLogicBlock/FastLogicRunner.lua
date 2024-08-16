@@ -156,6 +156,18 @@ function FastLogicRunner.doLastTickUpdates(self)
     local multiBlockData = self.multiBlockData
     local runnableBlockPathIds = self.runnableBlockPathIds
     local timerData = self.timerData
+    local timerDataHash = {}
+    for i = 1, #timerData do
+        local timeDataAtTime = timerData[i]
+        local hashAtTime = {}
+        for k = 1, #timeDataAtTime do
+            local item = timeDataAtTime[k]
+            if item ~= nil and type(item) ~= "number" then
+                hashAtTime[item[2]] = k
+            end
+        end
+        timerDataHash[i] = hashAtTime
+    end
     for j = 1, #multiBlocks do
         local multiBlockId = multiBlocks[j]
         local multiData = multiBlockData[multiBlockId]
@@ -166,23 +178,19 @@ function FastLogicRunner.doLastTickUpdates(self)
                 local endBlockId = multiData[4][1]
                 for i = 2, multiData[6] do
                     local id = multiData[2][i]
-                    local timeDataAtTime = timerData[multiData[6]-i+1]
-                    for k = 1, #timeDataAtTime do
-                        local item = timeDataAtTime[k]
-                        if type(item) ~= "number" and item[2] == endBlockId then
+                    if timerDataHash[multiData[6]-i+1][endBlockId] ~= nil then
+                        if runnableBlockPathIds[id] ~= 4 then
                             state = not state
-                            break
                         end
-                    end
-                    if runnableBlockPathIds[id] == 4 then
+                    elseif runnableBlockPathIds[id] == 4 then
                         state = not state
                     end
                     blockStates[id] = state
                     local outputs = blockOutputs[multiData[2][i-1]]
                     for k = 1, #outputs do
-                        local id = outputs[k]
-                        if runnableBlockPathIds[id] == 2 then
-                            blockStates[id] = state
+                        local outputId = outputs[k]
+                        if runnableBlockPathIds[outputId] == 2 then
+                            blockStates[outputId] = state
                         end
                     end
                     if self.nextRunningBlocks[id] >= self.nextRunningIndex - 1 then

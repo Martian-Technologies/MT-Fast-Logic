@@ -52,7 +52,7 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
             local timeDataAtTime = timerData[multiData[6]-i+1]
             for k = 1, #timeDataAtTime do
                 local item = timeDataAtTime[k]
-                if type(item) ~= "number" and item[2] == endBlockId then
+                if item ~= nil and type(item) ~= "number" and item[2] == endBlockId then
                     state = not state
                     break
                 end

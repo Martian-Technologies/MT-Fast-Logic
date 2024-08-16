@@ -70,7 +70,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
             if timeDataAtTime == nil then goto continue end
             for k = 1, #timeDataAtTime do
                 local item = timeDataAtTime[k]
-                if type(item) ~= "number" then
+                if item ~= nil and type(item) ~= "number" then
                     local itemId = item[2]
                     if multiBlockData[itemId] ~= false and multiBlockData[itemId][id] then
                         table.remove(timeDataAtTime, k)
@@ -363,11 +363,20 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
         path = self.pathIndexs[path]
     end
     if (self.runnableBlockPathIds[id] ~= path and self.altBlockData[id] == nil) or (self.altBlockData[id] ~= path and self.altBlockData[id] ~= nil) then
+        local isMemeory = self.runnableBlockPathIds[id] == 12 or self.runnableBlockPathIds[id] == 27
+        if not isMemeory then
+            -- remove from multi blocks
+            if self.multiBlockData[id] ~= false then
+                for k,_ in pairs(self.multiBlockData[id]) do
+                    self:internalRemoveBlock(k)
+                end
+            end
+        end
         self.altBlockData[id] = false
         local oldPath = self.runnableBlockPathIds[id]
         -- remove old
         table.removeValue(self.blocksSortedByPath[oldPath], id)
-
+        
         -- add new
         self.runnableBlockPaths[id] = self.pathNames[path]
         self.runnableBlockPathIds[id] = path
@@ -383,11 +392,12 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
                 end
             end
         end
-
-        -- remove from multi blocks
-        if self.multiBlockData[id] ~= false then
-            for k,_ in pairs(self.multiBlockData[id]) do
-                self:internalRemoveBlock(k)
+        if isMemeory then
+            -- remove from multi blocks
+            if self.multiBlockData[id] ~= false then
+                for k,_ in pairs(self.multiBlockData[id]) do
+                    self:internalRemoveBlock(k)
+                end
             end
         end
 

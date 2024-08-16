@@ -34,7 +34,7 @@ function FastLogicRunner.internalAddBlockToMultiBlock(self, id, multiBlockId, is
 end
 
 function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
-    -- multiData = [id, all blocks, inputs, outputs, score, otherdata...]
+    -- multiData = [id, all blocks, inputs, outputs, to update, max time, otherdata (different per multiBlock) ...]
     local multiBlockData = self.multiBlockData
     local multiData = multiBlockData[multiBlockId]
     local idStatePairs = {} -- fill with states to set/update
@@ -83,7 +83,7 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
 end
 
 function FastLogicRunner.internalGetLastMultiBlockInternalStates(self, multiBlockId)
-    -- multiData = [id, all blocks, inputs, outputs, score, otherdata...]
+    -- multiData = [id, all blocks, inputs, outputs, to update, max time, otherdata (different per multiBlock) ...]
     local blockStates = self.blockStates
     local timerData = self.timerData
     local multiData = self.multiBlockData[multiBlockId]

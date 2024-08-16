@@ -213,11 +213,11 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- sm.MTUtil.Profiler.Time.reset()
     -- sm.MTUtil.Profiler.Count.reset()
     -- real data
-    print(runnrerId)
-    print(self.FastLogicRunner.blockStates[runnrerId])
-    print(self.FastLogicRunner.countOfOnInputs[runnrerId] + self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
-    print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
+    -- print(runnrerId)
+    -- print(self.FastLogicRunner.blockStates[runnrerId])
+    -- print(self.FastLogicRunner.countOfOnInputs[runnrerId] + self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
+    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
+    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
      -- print(self.FastLogicRunner.numberOfBlockInputs[runnrerId])
     -- print(self.FastLogicRunner.numberOfOtherInputs[runnrerId])
     -- print(self.FastLogicRunner.blockInputs[runnrerId])
@@ -229,27 +229,27 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- self.FastLogicRunner.internalChangeBlockType = FastLogicRunner.internalChangeBlockType
     -- print(self.creation.AllNonFastBlocks)
     ----------------------------------------------
-    -- print("id: " .. tostring(runnrerId))
+    print("id: " .. tostring(runnrerId))
     -- -- print("------")
-    -- local layers = self.FastLogicRunner:findBalencedLogic(runnrerId)
-    -- -- print("id: " .. tostring(runnrerId))
-    -- local dontReset = {}
-    -- for i = 1, #layers do
-    --     -- print(layers[i])
-    --     -- print(#layers[i])
-    --     for ii = 1, #layers[i] do
-    --         local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
-    --         if id ~= nil then
-    --             self.creation.FastLogicRealBlockManager:changeConnectionColor(id, i%40)
-    --             dontReset[id] = true
-    --         end
-    --     end
-    -- end
-    -- for uuid, id in pairs(self.creation.ids) do
-    --     if id ~= nil and dontReset[id] == nil then
-    --         self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 40)
-    --     end
-    -- end
+    local layers = self.FastLogicRunner:findBalencedLogic(runnrerId)
+    -- print("id: " .. tostring(runnrerId))
+    local dontReset = {}
+    for i = 1, #layers do
+        -- print(layers[i])
+        -- print(#layers[i])
+        for ii = 1, #layers[i] do
+            local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
+            if id ~= nil then
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, i%40)
+                dontReset[id] = true
+            end
+        end
+    end
+    for uuid, id in pairs(self.creation.ids) do
+        if id ~= nil and dontReset[id] == nil then
+            self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 40)
+        end
+    end
 end
 
 function BaseFastLogicBlock.server_changeBlockState(self)

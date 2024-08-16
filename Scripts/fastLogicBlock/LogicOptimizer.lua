@@ -32,6 +32,7 @@ end
 function FastLogicRunner.findMultiBlocks(self, id)
     local blockInputs = self.blockInputs
     local blockOutputs = self.blockOutputs
+    local blockStates = self.blockStates
     -- line, id = 1 -- not line, id = 2
     if self.runnableBlockPathIds[id] == 3 and self.multiBlockData[id] == false then
         local blocks = { id }
@@ -110,17 +111,21 @@ function FastLogicRunner.findMultiBlocks(self, id)
             return
         end
     end
-    if false and id == 3 and self.multiBlockData[id] == false then
+    if false and self.runnableBlockPathIds[id] == 15 and self.multiBlockData[id] == false then
+        print(id)
         local layers, layerHash, outputBlocks, outputHash, farthestOutput = self:findBalencedLogic(id)
         local makeBalanced = farthestOutput ~= nil
         local outputBlockTimes = {}
+        -- local outputStates = {}
         for i = 1, #outputBlocks do
-            if layerHash[outputBlocks[i]] == 1 then
+            local outputId = outputBlocks[i]
+            if layerHash[outputId] == 1 then
                 print("cant have input block be output")
                 makeBalanced = false
                 break
             end
-            outputBlockTimes[i] = layerHash[outputBlocks[i]] + 1
+            -- outputStates[i] = blockStates[outputId]
+            outputBlockTimes[i] = layerHash[outputId] + 1
         end
         if makeBalanced then
             local multiBlockId = self:internalAddMultiBlock(5)
@@ -145,6 +150,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self.multiBlockData[multiBlockId][7] = {}
             self.multiBlockData[multiBlockId][8] = farthestOutput
             self.multiBlockData[multiBlockId][9] = outputBlockTimes
+            -- self.multiBlockData[multiBlockId][10] = outputStates
             self:updateLongestTimerToLength(length)
         end
     end

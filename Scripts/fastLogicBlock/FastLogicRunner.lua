@@ -215,6 +215,8 @@ function FastLogicRunner.doLastTickUpdates(self)
                 end
                 self:internalSetBlockStates(idStatePairs, false)
             end
+        else
+            print(table.length(multiData[7]))
         end
     end
 end

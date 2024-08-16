@@ -579,9 +579,7 @@ function FastLogicRunner.doUpdate(self)
                     inputData = inputData .. "0"
                 end
             end
-            print(inputData)
             local hashData = multiData[7]
-            print(hashData[inputData])
             local data = hashData[inputData]
             local outputTimes = multiData[9]
             local outputs = multiData[4]

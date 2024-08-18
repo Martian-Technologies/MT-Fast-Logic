@@ -112,7 +112,6 @@ function FastLogicRunner.findMultiBlocks(self, id)
         end
     end
     if false and self.runnableBlockPathIds[id] == 15 and self.multiBlockData[id] == false then
-        print(id)
         local layers, layerHash, outputBlocks, outputHash, farthestOutput = self:findBalencedLogic(id)
         local makeBalanced = farthestOutput ~= nil
         local outputBlockTimes = {}

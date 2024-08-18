@@ -113,6 +113,23 @@ end
 
 ------------- ram -------------
 
+function FastLogicRunner.makeAllRamInterfaces(self)
+    for j = 1, #self.interfacesToMake do
+        local blockId = self.interfacesToMake[j]
+        local outputs = self.blockOutputs[blockId]
+        if outputs ~= false then
+            for i = 1, #outputs do
+                local outputId = outputs[i]
+                if self.runnableBlockPaths[outputId] == "Address" then
+                    self:internalMakeRamInterface(outputId, blockId)
+                end
+            end
+        end
+    end
+    self.interfacesToMake = {}
+    self.interfacesToMakeHash = {}
+end
+
 function FastLogicRunner.internalFindRamInterfaces(self, blockId, pastCheckHash)
     if blockId == nil then return end
     if pastCheckHash == nil then
@@ -148,23 +165,6 @@ function FastLogicRunner.internalFindRamInterfaces(self, blockId, pastCheckHash)
             self:internalFindRamInterfaces(inputs[i], pastCheckHash)
         end
     end
-end
-
-function FastLogicRunner.makeAllRamInterfaces(self)
-    for j = 1, #self.interfacesToMake do
-        local blockId = self.interfacesToMake[j]
-        local outputs = self.blockOutputs[blockId]
-        if outputs ~= false then
-            for i = 1, #outputs do
-                local outputId = outputs[i]
-                if self.runnableBlockPaths[outputId] == "Address" then
-                    self:internalMakeRamInterface(outputId, blockId)
-                end
-            end
-        end
-    end
-    self.interfacesToMake = {}
-    self.interfacesToMakeHash = {}
 end
 
 function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryBlockId)

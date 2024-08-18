@@ -232,22 +232,28 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     ----------------------------------------------
     print("------")
     print("id: " .. tostring(runnrerId))
-    local layers = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
+    local layers, LayerHash, outputBlocks, outputHash, farthestOutput, deletionBlame = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
     local dontReset = {}
     for i = 1, #layers do
-        -- print(layers[i])
-        -- print(#layers[i])
         for ii = 1, #layers[i] do
             local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
-            if id ~= nil and self.creation.blocks[self.creation.uuids[id]].isSilicon == false then
-                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, i%40)
+            if id ~= nil then
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, i%36+4)
                 dontReset[id] = true
             end
         end
     end
     for uuid, id in pairs(self.creation.ids) do
-        if id ~= nil and dontReset[id] == nil and self.creation.blocks[uuid].isSilicon == false then
-            self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 40)
+        if id ~= nil and dontReset[id] == nil then
+            if deletionBlame[runnrerId] == nil then
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
+            elseif deletionBlame[runnrerId] == "removeBlockAndInputsRec" then
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 1)
+            elseif deletionBlame[runnrerId] == "removeBlockAndOutputsRec" then
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 2)
+            elseif deletionBlame[runnrerId] == "removeBlockAndOutputsRec2" then
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 3)
+            end
         end
     end
 end

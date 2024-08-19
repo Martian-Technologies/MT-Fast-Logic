@@ -15,7 +15,7 @@ local highestLayer
 local lowerLimit
 local FLR
 
-local maxInputLayerSize = 1000
+local maxInputLayerSize = 28
 
 local BalencedLogicFinder = {}
 

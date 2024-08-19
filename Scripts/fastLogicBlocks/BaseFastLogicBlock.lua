@@ -233,6 +233,10 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     print("------")
     print("id: " .. tostring(runnrerId))
     local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
+    if layers == nil then
+        print("No Balenced Logic Found")
+        return
+    end
     local dontReset = {}
     print("coloring gates")
     for i = 1, #layers do

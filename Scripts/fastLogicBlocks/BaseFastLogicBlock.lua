@@ -232,28 +232,21 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     ----------------------------------------------
     print("------")
     print("id: " .. tostring(runnrerId))
-    local layers, LayerHash, outputBlocks, outputHash, farthestOutput, deletionBlame = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
+    local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
     local dontReset = {}
+    print("coloring gates")
     for i = 1, #layers do
         for ii = 1, #layers[i] do
             local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
             if id ~= nil then
-                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, i%36+4)
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, (i-1)%38+1)
                 dontReset[id] = true
             end
         end
     end
     for uuid, id in pairs(self.creation.ids) do
         if id ~= nil and dontReset[id] == nil then
-            if deletionBlame[runnrerId] == nil then
-                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
-            elseif deletionBlame[runnrerId] == "removeBlockAndInputsRec" then
-                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 1)
-            elseif deletionBlame[runnrerId] == "removeBlockAndOutputsRec" then
-                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 2)
-            elseif deletionBlame[runnrerId] == "removeBlockAndOutputsRec2" then
-                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 3)
-            end
+            self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
         end
     end
 end

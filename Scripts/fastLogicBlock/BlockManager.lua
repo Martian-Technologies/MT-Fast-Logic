@@ -62,15 +62,15 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         -- set new states of blocks
         local idStatePairs = self:internalGetMultiBlockInternalStates(id)
         self:internalSetBlockStates(idStatePairs)
-        -- clear anything to do with multiBlock in timerData
+        -- clear anything to do with multiBlock in timeData
         local endBlockId = multiData[4][1]
-        local timerData = self.timerData
+        local otherTimeData = self.timeData[2]
         for i = 1, multiData[6] do
-            local timeDataAtTime = timerData[i]
+            local timeDataAtTime = otherTimeData[i]
             if timeDataAtTime == nil then goto continue end
             for k = 1, #timeDataAtTime do
                 local item = timeDataAtTime[k]
-                if item ~= nil and type(item) ~= "number" then
+                if item ~= nil then
                     local itemId = item[2]
                     if multiBlockData[itemId] ~= false and multiBlockData[itemId][id] then
                         table.remove(timeDataAtTime, k)
@@ -305,25 +305,34 @@ function FastLogicRunner.updateLongestTimer(self)
             self.longestTimer = length
         end
     end
-    while #self.timerData < self.longestTimer + 1 do
-        self.timerData[#self.timerData + 1] = {}
+    local timerData = self.timeData[1]
+    local otherTimeData = self.timeData[2]
+    while #timerData < self.longestTimer + 1 do
+        local length = #timerData + 1
+        timerData[length] = {}
+        otherTimeData[length] = {}
     end
 end
 
-function FastLogicRunner.updateLongestTimerToLength(self, length)
+function FastLogicRunner.updateLongestTimeToLength(self, length)
     if length > self.longestTimer then
         self.longestTimer = length
     end
-    while #self.timerData < self.longestTimer + 1 do
-        self.timerData[#self.timerData + 1] = {}
+    local timerData = self.timeData[1]
+    local otherTimeData = self.timeData[2]
+    while #timerData < self.longestTimer + 1 do
+        local newLength = #timerData + 1
+        timerData[length] = {}
+        otherTimeData[length] = {}
     end
 end
 
 function FastLogicRunner.clearTimerData(self, id)
-    for i = 1, #self.timerData do
-        for ii = 1, #self.timerData[i] do
-            if self.timerData[i][ii] == id then
-                table.remove(self.timerData[i], ii)
+    local timerData = self.timeData[1]
+    for i = 1, #timerData do
+        for ii = 1, #timerData[i] do
+            if timerData[i][ii] == id then
+                table.remove(timerData[i], ii)
             end
         end
     end

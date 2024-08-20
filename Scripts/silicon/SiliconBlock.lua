@@ -155,7 +155,8 @@ function SiliconBlock.server_onProjectile(self, position, airTime, velocity, pro
     -- sm.MTUtil.Profiler.Time.reset("2checkForBodyUpdate" .. tostring(self.creationId))
     -- sm.MTUtil.Profiler.Count.reset("2checkForBodyUpdate" .. tostring(self.creationId))
     -- print(SiliconCompressor.compressBlocks(self))
-    print(self.storage:load())
+    -- print(self.storage:load())
+    print(self.creation.FastLogicRunner.blocksRan)
 end
 
 function SiliconBlock.client_onTinker(self, character, state)

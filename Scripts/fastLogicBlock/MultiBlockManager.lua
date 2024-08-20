@@ -41,7 +41,7 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
     local multiBlockType = multiData[1]
     if multiBlockType == nil then
     elseif multiBlockType == 1 or multiBlockType == 2 then
-        local timerData = self.timerData
+        local otherTimeData = self.timeData[2]
         local blockStates = self.blockStates
         local state = blockStates[multiData[3][1]]
         local endBlockId = multiData[4][1]
@@ -49,10 +49,10 @@ function FastLogicRunner.internalGetMultiBlockInternalStates(self, multiBlockId)
         idStatePairs[#idStatePairs+1] = {multiData[3][1], state}
         for i = 2, multiData[6] do
             local id = multiData[2][i]
-            local timeDataAtTime = timerData[multiData[6]-i+1]
-            for k = 1, #timeDataAtTime do
-                local item = timeDataAtTime[k]
-                if item ~= nil and type(item) ~= "number" and item[2] == endBlockId then
+            local otherTimeDataRow = otherTimeData[multiData[6]-i+1]
+            for k = 1, #otherTimeDataRow do
+                local item = otherTimeDataRow[k]
+                if item ~= nil and item[2] == endBlockId then
                     state = not state
                     break
                 end
@@ -85,7 +85,6 @@ end
 function FastLogicRunner.internalGetLastMultiBlockInternalStates(self, multiBlockId)
     -- multiData = [id, all blocks, inputs, outputs, to update, max time, otherdata (different per multiBlock) ...]
     local blockStates = self.blockStates
-    local timerData = self.timerData
     local multiData = self.multiBlockData[multiBlockId]
     local lastIdStatePairs = {} -- fill with states to set/update
     local idStatePairs = nil

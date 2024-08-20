@@ -39,7 +39,6 @@ function FastLogicRunner.makeDataArrays(self)
     self.hashedLookUp = self.hashData.hashedLookUp
     -- make arrays
     self.blocksRan = 0
-    self.lastTimerOutputWait = 0
     self.blockStates = table.makeArrayForHash(self.hashData)
     self.blockInputs = table.makeArrayForHash(self.hashData)
     self.lastBlockStates = table.makeArrayForHash(self.hashData, 0)
@@ -52,7 +51,7 @@ function FastLogicRunner.makeDataArrays(self)
     self.numberOfBlockOutputs = table.makeArrayForHash(self.hashData)
     self.countOfOnInputs = table.makeArrayForHash(self.hashData)
     self.countOfOnOtherInputs = table.makeArrayForHash(self.hashData)
-    self.timerData = {}
+    self.timeData = {{}, {}}
     self.timerLengths = table.makeArrayForHash(self.hashData)
     self.timerInputStates = table.makeArrayForHash(self.hashData)
     self.runnableBlockPathIds = table.makeArrayForHash(self.hashData)
@@ -155,18 +154,18 @@ function FastLogicRunner.doLastTickUpdates(self)
     local blockStates = self.blockStates
     local multiBlockData = self.multiBlockData
     local runnableBlockPathIds = self.runnableBlockPathIds
-    local timerData = self.timerData
-    local timerDataHash = {}
-    for i = 1, #timerData do
-        local timeDataAtTime = timerData[i]
+    local otherTimeData = self.timeData[2]
+    local otherTimeDataHash = {}
+    for i = 1, #otherTimeData do
+        local timeDataAtTime = otherTimeData[i]
         local hashAtTime = {}
         for k = 1, #timeDataAtTime do
             local item = timeDataAtTime[k]
-            if item ~= nil and type(item) ~= "number" then
+            if item ~= nil then
                 hashAtTime[item[2]] = k
             end
         end
-        timerDataHash[i] = hashAtTime
+        otherTimeDataHash[i] = hashAtTime
     end
     for j = 1, #multiBlocks do
         local multiBlockId = multiBlocks[j]
@@ -178,7 +177,7 @@ function FastLogicRunner.doLastTickUpdates(self)
                 local endBlockId = multiData[4][1]
                 for i = 2, multiData[6] do
                     local id = multiData[2][i]
-                    if timerDataHash[multiData[6]-i+1][endBlockId] ~= nil then
+                    if otherTimeDataHash[multiData[6]-i+1][endBlockId] ~= nil then
                         if runnableBlockPathIds[id] ~= 4 then
                             state = not state
                         end

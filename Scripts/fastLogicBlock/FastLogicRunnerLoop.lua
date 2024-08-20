@@ -1,3 +1,5 @@
+local remove = table.remove
+
 -- for fast read
 local runningBlocks = nil
 local nextRunningBlocks = nil
@@ -11,10 +13,10 @@ local numberOfBlockInputs = nil
 local numberOfOtherInputs = nil
 local blockStates = nil
 local timerData = nil
+local otherTimeData = nil
 local timerLengths = nil
 local timerInputStates = nil
 local blockOutputs = nil
-local lastTimerOutputWait = nil
 local multiBlockData = nil
 local numberOfTimesRun = nil
 local ramBlockData = nil
@@ -59,15 +61,15 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     numberOfBlockInputs = self.numberOfBlockInputs
     numberOfOtherInputs = self.numberOfOtherInputs
     blockStates = self.blockStates
-    timerData = self.timerData
+    timerData = self.timeData[1]
     timerLengths = self.timerLengths
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
     if needsRunningBlocks == true then
+        otherTimeData = self.timeData[2]
         multiBlockInputMultiBlockId = self.multiBlockInputMultiBlockId
         FastLogicBlockMemorys = self.creation.FastLogicBlockMemorys
         unhashedLookUp = self.unhashedLookUp
-        lastTimerOutputWait = self.lastTimerOutputWait
         multiBlockData = self.multiBlockData
         ramBlockData = self.ramBlockData
         ramBlockOtherData = self.ramBlockOtherData
@@ -128,7 +130,7 @@ function FastLogicRunner.update(self)
                     if countOfOnInputs[id] == false then
                         -- pri nt("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
                         nextRunningBlocks[id] = false
-                        table.remove(runningBlocks[pathId], i)
+                        remove(runningBlocks[pathId], i)
                         runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1
                     else
                         i = i + 1
@@ -158,15 +160,6 @@ function FastLogicRunner.update(self)
             self:doUpdate()
             -- sm.MTUtil.Profiler.Time.off("doUpdate")
             self.updateTicks = self.updateTicks - 1
-            sum = 0
-            for i = 1, #self.runningBlockLengths do
-                if self.pathNames[i] ~= "none" then
-                    sum = sum + self.runningBlockLengths[i]
-                end
-            end
-            if sum == 0 and self.lastTimerOutputWait <= -1 then
-                self.updateTicks = 1
-            end
             -- sm.MTUtil.Profiler.Count.increment("doUpdate")
         end
         -- sm.MTUtil.Profiler.Time.off("doUpdateFullLoop")
@@ -193,6 +186,9 @@ function FastLogicRunner.doUpdate(self)
     local lastRunningIndex = self.nextRunningIndex
     local nextRunningIndex = lastRunningIndex + 1
     self.nextRunningIndex = nextRunningIndex
+    local length = #timerData + 1
+    timerData[length] = {}
+    otherTimeData[length] = {}
     -- EndTickButton
     for k = 1, runningBlockLengths[1] do
         self.blocksRan = self.blocksRan + 1
@@ -298,15 +294,13 @@ function FastLogicRunner.doUpdate(self)
     end
     runningBlockLengths[15] = 0
     -- timer
-    timerData[#timerData + 1] = {{}, {}}
     for k = 1, runningBlockLengths[5] do
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks5[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] == 1) ~= timerInputStates[blockId] then
             timerInputStates[blockId] = not timerInputStates[blockId]
-            local row = timerData[timerLengths[blockId]][1]
+            local row = timerData[timerLengths[blockId]]
             row[#row + 1] = blockId
-            lastTimerOutputWait = timerLengths[blockId] > lastTimerOutputWait and timerLengths[blockId] + 1 or lastTimerOutputWait
         end
     end
     runningBlockLengths[5] = 0
@@ -480,12 +474,8 @@ function FastLogicRunner.doUpdate(self)
             else
                 countOfOnInputs[secondBlockId] = countOfOnInputs[secondBlockId] - 1
             end
-            local outputId = multiData[4][1]
-            local length = multiData[6]
-            timerData[length][#timerData[length] + 1] = {1, multiData[4][1], state}
-            if length > lastTimerOutputWait then
-                lastTimerOutputWait = length + 1
-            end
+            local row = otherTimeData[multiData[6]]
+            row[#row + 1] = {1, multiData[4][1], state}
         elseif multiBlockType == 2 then -- not line
             local firstBlock = multiData[3][1]
             local secondBlockId = blockOutputs[firstBlock][1]
@@ -496,12 +486,8 @@ function FastLogicRunner.doUpdate(self)
             else
                 countOfOnInputs[secondBlockId] = countOfOnInputs[secondBlockId] + 1
             end
-            local outputId = multiData[4][1]
-            local length = multiData[6]
-            timerData[length][#timerData[length] + 1] = {1, multiData[4][1], notState}
-            if length > lastTimerOutputWait then
-                lastTimerOutputWait = length + 1
-            end
+            local row = otherTimeData[multiData[6]]
+            row[#row + 1] = {1, multiData[4][1], state}
         elseif multiBlockType == 3 then -- ram block input
             local blocksToUpdate = multiData[5]
             for i = 1, #blocksToUpdate do
@@ -536,7 +522,7 @@ function FastLogicRunner.doUpdate(self)
                 while j <= #outputInterfaces do
                     local outputInterfaceId = outputInterfaces[j]
                     if multiBlockData[outputInterfaceId] == false then
-                        table.remove(outputInterfaces, j)
+                        remove(outputInterfaces, j)
                     else
                         j = j + 1
                         if ramOutputMultiBlocksHash[outputInterfaceId] == nil then
@@ -584,16 +570,15 @@ function FastLogicRunner.doUpdate(self)
                 for i = 1, #outputs do
                     local id = outputs[i]
                     local outputTime = outputTimes[i]
+                    local row = otherTimeData[outputTime]
                     if id == farthestOutput then
-                        timerData[outputTime][#timerData[outputTime] + 1] = {2, id, i, newData, inputData, hashData}
+                        row[#row + 1] = {2, id, i, newData, inputData, hashData}
                     else
-                        timerData[outputTime][#timerData[outputTime] + 1] = {2, id, i, newData}
+                        row[#row + 1] = {2, id, i, newData}
                     end
                     if outputTime > 2 then
-                        timerData[outputTime-2][#timerData[outputTime-2] + 1] = {3, id}
-                    end
-                    if outputTime > lastTimerOutputWait then
-                        lastTimerOutputWait = outputTime + 1
+                        row = otherTimeData[outputTime-2]
+                        row[#row + 1] = {3, id}
                     end
                 end
                 -- run internals
@@ -615,12 +600,8 @@ function FastLogicRunner.doUpdate(self)
                 end
             else
                 for i = 1, #outputs do
-                    local id = outputs[i]
-                    local outputTime = outputTimes[i] - 1
-                    timerData[outputTime][#timerData[outputTime] + 1] = {1, id, data[i]}
-                    if outputTime > lastTimerOutputWait then
-                        lastTimerOutputWait = outputTime + 1
-                    end
+                    local row = otherTimeData[outputTimes[i] - 1]
+                    row[#row + 1] = {1, outputs[i], data[i]}
                 end
             end
         else
@@ -673,7 +654,7 @@ function FastLogicRunner.doUpdate(self)
                 while j <= #outputInterfaces do
                     local outputInterfaceId = outputInterfaces[j]
                     if multiBlockData[outputInterfaceId] == false then
-                        table.remove(outputInterfaces, j)
+                        remove(outputInterfaces, j)
                     else
                         j = j + 1
                         if ramOutputMultiBlocksHash[outputInterfaceId] == nil then
@@ -713,13 +694,12 @@ function FastLogicRunner.doUpdate(self)
         end
     end
     -- run time stuff
-    local timeReadRows = table.remove(timerData, 1)
-    local timerReadRow = timeReadRows[1]
+    local timerReadRow = remove(timerData, 1)
     for k = 1, #timerReadRow do
         newBlockStatesLength = newBlockStatesLength + 1
         newBlockStates[newBlockStatesLength] = timerReadRow[k]
     end
-    local otherReadRow = timeReadRows[2]
+    local otherReadRow = remove(otherTimeData, 1)
     for k = 1, #otherReadRow do
         local item = otherReadRow[k]
         local item1 = item[1]
@@ -751,9 +731,6 @@ function FastLogicRunner.doUpdate(self)
                 end
             end
         end
-    end
-    if lastTimerOutputWait >= 0 then
-        self.lastTimerOutputWait = lastTimerOutputWait - 1
     end
     -- update all
     for k = 1, newBlockStatesLength do
@@ -813,8 +790,8 @@ function FastLogicRunner.simulatedManyBalencedUpdates(self, blockIdsToInclude, l
         local numberOfTicksToRun = listOfNumberOfTicksToRun[j]
         local inputStates = listOfInputStates[j]
         -- run
-        while #timerData < maxTimerLenght do
-            timerData[#timerData + 1 ] = {}
+        while #timeData < maxTimerLenght do
+            timeData[#timeData + 1 ] = {}
         end
         local states = {}
         local toUpdateHash = {}
@@ -838,7 +815,7 @@ function FastLogicRunner.simulatedManyBalencedUpdates(self, blockIdsToInclude, l
                 end
             end
         end
-        local timerReadRow = table.remove(simTimerData, 1)
+        local timerReadRow = remove(simTimerData, 1)
         for i = 1, #timerReadRow do
             local item = timerReadRow[i]
             local id = item[1]
@@ -944,7 +921,7 @@ function FastLogicRunner.simulatedManyBalencedUpdates(self, blockIdsToInclude, l
                     end
                 end
             end
-            local timerReadRow = table.remove(simTimerData, 1)
+            local timerReadRow = remove(simTimerData, 1)
             for i = 1, #timerReadRow do
                 local item = timerReadRow[i]
                 local id = item[1]
@@ -1032,7 +1009,7 @@ function FastLogicRunner.simulatedBalencedUpdates(self, blockIdsToInclude, numbe
             end
         end
     end
-    local timerReadRow = table.remove(simTimerData, 1)
+    local timerReadRow = remove(simTimerData, 1)
     for i = 1, #timerReadRow do
         local item = timerReadRow[i]
         local id = item[1]
@@ -1138,7 +1115,7 @@ function FastLogicRunner.simulatedBalencedUpdates(self, blockIdsToInclude, numbe
                 end
             end
         end
-        local timerReadRow = table.remove(simTimerData, 1)
+        local timerReadRow = remove(simTimerData, 1)
         for i = 1, #timerReadRow do
             local item = timerReadRow[i]
             local id = item[1]

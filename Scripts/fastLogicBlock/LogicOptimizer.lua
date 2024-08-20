@@ -108,11 +108,11 @@ function FastLogicRunner.findMultiBlocks(self, id)
             end
             self:internalAddBlockToMultiBlock(blocks[#blocks], multiBlockId, false, true)
 
-            self:updateLongestTimerToLength(length)
+            self:updateLongestTimeToLength(length)
             return
         end
     end
-    if self.multiBlockData[id] == false and (sm.noise.randomRange( 0, 100 ) < 1) then
+    if self.multiBlockData[id] == false and (sm.noise.randomRange( 0, 100 ) < 1) and false then
         local layers,
               layerHash,
               outputBlocks,
@@ -160,7 +160,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self.multiBlockData[multiBlockId][9] = outputBlockTimes
             self.multiBlockData[multiBlockId][10] = inputData
             self.multiBlockData[multiBlockId][11] = inputsIndexPow2
-            self:updateLongestTimerToLength(length)
+            self:updateLongestTimeToLength(length)
         end
     end
     ::notBalanced::

@@ -69,8 +69,18 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                 block:deepRescanSelf()
             else
                 local blockData = blocks[uuid]
+                local numberOfOtherOutputs = 0
+                local outputs = block.interactable:getChildren()
+                for i = 1, #outputs do
+                    local interactable = outputs[i]
+                    if exists(interactable) then
+                        if uuids[interactable.id] == nil then
+                            numberOfOtherOutputs = numberOfOtherOutputs + 1
+                        end
+                    end
+                end
+                blockData.numberOfOtherOutputs = numberOfOtherOutputs
                 local inputs = block.interactable:getParents()
-                blockData.numberOfAllOutputs = #block.interactable:getChildren()
                 local inputHash = blockData.inputsHash
                 local newInputsHash = {}
                 FastLogicAllBlockManager:setColor(uuid, block.shape.color)

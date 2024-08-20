@@ -25,7 +25,7 @@ function FastLogicRunner.optimizeLogic(self)
     end
 
     if id == #blockInputs then
-        id = -100 * #blockInputs
+        id = -8 * #blockInputs
     end
     self.blocksOptimized = id
 end

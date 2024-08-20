@@ -25,7 +25,7 @@ function FastLogicRunner.optimizeLogic(self)
     end
 
     if id == #blockInputs then
-        id = -4 * #blockInputs
+        id = -100 * #blockInputs
     end
     self.blocksOptimized = id
 end
@@ -112,7 +112,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             return
         end
     end
-    if self.multiBlockData[id] == false and (sm.noise.randomRange( 0, 100 ) < 1) and false then
+    if false and self.multiBlockData[id] == false and (sm.noise.randomRange( 0, 20 ) < 1) then
         local layers,
               layerHash,
               outputBlocks,

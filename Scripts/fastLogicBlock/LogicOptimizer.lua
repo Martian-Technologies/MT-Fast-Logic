@@ -4,6 +4,7 @@ local table = table
 local type = type
 local pairs = pairs
 local sm = sm
+local BalencedLogicFinder = sm.MTFastLogic.BalencedLogicFinder
 
 
 function FastLogicRunner.optimizeLogic(self)
@@ -111,27 +112,35 @@ function FastLogicRunner.findMultiBlocks(self, id)
             return
         end
     end
-    if false and self.runnableBlockPathIds[id] == 15 and self.multiBlockData[id] == false then
-        local layers, layerHash, outputBlocks, outputHash, farthestOutput = self:findBalencedLogic(id)
-        local makeBalanced = farthestOutput ~= nil
-        local outputBlockTimes = {}
-        -- local outputStates = {}
-        for i = 1, #outputBlocks do
-            local outputId = outputBlocks[i]
-            if layerHash[outputId] == 1 then
-                print("cant have input block be output")
-                makeBalanced = false
-                break
+    if self.multiBlockData[id] == false and (sm.noise.randomRange( 0, 100 ) < 1) then
+        local layers,
+              layerHash,
+              outputBlocks,
+              outputHash,
+              farthestOutput = BalencedLogicFinder.findBalencedLogic(self, id)
+        if layers ~= nil then
+            local outputBlockTimes = {}
+            for i = 1, #outputBlocks do
+                local outputId = outputBlocks[i]
+                -- prob dont need, still we have it
+                if layerHash[outputId] == 1 then
+                    print("cant have input block be output")
+                    goto notBalanced
+                end
+                outputBlockTimes[i] = layerHash[outputId] + 1
             end
-            -- outputStates[i] = blockStates[outputId]
-            outputBlockTimes[i] = layerHash[outputId] + 1
-        end
-        if makeBalanced then
             local multiBlockId = self:internalAddMultiBlock(5)
             local inputs = layers[1]
+            local inputData = 0
+            local inputsIndexPow2 = {}
             for i = 1, #inputs do
                 local intputId = inputs[i]
                 self:internalAddBlockToMultiBlock(intputId, multiBlockId, true, false)
+                local pow = math.pow(2, i-1)
+                inputsIndexPow2[intputId] = pow
+                if blockStates[intputId] then
+                    inputData = inputData + pow
+                end
             end
             for i = 2, #layers do
                 local layer = layers[i]
@@ -149,8 +158,10 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self.multiBlockData[multiBlockId][7] = {}
             self.multiBlockData[multiBlockId][8] = farthestOutput
             self.multiBlockData[multiBlockId][9] = outputBlockTimes
-            -- self.multiBlockData[multiBlockId][10] = outputStates
+            self.multiBlockData[multiBlockId][10] = inputData
+            self.multiBlockData[multiBlockId][11] = inputsIndexPow2
             self:updateLongestTimerToLength(length)
         end
     end
+    ::notBalanced::
 end

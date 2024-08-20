@@ -9,7 +9,6 @@ local layers
 local layerHash
 local outputBlocks
 local outputHash
-local farthestOutput
 local lowestLayer
 local highestLayer
 local lowerLimit
@@ -17,16 +16,16 @@ local FLR
 
 local maxInputLayerSize = 28
 
-local BalencedLogicFinder = {}
-
 sm.MTFastLogic = sm.MTFastLogic or {}
+
+local BalencedLogicFinder = sm.MTFastLogic.BalencedLogicFinder or {}
 sm.MTFastLogic.BalencedLogicFinder = BalencedLogicFinder
 
 function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
     FLR = FastLogicRunner
 
     -- can't be timer (idk why it is not working and I don't have time to fix it)
-    if FLR.runnableBlockPathIds[id] == 5 then
+    if FLR.runnableBlockPathIds[id] == 5 or FLR.multiBlockData[id] ~= false then
         return nil
     end
 
@@ -48,7 +47,6 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
         layerHash = {}
         outputBlocks = {}
         outputHash = {}
-        farthestOutput = {}
         lowestLayer = 0
         highestLayer = 0
         BalencedLogicFinder.stage1_findInputLayers(id, 1)
@@ -57,7 +55,7 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
         local loops2 = 0
         local doremoveBlocksWithBadOutputsUp = true
         while doremoveBlocksWithBadOutputsUp do
-            doremoveBlocksWithBadOutputsUp = BalencedLogicFinder.removeBlocksWithBadOutputsUp(id)
+             doremoveBlocksWithBadOutputsUp = BalencedLogicFinder.removeBlocksWithBadOutputsUp(id)
             BalencedLogicFinder.layersStartAtOne()
             loops2 = loops2 + 1
             if loops2 > 20 then
@@ -65,8 +63,8 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
                 return nil
             end
         end
-        print(loops2)
         if layerHash[id] == nil then
+            -- print("layerHash[id] == nil")
             return nil
         end
 
@@ -83,11 +81,55 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
 
         loops = loops + 1
         if loops > 20 then
+            print("error: inf loop", loops)
             return nil
         end
     end
 
-    print(loops)
+    if layers == nil then
+        return nil
+    end
+
+    local connectionCount = 0
+    local farthestOutput = nil
+    for i = 1, #layers do
+        local layer = layers[i]
+        for j = 1, #layer do
+            local blockId = layer[j]
+            local outputs = FLR.blockOutputs[blockId]
+            connectionCount = connectionCount + #outputs
+            if #outputs > 0 then
+                local outputId = outputs[1]
+                if layerHash[outputId] == nil or layerHash[outputId] == 1 then
+                    outputBlocks[#outputBlocks+1] = blockId
+                    outputHash[blockId] = layerHash[blockId]
+                    if farthestOutput == nil or layerHash[farthestOutput] < layerHash[blockId] then
+                        farthestOutput = blockId
+                    end
+                end
+            elseif FLR.creation.blocks[FLR.unhashedLookUp[blockId]].numberOfAllOutputs > 0 then
+                outputBlocks[#outputBlocks+1] = blockId
+                outputHash[blockId] = layerHash[blockId]
+                if farthestOutput == nil or layerHash[farthestOutput] < layerHash[blockId] then
+                    farthestOutput = blockId
+                end
+            end
+        end
+    end
+
+    if farthestOutput == nil then
+        -- print("no output, makes caching cheep!")
+        -- this could be used to remove large portions of the graph but its nit worth it prob
+        return nil
+    end
+    local score = connectionCount/#layers[1] + connectionCount/#outputBlocks
+    if score < 50 then
+        -- print("score not good")
+        return nil
+    end
+
+    print(score)
+
     return layers, layerHash, outputBlocks, outputHash, farthestOutput
 end
 
@@ -101,13 +143,18 @@ function BalencedLogicFinder.stage1_findInputLayers(startId, startLayerIndex)
         local idOutputLayerIndex = blocksToAdd[blocksToAddIndex][2]
         local idLayerIndex = idOutputLayerIndex - BalencedLogicFinder.getBlockTime(id)
         local idLayerHash = layerHash[id]
-        if (lowerLimit ~= nil and lowerLimit > idLayerIndex) then
+        if (
+            (lowerLimit ~= nil and lowerLimit > idLayerIndex) or
+            FLR.multiBlockData[id] ~= false
+        ) then
             lowerLimit = idOutputLayerIndex
             break
         end
         if idLayerHash ~= nil then
             if (idLayerHash ~= idLayerIndex) then
-                lowerLimit = idLayerIndex
+                lowestLayer = idOutputLayerIndex
+                BalencedLogicFinder.removeLayer(lowestLayer)
+                lowerLimit = lowestLayer
                 break
             end
         else
@@ -164,7 +211,7 @@ function BalencedLogicFinder.stage2_makeInputLayer()
         lowestLayer = lowestLayer + 1
         layer = layers[lowestLayer]
     end
-    while (lowestLayer < lowerLimit or #layer > maxInputLayerSize) do
+    while ((lowerLimit == nil or lowestLayer < lowerLimit) or #layer > maxInputLayerSize) do
         BalencedLogicFinder.removeLayer(lowestLayer)
         layer = layers[lowestLayer]
         while layer == nil or #layer == 0 do
@@ -209,7 +256,18 @@ function BalencedLogicFinder.stage3_findOutputs()
             local outputLayerIndex = layerIndex + BalencedLogicFinder.getBlockTime(id)
             for i = 1, #outputs do
                 local outputId = outputs[i]
-                if FLR.numberOfOtherInputs[outputId] == 0 and layerHash[outputId] == nil then
+                if (
+                    FLR.numberOfOtherInputs[outputId] == 0 and
+                    layerHash[outputId] == nil and
+                    FLR.multiBlockData[outputId] == false
+                ) then
+                    local outputsOutputs = FLR.blockOutputs[outputId]
+                    local outputsOutputLayerIndex = outputLayerIndex + BalencedLogicFinder.getBlockTime(outputId)
+                    for k = 1, #outputsOutputs do
+                        if layerHash[outputsOutputs[k]] ~= nil and layerHash[outputsOutputs[k]] ~= outputsOutputLayerIndex then
+                            goto skipAdd
+                        end
+                    end
                     inputLayerSize = BalencedLogicFinder.checkIfShouldDoAdd(
                         outputId,
                         outputLayerIndex,
@@ -217,6 +275,7 @@ function BalencedLogicFinder.stage3_findOutputs()
                         blocksToAddHash,
                         inputLayerSize
                     )
+                    ::skipAdd::
                 end
             end
         end
@@ -234,8 +293,16 @@ function BalencedLogicFinder.stage3_findOutputs()
                 if (
                     blocksToAddHash[outputId] == nil and
                     FLR.numberOfOtherInputs[outputId] == 0 and
+                    FLR.multiBlockData[outputId] == false and
                     layerHash[outputId] == nil
                 ) then
+                    local outputsOutputs = FLR.blockOutputs[outputId]
+                    local outputsOutputLayerIndex = outputLayerIndex + BalencedLogicFinder.getBlockTime(outputId)
+                    for k = 1, #outputsOutputs do
+                        if layerHash[outputsOutputs[k]] ~= nil and layerHash[outputsOutputs[k]] ~= outputsOutputLayerIndex then
+                            goto skipAdd
+                        end
+                    end
                     inputLayerSize = BalencedLogicFinder.checkIfShouldDoAdd(
                         outputId,
                         outputLayerIndex,
@@ -243,6 +310,7 @@ function BalencedLogicFinder.stage3_findOutputs()
                         blocksToAddHash,
                         inputLayerSize
                     )
+                    ::skipAdd::
                 end
             end
         end
@@ -273,8 +341,8 @@ function BalencedLogicFinder.checkIfShouldDoAdd(
             for i = 1, #inputs do
                 local inputId = inputs[i]
                 if (
+                    FLR.multiBlockData[inputId] ~= false or
                     blocksToAddHash[inputId] == false or
-                    layerHash[inputId] == false or
                     FLR.creation.blocks[FLR.unhashedLookUp[inputId]].numberOfAllOutputs ~=
                     FLR.numberOfBlockOutputs[inputId]
                 ) then
@@ -334,12 +402,12 @@ end
 
 function BalencedLogicFinder.removeLayer(layerIndex)
     local layer = layers[layerIndex]
+    if layer == nil then return end
+    layers[layerIndex] = nil
     for i = 1, #layer do
         local id = layer[i]
-        table.remove(layer, i)
         layerHash[i] = nil
     end
-    layer = {}
     if layerIndex == lowestLayer then
         for k = lowestLayer + 1, highestLayer, 1 do
             if layers[k] ~= nil then
@@ -434,7 +502,7 @@ function BalencedLogicFinder.removeBlocksWithBadOutputsUp(startId)
                         if layerIndex < startLayer then
                             kills = kills + 1
                             for k = 1, layerIndex do
-                                BalencedLogicFinder.removeLayer(layerIndex)
+                                BalencedLogicFinder.removeLayer(k)
                             end
                             return true
                         else
@@ -445,6 +513,7 @@ function BalencedLogicFinder.removeBlocksWithBadOutputsUp(startId)
                                 end
                             end
                         end
+                        
                     end
                 end
             end

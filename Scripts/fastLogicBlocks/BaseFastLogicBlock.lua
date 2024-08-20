@@ -215,9 +215,14 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- real data
     -- print(runnrerId)
     -- print(self.FastLogicRunner.blockStates[runnrerId])
+    print("------")
+    print("mul",self.FastLogicRunner.multiBlockData[runnrerId])
     -- print(self.FastLogicRunner.countOfOnInputs[runnrerId] + self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
-    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
-    -- print(self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
+    -- print("alt",self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
+    -- print("runp",self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]])
+    -- if (self.FastLogicRunner.pathNames[self.FastLogicRunner.runnableBlockPathIds[runnrerId]] == nil) then
+    --     print(self.FastLogicRunner.runnableBlockPathIds[runnrerId])
+    -- end
     -- print(self.FastLogicRunner.numberOfBlockInputs[runnrerId])
     -- print(self.FastLogicRunner.numberOfBlockOutputs[runnrerId])
     -- print(self.FastLogicRunner.numberOfOtherInputs[runnrerId])
@@ -230,29 +235,29 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- self.FastLogicRunner.internalChangeBlockType = FastLogicRunner.internalChangeBlockType
     -- print(self.creation.AllNonFastBlocks)
     ----------------------------------------------
-    print("------")
-    print("id: " .. tostring(runnrerId))
-    local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
-    if layers == nil then
-        print("No Balenced Logic Found")
-        return
-    end
-    local dontReset = {}
-    print("coloring gates")
-    for i = 1, #layers do
-        for ii = 1, #layers[i] do
-            local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
-            if id ~= nil then
-                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, (i-1)%38+1)
-                dontReset[id] = true
-            end
-        end
-    end
-    for uuid, id in pairs(self.creation.ids) do
-        if id ~= nil and dontReset[id] == nil then
-            self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
-        end
-    end
+    -- print("------")
+    -- print("id: " .. tostring(runnrerId))
+    -- local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
+    -- if layers == nil then
+    --     print("No Balenced Logic Found")
+    --     return
+    -- end
+    -- local dontReset = {}
+    -- print("coloring gates")
+--     for i = 1, #layers do
+--         for ii = 1, #layers[i] do
+--             local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
+--             if id ~= nil then
+--                 self.creation.FastLogicRealBlockManager:changeConnectionColor(id, (i-1)%38+1)
+--                 dontReset[id] = true
+--             end
+--         end
+--     end
+--     for uuid, id in pairs(self.creation.ids) do
+--         if id ~= nil and dontReset[id] == nil then
+--             self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
+--         end
+--     end
 end
 
 function BaseFastLogicBlock.server_changeBlockState(self)

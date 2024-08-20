@@ -23,15 +23,12 @@ sm.MTFastLogic = sm.MTFastLogic or {}
 sm.MTFastLogic.BalencedLogicFinder = BalencedLogicFinder
 
 function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
-    layers = {}
-    layerHash = {}
-    outputBlocks = {}
-    outputHash = {}
-    farthestOutput = {}
-    lowestLayer = 0
-    highestLayer = 0
-    lowerLimit = nil
     FLR = FastLogicRunner
+
+    -- can't be timer (idk why it is not working and I don't have time to fix it)
+    if FLR.runnableBlockPathIds[id] == 5 then
+        return nil
+    end
 
     -- cant be selfwired
     local inputs = FLR.blockInputs[id]
@@ -41,34 +38,56 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
         end
     end
 
-    BalencedLogicFinder.stage1_findInputLayers(id, 1)
-    BalencedLogicFinder.stage2_makeInputLayer()
-    BalencedLogicFinder.stage3_findOutputs()
-    BalencedLogicFinder.removeBlocksWithBadOutputs(id)
-    BalencedLogicFinder.layersStartAtOne()
-    if layerHash[id] == nil then
-        return
+    lowerLimit = nil
+    local lastLowerLimit = nil
+    local lowerLimitSameCount = 0
+    local loops = 0
+    local keepGoing = true
+    while keepGoing do
+        layers = {}
+        layerHash = {}
+        outputBlocks = {}
+        outputHash = {}
+        farthestOutput = {}
+        lowestLayer = 0
+        highestLayer = 0
+        BalencedLogicFinder.stage1_findInputLayers(id, 1)
+        BalencedLogicFinder.stage2_makeInputLayer()
+        BalencedLogicFinder.stage3_findOutputs()
+        local loops2 = 0
+        local doremoveBlocksWithBadOutputsUp = true
+        while doremoveBlocksWithBadOutputsUp do
+            doremoveBlocksWithBadOutputsUp = BalencedLogicFinder.removeBlocksWithBadOutputsUp(id)
+            BalencedLogicFinder.layersStartAtOne()
+            loops2 = loops2 + 1
+            if loops2 > 20 then
+                print("error: inf loop2", loops2)
+                return nil
+            end
+        end
+        print(loops2)
+        if layerHash[id] == nil then
+            return nil
+        end
+
+        lowerLimit = 1-layerHash[id]
+        if lastLowerLimit == lowerLimit and lastLowerLimit ~= nil then
+            if lowerLimitSameCount > 2 then
+                break
+            end
+            lowerLimitSameCount = lowerLimitSameCount + 1
+        else
+            lastLowerLimit = lowerLimit
+            lowerLimitSameCount = 0
+        end
+
+        loops = loops + 1
+        if loops > 20 then
+            return nil
+        end
     end
 
-    print("length", #layers[lowestLayer])
-
-    lowerLimit = 1-layerHash[id]
-
-    layers = {}
-    layerHash = {}
-    outputBlocks = {}
-    outputHash = {}
-    farthestOutput = {}
-    lowestLayer = 0
-    highestLayer = 0
-    BalencedLogicFinder.stage1_findInputLayers(id, 1)
-    BalencedLogicFinder.stage2_makeInputLayer()
-    BalencedLogicFinder.stage3_findOutputs()
-    BalencedLogicFinder.removeBlocksWithBadOutputs(id)
-    BalencedLogicFinder.layersStartAtOne()
-
-    print("length", #layers[lowestLayer])
-
+    print(loops)
     return layers, layerHash, outputBlocks, outputHash, farthestOutput
 end
 
@@ -78,11 +97,14 @@ function BalencedLogicFinder.stage1_findInputLayers(startId, startLayerIndex)
     local blocksToAddIndex = 1
     local limit = #blocksToAdd -- so we dont start scanning new elements of blocksToAdd
     while blocksToAddIndex <= #blocksToAdd do
-        -- scan layer
         local id = blocksToAdd[blocksToAddIndex][1]
         local idOutputLayerIndex = blocksToAdd[blocksToAddIndex][2]
         local idLayerIndex = idOutputLayerIndex - BalencedLogicFinder.getBlockTime(id)
         local idLayerHash = layerHash[id]
+        if (lowerLimit ~= nil and lowerLimit > idLayerIndex) then
+            lowerLimit = idOutputLayerIndex
+            break
+        end
         if idLayerHash ~= nil then
             if (idLayerHash ~= idLayerIndex) then
                 lowerLimit = idLayerIndex
@@ -97,7 +119,10 @@ function BalencedLogicFinder.stage1_findInputLayers(startId, startLayerIndex)
                 BalencedLogicFinder.addIdToLayer(id, idLayerIndex)
                 -- add inputs
                 if lowerLimit == nil or lowerLimit < idLayerIndex then
-                    if FLR.numberOfOtherInputs[id] == 0 then
+                    if (
+                        FLR.creation.blocks[FLR.unhashedLookUp[id]].numberOfAllOutputs ==
+                        FLR.numberOfBlockOutputs[id]
+                    ) then
                         -- tell it to add next layer next cycle
                         local inputs = FLR.blockInputs[id]
                         for j = 1, #inputs do
@@ -128,7 +153,7 @@ function BalencedLogicFinder.stage1_findInputLayers(startId, startLayerIndex)
         lowerLimit = lowestLayer
     end
 
-    print("stage 1: steps =", steps, ":", highestLayer, lowestLayer, lowerLimit)
+    -- print("stage 1: steps =", steps, ":", highestLayer, lowestLayer, lowerLimit)
 end
 
 function BalencedLogicFinder.stage2_makeInputLayer()
@@ -170,7 +195,7 @@ function BalencedLogicFinder.stage2_makeInputLayer()
     highestLayer = highestLayer - lowestLayer
     lowestLayer = 1
 
-    print("stage 2: highestLayer =", highestLayer, #layers[lowestLayer])
+    -- print("stage 2: highestLayer =", highestLayer, #layers[lowestLayer])
 end
 
 function BalencedLogicFinder.stage3_findOutputs()
@@ -180,17 +205,19 @@ function BalencedLogicFinder.stage3_findOutputs()
     -- add outputs on current gates to blocksToAdd
     for id,layerIndex in pairs(layerHash) do
         local outputs = FLR.blockOutputs[id]
-        local outputLayerIndex = layerIndex + BalencedLogicFinder.getBlockTime(id)
-        for i = 1, #outputs do
-            local outputId = outputs[i]
-            if FLR.numberOfOtherInputs[outputId] == 0 and layerHash[outputId] == nil then
-                inputLayerSize = BalencedLogicFinder.checkIfShouldDoAdd(
-                    outputId,
-                    outputLayerIndex,
-                    blocksToAdd,
-                    blocksToAddHash,
-                    inputLayerSize
-                )
+        if FLR.creation.blocks[FLR.unhashedLookUp[id]].numberOfAllOutputs == #outputs then
+            local outputLayerIndex = layerIndex + BalencedLogicFinder.getBlockTime(id)
+            for i = 1, #outputs do
+                local outputId = outputs[i]
+                if FLR.numberOfOtherInputs[outputId] == 0 and layerHash[outputId] == nil then
+                    inputLayerSize = BalencedLogicFinder.checkIfShouldDoAdd(
+                        outputId,
+                        outputLayerIndex,
+                        blocksToAdd,
+                        blocksToAddHash,
+                        inputLayerSize
+                    )
+                end
             end
         end
     end
@@ -200,21 +227,23 @@ function BalencedLogicFinder.stage3_findOutputs()
         local layerIndex = blocksToAdd[steps][2]
         BalencedLogicFinder.addIdToLayer(id, layerIndex)
         local outputs = FLR.blockOutputs[id]
-        local outputLayerIndex = layerIndex + BalencedLogicFinder.getBlockTime(id)
-        for i = 1, #outputs do
-            local outputId = outputs[i]
-            if (
-                blocksToAddHash[outputId] == nil and
-                FLR.numberOfOtherInputs[outputId] == 0 and
-                layerHash[outputId] == nil
-            ) then
-                inputLayerSize = BalencedLogicFinder.checkIfShouldDoAdd(
-                    outputId,
-                    outputLayerIndex,
-                    blocksToAdd,
-                    blocksToAddHash,
-                    inputLayerSize
-                )
+        if FLR.creation.blocks[FLR.unhashedLookUp[id]].numberOfAllOutputs == #outputs then
+            local outputLayerIndex = layerIndex + BalencedLogicFinder.getBlockTime(id)
+            for i = 1, #outputs do
+                local outputId = outputs[i]
+                if (
+                    blocksToAddHash[outputId] == nil and
+                    FLR.numberOfOtherInputs[outputId] == 0 and
+                    layerHash[outputId] == nil
+                ) then
+                    inputLayerSize = BalencedLogicFinder.checkIfShouldDoAdd(
+                        outputId,
+                        outputLayerIndex,
+                        blocksToAdd,
+                        blocksToAddHash,
+                        inputLayerSize
+                    )
+                end
             end
         end
         steps = steps + 1
@@ -222,7 +251,7 @@ function BalencedLogicFinder.stage3_findOutputs()
             break
         end
     end
-    print("stage 3: steps =", steps, #layers[1])
+    -- print("stage 3: steps =", steps, #layers[1])
 end
 
 function BalencedLogicFinder.checkIfShouldDoAdd(
@@ -243,7 +272,12 @@ function BalencedLogicFinder.checkIfShouldDoAdd(
             local inputs = FLR.blockInputs[id]
             for i = 1, #inputs do
                 local inputId = inputs[i]
-                if blocksToAddHash[inputId] == false or layerHash[inputId] == false then
+                if (
+                    blocksToAddHash[inputId] == false or
+                    layerHash[inputId] == false or
+                    FLR.creation.blocks[FLR.unhashedLookUp[inputId]].numberOfAllOutputs ~=
+                    FLR.numberOfBlockOutputs[inputId]
+                ) then
                     goto topNotGood
                 end
                 for j = 1, #inputs do
@@ -256,11 +290,9 @@ function BalencedLogicFinder.checkIfShouldDoAdd(
                     blocksToAddHash[inputId] == nil
                 ) then
                     local inputlayerIndex = layerIndex - BalencedLogicFinder.getBlockTime(inputId)
-                    if layerHash[inputId] == nil then
-                        if inputlayerIndex >= 1 then
-                            blocksToScanHash[inputId] = true
-                            blocksToScan[#blocksToScan+1] = {inputId, inputlayerIndex}
-                        end
+                    if layerHash[inputId] == nil and inputlayerIndex >= 1 then
+                        blocksToScanHash[inputId] = true
+                        blocksToScan[#blocksToScan+1] = {inputId, inputlayerIndex}
                     elseif layerHash[inputId] ~= inputlayerIndex then
                         goto topNotGood
                     end
@@ -368,10 +400,11 @@ function BalencedLogicFinder.getBlockTime(id)
     return 1
 end
 
-function BalencedLogicFinder.removeBlocksWithBadOutputs(startId)
-    local shouldBeGone = {}
+function BalencedLogicFinder.removeBlocksWithBadOutputsUp(startId)
     local startLayer = layerHash[startId]
-    for layerIndex = 1, #layers do
+    if startLayer == nil then return false end
+    local kills = 0
+    for layerIndex = #layers, 1, -1 do
         local layer = layers[layerIndex]
         if layer ~= nil then
             for i = 1, #layer do
@@ -399,14 +432,17 @@ function BalencedLogicFinder.removeBlocksWithBadOutputs(startId)
                     end
                     if outputType == "kill" then
                         if layerIndex < startLayer then
-                            for k = lowestLayer, layerIndex do
+                            kills = kills + 1
+                            for k = 1, layerIndex do
                                 BalencedLogicFinder.removeLayer(layerIndex)
                             end
                             return true
                         else
                             for k = 1, #outputs do
-                                BalencedLogicFinder.removeBlockAndOutputsRec(outputs[k])
-                                shouldBeGone[outputs[k]] = true
+                                if layerHash[outputs[k]] ~= nil then
+                                    kills = kills + 1
+                                    BalencedLogicFinder.removeBlockAndOutputsRec(outputs[k])
+                                end
                             end
                         end
                     end
@@ -414,7 +450,7 @@ function BalencedLogicFinder.removeBlocksWithBadOutputs(startId)
             end
         end
     end
-    return false
+    return kills > 0
 end
 
 function BalencedLogicFinder.removeBlockAndOutputsRec(id)

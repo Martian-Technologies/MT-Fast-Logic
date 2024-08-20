@@ -70,6 +70,7 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
             else
                 local blockData = blocks[uuid]
                 local inputs = block.interactable:getParents()
+                blockData.numberOfAllOutputs = #block.interactable:getChildren()
                 local inputHash = blockData.inputsHash
                 local newInputsHash = {}
                 FastLogicAllBlockManager:setColor(uuid, block.shape.color)

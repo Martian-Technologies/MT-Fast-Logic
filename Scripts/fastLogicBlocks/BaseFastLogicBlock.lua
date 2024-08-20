@@ -230,29 +230,29 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- self.FastLogicRunner.internalChangeBlockType = FastLogicRunner.internalChangeBlockType
     -- print(self.creation.AllNonFastBlocks)
     ----------------------------------------------
-    -- print("------")
-    -- print("id: " .. tostring(runnrerId))
-    -- local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
-    -- if layers == nil then
-    --     print("No Balenced Logic Found")
-    --     return
-    -- end
-    -- local dontReset = {}
-    -- print("coloring gates")
-    -- for i = 1, #layers do
-    --     for ii = 1, #layers[i] do
-    --         local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
-    --         if id ~= nil then
-    --             self.creation.FastLogicRealBlockManager:changeConnectionColor(id, (i-1)%38+1)
-    --             dontReset[id] = true
-    --         end
-    --     end
-    -- end
-    -- for uuid, id in pairs(self.creation.ids) do
-    --     if id ~= nil and dontReset[id] == nil then
-    --         self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
-    --     end
-    -- end
+    print("------")
+    print("id: " .. tostring(runnrerId))
+    local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
+    if layers == nil then
+        print("No Balenced Logic Found")
+        return
+    end
+    local dontReset = {}
+    print("coloring gates")
+    for i = 1, #layers do
+        for ii = 1, #layers[i] do
+            local id = self.creation.ids[self.FastLogicRunner.unhashedLookUp[layers[i][ii]]]
+            if id ~= nil then
+                self.creation.FastLogicRealBlockManager:changeConnectionColor(id, (i-1)%38+1)
+                dontReset[id] = true
+            end
+        end
+    end
+    for uuid, id in pairs(self.creation.ids) do
+        if id ~= nil and dontReset[id] == nil then
+            self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
+        end
+    end
 end
 
 function BaseFastLogicBlock.server_changeBlockState(self)

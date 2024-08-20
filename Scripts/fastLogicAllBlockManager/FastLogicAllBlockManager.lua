@@ -286,6 +286,7 @@ function FastLogicAllBlockManager.makeBlockData(self, type, uuid, pos, rot, inpu
         inputs = {},
         inputsHash = {},
         outputs = {},
+        numberOfOtherOutputs = 0,
         outputsHash = {},
         state = state,
         timerLength = timerLength,

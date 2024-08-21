@@ -26,6 +26,7 @@ function FastLogicRunner.init(self)
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.numberOfUpdatesPerTick = self.numberOfUpdatesPerTick or 1
     self.updateTicks = self.updateTicks or 0
+    self.blocks = self.creation.blocks
     self.blocksOptimized = self.blocksOptimized or -100
     if self.hashData == nil then
         self:makeDataArrays()
@@ -257,8 +258,6 @@ function FastLogicRunner.doLastTickUpdates(self)
                 end
                 self:internalSetBlockStates(idStatePairs, false)
             end
-        else
-            print(table.length(multiData[7]))
         end
     end
 end

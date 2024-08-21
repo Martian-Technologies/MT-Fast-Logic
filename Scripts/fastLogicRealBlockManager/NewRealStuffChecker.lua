@@ -79,7 +79,10 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                         end
                     end
                 end
-                blockData.numberOfOtherOutputs = numberOfOtherOutputs
+                if blockData.numberOfOtherOutputs ~= numberOfOtherOutputs then
+                    FastLogicRunner:externalRescanBlock(uuid)
+                    blockData.numberOfOtherOutputs = numberOfOtherOutputs
+                end
                 local inputs = block.interactable:getParents()
                 local inputHash = blockData.inputsHash
                 local newInputsHash = {}

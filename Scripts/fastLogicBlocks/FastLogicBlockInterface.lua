@@ -122,6 +122,8 @@ function FastLogicBlockInterface.makeErrorMessage(self)
         return "Interface can't end with " .. modeNamesForErrors[stage] .. " without a Write Data"
     elseif type == 11 then
         return "Interface can't end with " .. modeNamesForErrors[stage] .. " without Data In blocks"
+    elseif type == 12 then
+        return "Data Out has to many inputs. Max 1"
     else
         return "Unknow error??"
     end
@@ -144,6 +146,9 @@ end
 
 function FastLogicBlockInterface.client_onClientDataUpdate(self, mode)
     self:client_updateTexture(nil, mode)
+    if self.gui ~= nil then
+        self:gui_update()
+    end
 end
 
 function FastLogicBlockInterface.client_updateTexture(self, state, mode)

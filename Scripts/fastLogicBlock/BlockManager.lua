@@ -381,7 +381,7 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
         local oldPath = self.runnableBlockPathIds[id]
         -- remove old
         table.removeValue(self.blocksSortedByPath[oldPath], id)
-        
+
         -- add new
         self.runnableBlockPaths[id] = self.pathNames[path]
         self.runnableBlockPathIds[id] = path
@@ -547,7 +547,6 @@ function FastLogicRunner.getUpdatedIds(self)
     return changed
 end
 
-
 function FastLogicRunner.internalAddNonFastOutput(self, interId, id)
     local nonFastBlock = self.nonFastBlocks[interId]
     if nonFastBlock[3][id] == nil then
@@ -593,6 +592,13 @@ function FastLogicRunner.internalSetBlockState(self, id, state)
     self:internalSetBlockStates({{id, state}})
 end
 
+function FastLogicRunner.internalRescanBlock(self, id)
+    self:revertBlockType(id)
+    self:shouldBeThroughBlock(id)
+    self:internalFindRamInterfaces(id)
+    self:fixBlockInputData(id)
+    self:internalAddBlockToUpdate(id)
+end
 
 --------------------------------------------------------
 
@@ -680,6 +686,12 @@ function FastLogicRunner.externalShouldBeThroughBlock(self, uuid)
     end
 end
 
+function FastLogicRunner.externalRescanBlock(self, uuid)
+    if self.hashedLookUp[uuid] ~= nil then
+        self:internalRescanBlock(self.hashedLookUp[uuid])
+    end
+end
+
 -- some NonFast fuctions dont need internals because they are not called internaly
 -- also it the code assumes that there are not erroes in the data that is being set to it
 
@@ -711,7 +723,7 @@ function FastLogicRunner.externalRemoveNonFastBlock(self, interId)
                     self.countOfOnOtherInputs[outputId] = self.countOfOnOtherInputs[outputId] - 1
                 end
                 self:shouldBeThroughBlock(outputId)
-                self:internalFindRamInterfaces(id)
+                self:internalFindRamInterfaces(outputId)
                 self:internalAddBlockToUpdate(outputId)
             end
         end

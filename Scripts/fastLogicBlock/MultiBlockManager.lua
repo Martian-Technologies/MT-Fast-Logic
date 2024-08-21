@@ -302,8 +302,6 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
         end
     else
     end
-    -- local idStatePairs = self:internalGetMultiBlockInternalStates(id)
-    
 end
 
 ------------------------------- per block code -------------------------------
@@ -369,6 +367,9 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
     local runnableBlockPaths = self.runnableBlockPaths
     local blockOutputs = self.blockOutputs
     local blockStates = self.blockStates
+    local numberOfBlockOutputs = self.numberOfBlockOutputs
+    local numberOfBlockInputs = self.numberOfBlockInputs
+    local numberOfOtherInputs = self.numberOfOtherInputs
     local idToCheckNext = rootInterfaceId
     local allBlockFound = {rootInterfaceId}
     local addressBlocks = {rootInterfaceId}
@@ -377,7 +378,19 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
     local searchStage = 1 -- 1 address, 2 data out, 3 data in, 4 write data
     local done = false
     local count = 0
+    if (
+        numberOfBlockOutputs[rootInterfaceId] > 1 or
+        self.blocks[self.unhashedLookUp[rootInterfaceId]].numberOfOtherOutputs > 0
+    ) then
+        local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[rootInterfaceId]]
+        if interfaceBlock ~= nil then
+            interfaceBlock.error = {1, searchStage}
+        end
+        self:internalSetBlockState(rootInterfaceId, false)
+        return
+    end
     while not done do
+        local outputs = blockOutputs[idToCheckNext]
         local inputs = self.blockInputs[idToCheckNext]
         for i = 1, #inputs do
             local inputId = inputs[i]
@@ -398,17 +411,17 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                 end
             end
         end
-        if numberOfOutputs == 0 then
+        if numberOfBlockOutputs[idToCheckNext] == 0 then
             done = true
         else
-            local numberOfBlockOutputs = self.numberOfBlockOutputs
-            local outputs = blockOutputs[idToCheckNext]
-            local numberOfOutputs = #outputs
-            for i = 1, numberOfOutputs do
+            for i = 1, numberOfBlockOutputs[idToCheckNext] do
                 local outputId = outputs[i]
                 local path = runnableBlockPaths[outputId]
                 if path == "Address" then
-                    if numberOfBlockOutputs[outputId] > 1 then
+                    if (
+                        numberOfBlockOutputs[outputId] > 1 or
+                        self.blocks[self.unhashedLookUp[outputId]].numberOfOtherOutputs > 0
+                    ) then
                         allBlockFound[#allBlockFound+1] = outputId
                         for j = 1, #allBlockFound do
                             local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]
@@ -438,7 +451,10 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                         return
                     end
                 elseif path == "DataIn" then
-                    if numberOfBlockOutputs[outputId] > 1 then
+                    if (
+                        numberOfBlockOutputs[outputId] > 1 or
+                        self.blocks[self.unhashedLookUp[outputId]].numberOfOtherOutputs > 0
+                    ) then
                         allBlockFound[#allBlockFound+1] = outputId
                         for j = 1, #allBlockFound do
                             local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]
@@ -470,6 +486,20 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                         goto continue
                     end
                 elseif path == "DataOut" then
+                    if (
+                        numberOfBlockInputs[outputId] > 1 or
+                        numberOfOtherInputs[outputId] > 0
+                    ) then
+                        allBlockFound[#allBlockFound+1] = outputId
+                        for j = 1, #allBlockFound do
+                            local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]
+                            if interfaceBlock ~= nil then
+                                interfaceBlock.error = {12, searchStage}
+                            end
+                            self:internalSetBlockState(allBlockFound[j], false)
+                        end
+                        return
+                    end
                     if searchStage == 1 then
                         dataBlocks[#dataBlocks+1] = outputId
                         allBlockFound[#allBlockFound+1] = outputId
@@ -499,7 +529,10 @@ function FastLogicRunner.internalMakeRamInterface(self, rootInterfaceId, memoryB
                         return
                     end
                 elseif path == "WriteData" then
-                    if numberOfBlockOutputs[outputId] > 1 then
+                    if (
+                        numberOfBlockOutputs[outputId] > 1 or
+                        self.blocks[self.unhashedLookUp[outputId]].numberOfOtherOutputs > 0
+                    ) then
                         allBlockFound[#allBlockFound+1] = outputId
                         for j = 1, #allBlockFound do
                             local interfaceBlock = self.creation.FastLogicBlockInterfaces[self.unhashedLookUp[allBlockFound[j]]]

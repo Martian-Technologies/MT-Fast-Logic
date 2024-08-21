@@ -60,8 +60,7 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         local multiBlockType = multiData[1]
         multiData.isDead = true
         -- set new states of blocks
-        local idStatePairs = self:internalGetMultiBlockInternalStates(id)
-        self:internalSetBlockStates(idStatePairs)
+        self:internalCollapseMultiBlock(id)
         -- clear anything to do with multiBlock in timeData
         local endBlockId = multiData[4][1]
         local otherTimeData = self.timeData[2]
@@ -156,13 +155,11 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
     if withUpdates ~= false then
         for i = 1, #idStatePairs do
             local id = idStatePairs[i][1]
-            if withUpdates ~= false then
-                local multiBlockIds = multiBlockData[id]
-                if multiBlockIds ~= false then
-                    for k,_ in pairs(multiBlockIds) do
-                        if multiBlockData[k].isDead ~= true then
-                            self:internalRemoveBlock(k)
-                        end
+            local multiBlockIds = multiBlockData[id]
+            if multiBlockIds ~= false then
+                for k,_ in pairs(multiBlockIds) do
+                    if multiBlockData[k].isDead ~= true then
+                        self:internalRemoveBlock(k)
                     end
                 end
             end
@@ -172,10 +169,8 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
                 blocksToFixInputData[blockOutputs[id][k]] = true
             end
         end
-        if withUpdates ~= false then
-            for id, _ in pairs(blocksToFixInputData) do
-                self:fixBlockInputData(id)
-            end
+        for id, _ in pairs(blocksToFixInputData) do
+            self:fixBlockInputData(id)
         end
     else
         for i = 1, #idStatePairs do
@@ -322,8 +317,8 @@ function FastLogicRunner.updateLongestTimeToLength(self, length)
     local otherTimeData = self.timeData[2]
     while #timerData < self.longestTimer + 1 do
         local newLength = #timerData + 1
-        timerData[length] = {}
-        otherTimeData[length] = {}
+        timerData[newLength] = {}
+        otherTimeData[newLength] = {}
     end
 end
 

@@ -331,13 +331,14 @@ function FastLogicRunner.clearTimerData(self, id)
             end
         end
     end
-    if self.timerInputStates[id] ~= self.blockStates[id] then
-        self.blockStates[id] = not self.blockStates[id]
-        local stateNumber = self.blockStates[id] and 1 or -1
+    self.timerInputStates[id] = false
+    if self.blockStates[id] then
+        self:internalAddBlockToUpdate(id)
+        self.blockStates[id] = false
         for i = 1, #self.blockOutputs[id] do
             local outputId = self.blockOutputs[id][i]
             self:internalAddBlockToUpdate(outputId)
-            self.countOfOnInputs[outputId] = self.countOfOnInputs[outputId] + stateNumber
+            self.countOfOnInputs[outputId] = self.countOfOnInputs[outputId] - 1
         end
     end
 end

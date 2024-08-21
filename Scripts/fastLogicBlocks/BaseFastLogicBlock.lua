@@ -213,9 +213,10 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- sm.MTUtil.Profiler.Time.reset()
     -- sm.MTUtil.Profiler.Count.reset()
     -- real data
-    -- print(runnrerId)
-    -- print(self.FastLogicRunner.blockStates[runnrerId])
     print("------")
+    print(runnrerId)
+    print(self.FastLogicRunner.blockStates[runnrerId])
+    
     print("mul",self.FastLogicRunner.multiBlockData[runnrerId])
     -- print(self.FastLogicRunner.countOfOnInputs[runnrerId] + self.FastLogicRunner.countOfOnOtherInputs[runnrerId])
     -- print("alt",self.FastLogicRunner.pathNames[self.FastLogicRunner.altBlockData[runnrerId]])
@@ -236,13 +237,13 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- print(self.creation.AllNonFastBlocks)
     ----------------------------------------------
     -- print("------")
-    -- print("id: " .. tostring(runnrerId))
-    -- local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
-    -- if layers == nil then
-    --     print("No Balenced Logic Found")
-    --     return
-    -- end
-    -- print("coloring gates")
+    print("id: " .. tostring(runnrerId))
+    local layers, LayerHash, outputBlocks, outputHash, farthestOutput = sm.MTFastLogic.BalencedLogicFinder.findBalencedLogic(self.FastLogicRunner, runnrerId)
+    if layers == nil then
+        print("No Balenced Logic Found")
+        return
+    end
+    print("coloring gates")
     -- local dontReset = {}
     -- for i = 1, #layers do
     --     for ii = 1, #layers[i] do

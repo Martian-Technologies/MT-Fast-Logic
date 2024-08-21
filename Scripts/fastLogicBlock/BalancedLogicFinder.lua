@@ -16,6 +16,29 @@ local FLR
 
 local maxInputLayerSize = 28
 
+local excludedBlockIdList = {
+    [1] = true, -- EndTickButtons
+    [2] = true, -- lightBlocks
+    [7] = true, -- Address
+    [9] = true, -- DataIn
+    [12] = true, -- DataOut
+    [14] = true, -- WriteData
+    [16] = true, -- multiBlocks
+    [17] = true, -- throughMultiBlockInput
+    [18] = true, -- norThroughMultiBlockInput
+    [19] = true, -- andMultiBlockInput
+    [20] = true, -- orMultiBlockInput
+    [21] = true, -- xorMultiBlockInput
+    [22] = true, -- nandMultiBlockInput
+    [23] = true, -- norMultiBlockInput
+    [24] = true, -- xnorMultiBlockInput
+    [25] = true, -- stateSetterBlocks
+    [26] = true, -- BlockMemory
+    [27] = true, -- interfaceMultiBlockInput
+}
+
+
+
 sm.MTFastLogic = sm.MTFastLogic or {}
 
 local BalencedLogicFinder = sm.MTFastLogic.BalencedLogicFinder or {}
@@ -25,7 +48,7 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
     FLR = FastLogicRunner
 
     -- can't be timer (idk why it is not working and I don't have time to fix it)
-    if FLR.runnableBlockPathIds[id] == 5 or FLR.multiBlockData[id] ~= false then
+    if FLR.runnableBlockPathIds[id] == 5 or not BalencedLogicFinder.canUseBlock(id) then
         return nil
     end
 
@@ -64,6 +87,7 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
             end
         end
         if layerHash[id] == nil then
+            -- print("layerHash[id] == nil")
             return nil
         end
 
@@ -122,9 +146,10 @@ function BalencedLogicFinder.findBalencedLogic(FastLogicRunner, id)
         -- this could be used to remove large portions of the graph but its nit worth it prob
         return nil
     end
-    
-    local score = connectionCount/#layers[1] + connectionCount/#outputBlocks
-    if score < 50 then
+
+    local score = connectionCount/#layers[1]*2 + connectionCount/#outputBlocks
+    -- print(score, connectionCount, #layers[1], #outputBlocks)
+    if score < 30 then
         -- print("score not good")
         return nil
     end
@@ -153,7 +178,7 @@ function BalencedLogicFinder.stage1_findInputLayers(startId, startLayerIndex)
             end
         elseif (
             (lowerLimit ~= nil and lowerLimit > idLayerIndex) or
-            FLR.multiBlockData[id] ~= false
+            not BalencedLogicFinder.canUseBlock(id)
         ) then
             lowerLimit = idOutputLayerIndex
             break
@@ -253,7 +278,7 @@ function BalencedLogicFinder.stage3_findOutputs()
                 if (
                     FLR.numberOfOtherInputs[outputId] == 0 and
                     layerHash[outputId] == nil and
-                    FLR.multiBlockData[outputId] == false
+                    BalencedLogicFinder.canUseBlock(outputId)
                 ) then
                     local outputsOutputs = FLR.blockOutputs[outputId]
                     local outputsOutputLayerIndex = outputLayerIndex + BalencedLogicFinder.getBlockTime(outputId)
@@ -287,7 +312,7 @@ function BalencedLogicFinder.stage3_findOutputs()
                 if (
                     blocksToAddHash[outputId] == nil and
                     FLR.numberOfOtherInputs[outputId] == 0 and
-                    FLR.multiBlockData[outputId] == false and
+                    BalencedLogicFinder.canUseBlock(outputId) and
                     layerHash[outputId] == nil
                 ) then
                     local outputsOutputs = FLR.blockOutputs[outputId]
@@ -329,13 +354,16 @@ function BalencedLogicFinder.checkIfShouldDoAdd(
     local layerOneSizeIncrease = 0
     while steps <= #blocksToScan do
         local id = blocksToScan[steps][1]
+        if not BalencedLogicFinder.canUseBlock(id) then
+            goto topNotGood
+        end
         local layerIndex = blocksToScan[steps][2]
         if layerIndex > 1 then
             local inputs = FLR.blockInputs[id]
             for i = 1, #inputs do
                 local inputId = inputs[i]
                 if (
-                    FLR.multiBlockData[inputId] ~= false or
+                    not BalencedLogicFinder.canUseBlock(inputId) or
                     blocksToAddHash[inputId] == false or
                     FLR.creation.blocks[FLR.unhashedLookUp[inputId]].numberOfOtherOutputs ~= 0
                 ) then
@@ -560,4 +588,14 @@ function BalencedLogicFinder.layersStartAtOne()
     layerHash = newLayerHash
     highestLayer = highestLayer - lowestLayer
     lowestLayer = 1
+end
+
+function BalencedLogicFinder.canUseBlock(id)
+    if excludedBlockIdList[FLR.runnableBlockPathIds[id]] then
+        return false
+    end
+    if FLR.multiBlockData == false then
+        return false
+    end
+    return true
 end

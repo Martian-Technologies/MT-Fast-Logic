@@ -62,18 +62,22 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         -- set new states of blocks
         self:internalCollapseMultiBlock(id)
         -- clear anything to do with multiBlock in timeData
-        local endBlockId = multiData[4][1]
         local otherTimeData = self.timeData[2]
         for i = 1, multiData[6] do
-            local timeDataAtTime = otherTimeData[i]
-            if timeDataAtTime == nil then goto continue end
-            for k = 1, #timeDataAtTime do
-                local item = timeDataAtTime[k]
+            local timeDataRow = otherTimeData[i]
+            if timeDataRow == nil then goto continue end
+            local k = 1
+            while k <= #timeDataRow do
+                local item = timeDataRow[k]
                 if item ~= nil then
                     local itemId = item[2]
                     if multiBlockData[itemId] ~= false and multiBlockData[itemId][id] then
-                        table.remove(timeDataAtTime, k)
+                        table.remove(timeDataRow, k)
+                    else
+                        k = k + 1
                     end
+                else
+                    k = k + 1
                 end
             end
             ::continue::
@@ -367,7 +371,10 @@ function FastLogicRunner.internalChangeBlockType(self, id, path)
     if type(path) == "string" then
         path = self.pathIndexs[path]
     end
-    if (self.runnableBlockPathIds[id] ~= path and self.altBlockData[id] == nil) or (self.altBlockData[id] ~= path and self.altBlockData[id] ~= nil) then
+    if (
+        (self.runnableBlockPathIds[id] ~= path and self.altBlockData[id] == false) or
+        (self.altBlockData[id] ~= path and self.altBlockData[id] ~= false)
+    )then
         local isMemeory = self.runnableBlockPathIds[id] == 12 or self.runnableBlockPathIds[id] == 27
         if not isMemeory then
             -- remove from multi blocks

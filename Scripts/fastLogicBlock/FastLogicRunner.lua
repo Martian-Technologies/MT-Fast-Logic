@@ -141,14 +141,6 @@ function FastLogicRunner.makeDataArrays(self)
     self:updateLongestTimer()
 end
 
-local doLastTickDecompress = {
-    true,
-    true,
-    false,
-    false,
-    false,
-}
-
 function FastLogicRunner.doLastTickUpdates(self)
     local multiBlocks = self.blocksSortedByPath[16]
     local blockOutputs = self.blockOutputs
@@ -183,80 +175,61 @@ function FastLogicRunner.doLastTickUpdates(self)
         local multiBlockId = multiBlocks[j]
         local multiData = multiBlockData[multiBlockId]
         local multiBlockType = multiData[1]
-        if doLastTickDecompress[multiBlockType] then
-            if multiData[1] == 1 or multiData[1] == 2 then
-                local state = blockStates[multiData[3][1]]
-                local endBlockId = multiData[4][1]
-                local index = 2
-                local time = multiData[6]-1
-                local timerSkipCount = 0
-                local id = multiData[2][2]
-                while time > 1 do
-                    if timerSkipCount > 1 then
-                        timerSkipCount = timerSkipCount - 1
+        if multiData[1] == 1 or multiData[1] == 2 then
+            local state = blockStates[multiData[3][1]]
+            local endBlockId = multiData[4][1]
+            local index = 2
+            local time = multiData[6]-1
+            local timerSkipCount = 0
+            local id = multiData[2][2]
+            while time > 1 do
+                if timerSkipCount > 1 then
+                    timerSkipCount = timerSkipCount - 1
+                    if timerDataHash[timerSkipCount][id] ~= nil then
+                        break
+                    end
+                    if otherTimeDataHash[time][endBlockId] ~= nil then
+                        state = not state
+                    end
+                    if timerSkipCount == 1 then
+                        blockStates[id] = state
+                        local outputs = blockOutputs[multiData[2][index-1]]
+                        for k = 1, #outputs do
+                            local outputId = outputs[k]
+                            if runnableBlockPathIds[outputId] == 2 then
+                                blockStates[outputId] = state
+                            end
+                        end
+                    end
+                else
+                    id = multiData[2][index]
+                    if self.nextRunningBlocks[id] >= self.nextRunningIndex - 1 then
+                        break
+                    end
+                    if otherTimeDataHash[time][endBlockId] ~= nil then
+                        state = not state
+                    end
+                    if runnableBlockPathIds[id] == 5 then
+                        timerSkipCount = timerLengths[id]
                         if timerDataHash[timerSkipCount][id] ~= nil then
                             break
                         end
-                        if otherTimeDataHash[time][endBlockId] ~= nil then
-                            state = not state
-                        end
-                        if timerSkipCount == 1 then
-                            blockStates[id] = state
-                            local outputs = blockOutputs[multiData[2][index-1]]
-                            for k = 1, #outputs do
-                                local outputId = outputs[k]
-                                if runnableBlockPathIds[outputId] == 2 then
-                                    blockStates[outputId] = state
-                                end
-                            end
-                        end
                     else
-                        id = multiData[2][index]
-                        if self.nextRunningBlocks[id] >= self.nextRunningIndex - 1 then
-                            break
-                        end
-                        if otherTimeDataHash[time][endBlockId] ~= nil then
+                        if runnableBlockPathIds[id] == 4 then
                             state = not state
                         end
-                        if runnableBlockPathIds[id] == 5 then
-                            timerSkipCount = timerLengths[id]
-                            if timerDataHash[timerSkipCount][id] ~= nil then
-                                break
-                            end
-                        else
-                            if runnableBlockPathIds[id] == 4 then
-                                state = not state
-                            end
-                            blockStates[id] = state
-                            local outputs = blockOutputs[multiData[2][index-1]]
-                            for k = 1, #outputs do
-                                local outputId = outputs[k]
-                                if runnableBlockPathIds[outputId] == 2 then
-                                    blockStates[outputId] = state
-                                end
+                        blockStates[id] = state
+                        local outputs = blockOutputs[multiData[2][index-1]]
+                        for k = 1, #outputs do
+                            local outputId = outputs[k]
+                            if runnableBlockPathIds[outputId] == 2 then
+                                blockStates[outputId] = state
                             end
                         end
-                        index = index + 1
                     end
-                    time = time - 1
+                    index = index + 1
                 end
-            else
-                local lastIdStatePairs, idStatePairs = self:internalGetLastMultiBlockInternalStates(multiBlockId)
-                if idStatePairs == nil then
-                    idStatePairs = self:internalGetMultiBlockInternalStates(multiBlockId)
-                end
-                local blocks = multiData[2]
-                for j = 1, #lastIdStatePairs do
-                    local outputs = blockOutputs[lastIdStatePairs[j][1]]
-                    local state = lastIdStatePairs[j][2]
-                    for k = 1, #outputs do
-                        local id = outputs[k]
-                        if runnableBlockPathIds[id] == 2 then
-                            blockStates[id] = state
-                        end
-                    end
-                end
-                self:internalSetBlockStates(idStatePairs, false)
+                time = time - 1
             end
         end
     end

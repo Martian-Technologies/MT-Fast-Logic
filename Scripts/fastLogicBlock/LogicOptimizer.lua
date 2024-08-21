@@ -158,6 +158,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self.multiBlockData[multiBlockId][9] = outputBlockTimes
             self.multiBlockData[multiBlockId][10] = inputData
             self.multiBlockData[multiBlockId][11] = inputsIndexPow2
+            self.multiBlockData[multiBlockId][12] = nil
             self:updateLongestTimeToLength(length)
         end
     end

@@ -8,7 +8,37 @@ function Colorizer.inject(multitool)
     multitool.colorizer = {}
     local self = multitool.colorizer
     self.displayingGUI = false
-    self.selectedColor = 1
+    self.selectedColor = 1            -- 1-40, "match", "invert"
+    self.specialModeLast = "match"    -- "match", "invert"
+    self.parameterMode = "Connection" -- "Connection", "Block"
+end
+
+local function HSVtoRGB(h, s, v)
+    local r, g, b
+
+    local i = math.floor(h * 6)
+    local f = h * 6 - i
+    local p = v * (1 - s)
+    local q = v * (1 - f * s)
+    local t = v * (1 - (1 - f) * s)
+
+    i = i % 6
+
+    if i == 0 then
+        r, g, b = v, t, p
+    elseif i == 1 then
+        r, g, b = q, v, p
+    elseif i == 2 then
+        r, g, b = p, v, t
+    elseif i == 3 then
+        r, g, b = p, q, v
+    elseif i == 4 then
+        r, g, b = t, p, v
+    elseif i == 5 then
+        r, g, b = v, p, q
+    end
+
+    return sm.color.new(r, g, b, 1)
 end
 
 local function injectElements(multitool)
@@ -46,7 +76,7 @@ local function injectElements(multitool)
             table.insert(hUI.elements, {
                 name = "color_" .. i,
                 type = "customButton",
-                position = { a = (col - 5.5) * 0.07 * fovMult, e = (row) * 0.07 * fovMult + 0.0 }, -- a = azimuth, e = elevation
+                position = { a = (col - 5.5) * 0.07 * fovMult, e = (row + 0.5) * 0.07 * fovMult + 0.0 }, -- a = azimuth, e = elevation
                 color = sm.MTFastLogic.FastLogicBlockColors[i],
                 angleBoundHorizontal = 0.035 * fovMult,
                 angleBoundVertical = 0.035 * fovMult,
@@ -77,13 +107,75 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "close",
         type = "button",
-        position = { a = 0.0, e = 0.07 * 5 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = 0.21 * fovMult, e = 0.07 * 0.5 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.9, 0.2, 0.2),
         text = "Close",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = 0.05 * fovMult,
         onclick = function()
             multitool.colorizer.displayingGUI = false
+        end,
+    })
+    table.insert(hUI.elements, {
+        name = "parameterMode",
+        type = "customButton",
+        position = { a = 0, e = 0.07 * 0.5 * fovMult }, -- a = azimuth, e = elevation
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = 0.05 * fovMult,
+        getrender = function(hovering)
+            local text = "Connection"
+            if self.parameterMode == "Block" then
+                text = "Block"
+            end
+            if hovering then
+                text = "[ " .. text .. " ]"
+            end
+            return {
+                text = text,
+                color = sm.color.new(0.2, 0.2, 0.9),
+            }
+        end,
+        onclick = function()
+            if self.parameterMode == "Connection" then
+                self.parameterMode = "Block"
+            else
+                self.parameterMode = "Connection"
+            end
+        end,
+    })
+    table.insert(hUI.elements, {
+        name = "specialColorModes",
+        type = "customButton",
+        position = { a = -0.21 * fovMult, e = 0.07 * 0.5 * fovMult }, -- a = azimuth, e = elevation
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = 0.05 * fovMult,
+        getrender = function(hovering)
+            local text = "Match / I"
+            if self.specialModeLast == "invert" then
+                text = "Invert / M"
+            end
+            if hovering then
+                text = "|" .. text .. "|"
+            end
+            local color = sm.color.new(0.2, 0.2, 0.5)
+            if self.selectedColor == "match" or self.selectedColor == "invert" then
+                local hue = os.clock() / 3
+                color = HSVtoRGB(hue, 0.8, 0.9)
+            end
+            return {
+                text = text,
+                color = color,
+            }
+        end,
+        onclick = function()
+            if self.selectedColor == "match" or self.selectedColor == "invert" then
+                if self.specialModeLast == "match" then
+                    self.specialModeLast = "invert"
+                else
+                    self.specialModeLast = "match"
+                end
+            end
+            self.selectedColor = self.specialModeLast
         end,
     })
 end
@@ -103,7 +195,14 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
         multitool.VolumeSelector.actionWord = "Colorize"
         multitool.VolumeSelector.isBeta = false
         multitool.VolumeSelector.selectionMode = "inside"
-        multitool.VolumeSelector.previewColor = sm.MTFastLogic.FastLogicBlockColors[self.selectedColor]
+        local previewColor = nil
+        if self.selectedColor ~= "match" and self.selectedColor ~= "invert" then
+            previewColor = sm.MTFastLogic.FastLogicBlockColors[self.selectedColor]
+        else
+            local hue = os.clock() / 3
+            previewColor = HSVtoRGB(hue, 0.8, 0.9)
+        end
+        multitool.VolumeSelector.previewColor = previewColor
         multitool.VolumeSelector.doConfirm = true
 
 
@@ -116,11 +215,12 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
         if result == nil then
             return
         end
-
+        
         multitool.network:sendToServer("server_recolor", {
             origin = result.origin,
             final = result.final,
-            mode = self.selectedColor - 1,
+            color = self.selectedColor,
+            mode = self.parameterMode,
             body = result.body
         })
     else

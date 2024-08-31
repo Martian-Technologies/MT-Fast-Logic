@@ -937,7 +937,11 @@ function MTMultitool.client_callCallCallbackFromServer(self, data)
 end
 
 function MTMultitool.server_recolor(self, data)
-    local colorId = data.mode
+    local colorId = data.color
+    local mode = data.mode
+    if colorId ~= "invert" and colorId ~= "match" then
+        colorId = colorId - 1
+    end
     local originLocal = data.origin
     local finalLocal = data.final
     local body = data.body
@@ -948,24 +952,137 @@ function MTMultitool.server_recolor(self, data)
     local xMax = math.max(originLocal.x, finalLocal.x) - halfBlock
     local yMax = math.max(originLocal.y, finalLocal.y) - halfBlock
     local zMax = math.max(originLocal.z, finalLocal.z) - halfBlock
-    local voxelMap = MTMultitoolLib.getVoxelMap(body, true)
+    local voxelMap = MTMultitoolLib.getVoxelMapShapesGW(body, true)
     local creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
     local creation = sm.MTFastLogic.Creations[creationId]
     for i = x * 4, xMax * 4 do
         for j = y * 4, yMax * 4 do
             for k = z * 4, zMax * 4 do
                 local indexString = i / 4 .. ";" .. j / 4 .. ";" .. k / 4
-                local shape = voxelMap[indexString]
-                if shape == nil then
+                local shapes = voxelMap[indexString]
+                if shapes == nil then
                     goto continue
                 end
-                -- if shape.uuid == MTGateUUID then
-                if table.contains(MTGateUUIDs, shape.uuid) then
-                    local interactable = shape:getInteractable()
-                    if interactable ~= nil then
-                        creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorId)
+                for _, shape in pairs(shapes) do
+                    if shape == nil then
+                        goto continue2
                     end
+                    if not sm.exists(shape) then
+                        goto continue2
+                    end
+                    if mode == "Connection" then
+                        local interactable = shape:getInteractable()
+                        if interactable == nil then
+                            goto continue2
+                        end
+                        if type(colorId) == "number" then
+                            creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorId)
+                        else
+                            local currentShapeColor = shape:getColor()
+                            local colorIdLocal = 0
+                            if colorId == "match" then
+                                local minDist = 1000000
+                                for i = 1, 40 do
+                                    local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
+                                    local diff = math.sqrt(
+                                        (currentShapeColor.r - compColor.r) ^ 2 +
+                                        (currentShapeColor.g - compColor.g) ^ 2 +
+                                        (currentShapeColor.b - compColor.b) ^ 2
+                                    )
+                                    if diff < minDist then
+                                        minDist = diff
+                                        colorIdLocal = i - 1
+                                    end
+                                end
+                            elseif colorId == "invert" then
+                                local maxDist = -1
+                                for i = 1, 40 do
+                                    local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
+                                    local diff = math.sqrt(
+                                        (currentShapeColor.r - compColor.r) ^ 2 +
+                                        (currentShapeColor.g - compColor.g) ^ 2 +
+                                        (currentShapeColor.b - compColor.b) ^ 2
+                                    )
+                                    if diff > maxDist then
+                                        maxDist = diff
+                                        colorIdLocal = i - 1
+                                    end
+                                end
+                            end
+                            creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorIdLocal)
+                        end
+                    elseif mode == "Block" then
+                        if type(colorId) == "number" then
+                            shape:setColor(sm.MTFastLogic.FastLogicBlockColors[colorId + 1])
+                        else
+                            local interactable = shape:getInteractable()
+                            if interactable == nil then
+                                goto continue2
+                            end
+                            -- check if the shape is a gate
+                            if table.contains(MTGateUUIDs, shape.uuid) then
+                                -- check the connection color
+                                local gateUuid = creation.uuids[interactable.id]
+                                if gateUuid == nil then
+                                    goto continue2
+                                end
+                                local gate = creation.blocks[gateUuid]
+                                if gate == nil then
+                                    goto continue2
+                                end
+                                local gateColorId = gate.connectionColorId
+                                if gateColorId == nil then
+                                    goto continue2
+                                end
+                                local connectionColor = sm.MTFastLogic.FastLogicBlockColors[gateColorId + 1]
+                                if colorId == "match" then
+                                    local minDist = 1000000
+                                    local colorIdLocal = 0
+                                    for i = 1, 40 do
+                                        local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
+                                        local diff = math.sqrt(
+                                            (connectionColor.r - compColor.r) ^ 2 +
+                                            (connectionColor.g - compColor.g) ^ 2 +
+                                            (connectionColor.b - compColor.b) ^ 2
+                                        )
+                                        if diff < minDist then
+                                            minDist = diff
+                                            colorIdLocal = i - 1
+                                        end
+                                    end
+                                    shape:setColor(sm.MTFastLogic.FastLogicBlockColors[colorIdLocal + 1])
+                                elseif colorId == "invert" then
+                                    local maxDist = -1
+                                    local colorIdLocal = 0
+                                    for i = 1, 40 do
+                                        local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
+                                        local diff = math.sqrt(
+                                            (connectionColor.r - compColor.r) ^ 2 +
+                                            (connectionColor.g - compColor.g) ^ 2 +
+                                            (connectionColor.b - compColor.b) ^ 2
+                                        )
+                                        if diff > maxDist then
+                                            maxDist = diff
+                                            colorIdLocal = i - 1
+                                        end
+                                    end
+                                    shape:setColor(sm.MTFastLogic.FastLogicBlockColors[colorIdLocal + 1])
+                                end
+                            end
+                        end
+                    end
+                    ::continue2::
                 end
+                -- if shape == nil then
+                --     goto continue
+                -- end
+                -- -- if shape.uuid == MTGateUUID then
+                -- if table.contains(MTGateUUIDs, shape.uuid) then
+                --     local interactable = shape:getInteractable()
+                --     if interactable ~= nil then
+                --         creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorId)
+                --     end
+                -- end
                 ::continue::
             end
         end

@@ -355,6 +355,38 @@ function MTMultitoolLib.getVoxelMapShapes(body, override_cache)
     return voxelMap
 end
 
+function MTMultitoolLib.getVoxelMapShapesGW(body, override_cache)
+    if MTMultitoolLib.voxelMapHash[body:getId().."shapesGW"] and not override_cache then
+        local hashValue = MTMultitoolLib.voxelMapHash[body:getId()]
+        if not body:hasChanged(hashValue.tick) then
+            return hashValue.voxelMap
+        end
+    end
+
+    local shapes = body:getShapes()
+    local voxelMap = {}
+    -- print("__________________________________________________________")
+    local halfBlock = sm.vec3.new(0.125, 0.125, 0.125)
+    for _, shape in pairs(shapes) do
+        local position = MTMultitoolLib.getLocalCenter(shape) / 4 - halfBlock
+        local indexString = position.x .. ";" .. position.y .. ";" .. position.z
+        if voxelMap[indexString] == nil then
+            voxelMap[indexString] = {}
+        end
+        table.insert(voxelMap[indexString], shape)
+    end
+
+    MTMultitoolLib.voxelMapHash[body:getId()] = {
+        voxelMap = voxelMap,
+        tick = sm.game.getCurrentTick()
+    }
+
+    -- print(voxelMap)
+
+    return voxelMap
+end
+
+
 function MTMultitoolLib.getOccupiedBlocks(shape)
     local positions = {}
     local bb = shape:getBoundingBox()

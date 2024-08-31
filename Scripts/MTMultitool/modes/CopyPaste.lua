@@ -796,26 +796,30 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 local body = result.body
                 local originLocal = result.origin
                 local finalLocal = result.final
-                local voxelMap = MTMultitoolLib.getVoxelMapShapes(body, true)
+                local voxelMap = MTMultitoolLib.getVoxelMapShapesGW(body, true)
                 local x = math.min(originLocal.x, finalLocal.x) - halfBlock
                 local y = math.min(originLocal.y, finalLocal.y) - halfBlock
                 local z = math.min(originLocal.z, finalLocal.z) - halfBlock
                 local xMax = math.max(originLocal.x, finalLocal.x) - halfBlock
                 local yMax = math.max(originLocal.y, finalLocal.y) - halfBlock
                 local zMax = math.max(originLocal.z, finalLocal.z) - halfBlock
-                local shapes = {}
+                local allShapes = {}
                 for i = x * 4, xMax * 4 do
                     for j = y * 4, yMax * 4 do
                         for k = z * 4, zMax * 4 do
                             local indexString = i / 4 .. ";" .. j / 4 .. ";" .. k / 4
-                            local shape = voxelMap[indexString]
-                            if shape ~= nil and sm.exists(shape) then
-                                table.insert(shapes, shape)
+                            local shapes = voxelMap[indexString]
+                            if shapes ~= nil then
+                                for _, shape in ipairs(shapes) do
+                                    if sm.exists(shape) then
+                                        table.insert(allShapes, shape)
+                                    end
+                                end
                             end
                         end
                     end
                 end
-                addShapes(multitool, shapes)
+                addShapes(multitool, allShapes)
                 VolumeSelector.cleanUp(multitool)
             end
         end

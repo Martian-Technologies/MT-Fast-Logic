@@ -13,6 +13,7 @@ local modesAndTheirFunctions = {
     ["VolumePlacer"] = "Lets you place a cuboid of logic gates all at once",
     ["Merger"] =
     "Lets you merge gates. Merging takes all of a gates inputs and wires them into the gate's outputs deleting the gate.",
+    ["VolumeDeleter"] = "Lets you delete a volumetric selection of gates, parts, and other shapes.",
     ["Heatmap"] = "Can show you the parts of your circuit that are using up the most compute.",
     ["Colorizer"] = "Changes the connection dot color of Fast Logic gates.",
     ["DecoderMaker"] = "Goofy tool that wires up decoders for you.",

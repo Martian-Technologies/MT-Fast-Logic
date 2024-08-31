@@ -39,6 +39,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Settings.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/ModeChanger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/VolumePlacer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Merger.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/VolumeDeleter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Colorizer.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Heatmap.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/DecoderMaker.lua")
@@ -78,7 +79,8 @@ local defaultEnabledModes = {
     true, -- Settings
     true, -- Mode Changer
     true, -- Volume Placer
-    true, -- Merger
+    true,  -- Merger
+    false, -- Deleter
     true, -- Colorizer
     false, -- Heatmap
     false, -- Decoder Maker
@@ -97,6 +99,7 @@ MTMultitool.modes = {
     "Mode Changer",
     "Volume Placer",
     "Merger",
+    "Deleter",
     "Colorizer",
     "Heatmap",
     "Decoder Maker",
@@ -115,6 +118,7 @@ MTMultitool.internalModes = {
     "ModeChanger",
     "VolumePlacer",
     "Merger",
+    "VolumeDeleter",
     "Colorizer",
     "Heatmap",
     "DecoderMaker",
@@ -165,6 +169,7 @@ function MTMultitool.client_onCreate(self)
     ModeChanger.inject(self)
     VolumePlacer.inject(self)
     Merger.inject(self)
+    VolumeDeleter.inject(self)
     Colorizer.inject(self)
     Heatmap.inject(self)
     DecoderMaker.inject(self)
@@ -474,6 +479,8 @@ function MTMultitool.client_onUnequip(self, animate)
         VolumePlacer.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.cleanNametags(self)
+    elseif MTMultitool.internalModes[self.mode] == "VolumeDeleter" then
+        VolumeDeleter.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
         Colorizer.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "CopyPaste" then
@@ -564,6 +571,8 @@ local function triggerTool(self, primaryState, secondaryState, forceBuild, looki
         VolumePlacer.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+    elseif MTMultitool.internalModes[self.mode] == "VolumeDeleter" then
+        VolumeDeleter.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
         Colorizer.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "Heatmap" then
@@ -852,6 +861,44 @@ function MTMultitool.server_blockMerge(self, data)
         shape:destroyShape()
     end
 end
+
+function MTMultitool.server_volumeDelete(self, data)
+    local originLocal = data.origin
+    local finalLocal = data.final
+    local body = data.body
+    local halfBlock = 0.125
+    local x = math.min(originLocal.x, finalLocal.x) - halfBlock
+    local y = math.min(originLocal.y, finalLocal.y) - halfBlock
+    local z = math.min(originLocal.z, finalLocal.z) - halfBlock
+    local xMax = math.max(originLocal.x, finalLocal.x) - halfBlock
+    local yMax = math.max(originLocal.y, finalLocal.y) - halfBlock
+    local zMax = math.max(originLocal.z, finalLocal.z) - halfBlock
+    local voxelMap = MTMultitoolLib.getVoxelMapShapesGW(body, true)
+    local deleteShapes = {}
+    for i = x * 4, xMax * 4 do
+        for j = y * 4, yMax * 4 do
+            for k = z * 4, zMax * 4 do
+                local indexString = i / 4 .. ";" .. j / 4 .. ";" .. k / 4
+                local shapes = voxelMap[indexString]
+                if shapes == nil then
+                    goto continue
+                end
+                for _, shape in pairs(shapes) do
+                    if shape == nil then
+                        goto continue2
+                    end
+                    if not sm.exists(shape) then
+                        goto continue2
+                    end
+                    shape:destroyShape()
+                    ::continue2::
+                end
+                ::continue::
+            end
+        end
+    end
+end
+
 
 function MTMultitool.server_volumePlace(self, data)
     -- same data as blockMerge, but here we need to fill the space with logic gates

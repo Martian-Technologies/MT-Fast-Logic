@@ -503,7 +503,6 @@ function CopyPaste.doCopyPaste(multitool, data)
             if interactableDelays[interactables[i]] ~= nil then
                 newShape.controller.data = interactableDelays[interactables[i]]
             end
-            print(interactableWipeData)
             if interactableWipeData[interactables[i]] then
                 newShape.controller.data = nil
             end

@@ -936,6 +936,34 @@ function MTMultitool.client_callCallCallbackFromServer(self, data)
     CallbackEngine.client_callCallCallbackFromServer(self, data)
 end
 
+local function getInverseColor(colorId)
+    if colorId == 0 then
+        return 3
+    elseif colorId == 1 then
+        return 2
+    elseif colorId == 2 then
+        return 1
+    elseif colorId == 3 then
+        return 0
+    end
+    local color = sm.MTFastLogic.FastLogicBlockColors[colorId + 1]
+    local maxDist = -1
+    local colorIdLocal = 0
+    for i = 4, 40 do
+        local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
+        local diff = math.sqrt(
+            (color.r - compColor.r) ^ 2 +
+            (color.g - compColor.g) ^ 2 +
+            (color.b - compColor.b) ^ 2
+        )
+        if diff > maxDist then
+            maxDist = diff
+            colorIdLocal = i - 1
+        end
+    end
+    return colorIdLocal
+end
+
 function MTMultitool.server_recolor(self, data)
     local colorId = data.color
     local mode = data.mode
@@ -980,36 +1008,42 @@ function MTMultitool.server_recolor(self, data)
                         else
                             local currentShapeColor = shape:getColor()
                             local colorIdLocal = 0
-                            if colorId == "match" then
-                                local minDist = 1000000
-                                for i = 1, 40 do
-                                    local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
-                                    local diff = math.sqrt(
-                                        (currentShapeColor.r - compColor.r) ^ 2 +
-                                        (currentShapeColor.g - compColor.g) ^ 2 +
-                                        (currentShapeColor.b - compColor.b) ^ 2
-                                    )
-                                    if diff < minDist then
-                                        minDist = diff
-                                        colorIdLocal = i - 1
-                                    end
-                                end
-                            elseif colorId == "invert" then
-                                local maxDist = -1
-                                for i = 1, 40 do
-                                    local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
-                                    local diff = math.sqrt(
-                                        (currentShapeColor.r - compColor.r) ^ 2 +
-                                        (currentShapeColor.g - compColor.g) ^ 2 +
-                                        (currentShapeColor.b - compColor.b) ^ 2
-                                    )
-                                    if diff > maxDist then
-                                        maxDist = diff
-                                        colorIdLocal = i - 1
-                                    end
+                            local minDist = 1000000
+                            for i = 1, 40 do
+                                local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
+                                local diff = math.sqrt(
+                                    (currentShapeColor.r - compColor.r) ^ 2 +
+                                    (currentShapeColor.g - compColor.g) ^ 2 +
+                                    (currentShapeColor.b - compColor.b) ^ 2
+                                )
+                                if diff < minDist then
+                                    minDist = diff
+                                    colorIdLocal = i - 1
                                 end
                             end
-                            creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorIdLocal)
+                            if colorId == "match" then
+                                creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorIdLocal)
+                            elseif colorId == "invert" then
+                                if minDist < 5 then
+                                    creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id,
+                                    getInverseColor(colorIdLocal))
+                                else
+                                    local maxDist = -1
+                                    for i = 1, 40 do
+                                        local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
+                                        local diff = math.sqrt(
+                                            (currentShapeColor.r - compColor.r) ^ 2 +
+                                            (currentShapeColor.g - compColor.g) ^ 2 +
+                                            (currentShapeColor.b - compColor.b) ^ 2
+                                        )
+                                        if diff > maxDist then
+                                            maxDist = diff
+                                            colorIdLocal = i - 1
+                                        end
+                                    end
+                                    creation.FastLogicRealBlockManager:changeConnectionColor(interactable.id, colorIdLocal)
+                                end
+                            end
                         end
                     elseif mode == "Block" then
                         if type(colorId) == "number" then
@@ -1034,8 +1068,8 @@ function MTMultitool.server_recolor(self, data)
                                 if gateColorId == nil then
                                     goto continue2
                                 end
-                                local connectionColor = sm.MTFastLogic.FastLogicBlockColors[gateColorId + 1]
                                 if colorId == "match" then
+                                    local connectionColor = sm.MTFastLogic.FastLogicBlockColors[gateColorId + 1]
                                     local minDist = 1000000
                                     local colorIdLocal = 0
                                     for i = 1, 40 do
@@ -1053,19 +1087,7 @@ function MTMultitool.server_recolor(self, data)
                                     shape:setColor(sm.MTFastLogic.FastLogicBlockColors[colorIdLocal + 1])
                                 elseif colorId == "invert" then
                                     local maxDist = -1
-                                    local colorIdLocal = 0
-                                    for i = 1, 40 do
-                                        local compColor = sm.MTFastLogic.FastLogicBlockColors[i]
-                                        local diff = math.sqrt(
-                                            (connectionColor.r - compColor.r) ^ 2 +
-                                            (connectionColor.g - compColor.g) ^ 2 +
-                                            (connectionColor.b - compColor.b) ^ 2
-                                        )
-                                        if diff > maxDist then
-                                            maxDist = diff
-                                            colorIdLocal = i - 1
-                                        end
-                                    end
+                                    local colorIdLocal = getInverseColor(gateColorId)
                                     shape:setColor(sm.MTFastLogic.FastLogicBlockColors[colorIdLocal + 1])
                                 end
                             end

@@ -228,6 +228,7 @@ function CopyPaste.doCopyPaste(multitool, data)
                 goto continue
             end
             local type = block.type
+            print(type)
             if type ~= nil then
                 if type == "andBlocks" then
                     interactableModes[intId] = 0
@@ -249,6 +250,8 @@ function CopyPaste.doCopyPaste(multitool, data)
                     local seconds = creation.FastTimers[uuid].client_seconds
                     local ticks = creation.FastTimers[uuid].client_ticks
                     interactableDelays[intId] = FastLogicRunnerRunner.convertTimerDelayToData(seconds, ticks)
+                elseif type == "Address" or type == "DataIn" or type == "DataOut" or type == "WriteData" or type == "BlockMemory" then
+                    interactableWipeData[intId] = true
                 end
             -- elseif luminance ~= nil then
             --     interactableLums[intId] = luminance
@@ -499,6 +502,10 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
             if interactableDelays[interactables[i]] ~= nil then
                 newShape.controller.data = interactableDelays[interactables[i]]
+            end
+            print(interactableWipeData)
+            if interactableWipeData[interactables[i]] then
+                newShape.controller.data = nil
             end
             newShape.controller.controllers = {}
             for j = 1, #internalConnections do

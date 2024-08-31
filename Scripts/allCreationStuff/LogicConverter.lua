@@ -42,7 +42,7 @@ for k, v in pairs(sm.MTFastLogic.LogicConverter.vGateModesToFGateModes) do
     fGateModesToVGateModes[v] = k
 end
 
-local vLightLumsToFLightLums = {
+sm.MTFastLogic.LogicConverter.vLightLumsToFLightLums = {
     [10] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgK",
     [20] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQgU",
     [30] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQge",
@@ -55,7 +55,7 @@ local vLightLumsToFLightLums = {
     [100] = "gExVQQAAAAEFBQDwAgIAAAAEgGx1bWluYW5jZQhk",
 }
 local fLightLumsToVLightLums = {}
-for k, v in pairs(vLightLumsToFLightLums) do
+for k, v in pairs(sm.MTFastLogic.LogicConverter.vLightLumsToFLightLums) do
     fLightLumsToVLightLums[v] = k
 end
 
@@ -104,6 +104,58 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
     else
         sm.MTFastLogic.FastLogicRunnerRunner:convertToVanillaInternal(body)
     end
+end
+
+function FastLogicRunnerRunner.convertTimerDelayToData(secondsUnprocessed, ticksUnprocessed)
+    local childdata = "0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA"
+    local binarr = {}
+    local bincount = 1
+    for k = #childdata, 1, -1 do
+        local char = string.sub(childdata, k, k)
+        local index, _ = string.find(letters, char)
+        for l = 0, 5 do
+            if bit.band(index, 2 ^ l) > 0 then
+                binarr[bincount] = 1
+                bincount = bincount + 1
+            else
+                binarr[bincount] = 0
+                bincount = bincount + 1
+            end
+        end
+    end
+
+    local seconds = 4 + secondsUnprocessed
+    for i = 5, 10 do
+        if bit.band(seconds, 2 ^ (i - 5)) > 0 then
+            binarr[i] = 1
+        else
+            binarr[i] = 0
+        end
+    end
+    local ticks = 16 + ticksUnprocessed
+    for i = 117, 122 do
+        if bit.band(ticks, 2 ^ (i - 117)) > 0 then
+            binarr[i] = 1
+        else
+            binarr[i] = 0
+        end
+    end
+
+    local newchilddata = childdata
+    bincount = 1
+    for k = #childdata, 1, -1 do
+        local index = 0
+        for l = 0, 5 do
+            if binarr[bincount] == 1 then
+                index = index + 2 ^ l
+            end
+            bincount = bincount + 1
+        end
+        --childdata[k] = b[index]
+        local char = string.sub(letters, index, index)
+        newchilddata = string.replace_char(k, newchilddata, char)
+    end
+    return newchilddata
 end
 
 function FastLogicRunnerRunner.convertToVanillaInternal(self, bodyToGetData)
@@ -227,63 +279,14 @@ function FastLogicRunnerRunner.convertToFastInternal(self, bodyToGetData)
                 child.controller.active = nil
             elseif child.shapeId == "8f7fd0e7-c46e-4944-a414-7ce2437bb30f" then --Vanilla Timer
                 child.shapeId = "db0bc11b-c083-4a6a-843f-73ac1033e6fe"
-                
-                local childdata = "0ExVQQAAAAEFAAAAAgIFAPAHgHRpY2tzCAAEAAAAB3NlY29uZHMIAA"
-                local binarr = {}
-                local bincount = 1
-                for k = #childdata, 1, -1 do
-                    local char = string.sub(childdata, k, k)
-                    local index, _ = string.find(letters, char)
-                    for l = 0, 5 do
-                        if bit.band(index, 2 ^ l) > 0 then
-                            binarr[bincount] = 1
-                            bincount = bincount + 1
-                        else
-                            binarr[bincount] = 0
-                            bincount = bincount + 1
-                        end
-                    end
-                end
 
-                local seconds = 4 + child.controller.seconds
-                for i = 5, 10 do
-                    if bit.band(seconds, 2 ^ (i - 5)) > 0 then
-                        binarr[i] = 1
-                    else
-                        binarr[i] = 0
-                    end
-                end
-                local ticks = 16 + child.controller.ticks
-                for i = 117, 122 do
-                    if bit.band(ticks, 2 ^ (i - 117)) > 0 then
-                        binarr[i] = 1
-                    else
-                        binarr[i] = 0
-                    end
-                end
-
-                local newchilddata = childdata
-                bincount = 1
-                for k = #childdata, 1, -1 do
-                    local index = 0
-                    for l = 0, 5 do
-                        if binarr[bincount] == 1 then
-                            index = index + 2 ^ l
-                        end
-                        bincount = bincount + 1
-                    end
-                    --childdata[k] = b[index]
-                    local char = string.sub(letters, index, index)
-                    newchilddata = string.replace_char(k, newchilddata, char)
-                end
-
-                child.controller.data = newchilddata
+                child.controller.data = FastLogicRunnerRunner.convertTimerDelayToData(child.controller.seconds, child.controller.ticks)
                 child.controller.active = nil
                 child.controller.seconds = nil
                 child.controller.ticks = nil
             elseif vLightsToFLights[child.shapeId] ~= nil then --Vanilla Light
                 child.shapeId = vLightsToFLights[child.shapeId]
-                child.controller.data = vLightLumsToFLightLums[child.controller.luminance]
+                child.controller.data = sm.MTFastLogic.LogicConverter.vLightLumsToFLightLums[child.controller.luminance]
                 child.controller.coneAngle = nil
                 child.controller.luminance = nil
             -- elseif child.shapeId == "0eb09225-11c7-4178-b87a-9fdf7343f472" then -- Fast Ram

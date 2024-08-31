@@ -214,6 +214,9 @@ function CopyPaste.doCopyPaste(multitool, data)
 
     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
     local interactableModes = {}
+    local interactableLums = {}
+    local interactableDelays = {}
+    local interactableWipeData = {}
     if creation ~= nil then
         for _, intId in ipairs(interactables) do
             local uuid = creation.uuids[intId]
@@ -221,23 +224,34 @@ function CopyPaste.doCopyPaste(multitool, data)
                 goto continue
             end
             local block = creation.blocks[uuid]
+            if block == nil then
+                goto continue
+            end
             local type = block.type
             if type ~= nil then
-                local integerType = 0
                 if type == "andBlocks" then
-                    integerType = 0
+                    interactableModes[intId] = 0
                 elseif type == "orBlocks" then
-                    integerType = 1
+                    interactableModes[intId] = 1
                 elseif type == "xorBlocks" then
-                    integerType = 2
+                    interactableModes[intId] = 2
                 elseif type == "nandBlocks" then
-                    integerType = 3
+                    interactableModes[intId] = 3
                 elseif type == "norBlocks" then
-                    integerType = 4
+                    interactableModes[intId] = 4
                 elseif type == "xnorBlocks" then
-                    integerType = 5
+                    interactableModes[intId] = 5
+                elseif type == "lightBlocks" then
+                    -- advPrint(creation.FastLights[uuid], 3, 100, true)
+                    local light = creation.FastLights[uuid]
+                    interactableLums[intId] = light.data.luminance
+                elseif type == "timerBlocks" then
+                    local seconds = creation.FastTimers[uuid].client_seconds
+                    local ticks = creation.FastTimers[uuid].client_ticks
+                    interactableDelays[intId] = FastLogicRunnerRunner.convertTimerDelayToData(seconds, ticks)
                 end
-                interactableModes[intId] = integerType
+            -- elseif luminance ~= nil then
+            --     interactableLums[intId] = luminance
             end
             ::continue::
         end
@@ -476,7 +490,15 @@ function CopyPaste.doCopyPaste(multitool, data)
             end
             newShape.controller.id = maxIntId + i
             if interactableModes[interactables[i]] ~= nil then
-                newShape.controller.data = sm.MTFastLogic.LogicConverter.vGateModesToFGateModes[interactableModes[interactables[i]]]
+                newShape.controller.data = sm.MTFastLogic.LogicConverter.vGateModesToFGateModes
+                [interactableModes[interactables[i]]]
+            end
+            if interactableLums[interactables[i]] ~= nil then
+                newShape.controller.data = sm.MTFastLogic.LogicConverter.vLightLumsToFLightLums
+                    [interactableLums[interactables[i]]]
+            end
+            if interactableDelays[interactables[i]] ~= nil then
+                newShape.controller.data = interactableDelays[interactables[i]]
             end
             newShape.controller.controllers = {}
             for j = 1, #internalConnections do

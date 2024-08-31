@@ -259,6 +259,7 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     --         self.creation.FastLogicRealBlockManager:changeConnectionColor(id, 0)
     --     end
     -- end
+    -- advPrint(self, 3, 100, true)
 end
 
 function BaseFastLogicBlock.server_changeBlockState(self)

@@ -800,7 +800,23 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             end
             local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, extraTooltip)
             if #self.selectedShapes ~= 0 then
-                sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>     Connections to Silicon will not be copied     <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>")
+                local siliconFound = false
+                -- local interactableIds = {}
+                -- for _, shape in ipairs(self.selectedShapes) do
+                if self.activeBody ~= nil then
+                    for _, shape in ipairs(self.activeBody:getCreationShapes()) do
+                        local shapeUuid = shape:getShapeUuid()
+                        -- table.insert(interactableIds, shape.interactable:getId())
+                        if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
+                            siliconFound = true
+                            break
+                        end
+                    end
+                end
+                if siliconFound then
+                    sm.gui.setInteractionText(
+                    "<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p> Connections to Silicon will not be copied <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>")
+                end
             end
             if result ~= nil then
                 local halfBlock = 0.125
@@ -1132,22 +1148,22 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     self.externalConnectionsPolicy = "absolute"
                 end
             end
-            -- local siliconFound = false
-            -- -- local interactableIds = {}
-            -- -- for _, shape in ipairs(self.selectedShapes) do
-            -- if self.activeBody ~= nil then
-            --     for _, shape in ipairs(self.activeBody:getCreationShapes()) do
-            --         local shapeUuid = shape:getShapeUuid()
-            --         -- table.insert(interactableIds, shape.interactable:getId())
-            --         if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
-            --             siliconFound = true
-            --             break
-            --         end
-            --     end
-            -- end
-            -- if siliconFound then
-            --     sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p> Copying and pasting silicon-related blocks will lead to undefined behavior. <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>")
-            -- end
+            local siliconFound = false
+            -- local interactableIds = {}
+            -- for _, shape in ipairs(self.selectedShapes) do
+            if self.activeBody ~= nil then
+                for _, shape in ipairs(self.activeBody:getCreationShapes()) do
+                    local shapeUuid = shape:getShapeUuid()
+                    -- table.insert(interactableIds, shape.interactable:getId())
+                    if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
+                        siliconFound = true
+                        break
+                    end
+                end
+            end
+            if siliconFound then
+                sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p> Connections to Silicon will not be copied <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>")
+            end
         end
         for i = 1, #self.vectors do
             local vec = self.vectors[i]

@@ -790,7 +790,18 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             end
             vs.actionWord = "Add Shapes"
             vs.doConfirm = false
-            local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+            local extraTooltip = {
+                selectOrigin = "",
+                selectFinal = "",
+                confirm = "",
+            }
+            if #self.selectedShapes ~= 0 then
+                extraTooltip.selectOrigin = "     "..sm.gui.getKeyBinding("ForceBuild", true) .. "Confirm selection"
+            end
+            local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, extraTooltip)
+            if #self.selectedShapes ~= 0 then
+                sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>     Connections to Silicon will not be copied     <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>")
+            end
             if result ~= nil then
                 local halfBlock = 0.125
                 local body = result.body
@@ -804,6 +815,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 local yMax = math.max(originLocal.y, finalLocal.y) - halfBlock
                 local zMax = math.max(originLocal.z, finalLocal.z) - halfBlock
                 local allShapes = {}
+                local hitSilicon = false
                 for i = x * 4, xMax * 4 do
                     for j = y * 4, yMax * 4 do
                         for k = z * 4, zMax * 4 do
@@ -812,12 +824,20 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                             if shapes ~= nil then
                                 for _, shape in ipairs(shapes) do
                                     if sm.exists(shape) then
-                                        table.insert(allShapes, shape)
+                                        -- list of silicon uuids = sm.MTFastLogic.SiliconBlocksShapeDB.allUuids
+                                        if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shape:getShapeUuid())) then
+                                            hitSilicon = true
+                                        else
+                                            table.insert(allShapes, shape)
+                                        end
                                     end
                                 end
                             end
                         end
                     end
+                end
+                if hitSilicon then
+                    sm.gui.displayAlertText("Silicon blocks cannot be copied")
                 end
                 addShapes(multitool, allShapes)
                 VolumeSelector.cleanUp(multitool)
@@ -1112,22 +1132,22 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     self.externalConnectionsPolicy = "absolute"
                 end
             end
-            local siliconFound = false
-            -- local interactableIds = {}
-            -- for _, shape in ipairs(self.selectedShapes) do
-            if self.activeBody ~= nil then
-                for _, shape in ipairs(self.activeBody:getCreationShapes()) do
-                    local shapeUuid = shape:getShapeUuid()
-                    -- table.insert(interactableIds, shape.interactable:getId())
-                    if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
-                        siliconFound = true
-                        break
-                    end
-                end
-            end
-            if siliconFound then
-                sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p> Copying and pasting silicon-related blocks will lead to undefined behavior. <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>")
-            end
+            -- local siliconFound = false
+            -- -- local interactableIds = {}
+            -- -- for _, shape in ipairs(self.selectedShapes) do
+            -- if self.activeBody ~= nil then
+            --     for _, shape in ipairs(self.activeBody:getCreationShapes()) do
+            --         local shapeUuid = shape:getShapeUuid()
+            --         -- table.insert(interactableIds, shape.interactable:getId())
+            --         if table.contains(sm.MTFastLogic.SiliconBlocksShapeDB.allUuids, tostring(shapeUuid)) then
+            --             siliconFound = true
+            --             break
+            --         end
+            --     end
+            -- end
+            -- if siliconFound then
+            --     sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p> Copying and pasting silicon-related blocks will lead to undefined behavior. <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARNING !</p>")
+            -- end
         end
         for i = 1, #self.vectors do
             local vec = self.vectors[i]

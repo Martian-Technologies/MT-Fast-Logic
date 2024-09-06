@@ -999,8 +999,14 @@ function MTMultitool.server_recolor(self, data)
                         goto continue2
                     end
                     if mode == "Connection" then
+                        if creation == nil then
+                            return
+                        end
                         local interactable = shape:getInteractable()
                         if interactable == nil then
+                            goto continue2
+                        end
+                        if not table.contains(MTGateUUIDs, shape.uuid) then
                             goto continue2
                         end
                         if type(colorId) == "number" then
@@ -1056,6 +1062,10 @@ function MTMultitool.server_recolor(self, data)
                             -- check if the shape is a gate
                             if table.contains(MTGateUUIDs, shape.uuid) then
                                 -- check the connection color
+                                
+                                if creation == nil then
+                                    return
+                                end
                                 local gateUuid = creation.uuids[interactable.id]
                                 if gateUuid == nil then
                                     goto continue2

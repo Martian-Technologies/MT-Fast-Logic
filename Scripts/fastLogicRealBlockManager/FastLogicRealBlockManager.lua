@@ -47,8 +47,10 @@ function FastLogicRealBlockManager.update(self)
     self:updateDisplay(updatedGates)
 
     for k, v in pairs(self.creation.FastLogicBlockMemorys) do
-        sm.event.sendToInteractable(v.interactable, "server_saveHeldMemory")
-        v:server_saveHeldMemory()
+		if sm.exists(v.interactable) then
+			sm.event.sendToInteractable(v.interactable, "server_saveHeldMemory")
+			v:server_saveHeldMemory()
+		end
     end
     -- sm.MTUtil.Profiler.Time.off("update" .. tostring(self.creationId))
     -- print("update" .. tostring(self.creationId) .. ": " .. tostring(sm.MTUtil.Profiler.Time.get("update" .. tostring(self.creationId))))

@@ -178,7 +178,7 @@ function Heatmap.client_onUpdate(multitool, dt)
             local siliconId = block.siliconBlockId
             local silicon = siliconBlocks[siliconId]
             if silicon == nil then
-                advPrint("Silicon block not found", 5, 100, true)
+                print("Silicon block not found")
                 goto continue
             end
             body = silicon.shape:getBody()

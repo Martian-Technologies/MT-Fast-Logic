@@ -104,6 +104,8 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
 end
 
 function FastLogicRunner.update(self)
+    -- fPrint(self, {depth=2, maxTableLength=1000, ignoreTypes={"function"}})
+    
     if self.isNew ~= nil then
         if self.isNew > 1 then
             self.isNew = self.isNew - 1
@@ -121,14 +123,16 @@ function FastLogicRunner.update(self)
         self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
     end
     if self.updateTicks >= 1 then
+        -- sm.MTUtil.Profiler.Time.on("doPreUpdate")
         --make sure all blocks are not broken
+        -- fPrint(runningBlockLengths)
         for pathId = 1, #runningBlocks do
             if self.pathNames[pathId] ~= "none" then
                 local i = 1
                 while i <= runningBlockLengths[pathId] do
                     local id = runningBlocks[pathId][i]
                     if countOfOnInputs[id] == false then
-                        -- pri nt("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
+                        print("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
                         nextRunningBlocks[id] = false
                         remove(runningBlocks[pathId], i)
                         runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1
@@ -138,6 +142,11 @@ function FastLogicRunner.update(self)
                 end
             end
         end
+        -- sm.MTUtil.Profiler.Time.off("doPreUpdate")
+        -- sm.MTUtil.Profiler.Count.increment("doPreUpdate")
+        -- local timeTotal = sm.MTUtil.Profiler.Time.get("doPreUpdate")
+        -- local countTotal = sm.MTUtil.Profiler.Count.get("doPreUpdate")
+        -- print("doPreUpdate: " .. timeTotal / countTotal)
         -- EndTickButtons
         local EndTickButtons = self.blocksSortedByPath[self.pathIndexs["EndTickButtons"]]
         for k = 1, #EndTickButtons do
@@ -279,6 +288,7 @@ function FastLogicRunner.doUpdate(self)
         end
         k = k + 1
     end
+    runningBlockLengths[12] = 0
     runningBlockLengths[13] = 0
     -- xnor
     for k = 1, runningBlockLengths[15] do

@@ -260,6 +260,8 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     --     end
     -- end
     -- advPrint(self.data, 3, 100, true)
+    -- sm.MTUtil.Profiler.Time.reset()
+    -- sm.MTUtil.Profiler.Count.reset()
 end
 
 function BaseFastLogicBlock.server_changeBlockState(self)

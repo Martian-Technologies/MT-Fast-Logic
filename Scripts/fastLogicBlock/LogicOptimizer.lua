@@ -4,7 +4,7 @@ local table = table
 local type = type
 local pairs = pairs
 local sm = sm
-local BalencedLogicFinder = sm.MTFastLogic.BalencedLogicFinder
+local BalancedLogicFinder = sm.MTFastLogic.BalancedLogicFinder
 
 
 function FastLogicRunner.optimizeLogic(self)
@@ -115,7 +115,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
               layerHash,
               outputBlocks,
               outputHash,
-              farthestOutput = BalencedLogicFinder.findBalencedLogic(self, id)
+              farthestOutput = BalancedLogicFinder.findBalancedLogic(self, id)
         if layers ~= nil then
             local outputBlockTimes = {}
             for i = 1, #outputBlocks do

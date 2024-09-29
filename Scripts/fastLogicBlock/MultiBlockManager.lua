@@ -232,7 +232,7 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
             end
         end
 
-        local idsToUpdate, states, perTimerData = self:simulatedManyBalencedUpdates(
+        local idsToUpdate, states, perTimerData = self:simulatedManyBalancedUpdates(
             multiData[2],
             numberOfTicksToRun,
             inputStatesOverTime

@@ -782,8 +782,8 @@ end
 
 
 
--- assumes that included blocks are part of a balenced circuit
-function FastLogicRunner.simulatedManyBalencedUpdates(
+-- assumes that included blocks are part of a balanced circuit
+function FastLogicRunner.simulatedManyBalancedUpdates(
     self,
     blockIdsToInclude,
     numberOfTicksToRun,
@@ -999,7 +999,7 @@ end
 
 --- unused. If it doesn't work, don't be surprised 
 --- no it will not work
-function FastLogicRunner.simulatedBalencedUpdates(self, blockIdsToInclude, numberOfTicksToRun, inputStates)
+function FastLogicRunner.simulatedBalancedUpdates(self, blockIdsToInclude, numberOfTicksToRun, inputStates)
     self:setFastReadData()
     local usingPathIds = {}
     local states = {}

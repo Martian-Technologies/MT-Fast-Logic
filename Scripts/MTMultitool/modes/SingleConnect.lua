@@ -8,10 +8,13 @@ function SingleConnect.inject(multitool)
     self.selectedTarget = {}
     self.updateNametags = NametagManager.createController(multitool)
     self.operationState = nil -- "adding", "removing", nil
+    self.readingRotate = false
+    self.rotated = false
 end
 
 function SingleConnect.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
     local self = multitool.SingleConnect
+    self.readingRotate = false
     multitool.SelectionModeController.modeActive = "BlockSelector"
     if primaryState > 0 then
         if self.operationState == nil then
@@ -81,18 +84,22 @@ function SingleConnect.trigger(multitool, primaryState, secondaryState, forceBui
     sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Source     ",
         sm.gui.getKeyBinding("Attack", true), "Target")
     if #self.selectedSource > 0 and #self.selectedTarget > 0 then
+        self.readingRotate = true
         local canParallel = false
+        local action = "Connect"
+        local cm = multitool.ConnectionManager
+        if cm.mode == "disconnect" then
+            action = "Disconnect"
+        end
         if #self.selectedSource == #self.selectedTarget then
             canParallel = true
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Connect NtoN     ",
-                sm.gui.getKeyBinding("Reload", true), "Connect Parallel")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " NtoN     ",
+                sm.gui.getKeyBinding("Reload", true), action .. " Parallel" .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " Change mode")
         else
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Connect NtoN")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " NtoN" .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " Change mode")
         end
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
-            local cm = multitool.ConnectionManager
             cm.preview = {}
-            cm.mode = "connect"
             for i = 1, #self.selectedSource do
                 local shape1 = self.selectedSource[i]
                 for j = 1, #self.selectedTarget do
@@ -107,6 +114,10 @@ function SingleConnect.trigger(multitool, primaryState, secondaryState, forceBui
             ConnectionManager.commitPreview(multitool)
             SingleConnect.cleanUp(multitool)
         end
+        if self.rotated then
+            self.rotated = false
+            ConnectionManager.toggleMode(multitool)
+        end
     end
 end
 
@@ -120,7 +131,6 @@ function SingleConnect.client_onReload(multitool)
     end
     local cm = multitool.ConnectionManager
     cm.preview = {}
-    cm.mode = "connect"
     for i = 1, #self.selectedSource do
         local shape1 = self.selectedSource[i]
         local shape2 = self.selectedTarget[i]
@@ -143,4 +153,5 @@ function SingleConnect.cleanUp(multitool)
     self.selectedSource = {}
     self.selectedTarget = {}
     self.updateNametags(nil)
+    self.readingRotate = false
 end

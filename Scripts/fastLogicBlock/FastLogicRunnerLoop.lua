@@ -124,7 +124,7 @@ function FastLogicRunner.update(self)
     end
     if self.updateTicks >= 1 then
         -- sm.MTUtil.Profiler.Time.on("doPreUpdate")
-        --make sure all blocks are not broken
+        -- make sure all blocks are not broken
         -- fPrint(runningBlockLengths)
         for pathId = 1, #runningBlocks do
             if self.pathNames[pathId] ~= "none" then

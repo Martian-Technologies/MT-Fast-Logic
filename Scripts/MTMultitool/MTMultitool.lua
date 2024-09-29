@@ -511,6 +511,12 @@ function MTMultitool.client_onToggle(self)
         self.mode = 3
         return true
     end
+    if self.SingleConnect.readingRotate then
+        self.SingleConnect.rotated = true
+        return true
+    else
+        self.SingleConnect.rotated = false
+    end
     if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
         SiliconConverterTool.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then

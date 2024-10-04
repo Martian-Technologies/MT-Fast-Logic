@@ -193,7 +193,7 @@ function FastLogicRunner.doLastTickUpdates(self)
                     end
                     if timerSkipCount == 1 then
                         blockStates[id] = state
-                        local outputs = blockOutputs[multiData[2][index-1]]
+                        local outputs = blockOutputs[multiData[2][index - 1]]
                         for k = 1, #outputs do
                             local outputId = outputs[k]
                             if runnableBlockPathIds[outputId] == 2 then
@@ -219,7 +219,7 @@ function FastLogicRunner.doLastTickUpdates(self)
                             state = not state
                         end
                         blockStates[id] = state
-                        local outputs = blockOutputs[multiData[2][index-1]]
+                        local outputs = blockOutputs[multiData[2][index - 1]]
                         for k = 1, #outputs do
                             local outputId = outputs[k]
                             if runnableBlockPathIds[outputId] == 2 then
@@ -230,6 +230,19 @@ function FastLogicRunner.doLastTickUpdates(self)
                     index = index + 1
                 end
                 time = time - 1
+            end
+            -- endBlockId
+            if runnableBlockPathIds[endBlockId] == 4 then
+                state = not blockStates[endBlockId]
+            else
+                state = blockStates[endBlockId]
+            end
+            local outputs = blockOutputs[multiData[2][#multiData[2]-1]]
+            for k = 1, #outputs do
+                local outputId = outputs[k]
+                if runnableBlockPathIds[outputId] == 2 then
+                    blockStates[outputId] = state
+                end
             end
         end
     end

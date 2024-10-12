@@ -178,6 +178,17 @@ local function injectElements(multitool)
             self.selectedColor = self.specialModeLast
         end,
     })
+    table.insert(hUI.elements, {
+        name = "info",
+        type = "indicator",
+        position = { a = 0, e = 0.07 * -0.5 * fovMult }, -- a = azimuth, e = elevation
+        color = sm.color.new(0.9, 0.9, 0.9),
+        getText = function()
+            return "Changing the color of connection dots only works on Fast Logic gates."
+        end,
+        angleBoundHorizontal = 0.2 * fovMult,
+        angleBoundVertical = 0.05 * fovMult,
+    })
 end
 
 function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)

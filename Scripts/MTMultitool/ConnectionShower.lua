@@ -4,7 +4,7 @@ function ConnectionShower.inject(multitool)
     multitool.ConnectionShower = {}
     local self = multitool.ConnectionShower
     self.enabled = false
-    self.hideOnPanAway = true
+    self.hideOnPanAway = false
     ConnectionShower.syncStorage(multitool)
     self.updateNametags = NametagManager.createController(multitool)
     self.lastLookAt = nil

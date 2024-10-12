@@ -441,3 +441,171 @@ function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint
 
     return false, nil
 end
+
+function ConnectionRaycaster:rayTraceClosestDot(rayOrigin, rayDirection, bodyConstraint, connectionDotRad)
+    local connectionDotRadiusGiven = self.connectionDotRadius
+    if connectionDotRad ~= nil then
+        connectionDotRadiusGiven = connectionDotRad
+    end
+    -- go till we hit the first body
+    local hit, res = sm.physics.raycast(rayOrigin, rayOrigin + rayDirection * 128, sm.localPlayer.getPlayer().character)
+    if not hit then
+        return false, nil
+    end
+    if res.type ~= "body" then
+        return false, resh
+    end
+    local body = res:getBody()
+    -- check if body is in the bodyConstraint table
+    local found = false
+    if bodyConstraint ~= nil then
+        for i = 1, #bodyConstraint do
+            if body == bodyConstraint[i] then
+                found = true
+                break
+            end
+        end
+    else
+        found = true
+    end
+    if not found then
+        return false, nil
+    end
+    local localAabbMin, localAabbMax = body:getLocalAabb()
+    local localAabbMin = localAabbMin / 4
+    local localAabbMax = localAabbMax / 4
+    local rayPos = res.pointLocal
+    -- ray direction is in world space, convert it to local space
+    local rayDirection = sm.quat.inverse(body.worldRotation) * rayDirection
+    -- table.insert(tags, {
+    --     pos = body:transformPoint(rayPos+rayDirection),
+    --     color = sm.color.new(1, 1, 1, 1),
+    --     txt = "•"
+    -- })
+    -- if true then
+    --     return false, nil
+    -- end
+    local stepX = 1
+    local stepY = 1
+    local stepZ = 1
+    if rayDirection.x < 0 then
+        stepX = -1
+    end
+    if rayDirection.y < 0 then
+        stepY = -1
+    end
+    if rayDirection.z < 0 then
+        stepZ = -1
+    end
+
+    local voxelMap = MTMultitoolLib.getVoxelMapMultidotblocks(body)
+    -- local tags = {}
+    -- -- go through every entry in the voxel map
+    -- for k, v in pairs(voxelMap) do
+    --     -- k is a string containing the local coordinates of the voxel
+    --     local coordTable = parseTableAsNumbers(splitString(k, ";"))
+    --     local pos = sm.vec3.new(coordTable[1], coordTable[2], coordTable[3])
+    --     table.insert(tags, {
+    --         pos = body:transformPoint(pos),
+    --         color = sm.color.new(1, 1, 1, 1),
+    --         txt = "•"
+    --     })
+    -- end
+
+    -- print('CASTING RAY')
+    -- print(rayDirection)
+    local closestDistance = 0.25
+    local closestBlock = nil
+    local halfBlock = sm.vec3.new(0.125, 0.125, 0.125)
+    while true do --DDA loop
+        -- check if the ray hits a voxel
+        local position = sm.vec3.new(math.floor(rayPos.x * 4), math.floor(rayPos.y * 4), math.floor(rayPos.z * 4)) / 4
+        -- table.insert(tags, {
+        --     pos = body:transformPoint(position),
+        --     color = sm.color.new(0, 1, 0, 1),
+        --     txt = "[ ]"
+        -- })
+        local indexString = position.x .. ";" .. position.y .. ";" .. position.z
+        local hitBlock = voxelMap[indexString]
+        if hitBlock ~= nil and sm.exists(hitBlock) then
+            -- check connection dot hit
+            -- print(hitBlock)
+            local bb = hitBlock:getBoundingBox()
+            local xAxis = hitBlock:getXAxis()
+            local yAxis = hitBlock:getYAxis()
+            local zAxis = hitBlock:getZAxis()
+            local hitBlockPos = hitBlock:getLocalPosition() / 4 + xAxis * bb.x / 2 + yAxis * bb.y / 2 + zAxis * bb.z / 2
+            -- print(position-halfBlock)
+            -- print(hitBlockPos)
+            local sphereToRayOrigin = (hitBlockPos - rayPos) * 4
+            local tc = sphereToRayOrigin:dot(rayDirection)
+            if tc > 0 then
+                local d2 = sphereToRayOrigin:length2() - tc * tc
+                if closestDistance == nil or d2 < closestDistance then
+                    closestDistance = d2
+                    closestBlock = hitBlock
+                end
+            end
+        end
+        local tMaxX = 0
+        local tMaxY = 0
+        local tMaxZ = 0
+        -- print(rayDirection)
+        -- find tMax until the next voxel (voxels are 0.25x0.25x0.25)
+        local tMax = nil
+        if rayDirection.x ~= 0 then
+            if stepX == 1 then
+                tMaxX = (math.floor(rayPos.x * 4 + 1) - rayPos.x * 4) / rayDirection.x / 4
+            else
+                tMaxX = (rayPos.x * 4 - math.floor(rayPos.x * 4)) / -rayDirection.x / 4
+            end
+            tMax = tMaxX
+        end
+        if rayDirection.y ~= 0 then
+            if stepY == 1 then
+                tMaxY = (math.floor(rayPos.y * 4 + 1) - rayPos.y * 4) / rayDirection.y / 4
+            else
+                tMaxY = (rayPos.y * 4 - math.floor(rayPos.y * 4)) / -rayDirection.y / 4
+            end
+            if tMax == nil or tMaxY < tMax then
+                tMax = tMaxY
+            end
+        end
+        if rayDirection.z ~= 0 then
+            if stepZ == 1 then
+                tMaxZ = (math.floor(rayPos.z * 4 + 1) - rayPos.z * 4) / rayDirection.z / 4
+            else
+                tMaxZ = (rayPos.z * 4 - math.floor(rayPos.z * 4)) / -rayDirection.z / 4
+            end
+            if tMax == nil or tMaxZ < tMax then
+                tMax = tMaxZ
+            end
+        end
+        -- print(tMaxX)
+        -- print(tMaxY)
+        -- print(tMaxZ)
+        -- print('-------------------------')
+        -- move the ray to the next voxel
+        rayPos = rayPos + rayDirection * (tMax+0.01)
+        -- check if out ray is outside the body
+        if (rayPos.x < localAabbMin.x) or (rayPos.x > localAabbMax.x) or
+            (rayPos.y < localAabbMin.y) or (rayPos.y > localAabbMax.y) or
+            (rayPos.z < localAabbMin.z) or (rayPos.z > localAabbMax.z) then
+            break
+        end
+    end
+    -- self.nametagUpdate(tags)
+
+    if closestBlock == nil then
+        return false, nil
+    end
+    local res = {
+        pointWorld = body:transformPoint(closestBlock:getLocalPosition()),
+        originWorld = rayOrigin,
+        type = "body",
+        getShape = function()
+            return closestBlock
+        end,
+    }
+    return true, res
+end

@@ -183,7 +183,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "showConnections",
         type = "toggleButton",
-        position = { a = math.pi / 8 * fovMult, e = 6 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = math.pi / 8 * fovMult, e = 7 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
@@ -205,7 +205,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "hideOnPanAway",
         type = "toggleButton",
-        position = { a = math.pi / 8 * fovMult, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = math.pi / 8 * fovMult, e = 6 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
@@ -225,9 +225,31 @@ local function injectElements(multitool)
     })
 
     table.insert(hUI.elements, {
+        name = "showGateState",
+        type = "toggleButton",
+        position = { a = math.pi / 8 * fovMult, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        color = {
+            on = sm.color.new(0.2, 0.9, 0.2),
+            off = sm.color.new(0.9, 0.2, 0.2)
+        },
+        text = "Show Gate States",
+        angleBoundHorizontal = 0.1 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        getState = function()
+            return multitool.StateDisplay.enabled
+        end,
+        onclick = function()
+            StateDisplay.toggle(multitool)
+        end,
+        tooltip = function()
+            return "Lets you see the state of a logic gate when looking at it."
+        end,
+    })
+
+    table.insert(hUI.elements, {
         name = "importCreation",
         type = "button",
-        position = { a = math.pi / 8 * fovMult, e = 9 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = math.pi / 8 * fovMult, e = 10 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         text = "Import Creation",
         angleBoundHorizontal = 0.1 * fovMult,
@@ -242,7 +264,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "importCreationCaption",
         type = "indicator",
-        position = { a = math.pi / 8 * fovMult, e = 8 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = math.pi / 8 * fovMult, e = 9 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         getText = function()
             return "from Scrap Mechanic\\Data\\blueprint.json"
@@ -257,7 +279,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "doMeleeState",
         type = "toggleButton",
-        position = { a = math.pi / 8 * fovMult, e = 11 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = math.pi / 8 * fovMult, e = 12 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
@@ -280,7 +302,7 @@ local function injectElements(multitool)
         table.insert(hUI.elements, {
             name = "goToBackupMenu",
             type = "button",
-            position = { a = math.pi / 8 * fovMult, e = 13 * math.pi / 90 * fovMult },
+            position = { a = math.pi / 8 * fovMult, e = 14 * math.pi / 90 * fovMult },
             color = sm.color.new(0.2, 0.2, 0.9),
             text = "Open Backup Menu",
             angleBoundHorizontal = 0.1 * fovMult,

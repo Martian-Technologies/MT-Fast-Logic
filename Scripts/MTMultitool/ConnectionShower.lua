@@ -70,6 +70,7 @@ function ConnectionShower.client_onUpdate(multitool)
     local toolsThatDisplayConnections = {
         "8c7efc37-cd7c-4262-976e-39585f8527bf"
     }
+    local raycastType = "DDA"
     if MTMultitool.internalModes[multitool.mode] ~= "Settings" then
         table.insert(toolsThatDisplayConnections, "018e4ca0-c5be-7f80-a80f-259c5951594b")
     end
@@ -87,6 +88,9 @@ function ConnectionShower.client_onUpdate(multitool)
             return
         end
     end
+    if holdingItem == "8c7efc37-cd7c-4262-976e-39585f8527bf" then
+        raycastType = "closestDot"
+    end
 
     local displayUI = table.contains(toolsThatDisplayUI, holdingItem)
     local hit = false
@@ -94,7 +98,11 @@ function ConnectionShower.client_onUpdate(multitool)
     if doRaycast then
         local rayOrigin = sm.camera.getPosition()
         local rayDirection = sm.camera.getDirection()
-        hit, res = ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, nil, 5)
+        if raycastType == "DDA" then
+            hit, res = ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, nil, 5)
+        elseif raycastType == "closestDot" then
+            hit, res = ConnectionRaycaster:rayTraceClosestDot(rayOrigin, rayDirection, nil, 5)
+        end
     end
     if hit or self.lastLookAt ~= nil and self.hideOnPanAway == false then
         local shape = nil

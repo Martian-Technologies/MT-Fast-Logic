@@ -28,6 +28,7 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionManager.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/NametagManager.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionShower.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/StateDisplay.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
 
@@ -154,6 +155,7 @@ function MTMultitool.client_onCreate(self)
 
     MTFlying.inject(self)
     ConnectionShower.inject(self)
+    StateDisplay.inject(self)
     DoMeleeState.inject(self)
 
     HoveringUI.inject(self)
@@ -290,6 +292,10 @@ function MTMultitool.client_onUpdate(self, dt)
     success, result = pcall(ConnectionShower.client_onUpdate, self, dt)
     if not success then
         print("Error in ConnectionShower.client_onUpdate: " .. result)
+    end
+    success, result = pcall(StateDisplay.client_onUpdate, self)
+    if not success then
+        print("Error in StateDisplay.client_onUpdate: " .. result)
     end
     success, result = pcall(unsafeOnUpdateStuff, self, dt)
     if not success then

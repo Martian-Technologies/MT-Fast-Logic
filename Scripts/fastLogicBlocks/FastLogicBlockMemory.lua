@@ -39,25 +39,25 @@ function FastLogicBlockMemory.server_onCreate2(self)
         sc_component = {
             type = FastLogicBlockMemory.componentType,
             api = {
-                setValue = function(s, key, value)
+                setValue = function(key, value)
                     FastLogicBlockMemory.server_setValue(self, key, value)
                 end,
-                getValue = function(s, key)
+                getValue = function(key)
                     return self.memory[math.floor(key + 1)] or 0
                 end,
-                setValues = function(s, kvPairs)
+                setValues = function(kvPairs)
                     FastLogicBlockMemory.server_setValues(self, kvPairs)
                 end,
-                getValues = function(s, keys)
+                getValues = function(keys)
                     return FastLogicBlockMemory.server_getValues(self, keys)
                 end,
-                clearMemory = function(s)
+                clearMemory = function()
                     FastLogicBlockMemory.server_clearMemory(self)
                 end,
-                setMemory = function(s, memory)
+                setMemory = function(memory)
                     FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
                 end,
-                getMemory = function(s)
+                getMemory = function()
                     return FastLogicBlockMemory.server_getMemoryIdxOffset(self)
                 end,
             },
@@ -144,10 +144,13 @@ function FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
 end
 
 function FastLogicBlockMemory.server_getMemoryIdxOffset(self)
+    -- sm.MTUtil.Profiler.Count.increment("getMemoryIdxOffset")
+    -- sm.MTUtil.Profiler.Time.on("getMemoryIdxOffset")
     local memory = {}
-    for k,v in pairs(self.memory) do
+    for k, v in pairs(self.memory) do
         memory[k - 1] = v
     end
+    -- sm.MTUtil.Profiler.Time.off("getMemoryIdxOffset")
     return memory
 end
 
@@ -190,6 +193,13 @@ end
 
 function FastLogicBlockMemory.server_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
     print(self.memory)
+    -- local averageTime = sm.MTUtil.Profiler.Time.get("getMemoryIdxOffset") /
+    -- sm.MTUtil.Profiler.Count.get("getMemoryIdxOffset")
+    -- print("Average time: " .. tostring(averageTime))
+    -- print("Total time: " .. tostring(sm.MTUtil.Profiler.Time.get("getMemoryIdxOffset")))
+    -- print("Total count: " .. tostring(sm.MTUtil.Profiler.Count.get("getMemoryIdxOffset")))
+    -- sm.MTUtil.Profiler.Time.reset("getMemoryIdxOffset")
+    -- sm.MTUtil.Profiler.Count.reset("getMemoryIdxOffset")
 end
 
 function FastLogicBlockMemory.client_onInteract(self, character, state)

@@ -4,12 +4,16 @@ dofile "../util/compressionUtil/compressionUtil.lua"
 dofile "BaseFastLogicBlock.lua"
 
 sm.interactable.connectionType.fastLogicInterface = math.pow(2, 27)
+sm.interactable.connectionType.composite = math.pow(2, 15)
 
 FastLogicBlockMemory = table.deepCopyTo(BaseFastLogicBlock, (FastLogicBlockMemory or class()))
 FastLogicBlockMemory.colorNormal = sm.color.new(0xf00000ff)
 FastLogicBlockMemory.colorHighlight = sm.color.new(0xf53d00ff)
 FastLogicBlockMemory.connectionInput = sm.interactable.connectionType.logic
-FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface
+FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface + sm.interactable.connectionType.composite
+
+--needed for SComputers
+FastLogicBlockMemory.componentType = "MTFastMemory"
 
 function FastLogicBlockMemory.getData2(self)
     self.creation.FastLogicBlockMemorys[self.data.uuid] = self
@@ -31,6 +35,120 @@ function FastLogicBlockMemory.server_onCreate2(self)
         self.memory = {}
     end
     self.storage:save(self.data)
+    self.interactable.publicData = {
+        sc_component = {
+            type = FastLogicBlockMemory.componentType,
+            api = {
+                setValue = function(s, key, value)
+                    FastLogicBlockMemory.server_setValue(self, key, value)
+                end,
+                getValue = function(s, key)
+                    return self.memory[math.floor(key + 1)] or 0
+                end,
+                setValues = function(s, kvPairs)
+                    FastLogicBlockMemory.server_setValues(self, kvPairs)
+                end,
+                getValues = function(s, keys)
+                    return FastLogicBlockMemory.server_getValues(self, keys)
+                end,
+                clearMemory = function(s)
+                    FastLogicBlockMemory.server_clearMemory(self)
+                end,
+                setMemory = function(s, memory)
+                    FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
+                end,
+                getMemory = function(s)
+                    return FastLogicBlockMemory.server_getMemoryIdxOffset(self)
+                end,
+            },
+            docs = { -- not used yet, but I'll try to convince logic to support this
+                setValue = {
+                    "Sets the value of a key in the memory",
+                    "key: number - The key to set",
+                    "value: number - The value to set"
+                },
+                getValue = {
+                    "Gets the value of a key in the memory",
+                    "key: number - The key to get"
+                },
+                setValues = {
+                    "Sets multiple values in the memory",
+                    "kvPairs: table - A table with key-value pairs to set"
+                },
+                getValues = {
+                    "Gets multiple values from the memory",
+                    "keys: table - A table with keys to get"
+                },
+                clearMemory = {
+                    "Clears the memory"
+                },
+                setMemory = {
+                    "Sets the memory",
+                    "memory: table - The memory to set"
+                },
+                getMemory = {
+                    "Gets the memory"
+                },
+            }
+        }
+    }
+end
+
+function FastLogicBlockMemory.server_setValue(self, key, value)
+    self.memory[math.floor(key + 1)] = math.floor(value)
+    self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
+    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
+    self.storage:save(self.data)
+end
+
+function FastLogicBlockMemory.server_setValues(self, kvPairs)
+    for k, v in pairs(kvPairs) do
+        self.memory[math.floor(k + 1)] = math.floor(v)
+    end
+    self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
+    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
+    self.storage:save(self.data)
+end
+
+function FastLogicBlockMemory.server_getValues(self, keys)
+    local values = {}
+    for _, k in pairs(keys) do
+        values[k] = self.memory[math.floor(k + 1)] or 0
+    end
+    return values
+end
+
+function FastLogicBlockMemory.server_clearMemory(self)
+    for k, _ in pairs(self.memory) do
+        self.memory[k] = nil
+    end
+    self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
+    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
+    self.storage:save(self.data)
+end
+
+function FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
+    -- clear mem
+    for k,_ in pairs(self.memory) do
+        self.memory[k] = nil
+    end
+    -- save mem
+    for k,v in pairs(memory) do
+        self.memory[math.floor(k + 1)] = math.floor(v)
+    end
+    -- update interfaces
+    self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
+    -- compress mem
+    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
+    self.storage:save(self.data)
+end
+
+function FastLogicBlockMemory.server_getMemoryIdxOffset(self)
+    local memory = {}
+    for k,v in pairs(self.memory) do
+        memory[k - 1] = v
+    end
+    return memory
 end
 
 function FastLogicBlockMemory.server_onDestroy2(self)

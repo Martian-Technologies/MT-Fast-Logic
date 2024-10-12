@@ -115,6 +115,9 @@ local function injectElements(multitool)
         onclick = function()
             multitool.colorizer.displayingGUI = false
         end,
+        tooltip = function()
+            return "Close the color selection menu. Pressing escape also works."
+        end,
     })
     table.insert(hUI.elements, {
         name = "parameterMode",
@@ -140,6 +143,13 @@ local function injectElements(multitool)
                 self.parameterMode = "Block"
             else
                 self.parameterMode = "Connection"
+            end
+        end,
+        tooltip = function()
+            if self.parameterMode == "Connection" then
+                return "Currently, the color of connection dots will be changed. Click to change to block color."
+            else
+                return "Currently, the color of blocks will be changed. Click to change to connection dot color."
             end
         end,
     })
@@ -176,6 +186,18 @@ local function injectElements(multitool)
                 end
             end
             self.selectedColor = self.specialModeLast
+        end,
+        tooltip = function()
+            if self.selectedColor == "match" and self.parameterMode == "Connection" then
+                return "Currently, the color of connection dots will be matched to the color of the block. Click to invert."
+            elseif self.selectedColor == "match" and self.parameterMode == "Block" then
+                return "Currently, the color of blocks will be matched to the color of the connection dot. Click to invert."
+            elseif self.selectedColor == "invert" and self.parameterMode == "Connection" then
+                return "Currently, the color of connection dots will be inverted from the color of the block. Click to match."
+            elseif self.selectedColor == "invert" and self.parameterMode == "Block" then
+                return "Currently, the color of blocks will be inverted from the color of the connection dot. Click to match."
+            end
+            return "Click to enable special color modes."
         end,
     })
     table.insert(hUI.elements, {

@@ -381,6 +381,7 @@ end
 function fPrint(val, config)
     printOld(fFormat(val, config))
 end
+fprint = fPrint
 
 -- input the keys you want to be able to hash
 function table.makeConstantKeysOnlyHash(keys)

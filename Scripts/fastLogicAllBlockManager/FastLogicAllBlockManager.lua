@@ -182,11 +182,11 @@ function FastLogicAllBlockManager.removeBlock(self, uuid, skipSiliconChanges)
     local block = self.blocks[uuid]
     if block == nil then return end
     if skipSiliconChanges ~= true then
-        for i = 0, #block.outputs do
-            self:removeOutput(block.outputs[i], uuid)
+        for i = 1, #block.outputs do
+            self:removeOutput(uuid, block.outputs[i])
         end
-        for i = 0, #block.inputs do
-            self:removeOutput(uuid, block.inputs[i])
+        for i = 1, #block.inputs do
+            self:removeOutput(block.inputs[i], uuid)
         end
     end
     local keyPos = string.vecToString(block.pos)
@@ -245,7 +245,7 @@ function FastLogicAllBlockManager.removeOutput(self, uuid, uuidToDisconnect, ski
     if (
         block ~= nil and blockToDisconnect ~= nil and
         (block.outputsHash[uuidToDisconnect] ~= nil or blockToDisconnect.inputsHash[uuid] ~= nil)
-    ) then
+        ) then
         if skipSiliconChanges ~= true then
             if block.isSilicon and self.creation.SiliconBlocks[block.siliconBlockId] ~= nil then
                 self.creation.SiliconBlocks[block.siliconBlockId]:removeOutput(uuid, uuidToDisconnect)

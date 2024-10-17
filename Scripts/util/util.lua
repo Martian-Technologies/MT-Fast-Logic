@@ -240,6 +240,15 @@ function formater.getFormatedForPrint(val, cfg)
         val = math.floor(val * 100 + 0.5) / 100
         return tostring(val)
     elseif type(val) == "table" then
+        -- check if the table is empty
+        local empty = true
+        for _, _ in pairs(val) do
+            empty = false
+            break
+        end
+        if empty then
+            return "{}"
+        end
         if newCfg.depth == 0 then
             return "tbl (" .. table.length(val) .. ")"
         end

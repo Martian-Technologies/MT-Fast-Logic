@@ -194,11 +194,11 @@ function ConnectionShower.client_onUpdate(multitool)
                     selfWired = true
                     goto continue
                 end
-                numOutputs = numOutputs + 1
                 local block = creation.blocks[output]
                 if block == nil then
                     goto continue
                 end
+                numOutputs = numOutputs + 1
                 local isSilicon = block.isSilicon
                 local body = nil
                 if isSilicon then

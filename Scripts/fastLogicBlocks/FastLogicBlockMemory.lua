@@ -202,6 +202,26 @@ function FastLogicBlockMemory.server_onProjectile(self, position, airTime, veloc
     -- sm.MTUtil.Profiler.Count.reset("getMemoryIdxOffset")
 end
 
+local function parseStrAsNum(txt)
+    -- if txt starts with 0b, parse as binary
+    if string.sub(txt, 1, 2) == "0b" then
+        local outputNumber = 0
+        for i = 1, #txt do
+            local char = txt:sub(i, i)
+            if char == "1" then
+                outputNumber = outputNumber * 2 + 1
+            elseif char == "0" then
+                outputNumber = outputNumber * 2
+            end
+        end
+        return outputNumber
+    elseif string.sub(txt, 1, 2) == "0x" then
+        return tonumber(txt, 16)
+    else
+        return tonumber(txt)
+    end
+end
+
 function FastLogicBlockMemory.client_onInteract(self, character, state)
     if state then
         if not sm.json.fileExists("$CONTENT_DATA/memoryBlockData/data.json") then
@@ -209,7 +229,18 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
             return
         end
         local allData = sm.json.open("$CONTENT_DATA/memoryBlockData/data.json")
-        local data = allData[string.sub(self.shape:getColor():getHexStr(), 0, 6)]
+        local color = string.sub(self.shape:getColor():getHexStr(), 0, 6)
+        -- local data = allData[string.sub(self.shape:getColor():getHexStr(), 0, 6)]
+        local data = nil
+        for k, v in pairs(allData) do
+            -- lower case everything
+            local kLower = string.lower(k)
+            local colorLower = string.lower(color)
+            if kLower == colorLower then
+                data = v
+                break
+            end
+        end
         if data == nil then
             data = allData.data
         end
@@ -223,12 +254,12 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
         local memory = {}
         local validValues = 0
         local invalidValue = 0
-        for k,v in pairs(data) do
+        for k, v in pairs(data) do
             if type(v) == "string" then
-                v = tonumber(v)
+                v = parseStrAsNum(v)
             end
             if type(k) == "string" then
-                k = tonumber(k)
+                k = parseStrAsNum(k)
             end
             if type(k) == "number" and type(v) == "number" then
                 memory[k] = v

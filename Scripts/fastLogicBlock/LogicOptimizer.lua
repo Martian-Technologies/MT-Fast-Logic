@@ -110,7 +110,8 @@ function FastLogicRunner.findMultiBlocks(self, id)
             return
         end
     end
-    if false and self.multiBlockData[id] == false and (sm.noise.randomRange( 0, 20 ) < 1) then
+    if false and self.multiBlockData[id] == false and (sm.noise.randomRange(0, 20) < 1) then
+        print("trying to find balanced logic")
         local layers,
               layerHash,
               outputBlocks,
@@ -160,6 +161,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
             self.multiBlockData[multiBlockId][11] = inputsIndexPow2
             self.multiBlockData[multiBlockId][12] = nil
             self:updateLongestTimeToLength(length)
+            print("found balanced logic with " .. #inputs .. " inputs")
         end
     end
     ::notBalanced::

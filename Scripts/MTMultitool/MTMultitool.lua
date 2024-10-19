@@ -34,6 +34,8 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/Flying.lua")
 
+dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/MultiblockDetector.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/LogicConverter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SiliconConverter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Settings.lua")
@@ -75,6 +77,7 @@ sm.tool.preloadRenderables( toolAnimsThirdPerson )
 sm.tool.preloadRenderables( toolAnimsFirstPerson )
 
 local defaultEnabledModes = {
+    -- false, -- MultiblockDetector
     true, -- Fast Logic Convert
     true, -- Silicon Convert
     true, -- Settings
@@ -94,6 +97,7 @@ local defaultEnabledModes = {
 }
 
 MTMultitool.modes = {
+    -- "Multiblock Detector",
 	"Fast Logic Convert",
 	"Silicon Convert",
     "Settings",
@@ -113,6 +117,7 @@ MTMultitool.modes = {
 }
 
 MTMultitool.internalModes = {
+    -- "MultiblockDetector",
     "LogicConverter",
     "SiliconConverter",
     "Settings",
@@ -132,11 +137,15 @@ MTMultitool.internalModes = {
 }
 
 MTMultitool.forceOn = {
-	3,
+	4,
 }
 MTMultitool.FastLogicModes = {
     -- 1,
     -- 2
+}
+
+MTMultitool.DevModeModes = {
+    1
 }
 
 function MTMultitool.server_onCreate(self)
@@ -144,6 +153,7 @@ function MTMultitool.server_onCreate(self)
 end
 
 function MTMultitool.client_onCreate(self)
+    self.DEVMODE = false
     ThisMultitool = self
     self.subscriptions = {
         client_onUpdate = {}
@@ -165,6 +175,8 @@ function MTMultitool.client_onCreate(self)
     VolumeSelector.inject(self)
     BetterVolumeSelector.inject(self)
 
+
+    MultiblockDetector.inject(self)
     LogicConverter.inject(self)
     SiliconConverterTool.inject(self)
     Settings.inject(self)
@@ -569,7 +581,9 @@ end
 
 local function triggerTool(self, primaryState, secondaryState, forceBuild, lookingAt)
     SelectionModeController.trigger(self)
-	if MTMultitool.internalModes[self.mode] == "LogicConverter" then
+    if MTMultitool.internalModes[self.mode] == "MultiblockDetector" then
+        MultiblockDetector.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+	elseif MTMultitool.internalModes[self.mode] == "LogicConverter" then
         LogicConverter.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then
 		SiliconConverterTool.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)

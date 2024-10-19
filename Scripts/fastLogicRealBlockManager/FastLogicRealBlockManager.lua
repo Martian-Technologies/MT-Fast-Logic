@@ -47,9 +47,15 @@ function FastLogicRealBlockManager.update(self)
     self:updateDisplay(updatedGates)
 
     for k, v in pairs(self.creation.FastLogicBlockMemorys) do
-		if sm.exists(v.interactable) then
-			sm.event.sendToInteractable(v.interactable, "server_saveHeldMemory")
-			v:server_saveHeldMemory()
+        if sm.exists(v.interactable) then
+            local ramBlockOtherData = self.creation.FastLogicRunner.ramBlockOtherData
+            local runnerId = self.creation.FastLogicRunner.hashedLookUp[self.creation.uuids[v.interactable.id]]
+            local didUpdate = ramBlockOtherData[runnerId][2]
+            if didUpdate then
+                sm.event.sendToInteractable(v.interactable, "server_requestSaveMemory")
+                v:server_requestSaveMemory()
+                ramBlockOtherData[runnerId][2] = false
+            end
 		end
     end
     -- sm.MTUtil.Profiler.Time.off("update" .. tostring(self.creationId))

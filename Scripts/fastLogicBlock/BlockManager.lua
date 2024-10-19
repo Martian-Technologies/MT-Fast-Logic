@@ -42,7 +42,7 @@ function FastLogicRunner.internalAddBlock(self, path, id, state, timerLength, sk
             self:updateLongestTimer()
         elseif pathName == "BlockMemory" then
             self.ramBlockData[id] = self.creation.FastLogicBlockMemorys[self.unhashedLookUp[id]].memory
-            self.ramBlockOtherData[id] = {{}, false}
+            self.ramBlockOtherData[id] = {{}, false, false}
         end
         if skipChecksAndUpdates ~= true then
             self:shouldBeThroughBlock(id)

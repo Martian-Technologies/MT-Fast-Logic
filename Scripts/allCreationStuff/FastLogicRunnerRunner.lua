@@ -70,7 +70,7 @@ function FastLogicRunnerRunner.server_onDestroy(self)
 end
 
 function FastLogicRunnerRunner.server_onrefresh(self)
-    self:server_onCreate()
+    -- self:server_onCreate()
 end
 
 function FastLogicRunnerRunner.sendMessageToAll(self, message)
@@ -82,6 +82,7 @@ function FastLogicRunnerRunner.client_sendMessage(self, message)
 end
 
 function FastLogicRunnerRunner.client_onCreate(self)
+    self:createScomputersCodeAPIExamples()
     if sm.isHost then
         sm.MTBackupEngine.cl_setUsername()
     end
@@ -116,4 +117,65 @@ function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocat
     elseif wantedType == "toFastLogic" then
         SiliconConverter.convertFromSilicon(creationId, blocksToConvert)
     end
+end
+
+function FastLogicRunnerRunner.createScomputersCodeAPIExamples(self)
+sm.scomputers.addExample("MT Memory API Docs", [[local memory = getComponent("MTFastMemory")
+-- The component type is called "MTFastMemory"
+
+setValue(key: number, value: number)
+-- Sets the value of a key in the memory
+
+getValue(key: number)
+-- Returns the value of a key in the memory block
+
+setValues(kvPairs: table<number, number>)
+-- Sets the values of multiple keys in the memory block
+
+getValues(keys: table<number>)
+-- Returns the values of multiple keys in the memory block
+
+clearMemory()
+-- Clears the memory block
+
+setMemory(memory: table<number, number>)
+-- Sets the memory block to the given table.
+-- this is equivalent to calling clearMemory()
+-- and then setValues(kvPairs)
+
+getMemory()
+-- Returns the memory block contents as a table]])
+
+sm.scomputers.addExample("MT Memory API Display", [[local display = getComponent("display")
+local w = display.getWidth()
+local h = display.getHeight()
+local memory = getComponent("MTFastMemory")
+-- we will assume that the memory given to us is a flattened 2D array of size w*h
+
+function callback_loop()
+    if _endtick then
+        display.clear()
+        display.flush()
+        return
+    end
+
+    local data = memory.getMemory()
+    -- this gets the whole memory block data as a table
+
+    for y = 0, h-1 do
+        for x = 0, w-1 do
+            local idx = y * w + x
+            local val = data[idx] or 0
+            -- assume we are given 24 bits of data, 8 bits for each color component
+
+            local red = math.floor(val / 256 / 256)
+            local green = math.floor(val / 256) % 256
+            local blue = val % 256
+
+            local color = string.format("%02x%02x%02x", red, green, blue)
+            display.drawPixel(x, y, color)
+        end
+    end
+    display.flush()
+end]])
 end

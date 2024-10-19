@@ -35,6 +35,8 @@ function FastLogicBlockMemory.server_onCreate2(self)
         self.memory = {}
     end
     self.storage:save(self.data)
+    self.lastSavedMemory = os.clock()
+    self.needToSaveMemory = false
     self.interactable.publicData = {
         sc_component = {
             type = FastLogicBlockMemory.componentType,
@@ -97,8 +99,19 @@ end
 function FastLogicBlockMemory.server_setValue(self, key, value)
     self.memory[math.floor(key + 1)] = math.floor(value)
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
-    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
-    self.storage:save(self.data)
+    FastLogicBlockMemory.server_requestSaveMemory(self)
+end
+
+function FastLogicBlockMemory.server_onFixedUpdate(self)
+    if self.needToSaveMemory then
+        if os.clock() - self.lastSavedMemory > 0.5 then
+            FastLogicBlockMemory.server_saveHeldMemory(self)
+        end
+    end
+end
+
+function FastLogicBlockMemory.server_requestSaveMemory(self)
+    self.needToSaveMemory = true
 end
 
 function FastLogicBlockMemory.server_setValues(self, kvPairs)
@@ -106,8 +119,7 @@ function FastLogicBlockMemory.server_setValues(self, kvPairs)
         self.memory[math.floor(k + 1)] = math.floor(v)
     end
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
-    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
-    self.storage:save(self.data)
+    FastLogicBlockMemory.server_requestSaveMemory(self)
 end
 
 function FastLogicBlockMemory.server_getValues(self, keys)
@@ -123,8 +135,7 @@ function FastLogicBlockMemory.server_clearMemory(self)
         self.memory[k] = nil
     end
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
-    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
-    self.storage:save(self.data)
+    FastLogicBlockMemory.server_saveHeldMemory(self)
 end
 
 function FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
@@ -138,9 +149,7 @@ function FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
     end
     -- update interfaces
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
-    -- compress mem
-    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
-    self.storage:save(self.data)
+    FastLogicBlockMemory.server_saveHeldMemory(self)
 end
 
 function FastLogicBlockMemory.server_getMemoryIdxOffset(self)
@@ -181,12 +190,12 @@ function FastLogicBlockMemory.server_saveMemory(self, memory)
     table.copyTo(memory, self.memory)
     -- update interfaces
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
-    -- compress mem
-    self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
-    self.storage:save(self.data)
+    FastLogicBlockMemory.server_saveHeldMemory(self)
 end
 
 function FastLogicBlockMemory.server_saveHeldMemory(self)
+    self.lastSavedMemory = os.clock()
+    self.needToSaveMemory = false
     self.data.memory = sm.MTFastLogic.CompressionUtil.hashToString(self.memory)
     self.storage:save(self.data)
 end

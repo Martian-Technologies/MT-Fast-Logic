@@ -527,6 +527,7 @@ function FastLogicRunner.doUpdate(self)
                 else
                     ramBlockData[ramBlockId][address] = data
                 end
+                ramBlockOtherData[ramBlockId][2] = true
                 local outputInterfaces = ramBlockOtherData[ramBlockId][1]
                 local j = 1
                 while j <= #outputInterfaces do

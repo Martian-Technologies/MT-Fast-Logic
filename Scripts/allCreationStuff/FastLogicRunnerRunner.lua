@@ -82,7 +82,7 @@ function FastLogicRunnerRunner.client_sendMessage(self, message)
 end
 
 function FastLogicRunnerRunner.client_onCreate(self)
-    self:createScomputersCodeAPIExamples()
+    local success, result = pcall(self.createScomputersCodeAPIExamples, self)
     if sm.isHost then
         sm.MTBackupEngine.cl_setUsername()
     end
@@ -120,6 +120,8 @@ function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocat
 end
 
 function FastLogicRunnerRunner.createScomputersCodeAPIExamples(self)
+    if sm.scomputers == nil then return end
+    if sm.scomputers.addExample == nil then return end
 sm.scomputers.addExample("MT Memory API Docs", [[local memory = getComponent("MTFastMemory")
 -- The component type is called "MTFastMemory"
 

@@ -50,11 +50,11 @@ function FastLogicRealBlockManager.update(self)
         if sm.exists(v.interactable) then
             local ramBlockOtherData = self.creation.FastLogicRunner.ramBlockOtherData
             local runnerId = self.creation.FastLogicRunner.hashedLookUp[self.creation.uuids[v.interactable.id]]
-            local didUpdate = ramBlockOtherData[runnerId][2]
-            if didUpdate then
+            local updateCycleState = ramBlockOtherData[runnerId][2]
+            if updateCycleState == 2 then
                 sm.event.sendToInteractable(v.interactable, "server_requestSaveMemory")
                 v:server_requestSaveMemory()
-                ramBlockOtherData[runnerId][2] = false
+                ramBlockOtherData[runnerId][2] = 0
             end
 		end
     end

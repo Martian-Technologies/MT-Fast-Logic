@@ -519,15 +519,16 @@ function FastLogicRunner.doUpdate(self)
                 for i = 1, #dataBlocks do
                     local id = dataBlocks[i]
                     if blockStates[id] then
-                        data = data + math.pow(2, i-1)
+                        data = data + math.pow(2, i - 1)
                     end
                 end
-                if data == 0 then
-                    ramBlockData[ramBlockId][address] = nil
-                else
+                if data == 0 then data = nil end
+                if ramBlockData[ramBlockId][address] ~= data then
+                    ramBlockOtherData[ramBlockId][2] = 1 -- writing happened
                     ramBlockData[ramBlockId][address] = data
+                elseif ramBlockOtherData[ramBlockId][2] == 1 then
+                    ramBlockOtherData[ramBlockId][2] = 2 -- writing happend and is now done
                 end
-                ramBlockOtherData[ramBlockId][2] = true
                 local outputInterfaces = ramBlockOtherData[ramBlockId][1]
                 local j = 1
                 while j <= #outputInterfaces do
@@ -543,6 +544,8 @@ function FastLogicRunner.doUpdate(self)
                         end
                     end
                 end
+            elseif ramBlockOtherData[ramBlockId][2] == 1 then
+                ramBlockOtherData[ramBlockId][2] = 2 -- writing happend and is now done
             end
         elseif multiBlockType == 4 then -- ram block output
             local blocksToUpdate = multiData[5]
@@ -665,6 +668,7 @@ function FastLogicRunner.doUpdate(self)
                 ramBlockData[blockId] = newData
                 FastLogicBlockMemorys[unhashedLookUp[blockId]].memory = newData
                 local outputInterfaces = ramBlockOtherData[blockId][1]
+                ramBlockOtherData[blockId][2] = 2 -- need to save
                 local j = 1
                 while j <= #outputInterfaces do
                     local outputInterfaceId = outputInterfaces[j]

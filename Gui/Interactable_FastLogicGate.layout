@@ -91,6 +91,20 @@
             <Property key="FontName" value="SM_TextSmall" />
             <Property key="Caption" value="#{CONTROLLER_LOGIC_DESCRIPTION_AND}" />
         </Widget>
+        <!-- here we will have a button that will allow you to self-wire the gate -->
+        <Widget type="Button" skin="SettingsButton" name="SelfwireButton"
+            position_real="0.0527778 0.8 0.119205 0.1">
+            <Property key="Caption" value="SELFWIRE" />
+            <Property key="FontName" value="SM_ButtonSmall" />
+            <Property key="TextAlign" value="Center" />
+        </Widget>
+        <Widget type="Button" skin="SettingsButton" name="UnselfwireButton"
+            position_real="0.0527778 0.8 0.119205 0.1">
+            <Property key="Caption" value="UNSELFWIRE" />
+            <Property key="FontName" value="SM_ButtonSmall" />
+            <Property key="TextAlign" value="Center" />
+            <Property key="Checked" value="true" />
+        </Widget>
         <Widget type="ImageBox" skin="ImageBox" position_real="0.649074 0.794411 0.0138889 0.0279441">
             <Property key="ImageResource" value="LogicGateDescriptionDots" />
             <Property key="ImageName" value="off" />

@@ -37,6 +37,16 @@ local descriptions = {
     ["Xnor"] = "Active if an even number of linked triggers are active"
 }
 
+function FastLogicGate.client_checkSelfwired(self)
+    local parents = self.interactable:getParents()
+    for k, v in pairs(parents) do
+        if v == self.interactable then
+            return true
+        end
+    end
+    return false
+end
+
 function FastLogicGate.getData2(self)
     self.creation.FastLogicGates[self.data.uuid] = self
 end
@@ -75,12 +85,36 @@ function FastLogicGate.client_onInteract(self, character, state)
     end
 end
 
+function FastLogicGate.gui_selfwire(self)
+    print("selfwiring")
+    self.network:sendToServer("server_selfwire")
+    self.gui:setVisible("UnselfwireButton", true)
+    self.gui:setVisible("SelfwireButton", false)
+end
+
+function FastLogicGate.gui_unselfwire(self)
+    print("unselfwiring")
+    self.network:sendToServer("server_unselfwire")
+    self.gui:setVisible("UnselfwireButton", false)
+    self.gui:setVisible("SelfwireButton", true)
+end
+
+function FastLogicGate.server_selfwire(self)
+    self.interactable:connect(self.interactable)
+end
+
+function FastLogicGate.server_unselfwire(self)
+    self.interactable:disconnect(self.interactable)
+end
+
 function FastLogicGate.gui_createNewGui(self)
     if self.gui == nil then
         self.gui = sm.gui.createGuiFromLayout("$CONTENT_DATA/Gui/Interactable_FastLogicGate.layout")
         for i = 1, #indexToMode do
             self.gui:setButtonCallback(indexToMode[i], "gui_selectButton")
         end
+        self.gui:setButtonCallback("SelfwireButton", "gui_selfwire")
+        self.gui:setButtonCallback("UnselfwireButton", "gui_unselfwire")
     end
 end
 
@@ -90,6 +124,9 @@ function FastLogicGate.gui_update(self)
     self.gui:setVisible("Lamp00on", lampPattern[1])
     self.gui:setVisible("Lamp01on", lampPattern[2])
     self.gui:setVisible("Lamp11on", lampPattern[3])
+    local selfwired = self:client_checkSelfwired()
+    self.gui:setVisible("UnselfwireButton", selfwired)
+    self.gui:setVisible("SelfwireButton", not selfwired)
     for i = 1, #indexToMode do
         if self.client_modeIndex == i then
             self.gui:setButtonState(wantedMode, true)

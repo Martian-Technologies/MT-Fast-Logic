@@ -10,6 +10,15 @@ local modes = { "andBlocks", "orBlocks", "xorBlocks", "nandBlocks", "norBlocks",
 
 local indexToMode = { "And", "Or", "Xor", "Nand", "Nor", "Xnor" }
 
+local modeToLampPattern = {
+    ["And"] = { false, false, true },
+    ["Or"] = { false, true, true },
+    ["Xor"] = { false, true, false },
+    ["Nand"] = { true, true, false },
+    ["Nor"] = { true, false, false },
+    ["Xnor"] = { true, false, true }
+}
+
 local modeToIndex = {
     ["And"] = 1,
     ["Or"] = 2,
@@ -77,6 +86,10 @@ end
 
 function FastLogicGate.gui_update(self)
     local wantedMode = indexToMode[self.client_modeIndex]
+    local lampPattern = modeToLampPattern[wantedMode]
+    self.gui:setVisible("Lamp00on", lampPattern[1])
+    self.gui:setVisible("Lamp01on", lampPattern[2])
+    self.gui:setVisible("Lamp11on", lampPattern[3])
     for i = 1, #indexToMode do
         if self.client_modeIndex == i then
             self.gui:setButtonState(wantedMode, true)
@@ -85,6 +98,7 @@ function FastLogicGate.gui_update(self)
             self.gui:setButtonState(indexToMode[i], false)
         end
     end
+
 end
 
 function FastLogicGate.gui_selectButton(self, mode)

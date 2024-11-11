@@ -20,26 +20,32 @@ The multitool is a new tool that allows players to easily manipulate logic effic
 
 ## Connection Shower
 Allows you to see the inputs and outputs of any gate (Even inside of a silicon block). This is great when you have a mess of wires.
+
 ![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWFsODRtMDIxMmNwcnB5aTdsYWVtcGZjdjBtMGV5cHBvcDJ3YndwNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Txbf3zPT7py96SI8os/giphy.gif)
 
 ## Parallel Connect
 Connects rows of gates in parallel very quickly. Great for wiring up complex circuits.
+
 ![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzZ4NnZsNnF0emZnaDA3d3dsbXA4ZXUwc3J6dDRkNmEycnIwb3Q3MCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Nm4MDReXKguzcfhPc7/giphy.gif)
 
 ## Tensor Connect
 Parallel connect's big brother. Makes orders of magnitude more connections than parallel connect efficiently.
+
 ![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExenY0emY4d3d1MG95Z3B1eDQwb2NoeXZxMGw1djd6YXI3ZGFmbnRoOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/A0CuwesGXJfCwTvoEt/giphy.gif)
 
 ## Volume Placer
 Have you ever needed **a lot** of logic gates in a cube? This is the tool for you!
+
 ![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGJlMXE4bXl0NXNyemp4ZGM4ZGFoc2lzazZqMTNnc3IwaXVweXA3YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3NEm5yO91VaoXUi0qA/giphy.gif)
 
 ## One Tick Hammer
 You can hit a fast logic gate with a hammer to pulse it for one tick.
+
 ![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDR1NmY1MnVja3Zsbm94MnJ3OGVndjZvYjVibTUwbG1vZzVqbDAzcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/JuiP8UJhrinbzLtztC/giphy.gif)
 
 ## Colored Connection Dots
 You can change the connection dot color of fast logic gates to allow for better clarity within your circuits.
+
 ![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzhqemVjb3hqdGxiZXB2dXVseXZtMWxib2t4cDI1ZHdwMTZibHFzbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/2QWxev1dP3207uun4p/giphy.gif)
 
 # Useful Links:

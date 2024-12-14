@@ -1,3 +1,5 @@
+-- dofile "../util/util.lua"
+
 ConnectionShower = {}
 
 function ConnectionShower.inject(multitool)

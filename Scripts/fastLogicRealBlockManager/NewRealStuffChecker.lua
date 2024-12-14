@@ -81,6 +81,19 @@ function FastLogicRealBlockManager.checkForBodyUpdate(self)
                 end
                 if blockData.numberOfOtherOutputs ~= numberOfOtherOutputs then
                     FastLogicRunner:externalRescanBlock(uuid)
+                    if blockData.numberOfOtherOutputs == 0 then
+                        local blockInteractable = self.creation.AllFastBlocks[uuid].interactable
+                        blockInteractable.active = blockData.state
+                        if blockData.state then
+                            blockInteractable.power = 1
+                        else
+                            blockInteractable.power = 0
+                        end
+                    elseif numberOfOtherOutputs == 0 then
+                        local blockInteractable = self.creation.AllFastBlocks[uuid].interactable
+                        blockInteractable.active = false
+                        blockInteractable.power = 0
+                    end
                     blockData.numberOfOtherOutputs = numberOfOtherOutputs
                 end
                 local inputs = block.interactable:getParents()

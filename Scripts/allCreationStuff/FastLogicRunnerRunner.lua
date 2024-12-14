@@ -11,6 +11,9 @@ local type = type
 local pairs = pairs
 local sm = sm
 
+-- global to check if SComputers example has been loaded
+SComputersExamplesCreated = SComputersExamplesCreated or {}
+
 local SiliconConverter = SiliconConverter
 
 
@@ -83,6 +86,7 @@ end
 
 function FastLogicRunnerRunner.client_onCreate(self)
     local success, result = pcall(self.createScomputersCodeAPIExamples, self)
+    self.scomputersExamplesCreated = true
     if sm.isHost then
         sm.MTBackupEngine.cl_setUsername()
     end
@@ -122,11 +126,17 @@ end
 function FastLogicRunnerRunner.createScomputersCodeAPIExamples(self)
     if sm.scomputers == nil then return end
     if sm.scomputers.addExample == nil then return end
-sm.scomputers.addExample("MT Memory API Docs", [[local memory = getComponent("MTFastMemory")
+    if table.contains(SComputersExamplesCreated, sm.localPlayer.name) then return end
+    SComputersExamplesCreated[#SComputersExamplesCreated + 1] = sm.localPlayer.name
+sm.scomputers.addExample("MT Memory API Docs", [[ -- This code cannot be executed, this is a list of functions and their descriptions
+
+local memory = getComponent("MTFastMemory")
 -- The component type is called "MTFastMemory"
+-- You can then interact with the memory block using
+-- the following functions:
 
 setValue(key: number, value: number)
--- Sets the value of a key in the memory
+-- Sets an individual value of a key in the memory
 
 getValue(key: number)
 -- Returns the value of a key in the memory block
@@ -149,6 +159,7 @@ getMemory()
 -- Returns the memory block contents as a table]])
 
 sm.scomputers.addExample("MT Memory API Display", [[local display = getComponent("display")
+display.setOptimizationLevel(0)
 local w = display.getWidth()
 local h = display.getHeight()
 local memory = getComponent("MTFastMemory")
@@ -167,14 +178,9 @@ function callback_loop()
     for y = 0, h-1 do
         for x = 0, w-1 do
             local idx = y * w + x
-            local val = data[idx] or 0
+            local color = data[idx] or 0
             -- assume we are given 24 bits of data, 8 bits for each color component
 
-            local red = math.floor(val / 256 / 256)
-            local green = math.floor(val / 256) % 256
-            local blue = val % 256
-
-            local color = string.format("%02x%02x%02x", red, green, blue)
             display.drawPixel(x, y, color)
         end
     end

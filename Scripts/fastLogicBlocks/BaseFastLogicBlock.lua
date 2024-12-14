@@ -262,6 +262,13 @@ function BaseFastLogicBlock.server_onProjectile(self, position, airTime, velocit
     -- advPrint(self.data, 3, 100, true)
     -- sm.MTUtil.Profiler.Time.reset()
     -- sm.MTUtil.Profiler.Count.reset()
+    -- local block = FastLogicAllBlockManager.blocks[self.data.uuid]
+    -- fprint(self, {
+    --     depth = 2,
+    --     ignoreTypes = {"function"}
+    -- })
+    -- fprint(self.creation.FastLogicAllBlockManager.blocks[self.data.uuid], {depth=2, ignoreTypes={"function"}})
+    -- fprint(self.creation.blocks[self.data.uuid], {depth=2, ignoreTypes={"function"}})
 end
 
 function BaseFastLogicBlock.server_changeBlockState(self)

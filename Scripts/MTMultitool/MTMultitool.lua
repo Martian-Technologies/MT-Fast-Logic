@@ -3,6 +3,7 @@ MTMultitool = class()
 print("loading MTMultitool.lua")
 
 dofile("../util/util.lua")
+-- fprint(sm.MTUtil)
 
 dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
 

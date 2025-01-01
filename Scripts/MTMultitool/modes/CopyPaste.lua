@@ -796,7 +796,14 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 confirm = "",
             }
             if #self.selectedShapes ~= 0 then
-                extraTooltip.selectOrigin = "     "..sm.gui.getKeyBinding("ForceBuild", true) .. "Confirm selection"
+                extraTooltip.selectOrigin = "     " .. sm.gui.getKeyBinding("ForceBuild", true) .. "Confirm selection"
+            end
+            if self.targeting == "surface" then
+                extraTooltip.selectOrigin = extraTooltip.selectOrigin .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target subsurface"
+                extraTooltip.selectFinal = extraTooltip.selectFinal .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target subsurface"
+            else
+                extraTooltip.selectOrigin = extraTooltip.selectOrigin .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target surface"
+                extraTooltip.selectFinal = extraTooltip.selectFinal .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target surface"
             end
             local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, extraTooltip)
             if #self.selectedShapes ~= 0 then

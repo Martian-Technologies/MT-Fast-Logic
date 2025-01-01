@@ -120,10 +120,10 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         local sizeString = "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>("..(xWidth*4).." x "..(yWidth*4).." x "..(zWidth*4)..")</p>"
         if self.origin ~= nil and self.final == nil then
             sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Select second corner     "..sizeString.."     ",
-                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
+                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd .. extraTooltip.selectFinal)
         elseif self.origin ~= nil and self.final ~= nil then
             sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), self.actionWord .. "     "..sizeString.."     ",
-                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd)
+                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd .. extraTooltip.confirm)
         end
         local stepsPerBlock = 2
         local xSteps = math.floor(xWidth / 0.25) * stepsPerBlock

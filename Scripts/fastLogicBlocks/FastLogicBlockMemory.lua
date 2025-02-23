@@ -20,33 +20,6 @@ FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogic
 FastLogicBlockMemory.componentType = "MTFastMemory"
 
 function FastLogicBlockMemory.removeSelfFromCreation(self)
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
-    print("removeSelfFromCreation")
 	self.creation.FastLogicBlockMemorys[self.data.uuid] = nil
 end
 

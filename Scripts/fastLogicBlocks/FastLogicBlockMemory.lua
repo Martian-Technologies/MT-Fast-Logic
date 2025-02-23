@@ -148,7 +148,6 @@ function FastLogicBlockMemory.server_onCreate2(self)
     self.type = "BlockMemory"
     local data = self.storage:load()
 
-    print(data)
     if data ~= nil then
         if data.memory == nil then
             self.data.memory = ""
@@ -157,9 +156,6 @@ function FastLogicBlockMemory.server_onCreate2(self)
             -- the first character will be used as an indicator to indicate version.
             self.data.memory = data.memory
             if string.sub(data.memory, 1, 1) == "q" then
-                print(string.sub(data.memory, 2))
-                print(sm.MTFastLogic.CompressionUtil.stringToHash(string.sub(data.memory, 2)))
-                print(sm.MTFastLogic.CompressionUtil.goofyToBinHash(sm.MTFastLogic.CompressionUtil.stringToHash(string.sub(data.memory, 2))))
                 self.memory = sm.MTFastLogic.CompressionUtil.goofyToBinHash(sm.MTFastLogic.CompressionUtil.stringToHash(string.sub(data.memory, 2)))
             else
                 self.memory = sm.MTFastLogic.CompressionUtil.stringToHash(data.memory)
@@ -347,7 +343,6 @@ function FastLogicBlockMemory.server_saveHeldMemory(self)
     self.needToSaveMemory = false
     self.data.memory = "q" ..
     sm.MTFastLogic.CompressionUtil.hashToString(sm.MTFastLogic.CompressionUtil.binHashToGoofy(self.memory))
-    print(self.data.memory)
     self.storage:save(self.data)
 end
 

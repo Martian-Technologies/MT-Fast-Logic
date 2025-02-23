@@ -126,6 +126,7 @@ local function parseStrAsBin(txt)
                 output = output .. hexToBin[char:lower()]
             end
         end
+        return output
     else
         return decimalToBinary(txt)
     end
@@ -413,6 +414,7 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
         for k, v in pairs(data) do
             v = parseStrAsBin(v)
             k = parseStrAsBin(k)
+            v = string.reverse(v)
             if isPureBinary(v) and isPureBinary(k) then
                 memory[k] = v
                 validValues = validValues + 1

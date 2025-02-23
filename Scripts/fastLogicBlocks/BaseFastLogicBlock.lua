@@ -25,12 +25,17 @@ function BaseFastLogicBlock.deepRescanSelf(self, noRemove)
             self.lastSeenSpeed = self.creation.FastLogicRunner.numberOfUpdatesPerTick
             self.creation.FastLogicAllBlockManager:removeBlock(self.data.uuid)
             self.creation.AllFastBlocks[self.data.uuid] = nil
+			self:removeSelfFromCreation()
         end
     end
     self.FastLogicRunner = nil
     self.creation = nil
     self.creationId = nil
     self:getData()
+end
+
+function BaseFastLogicBlock.removeSelfFromCreation(self)
+	-- your code (you prob dont need anything)
 end
 
 function BaseFastLogicBlock.getParentUuids(self)

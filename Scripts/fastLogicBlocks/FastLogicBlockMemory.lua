@@ -15,6 +15,10 @@ FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogic
 --needed for SComputers
 FastLogicBlockMemory.componentType = "MTFastMemory"
 
+function FastLogicBlockMemory.removeSelfFromCreation(self)
+	self.creation.FastLogicBlockMemorys[self.data.uuid] = nil
+end
+
 function FastLogicBlockMemory.getData2(self)
     self.creation.FastLogicBlockMemorys[self.data.uuid] = self
 end

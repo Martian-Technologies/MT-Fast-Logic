@@ -506,23 +506,48 @@ function FastLogicRunner.doUpdate(self)
             end
             local ramBlockId = multiData[7]
             if blockStates[multiData[10]] and not blockStates[ramBlockId] then
-                local address = 1
+                -- local address = 1
+                -- local addressBlocks = multiData[8]
+                -- for i = 1, #addressBlocks do
+                --     local id = addressBlocks[i]
+                --     if blockStates[id] then
+                --         address = address + math.pow(2, i-1)
+                --     end
+                -- end
+                local address = ""
+                local started = false
                 local addressBlocks = multiData[8]
-                for i = 1, #addressBlocks do
-                    local id = addressBlocks[i]
-                    if blockStates[id] then
-                        address = address + math.pow(2, i-1)
+                for i = #addressBlocks, 1, -1 do
+                    local state = blockStates[addressBlocks[i]]
+                    if state then
+                        started = true
+                        address = address .. "1"
+                    elseif started then
+                        address = address .. "0"
                     end
                 end
-                local data = 0
+                if address == "" then address = "0" end
+                -- local data = 0
+                -- local dataBlocks = multiData[9]
+                -- for i = 1, #dataBlocks do
+                --     local id = dataBlocks[i]
+                --     if blockStates[id] then
+                --         data = data + math.pow(2, i - 1)
+                --     end
+                -- end
+                local dataCS = 0
+                local data = ""
                 local dataBlocks = multiData[9]
                 for i = 1, #dataBlocks do
                     local id = dataBlocks[i]
                     if blockStates[id] then
-                        data = data + math.pow(2, i - 1)
+                        data = data .. "1"
+                        dataCS = dataCS + 1
+                    else
+                        data = data .. "0"
                     end
                 end
-                if data == 0 then data = nil end
+                if dataCS == 0 then data = nil end
                 if ramBlockData[ramBlockId][address] ~= data then
                     ramBlockOtherData[ramBlockId][2] = 1 -- writing happened
                     ramBlockData[ramBlockId][address] = data
@@ -690,26 +715,45 @@ function FastLogicRunner.doUpdate(self)
     -- ram outputs
     for k = 1, ramOutputMultiBlocksLength do
         local multiData = multiBlockData[ramOutputMultiBlocks[k]]
-        local data = 0
+        local data = ""
         if multiData[10] == nil or blockStates[multiData[10]] then
             local addressBlocks = multiData[8]
-            local address = 1
-            for i = 1, #addressBlocks do
-                local id = addressBlocks[i]
-                if blockStates[id] then
-                    address = address + math.pow(2, i-1)
+            -- local address = 1
+            local address = ""
+            local started = false
+            for i = #addressBlocks, 1, -1 do
+                -- local id = addressBlocks[i]
+                -- if blockStates[id] then
+                --     address = address + math.pow(2, i-1)
+                -- end
+                local state = blockStates[addressBlocks[i]]
+                if state then
+                    started = true
+                    address = address .. "1"
+                elseif started then
+                    address = address .. "0"
                 end
             end
-            data = ramBlockData[multiData[7]][address] or 0
+            if address == "" then address = "0" end
+            -- data = ramBlockData[multiData[7]][address] or 0
+            data = ramBlockData[multiData[7]][address] or ""
         end
+        -- local dataBlocks = multiData[9]
+        -- for i = 1, #dataBlocks do
+        --     local id = dataBlocks[i]
+        --     if (data%2 >= 1) ~= blockStates[id] then
+        --         newBlockStatesLength = newBlockStatesLength + 1
+        --         newBlockStates[newBlockStatesLength] = id
+        --     end
+        --     data = data / 2
+        -- end
         local dataBlocks = multiData[9]
         for i = 1, #dataBlocks do
             local id = dataBlocks[i]
-            if (data%2 >= 1) ~= blockStates[id] then
+            if (data:sub(i, i) == "1") ~= blockStates[id] then
                 newBlockStatesLength = newBlockStatesLength + 1
                 newBlockStates[newBlockStatesLength] = id
             end
-            data = data / 2
         end
     end
     -- run time stuff

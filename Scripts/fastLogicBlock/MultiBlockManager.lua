@@ -327,7 +327,7 @@ function FastLogicRunner.internalFindRamInterfaces(self, blockId, pastCheckHash)
         path == "DataOut" or
         path == "WriteData" or
         path == "interfaceMultiBlockInput"
-    ) then
+        ) then
         local inputs = self.blockInputs[blockId]
         for i = 1, #inputs do
             self:internalFindRamInterfaces(inputs[i], pastCheckHash)

@@ -266,3 +266,105 @@ function sm.MTFastLogic.CompressionUtil.stringToHash(str)
     end
     return data
 end
+
+local binToGoofyEncoding = {
+    ["00000"] = "a",
+    ["00001"] = "b",
+    ["00010"] = "c",
+    ["00011"] = "d",
+    ["00100"] = "e",
+    ["00101"] = "f",
+    ["00110"] = "g",
+    ["00111"] = "h",
+    ["01000"] = "i",
+    ["01001"] = "j",
+    ["01010"] = "k",
+    ["01011"] = "l",
+    ["01100"] = "m",
+    ["01101"] = "n",
+    ["01110"] = "o",
+    ["01111"] = "p",
+    ["10000"] = "q",
+    ["10001"] = "r",
+    ["10010"] = "s",
+    ["10011"] = "t",
+    ["10100"] = "u",
+    ["10101"] = "v",
+    ["10110"] = "w",
+    ["10111"] = "x",
+    ["11000"] = "y",
+    ["11001"] = "z",
+    ["11010"] = "A",
+    ["11011"] = "B",
+    ["11100"] = "C",
+    ["11101"] = "D",
+    ["11110"] = "E",
+    ["11111"] = "F",
+    ["0000"] = "G",
+    ["0001"] = "H",
+    ["0010"] = "I",
+    ["0011"] = "J",
+    ["0100"] = "K",
+    ["0101"] = "L",
+    ["0110"] = "M",
+    ["0111"] = "N",
+    ["1000"] = "O",
+    ["1001"] = "P",
+    ["1010"] = "Q",
+    ["1011"] = "R",
+    ["1100"] = "S",
+    ["1101"] = "T",
+    ["1110"] = "U",
+    ["1111"] = "V",
+    ["000"] = "W",
+    ["001"] = "X",
+    ["010"] = "Y",
+    ["011"] = "Z",
+    ["100"] = "0",
+    ["101"] = "1",
+    ["110"] = "2",
+    ["111"] = "3",
+    ["00"] = "4",
+    ["01"] = "5",
+    ["10"] = "6",
+    ["11"] = "7",
+    ["0"] = "8",
+    ["1"] = "9",
+}
+
+local goofyToBinaryEncoding = {}
+for k,v in pairs(binToGoofyEncoding) do
+    goofyToBinaryEncoding[v] = k
+end
+
+local function goofyToBinary(goofy)
+    local binary = ""
+    for c in goofy:gmatch "." do
+        binary = binary .. goofyToBinaryEncoding[c]
+    end
+    return binary
+end
+
+local function binaryToGoofy(binary)
+    local goofy = ""
+    for i = 1, #binary, 5 do
+        goofy = goofy .. binToGoofyEncoding[string.sub(binary, i, i+4)]
+    end
+    return goofy
+end
+
+function sm.MTFastLogic.CompressionUtil.binHashToGoofy(data)
+    local output = {}
+    for k, v in pairs(data) do
+        output[binaryToGoofy(k)] = binaryToGoofy(v)
+    end
+    return output
+end
+
+function sm.MTFastLogic.CompressionUtil.goofyToBinHash(data)
+    local output = {}
+    for k, v in pairs(data) do
+        output[goofyToBinary(k)] = goofyToBinary(v)
+    end
+    return output
+end

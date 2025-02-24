@@ -53,13 +53,31 @@ end
 
 function FastLogicGate.server_onCreate2(self)
     self.type = "LogicGate"
-    if self.storage:load() ~= nil then
-        self.data.mode = self.storage:load().mode or (self.data.mode or 0)
+    self.network:setClientData(self.data.mode + 1)
+    self:server_saveDataToStorage()
+end
+
+function FastLogicGate:server_loadData()
+    local storageData = self.storage:load()
+    if storageData == nil then
+        self.data.mode = self.data.mode or 0
+        return
+    end
+    if type(storageData) == "table" then
+        self.data = storageData
+        self.data.mode = self.data.mode or (self.data.mode or 0)
+    elseif type(storageData) == "string" then
+        local splitData = string.split(storageData, ",")
+        self.data.uuid = tonumber(splitData[1])
+        self.data.mode = tonumber(splitData[2])
     else
         self.data.mode = self.data.mode or 0
     end
-    self.network:setClientData(self.data.mode + 1)
-    self.storage:save(self.data)
+end
+
+function FastLogicGate:server_saveDataToStorage()
+    self.storage:save(self.data.uuid .. "," .. (self.data.mode or 0))
+    -- self.storage:save(self.data)
 end
 
 function FastLogicGate.server_onDestroy2(self)
@@ -174,7 +192,7 @@ end
 function FastLogicGate.server_saveMode(self, mode)
     self.data.mode = mode - 1
     self.network:setClientData(mode)
-    self.storage:save(self.data)
+    self:server_saveDataToStorage()
     self.FastLogicAllBlockManager:changeBlockType(self.data.uuid, modes[mode])
 end
 

@@ -108,21 +108,28 @@ function BaseFastLogicBlock.pcalled_server_onCreate(self)
         self.creation.FastLogicRealBlockManager:setData(self, sm.MTFastLogic.dataToSet[self.id])
         sm.MTFastLogic.dataToSet[self.id] = nil
     else
-        if self.storage:load() ~= nil then
-            self.data = self.storage:load()
-            if self.data.uuid == nil then
-                self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
-            else
-                self.data.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(self.data.uuid, self.creationId)
-            end
-        else
+        self:server_loadData()
+        if self.data.uuid == nil then
             self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
+        else
+            self.data.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(self.data.uuid, self.creationId)
         end
     end
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
-    self.storage:save(self.data)
+    self:server_saveDataToStorage()
     self:server_onCreate2()
     self:getData()
+end
+
+function BaseFastLogicBlock.server_saveDataToStorage(self)
+    self.storage:save(self.data)
+end
+
+function BaseFastLogicBlock.server_loadData(self)
+    local storageData = self.storage:load()
+    if storageData ~= nil then
+        self.data = storageData
+    end
 end
 
 function BaseFastLogicBlock.server_onCreate2(self)
@@ -334,6 +341,6 @@ function BaseFastLogicBlock.removeUuidData(self)
     end
     local uuid = self.data.uuid
     self.data.uuid = nil
-    self.storage:save(self.data)
+    self:server_saveDataToStorage()
     self.data.uuid = uuid
 end

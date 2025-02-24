@@ -411,9 +411,21 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
         local memory = {}
         local validValues = 0
         local invalidValue = 0
+        -- check the type of data, and take note if it's a dictionary or a list
+        local isDict = false
+        for k, v in pairs(data) do
+            if type(k) == "string" then
+                isDict = true
+                break
+            end
+        end
         for k, v in pairs(data) do
             v = parseStrAsBin(v)
-            k = parseStrAsBin(k)
+            if isDict then
+                k = parseStrAsBin(k)
+            else
+                k = parseStrAsBin(k-1)
+            end
             v = string.reverse(v)
             if isPureBinary(v) and isPureBinary(k) then
                 memory[k] = v

@@ -67,9 +67,15 @@ function FastLogicGate:server_loadData()
         self.data = storageData
         self.data.mode = self.data.mode or (self.data.mode or 0)
     elseif type(storageData) == "string" then
-        local splitData = string.split(storageData, ",")
-        self.data.uuid = tonumber(splitData[1])
-        self.data.mode = tonumber(splitData[2])
+        -- check if the string starts with a comma, if so assume no uuid
+        if string.sub(storageData, 1, 1) == "," then
+            self.data.uuid = nil
+            self.data.mode = tonumber(string.sub(storageData, 2)) or 0
+        else
+            local splitData = string.split(storageData, ",")
+            self.data.uuid = tonumber(splitData[1])
+            self.data.mode = tonumber(splitData[2])
+        end
     else
         self.data.mode = self.data.mode or 0
     end
@@ -77,10 +83,11 @@ end
 
 function FastLogicGate:server_saveDataToStorage()
     if self.data.uuid == nil then
-        self.storage:save("0," .. (self.data.mode or 0))
+        self.storage:save("," .. (self.data.mode or 0))
     else
         self.storage:save(self.data.uuid .. "," .. (self.data.mode or 0))
     end
+    -- self.storage:save("," .. (self.data.mode or 0))
     -- self.storage:save(self.data)
 end
 

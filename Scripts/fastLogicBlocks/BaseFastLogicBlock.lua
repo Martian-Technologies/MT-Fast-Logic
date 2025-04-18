@@ -109,11 +109,11 @@ function BaseFastLogicBlock.pcalled_server_onCreate(self)
         sm.MTFastLogic.dataToSet[self.id] = nil
     else
         self:server_loadData()
-    end
-    if self.data.uuid == nil then
-        self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
-    else
-        self.data.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(self.data.uuid, self.creationId)
+        if self.data.uuid == nil then
+            self.data.uuid = sm.MTFastLogic.CreationUtil.newUuid()
+        else
+            self.data.uuid = sm.MTFastLogic.CreationUtil.updateOldUuid(self.data.uuid, self.creationId)
+        end
     end
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = self
     self:server_saveDataToStorage()

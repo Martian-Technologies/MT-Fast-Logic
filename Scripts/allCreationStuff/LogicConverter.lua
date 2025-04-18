@@ -30,12 +30,12 @@ for k, v in pairs(vLightsToFLights) do
 end
 
 sm.MTFastLogic.LogicConverter.vGateModesToFGateModes = {
-    [0] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgA",
-    [1] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgB",
-    [2] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgC",
-    [3] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgD",
-    [4] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgE",
-    [5] = "gExVQQAAAAEFBQDAAgAAAAIAbW9kZQgF",
+    [0] = "8ABMVUEAAAABBAAAAAMwLDA",
+    [1] = "8ABMVUEAAAABBAAAAAMwLDE",
+    [2] = "8ABMVUEAAAABBAAAAAMwLDI",
+    [3] = "8ABMVUEAAAABBAAAAAMwLDM",
+    [4] = "8ABMVUEAAAABBAAAAAMwLDQ",
+    [5] = "8ABMVUEAAAABBAAAAAMwLDU",
 }
 local fGateModesToVGateModes = {}
 for k, v in pairs(sm.MTFastLogic.LogicConverter.vGateModesToFGateModes) do

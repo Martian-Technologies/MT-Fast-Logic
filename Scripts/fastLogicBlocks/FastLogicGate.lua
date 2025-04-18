@@ -76,15 +76,12 @@ function FastLogicGate:server_loadData()
 end
 
 function FastLogicGate:server_saveDataToStorage()
-    -- if self.data.uuid == nil then
-    --     self.storage:save("0," .. (self.data.mode or 0))
-    --     print("saving nil uuid")
-    -- else
-    --     self.storage:save(self.data.uuid .. "," .. (self.data.mode or 0))
-    --     print("saving uuid", self.data.uuid)
-    -- end
+    if self.data.uuid == nil then
+        self.storage:save("0," .. (self.data.mode or 0))
+    else
+        self.storage:save(self.data.uuid .. "," .. (self.data.mode or 0))
+    end
     -- self.storage:save(self.data)
-    self.storage:save("0," .. (self.data.mode or 0))
 end
 
 function FastLogicGate.server_onDestroy2(self)

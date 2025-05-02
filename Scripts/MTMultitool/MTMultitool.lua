@@ -1000,6 +1000,12 @@ function MTMultitool.server_recolor(self, data)
     local originLocal = data.origin
     local finalLocal = data.final
     local body = data.body
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = body,
+        name = "Colorizer Backup",
+        description = "Backup made by Colorizer - " .. colorId .. " - " .. mode,
+    })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
     local y = math.min(originLocal.y, finalLocal.y) - halfBlock

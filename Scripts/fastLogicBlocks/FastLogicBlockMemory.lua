@@ -201,16 +201,16 @@ function FastLogicBlockMemory.server_onCreate2(self)
         sc_component = {
             type = FastLogicBlockMemory.componentType,
             api = {
-                setValue = function(key, value)
+                setValue = function(key, value) -- updated
                     FastLogicBlockMemory.server_setValue(self, key, value)
                 end,
-                getValue = function(key)
+                getValue = function(key) -- updated
                     return parseBinstrAsNum(string.reverse(self.memory[parseStrAsBin(key)] or "0"))
                 end,
-                setValues = function(kvPairs)
+                setValues = function(kvPairs) -- updated
                     FastLogicBlockMemory.server_setValues(self, kvPairs)
                 end,
-                getValues = function(keys)
+                getValues = function(keys) -- updated
                     return FastLogicBlockMemory.server_getValues(self, keys)
                 end,
                 clearMemory = function() -- works anyways

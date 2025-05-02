@@ -205,7 +205,7 @@ function FastLogicBlockMemory.server_onCreate2(self)
                     FastLogicBlockMemory.server_setValue(self, key, value)
                 end,
                 getValue = function(key)
-                    return self.memory[math.floor(key + 1)] or 0
+                    return parseBinstrAsNum(string.reverse(self.memory[parseStrAsBin(key)] or "0"))
                 end,
                 setValues = function(kvPairs)
                     FastLogicBlockMemory.server_setValues(self, kvPairs)
@@ -213,13 +213,13 @@ function FastLogicBlockMemory.server_onCreate2(self)
                 getValues = function(keys)
                     return FastLogicBlockMemory.server_getValues(self, keys)
                 end,
-                clearMemory = function()
+                clearMemory = function() -- works anyways
                     FastLogicBlockMemory.server_clearMemory(self)
                 end,
-                setMemory = function(memory)
+                setMemory = function(memory) -- updated
                     FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
                 end,
-                getMemory = function()
+                getMemory = function() -- updated
                     return FastLogicBlockMemory.server_getMemoryIdxOffset(self)
                 end,
             },
@@ -257,7 +257,7 @@ function FastLogicBlockMemory.server_onCreate2(self)
 end
 
 function FastLogicBlockMemory.server_setValue(self, key, value)
-    self.memory[math.floor(key + 1)] = math.floor(value)
+    self.memory[parseStrAsBin(key)] = string.reverse(parseStrAsBin(value))
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
     FastLogicBlockMemory.server_requestSaveMemory(self)
 end
@@ -276,7 +276,7 @@ end
 
 function FastLogicBlockMemory.server_setValues(self, kvPairs)
     for k, v in pairs(kvPairs) do
-        self.memory[math.floor(k + 1)] = math.floor(v)
+        self.memory[parseStrAsBin(k)] = string.reverse(parseStrAsBin(v))
     end
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
     FastLogicBlockMemory.server_requestSaveMemory(self)
@@ -285,7 +285,7 @@ end
 function FastLogicBlockMemory.server_getValues(self, keys)
     local values = {}
     for _, k in pairs(keys) do
-        values[k] = self.memory[math.floor(k + 1)] or 0
+        values[k] = parseBinstrAsNum(string.reverse(self.memory[parseStrAsBin(k)] or "0"))
     end
     return values
 end
@@ -300,12 +300,12 @@ end
 
 function FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
     -- clear mem
-    for k,_ in pairs(self.memory) do
+    for k, _ in pairs(self.memory) do
         self.memory[k] = nil
     end
-    -- save mem
-    for k,v in pairs(memory) do
-        self.memory[math.floor(k + 1)] = math.floor(v)
+    for k, v in pairs(memory) do
+        -- convertedMemory[parseStrAsBin(k)] = string.reverse(parseStrAsBin(v))
+        self.memory[parseStrAsBin(k)] = string.reverse(parseStrAsBin(v))
     end
     -- update interfaces
     self.FastLogicRunner:externalUpdateRamInterfaces(self.data.uuid)
@@ -318,8 +318,7 @@ function FastLogicBlockMemory.server_getMemoryIdxOffset(self)
     -- print(self.memory)
     local memory = {}
     for k, v in pairs(self.memory) do
-        local vReverse = string.reverse(v)
-        memory[parseBinstrAsNum(k)] = parseBinstrAsNum(vReverse)
+        memory[parseBinstrAsNum(k)] = parseBinstrAsNum(string.reverse(v))
         -- print(parseBinstrAsNum(k), parseBinstrAsNum(vReverse))
     end
     -- sm.MTUtil.Profiler.Time.off("getMemoryIdxOffset")

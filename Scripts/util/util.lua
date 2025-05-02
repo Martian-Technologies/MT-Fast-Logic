@@ -307,7 +307,7 @@ function formater.getFormatedForPrint(val, cfg)
     elseif type(val) == "del" then
         return "del"
     elseif type(val) == "string" then
-        return val
+        return "\""..val.."\""
     elseif type(val) == "boolean" then
         if val then
             return "true"

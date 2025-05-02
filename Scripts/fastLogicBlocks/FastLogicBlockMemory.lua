@@ -132,6 +132,20 @@ local function parseStrAsBin(txt)
     end
 end
 
+local function parseBinstrAsNum(txt)
+    -- this expects string input consisting of only 1s and 0s
+    local outputNumber = 0
+    for i = 1, #txt do
+        local char = txt:sub(i, i)
+        if char == "1" then
+            outputNumber = outputNumber * 2 + 1
+        elseif char == "0" then
+            outputNumber = outputNumber * 2
+        end
+    end
+    return outputNumber
+end
+
 local function isPureBinary(value)
     if type(value) ~= "string" then
         return false
@@ -301,9 +315,12 @@ end
 function FastLogicBlockMemory.server_getMemoryIdxOffset(self)
     -- sm.MTUtil.Profiler.Count.increment("getMemoryIdxOffset")
     -- sm.MTUtil.Profiler.Time.on("getMemoryIdxOffset")
+    -- print(self.memory)
     local memory = {}
     for k, v in pairs(self.memory) do
-        memory[k - 1] = v
+        local vReverse = string.reverse(v)
+        memory[parseBinstrAsNum(k)] = parseBinstrAsNum(vReverse)
+        -- print(parseBinstrAsNum(k), parseBinstrAsNum(vReverse))
     end
     -- sm.MTUtil.Profiler.Time.off("getMemoryIdxOffset")
     return memory

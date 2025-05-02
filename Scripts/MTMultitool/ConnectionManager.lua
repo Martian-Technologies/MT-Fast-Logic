@@ -183,6 +183,10 @@ function ConnectionManager.commitPreview(multitool)
     self.preview = {}
 end
 
+function ConnectionManager.commitPreviewWithBackup(multitool, backupData)
+    sm.MTBackupEngine.cl_backupCreation(multitool, backupData, "cl_ConnectionManager_commitPreview", {})
+end
+
 function ConnectionManager.server_makeConnections(multitool, data)
     local from = data[1]
     local to = data[2]

@@ -129,6 +129,24 @@ local function loadPlayerCoordinator()
     return playerData
 end
 
+function sm.MTBackupEngine.cl_backupCreation(multitool, data, callback, callbackData)
+    local player = sm.localPlayer.getPlayer()
+    multitool.network:sendToServer("sv_backupCreationRequest", {
+        player = player,
+        data = data,
+        callback = callback,
+        callbackData = callbackData
+    })
+end
+
+function sm.MTBackupEngine.sv_backupCreationRequest(multitool, data)
+    local player = data.player
+    sm.MTBackupEngine.sv_backupCreation(data.data)
+    local callback = data.callback
+    local callbackData = data.callbackData
+    multitool.network:sendToClient(player, callback, callbackData)
+end
+
 function sm.MTBackupEngine.sv_backupCreation(data)
     local creationData
     local body = data.body

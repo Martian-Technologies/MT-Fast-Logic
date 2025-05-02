@@ -203,8 +203,14 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
         end
         if primaryState == 1 then
             TensorConnect.calculatePreview(multitool)
-            ConnectionManager.commitPreview(multitool)
-            TensorConnect.cleanUp(multitool)
+            -- ConnectionManager.commitPreview(multitool)
+            ConnectionManager.commitPreviewWithBackup(multitool, {
+                hasCreationData = false,
+                body = selfData.toOrigin:getBody(),
+                name = (table.length(selfData.dimSteps)).."-dim Tensor Connection Backup",
+                description = "Backup created by TensorConnect.trigger() in TensorConnect.lua.",
+            })
+            TensorConnect.cleanUp(multitool, true)
         end
     elseif selfData.nextAction == "previewlessConfirm" then
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Toggle",
@@ -429,7 +435,7 @@ function TensorConnect.client_onUpdate(multitool)
     end
 end
 
-function TensorConnect.cleanUp(multitool)
+function TensorConnect.cleanUp(multitool, noclearpreview)
     local self = multitool.TensorConnect
     local selfData = self.data
     selfData.actions = {}
@@ -443,7 +449,9 @@ function TensorConnect.cleanUp(multitool)
     selfData.dimSteps = {}
     selfData.vectorsFrom = {}
     selfData.vectorsTo = {}
-    multitool.ConnectionManager.preview = {}
+    if noclearpreview ~= true then
+        multitool.ConnectionManager.preview = {}
+    end
 end
 
 function TensorConnect.calculatePreview(multitool)
@@ -530,6 +538,12 @@ function TensorConnect.calculatePreview(multitool)
 end
 
 function TensorConnect.sv_connectTensors(multitool, packet)
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = packet.toOrigin:getBody(),
+        name = "Prieviewless "..(table.length(packet.dimSteps)).."-dim Tensor Connection Backup",
+        description = "Backup created by sv_connectTensors() in TensorConnect.lua.",
+    })
     local fromOrigin = packet.fromOrigin
     local toOrigin = packet.toOrigin
     if fromOrigin:getBody():isOnLift() then

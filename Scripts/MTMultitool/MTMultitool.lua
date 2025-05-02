@@ -1171,3 +1171,11 @@ end
 function MTMultitool.server_copyPaste(self, data)
     CopyPaste.server_copyPaste(self, data)
 end
+
+function MTMultitool.cl_ConnectionManager_commitPreview(self, data)
+    ConnectionManager.commitPreview(self)
+end
+
+function MTMultitool.sv_backupCreationRequest(self, data)
+    sm.MTBackupEngine.sv_backupCreationRequest(self, data)
+end

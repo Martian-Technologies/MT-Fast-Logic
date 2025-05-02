@@ -765,6 +765,12 @@ function MTMultitool.server_changeModes(self, data)
     local originLocal = data.origin
     local finalLocal = data.final
     local body = data.body
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = body,
+        name = "Mode Changer Backup",
+        description = "Backup made by mode changer"
+    })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
     local y = math.min(originLocal.y, finalLocal.y) - halfBlock
@@ -842,6 +848,12 @@ function MTMultitool.server_blockMerge(self, data)
     local originLocal = data.origin
     local finalLocal = data.final
     local body = data.body
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = body,
+        name = "Block Merge Backup",
+        description = "Backup made by block merge"
+    })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
     local y = math.min(originLocal.y, finalLocal.y) - halfBlock
@@ -893,6 +905,12 @@ function MTMultitool.server_volumeDelete(self, data)
     local originLocal = data.origin
     local finalLocal = data.final
     local body = data.body
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = body,
+        name = "Volume Deleter Backup",
+        description = "Backup made by volume deleter"
+    })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
     local y = math.min(originLocal.y, finalLocal.y) - halfBlock
@@ -932,6 +950,12 @@ function MTMultitool.server_volumePlace(self, data)
     local originLocal = data.origin
     local finalLocal = data.final
     local body = data.body
+    sm.MTBackupEngine.sv_backupCreation({
+        hasCreationData = false,
+        body = body,
+        name = "Volume Placer Backup",
+        description = "Backup made by volume placer"
+    })
     local placingType = data.placingType -- "vanilla" | "fast"
     local uuidPlacing = sm.uuid.new("9f0f56e8-2c31-4d83-996c-d00a9b296c3f")
     if placingType == "fast" then

@@ -58,8 +58,14 @@ function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuil
             self.outputStep = lookingAt
             DecoderMaker.calculatePreview(multitool)
         else
-            ConnectionManager.commitPreview(multitool)
-            DecoderMaker.cleanUp(multitool)
+            -- ConnectionManager.commitPreview(multitool)
+            ConnectionManager.commitPreviewWithBackup(multitool, {
+                hasCreationData = false,
+                body = self.outputOrigin:getBody(),
+                name = "Decoder Backup",
+                description = "Backup created by decoder maker",
+            })
+            DecoderMaker.cleanUp(multitool, true)
         end
         updateNametags = true
     elseif secondaryState == 1 then
@@ -180,7 +186,7 @@ function DecoderMaker.calculatePreview(multitool)
     end
 end
 
-function DecoderMaker.cleanUp(multitool)
+function DecoderMaker.cleanUp(multitool, noclearpreview)
     local self = multitool.DecoderMaker
     self.nametagUpdate(nil)
     self.normalStart = nil
@@ -189,5 +195,7 @@ function DecoderMaker.cleanUp(multitool)
     self.invertedEnd = nil
     self.outputOrigin = nil
     self.outputStep = nil
-    multitool.ConnectionManager.preview = {}
+    if noclearpreview ~= true then
+        multitool.ConnectionManager.preview = {}
+    end
 end

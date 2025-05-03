@@ -14,7 +14,7 @@ FastLogicBlockMemory = table.deepCopyTo(BaseFastLogicBlock, (FastLogicBlockMemor
 FastLogicBlockMemory.colorNormal = sm.color.new(0xf00000ff)
 FastLogicBlockMemory.colorHighlight = sm.color.new(0xf53d00ff)
 FastLogicBlockMemory.connectionInput = sm.interactable.connectionType.logic
-FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface + sm.interactable.connectionType.composite
+FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface + sm.interactable.connectionType.composite + (sm.interactable.connectionType.compositeIO or 0)
 
 --needed for SComputers
 FastLogicBlockMemory.componentType = "MTFastMemory"
@@ -159,6 +159,32 @@ local function isPureBinary(value)
     return true
 end
 
+local function getApiTable(self)
+    return {
+        setValue = function(key, value) -- updated
+            FastLogicBlockMemory.server_setValue(self, key, value)
+        end,
+        getValue = function(key) -- updated
+            return parseBinstrAsNum(string.reverse(self.memory[parseStrAsBin(key)] or "0"))
+        end,
+        setValues = function(kvPairs) -- updated
+            FastLogicBlockMemory.server_setValues(self, kvPairs)
+        end,
+        getValues = function(keys) -- updated
+            return FastLogicBlockMemory.server_getValues(self, keys)
+        end,
+        clearMemory = function() -- works anyways
+            FastLogicBlockMemory.server_clearMemory(self)
+        end,
+        setMemory = function(memory) -- updated
+            FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
+        end,
+        getMemory = function() -- updated
+            return FastLogicBlockMemory.server_getMemoryIdxOffset(self)
+        end,
+    }
+end
+
 function FastLogicBlockMemory.server_onCreate2(self)
     self.type = "BlockMemory"
     local data = self.storage:load()
@@ -200,29 +226,7 @@ function FastLogicBlockMemory.server_onCreate2(self)
     self.interactable.publicData = {
         sc_component = {
             type = FastLogicBlockMemory.componentType,
-            api = {
-                setValue = function(key, value) -- updated
-                    FastLogicBlockMemory.server_setValue(self, key, value)
-                end,
-                getValue = function(key) -- updated
-                    return parseBinstrAsNum(string.reverse(self.memory[parseStrAsBin(key)] or "0"))
-                end,
-                setValues = function(kvPairs) -- updated
-                    FastLogicBlockMemory.server_setValues(self, kvPairs)
-                end,
-                getValues = function(keys) -- updated
-                    return FastLogicBlockMemory.server_getValues(self, keys)
-                end,
-                clearMemory = function() -- works anyways
-                    FastLogicBlockMemory.server_clearMemory(self)
-                end,
-                setMemory = function(memory) -- updated
-                    FastLogicBlockMemory.server_saveMemoryIdxOffset(self, memory)
-                end,
-                getMemory = function() -- updated
-                    return FastLogicBlockMemory.server_getMemoryIdxOffset(self)
-                end,
-            },
+            api = getApiTable(self),
             docs = { -- not used yet, but I'll try to convince logic to support this
                 setValue = {
                     "Sets the value of a key in the memory",
@@ -460,4 +464,41 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
         memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
         self.network:sendToServer("server_saveMemory", memory)
     end
+end
+
+function FastLogicBlockMemory:sv_createData()
+    return getApiTable(self)
+end
+
+if sm.scrapcomputers ~= nil then
+    sm.scrapcomputers.componentManager.toComponent(FastLogicBlockMemory, "MTFastMemory", true, false)
+    local envHooks = sm.scrapcomputers.environmentManager.environmentHooks
+    table.insert(envHooks, function(self) return {sc = {getMTFastMemory = function()
+        return sm.scrapcomputers.componentManager.getComponents("MTFastMemory", self.interactable, false)
+                end
+        }
+        }
+    end)
+    sm.scrapcomputers.exampleManager.addExample("MT Memory API Display", [[local memory
+local display
+local width
+local height
+function onLoad()
+	memory = sc.getMTFastMemory()[1]
+	display = sc.getDisplays()[1]
+	width, height = display.getDimensions()
+end
+
+function onUpdate( deltaTime )
+	local data = memory.getMemory()
+	for y = 0, height-1 do
+		for x = 0, width-1 do
+			local idx = y * width + x
+			local color = data[idx] or 0
+			-- assume we are given 24 bits of data, 8 bits for each color component
+			display.drawPixel(x+1, y+1, color)
+		end
+	end
+	display.update()
+end]])
 end

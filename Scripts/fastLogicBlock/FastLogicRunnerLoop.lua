@@ -129,20 +129,17 @@ function FastLogicRunner.update(self)
         for pathId = 1, #runningBlocks do
             if self.pathNames[pathId] ~= "none" then
                 local i = 1
-				local runningBlockLengthsAtPathId = runningBlockLengths[pathId]
-				local runningBlocksAtPathId = runningBlocks[pathId]
-                while i <= runningBlockLengthsAtPathId do
-                    local id = runningBlocksAtPathId[i]
+                while i <= runningBlockLengths[pathId] do
+                    local id = runningBlocks[pathId][i]
                     if countOfOnInputs[id] == false then
                         -- print("ountOfOnInputs[id] == false broke tell itchytrack (you might be fine still tell him)")
                         nextRunningBlocks[id] = false
-                        remove(runningBlocksAtPathId, i)
-                        runningBlockLengthsAtPathId = runningBlockLengthsAtPathId - 1
+                        remove(runningBlocks[pathId], i)
+                        runningBlockLengths[pathId] = runningBlockLengths[pathId] - 1
                     else
                         i = i + 1
                     end
                 end
-				runningBlockLengths[pathId] = runningBlockLengthsAtPathId
             end
         end
         -- sm.MTUtil.Profiler.Time.off("doPreUpdate")
@@ -820,9 +817,8 @@ function FastLogicRunner.doUpdate(self)
                 nextRunningBlocks[outputId] = nextRunningIndex
                 local pathId = runnableBlockPathIds[outputId]
                 if pathId ~= 2 then
-					local runningBlockLengthsPathId = runningBlockLengths[pathId]
-                    runningBlockLengths[pathId] = runningBlockLengthsPathId + 1
-                    runningBlocks[pathId][runningBlockLengthsPathId] = outputId
+                    runningBlockLengths[pathId] = runningBlockLengths[pathId] + 1
+                    runningBlocks[pathId][runningBlockLengths[pathId]] = outputId
                 end
             end
         end

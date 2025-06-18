@@ -153,7 +153,6 @@ function BaseFastLogicBlock.server_onDestroy(self)
 end
 
 function BaseFastLogicBlock.pcalled_server_onDestroy(self)
-    print(self.data)
     sm.MTFastLogic.FastLogicBlockLookUp[self.data.uuid] = nil
     if self.creation ~= nil and sm.MTFastLogic.Creations[self.creationId] ~= nil then
         if self.creation.FastLogicRealBlockManager:checkForCreationDeletion() == false then

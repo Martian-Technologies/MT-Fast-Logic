@@ -514,3 +514,10 @@ end
 function MTMultitoolLib.colorToHexNoAlpha(color)
     return color:getHexStr():sub(1, -3)
 end
+
+function MTMultitoolLib.dimColor(color, factor)
+    local r = color.r * factor
+    local g = color.g * factor
+    local b = color.b * factor
+    return sm.color.new(r, g, b, color.a)
+end

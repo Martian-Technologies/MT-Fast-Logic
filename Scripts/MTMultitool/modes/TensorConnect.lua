@@ -103,14 +103,14 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
                 local vecColor = sm.MTTensorUtil.colorOrder
                 [math.fmod(selfData.nDimsFrom, #sm.MTTensorUtil.colorOrder) + 1]
                 if (lookingAt:getWorldPosition() - selfData.fromOrigin:getWorldPosition()):length() > 0 then
-                    sm.MTTensorUtil.renderVector(tags, selfData.fromOrigin:getWorldPosition(), lookingAt:getWorldPosition(), vecColor, 0.03)
+                    sm.MTTensorUtil.renderVector(tags, selfData.fromOrigin:getWorldPosition(), lookingAt:getWorldPosition(), MTMultitoolLib.dimColor(vecColor, 0.7), 0.03)
                 else
                     for i = 1, #selfData.vectorsFrom do
                         if selfData.vectorsFrom[i]:length() == 0 then
                             spinnersCount = spinnersCount + 1
                         end
                     end
-                    sm.MTTensorUtil.renderSpinner(tags, selfData.fromOrigin:getWorldPosition(), vecColor, spinnersCount)
+                    sm.MTTensorUtil.renderSpinner(tags, selfData.fromOrigin:getWorldPosition(), MTMultitoolLib.dimColor(vecColor, 0.7), spinnersCount)
                 end
             else
                 local vecColor = sm.MTTensorUtil.colorOrder
@@ -130,7 +130,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
                             goto continue
                         end
                         local pos = selfData.toOrigin:getWorldPosition() + delta * i
-                        sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, spacing)
+                        sm.MTTensorUtil.renderVector(tags, prevPos, pos, MTMultitoolLib.dimColor(vecColor, 0.7), spacing)
                         prevPos = pos
                         ::continue::
                     end
@@ -140,7 +140,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
                             spinnersCount = spinnersCount + 1
                         end
                     end
-                    sm.MTTensorUtil.renderSpinner(tags, selfData.toOrigin:getWorldPosition(), vecColor, spinnersCount)
+                    sm.MTTensorUtil.renderSpinner(tags, selfData.toOrigin:getWorldPosition(), MTMultitoolLib.dimColor(vecColor, 0.7), spinnersCount)
                 end
             end
         end

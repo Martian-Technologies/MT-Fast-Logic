@@ -35,8 +35,9 @@ function EndTickButton.client_onInteract(self, character, state)
 end
 
 function EndTickButton.pcalled_client_onInteract(self, character, state)
-    self.FastLogicRunner:externalChangeNonFastOnInput(self.data.uuid, state and 1 or -1)
-    self.FastLogicRunner:externalAddBlockToUpdate(self.data.uuid)
+    self:client_sendMessage("Sorry, the end tick button has to be activated by logic. Just connect a regular button to it and press that.")
+    -- self.FastLogicRunner:externalChangeNonFastOnInput(sewlf.data.uuid, state and 1 or -1)
+    -- self.FastLogicRunner:externalAddBlockToUpdate(self.data.uuid)
 end
 
 function EndTickButton.client_onCreate2(self)
@@ -50,9 +51,11 @@ function EndTickButton.client_updateTexture(self, state)
     if self.client_state ~= state then
         self.client_state = state
         if state then
-            self.interactable:setUvFrameIndex(6 + mode)
+            self.interactable:setPoseWeight(0, 1)
+
         else
-            self.interactable:setUvFrameIndex(0 + mode)
+            self.interactable:setPoseWeight(0, 0)
+
         end
     end
 end

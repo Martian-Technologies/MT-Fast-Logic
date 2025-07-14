@@ -497,6 +497,16 @@ function TensorConnect.calculatePreview(multitool)
     local vectorsFrom = selfData.vectorsFrom
     local vectorsTo = selfData.vectorsTo
     local counting = {}
+    -- if no vectors, do special case
+    if #vectorsFrom == 0 then
+        multitool.ConnectionManager.preview = {}
+        local task = {
+            from = fromOrigin,
+            to = toOrigin
+        }
+        table.insert(multitool.ConnectionManager.preview, task)
+        return
+    end
     for i, dimStep in pairs(dimSteps) do
         counting[i] = 0
     end

@@ -68,6 +68,57 @@ function sm.MTTensorUtil.renderVector(nametagsTable, origin, destination, color,
     sm.MTTensorUtil.renderLine(nametagsTable, destination, arrowRight, color, spacing)
 end
 
+function sm.MTTensorUtil.renderSpinner(nametagsTable, position, color, spinnerCount)
+    local baseRadius = 0.03
+    local radius = baseRadius + (spinnerCount or 0) * 0.02  -- increase radius with spinner count
+    local time = os.clock()
+    local count = spinnerCount or 0
+
+    local spinSpeed = 5 + count * 0.7  -- each spinner spins at different rate
+    local tiltSpeed = 2.3 + count * 0.4  -- different tilt speeds
+    local wobbleSpeed = 3.7 + count * 0.6  -- different wobble speeds
+    local rollSpeed = 1.8 + count * 0.3  -- third axis rotation
+
+    local mainSpin = time * spinSpeed + count * math.pi / 3
+    local tiltAngle = time * tiltSpeed + count * math.pi / 5
+    local wobbleAngle = time * wobbleSpeed + count * math.pi / 7
+    local rollAngle = time * rollSpeed + count * math.pi / 11
+
+    local tiltAmp = 0.8 + math.sin(count) * 0.2  -- varying tilt intensity
+    local wobbleAmp = 0.6 + math.cos(count) * 0.2  -- varying wobble intensity
+    local rollAmp = 0.4 + math.sin(count * 1.3) * 0.2  -- varying roll intensity
+
+    local dotCount = math.max(12, math.ceil(2 * math.pi * radius / 0.05))
+
+    for i = 0, dotCount - 1 do
+        local angle = (i / dotCount) * 2 * math.pi + mainSpin
+
+        local x = radius * math.cos(angle)
+        local y = radius * math.sin(angle)
+        local z = 0
+
+        local tilt = math.sin(tiltAngle) * tiltAmp
+        local y1 = y * math.cos(tilt) - z * math.sin(tilt)
+        local z1 = y * math.sin(tilt) + z * math.cos(tilt)
+
+        local wobble = math.cos(wobbleAngle) * wobbleAmp
+        local x2 = x * math.cos(wobble) + z1 * math.sin(wobble)
+        local z2 = -x * math.sin(wobble) + z1 * math.cos(wobble)
+
+        local roll = math.sin(rollAngle) * rollAmp
+        local x3 = x2 * math.cos(roll) - y1 * math.sin(roll)
+        local y3 = x2 * math.sin(roll) + y1 * math.cos(roll)
+
+        local dotPosition = position + sm.vec3.new(x3, y3, z2)
+
+        table.insert(nametagsTable, {
+            pos = dotPosition,
+            color = color,
+            txt = "•"
+        })
+    end
+end
+
 function sm.MTTensorUtil.iterateTensor(tensor, func)
     local number = {}
     for i = 1, #tensor do

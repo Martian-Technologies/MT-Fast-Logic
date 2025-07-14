@@ -30,6 +30,8 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     local self = multitool.TensorConnect
     local selfData = self.data
     local recalculateNextAction = false
+    local spinnersCount = 0
+
     -- print(selfData.actions)
     if secondaryState == 1 then
         if #selfData.actions > 0 then
@@ -98,27 +100,47 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
         end
         if lookingAt ~= nil then
             if selfData.selecting == "from" then
-                local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsFrom, #sm.MTTensorUtil.colorOrder) + 1]
-                sm.MTTensorUtil.renderVector(tags, selfData.fromOrigin:getWorldPosition(), lookingAt:getWorldPosition(), vecColor, 0.03)
-            else
-                local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsTo, #sm.MTTensorUtil.colorOrder) + 1]
-                local steps = selfData.dimSteps[selfData.nDimsTo + 1]
-                if steps == 0 then steps = 1 end
-                -- print(steps)
-                local delta = lookingAt:getWorldPosition() - selfData.toOrigin:getWorldPosition()
-                local spacing = 0.03
-                if steps > 100 then
-                    spacing = 0.1
-                end
-                local prevPos = selfData.toOrigin:getWorldPosition()
-                for i = 0, steps do
-                    if i > 10 and i < steps - 10 then
-                        goto continue
+                local vecColor = sm.MTTensorUtil.colorOrder
+                [math.fmod(selfData.nDimsFrom, #sm.MTTensorUtil.colorOrder) + 1]
+                if (lookingAt:getWorldPosition() - selfData.fromOrigin:getWorldPosition()):length() > 0 then
+                    sm.MTTensorUtil.renderVector(tags, selfData.fromOrigin:getWorldPosition(), lookingAt:getWorldPosition(), vecColor, 0.03)
+                else
+                    for i = 1, #selfData.vectorsFrom do
+                        if selfData.vectorsFrom[i]:length() == 0 then
+                            spinnersCount = spinnersCount + 1
+                        end
                     end
-                    local pos = selfData.toOrigin:getWorldPosition() + delta * i
-                    sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, spacing)
-                    prevPos = pos
-                    ::continue::
+                    sm.MTTensorUtil.renderSpinner(tags, selfData.fromOrigin:getWorldPosition(), vecColor, spinnersCount)
+                end
+            else
+                local vecColor = sm.MTTensorUtil.colorOrder
+                [math.fmod(selfData.nDimsTo, #sm.MTTensorUtil.colorOrder) + 1]
+                if (lookingAt:getWorldPosition() - selfData.toOrigin:getWorldPosition()):length() > 0 then
+                    local steps = selfData.dimSteps[selfData.nDimsTo + 1]
+                    if steps == 0 then steps = 1 end
+                    -- print(steps)
+                    local delta = lookingAt:getWorldPosition() - selfData.toOrigin:getWorldPosition()
+                    local spacing = 0.03
+                    if steps > 100 then
+                        spacing = 0.1
+                    end
+                    local prevPos = selfData.toOrigin:getWorldPosition()
+                    for i = 0, steps do
+                        if i > 10 and i < steps - 10 then
+                            goto continue
+                        end
+                        local pos = selfData.toOrigin:getWorldPosition() + delta * i
+                        sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, spacing)
+                        prevPos = pos
+                        ::continue::
+                    end
+                else
+                    for i = 1, #selfData.vectorsTo do
+                        if selfData.vectorsTo[i]:length() == 0 then
+                            spinnersCount = spinnersCount + 1
+                        end
+                    end
+                    sm.MTTensorUtil.renderSpinner(tags, selfData.toOrigin:getWorldPosition(), vecColor, spinnersCount)
                 end
             end
         end
@@ -243,36 +265,48 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     end
     
     -- render all previously selected vectors
+    spinnersCount = 0
     for i = 0, #selfData.vectorsFrom - 1 do
         local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder) + 1]
         local fromCreationRotationQuat = selfData.fromOrigin:getBody().worldRotation
         local prevPos = selfData.fromOrigin:getWorldPosition()
-        for l = 1, selfData.dimSteps[i + 1] do
-            if l > 10 and l < selfData.dimSteps[i + 1] - 10 then
-                goto continue
-            end
-            -- gotta rotate selfData.vectorsFrom[i + 1] * l / 4 by fromCreationRotationQuat
-            local pos = selfData.fromOrigin:getWorldPosition() +
-                fromCreationRotationQuat * (selfData.vectorsFrom[i + 1] * l / 4)
-            sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, 0.03)
-            prevPos = pos
-            ::continue::
-        end
-    end
-
-    if selfData.selecting == "to" then
-        for i = 0, #selfData.vectorsTo - 1 do
-            local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder) + 1]
-            local toCreationRotationQuat = selfData.toOrigin:getBody().worldRotation
-            local prevPos = selfData.toOrigin:getWorldPosition()
+        if selfData.vectorsFrom[i + 1]:length() > 0 then
             for l = 1, selfData.dimSteps[i + 1] do
                 if l > 10 and l < selfData.dimSteps[i + 1] - 10 then
                     goto continue
                 end
-                local pos = selfData.toOrigin:getWorldPosition() + toCreationRotationQuat * (selfData.vectorsTo[i + 1] * l / 4)
+                -- gotta rotate selfData.vectorsFrom[i + 1] * l / 4 by fromCreationRotationQuat
+                local pos = selfData.fromOrigin:getWorldPosition() +
+                    fromCreationRotationQuat * (selfData.vectorsFrom[i + 1] * l / 4)
                 sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, 0.03)
                 prevPos = pos
                 ::continue::
+            end
+        else
+            sm.MTTensorUtil.renderSpinner(tags, prevPos, vecColor, spinnersCount)
+            spinnersCount = spinnersCount + 1
+        end
+    end
+
+    if selfData.selecting == "to" then
+        local spinnersCount = 0
+        for i = 0, #selfData.vectorsTo - 1 do
+            local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder) + 1]
+            local toCreationRotationQuat = selfData.toOrigin:getBody().worldRotation
+            local prevPos = selfData.toOrigin:getWorldPosition()
+            if selfData.vectorsTo[i + 1]:length() > 0 then
+                for l = 1, selfData.dimSteps[i + 1] do
+                    if l > 10 and l < selfData.dimSteps[i + 1] - 10 then
+                        goto continue
+                    end
+                    local pos = selfData.toOrigin:getWorldPosition() + toCreationRotationQuat * (selfData.vectorsTo[i + 1] * l / 4)
+                    sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, 0.03)
+                    prevPos = pos
+                    ::continue::
+                end
+            else
+                sm.MTTensorUtil.renderSpinner(tags, prevPos, vecColor, spinnersCount)
+                spinnersCount = spinnersCount + 1
             end
         end
     end

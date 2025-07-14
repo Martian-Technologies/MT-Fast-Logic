@@ -138,7 +138,7 @@ MTMultitool.internalModes = {
 }
 
 MTMultitool.forceOn = {
-	4,
+	3,
 }
 MTMultitool.FastLogicModes = {
     -- 1,

@@ -14,7 +14,12 @@ FastLogicBlockMemory = table.deepCopyTo(BaseFastLogicBlock, (FastLogicBlockMemor
 FastLogicBlockMemory.colorNormal = sm.color.new(0xf00000ff)
 FastLogicBlockMemory.colorHighlight = sm.color.new(0xf53d00ff)
 FastLogicBlockMemory.connectionInput = sm.interactable.connectionType.logic
-FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface + sm.interactable.connectionType.composite + (sm.interactable.connectionType.compositeIO or 0)
+FastLogicBlockMemory.connectionOutput = sm.interactable.connectionType.fastLogicInterface +
+sm.interactable.connectionType.composite + (sm.interactable.connectionType.compositeIO or 0)
+
+FastLogicBlockMemory.currentlyLoadingDataUuid = nil
+FastLogicBlockMemory.currentlyLoadingDataTotalPackets = nil
+FastLogicBlockMemory.currentlyLoadingDataPackets = nil
 
 --needed for SComputers
 FastLogicBlockMemory.componentType = "MTFastMemory"
@@ -462,8 +467,53 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
             " values."
         )
         memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
-        self.network:sendToServer("server_saveMemory", memory)
+        local packets = {}
+        local packetSize = 50000
+        local packetCount = math.ceil(#memory / packetSize)
+        local sequenceUuid = tostring(sm.uuid.generateRandom())
+        for i = 1, packetCount do
+            local startIdx = (i - 1) * packetSize + 1
+            local endIdx = math.min(i * packetSize, #memory)
+            local data = string.sub(memory, startIdx, endIdx)
+            packets[i] = {data = data, index = i, total = packetCount, uuid = sequenceUuid}
+        end
+        -- self.network:sendToServer("server_saveMemory", memory)
+        for i = 1, #packets do
+            local packet = packets[i]
+            self.network:sendToServer("server_saveMemoryPacket", packet)
+        end
     end
+end
+
+function FastLogicBlockMemory.server_saveMemoryPacket(self, packet)
+    if self.currentlyLoadingDataUuid == nil then
+        self.currentlyLoadingDataUuid = packet.uuid
+        self.currentlyLoadingDataTotalPackets = packet.total
+        self.currentlyLoadingDataPackets = {}
+        for i = 1, packet.total do
+            self.currentlyLoadingDataPackets[i] = false
+        end
+    end
+    if self.currentlyLoadingDataUuid ~= packet.uuid then
+        return
+    end
+    self.currentlyLoadingDataPackets[packet.index] = packet.data
+    local allReceived = true
+    for i = 1, self.currentlyLoadingDataTotalPackets do
+        if not self.currentlyLoadingDataPackets[i] then
+            allReceived = false
+            break
+        end
+    end
+    if not allReceived then
+        return
+    end
+
+    local memory = table.concat(self.currentlyLoadingDataPackets)
+    FastLogicBlockMemory.server_saveMemory(self, memory)
+    self.currentlyLoadingDataUuid = nil
+    self.currentlyLoadingDataTotalPackets = nil
+    self.currentlyLoadingDataPackets = nil
 end
 
 function FastLogicBlockMemory:sv_createData()

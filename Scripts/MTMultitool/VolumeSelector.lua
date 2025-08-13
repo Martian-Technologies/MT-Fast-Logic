@@ -15,10 +15,16 @@ function VolumeSelector.inject(multitool)
     self.previewColor = sm.color.new(1, 1, 1, 1)
     self.selectionMode = "inside" -- "inside" or "outside"
     self.doConfirm = true
+    self.toolIndices = {}
     self.nametagUpdate = NametagManager.createController(multitool)
 end
 
-function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, extraTooltip)
+function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, toolName, extraTooltip)
+    local self = multitool.VolumeSelector
+    if self.toolIndices[toolName] == nil then
+        self.toolIndices[toolName] = 1
+    end
+    self.index = self.toolIndices[toolName]
     if extraTooltip == nil then
         extraTooltip = {
             selectOrigin = "",
@@ -26,7 +32,6 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
             confirm = "",
         }
     end
-    local self = multitool.VolumeSelector
     local needToRaycast = false
     local betaTextStart = ""
     local betaTextEnd = ""
@@ -58,6 +63,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         if self.index < 1 then
             self.index = #self.modes
         end
+        self.toolIndices[toolName] = self.index
         local niceMode = self.modesNice[self.index]
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
             "Toggle mode <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..

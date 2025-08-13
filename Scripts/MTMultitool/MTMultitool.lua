@@ -40,8 +40,8 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/MultiblockDetector.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/LogicConverter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/SiliconConverter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Settings.lua")
-dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/ModeChanger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/VolumePlacer.lua")
+dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/ModeChanger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Merger.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/VolumeDeleter.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/Colorizer.lua")
@@ -82,8 +82,8 @@ local defaultEnabledModes = {
     true, -- Fast Logic Convert
     true, -- Silicon Convert
     true, -- Settings
-    true, -- Mode Changer
     true, -- Volume Placer
+    true, -- Mode Changer
     true,  -- Merger
     false, -- Deleter
     true, -- Colorizer
@@ -102,8 +102,8 @@ MTMultitool.modes = {
 	"Fast Logic Convert",
 	"Silicon Convert",
     "Settings",
-    "Mode Changer",
     "Volume Placer",
+    "Mode Changer",
     "Merger",
     "Deleter",
     "Colorizer",
@@ -122,8 +122,8 @@ MTMultitool.internalModes = {
     "LogicConverter",
     "SiliconConverter",
     "Settings",
-    "ModeChanger",
     "VolumePlacer",
+    "ModeChanger",
     "Merger",
     "VolumeDeleter",
     "Colorizer",
@@ -181,8 +181,8 @@ function MTMultitool.client_onCreate(self)
     LogicConverter.inject(self)
     SiliconConverterTool.inject(self)
     Settings.inject(self)
-    ModeChanger.inject(self)
     VolumePlacer.inject(self)
+    ModeChanger.inject(self)
     Merger.inject(self)
     VolumeDeleter.inject(self)
     Colorizer.inject(self)
@@ -492,10 +492,10 @@ function MTMultitool.client_onUnequip(self, animate)
         SiliconConverterTool.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
-    elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
-        ModeChanger.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "VolumePlacer" then
         VolumePlacer.cleanNametags(self)
+    elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
+        ModeChanger.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "VolumeDeleter" then
@@ -592,10 +592,10 @@ local function triggerTool(self, primaryState, secondaryState, forceBuild, looki
         Settings.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif self.mode == "BackupMenu" then
         BackupMenu.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
-    elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
-        ModeChanger.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "VolumePlacer" then
         VolumePlacer.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
+    elseif MTMultitool.internalModes[self.mode] == "ModeChanger" then
+        ModeChanger.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.trigger(self, primaryState, secondaryState, forceBuild, lookingAt)
     elseif MTMultitool.internalModes[self.mode] == "VolumeDeleter" then

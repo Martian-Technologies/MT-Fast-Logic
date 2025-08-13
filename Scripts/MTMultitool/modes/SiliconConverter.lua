@@ -17,7 +17,7 @@ function SiliconConverterTool.trigger(multitool, primaryState, secondaryState, f
     multitool.VolumeSelector.selectionMode = "inside"
     multitool.VolumeSelector.doConfirm = true
 
-    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "siliconConverter")
     if result == nil then
         return
     end

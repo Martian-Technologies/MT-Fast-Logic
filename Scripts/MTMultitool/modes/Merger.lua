@@ -15,7 +15,7 @@ function Merger.trigger(multitool, primaryState, secondaryState, forceBuild, loo
     multitool.VolumeSelector.selectionMode = "inside"
     multitool.VolumeSelector.doConfirm = true
 
-    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "merger")
     if result == nil then
         return
     end

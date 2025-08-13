@@ -240,7 +240,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
 
 
         -- print("Colorizer")
-        local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, {
+        local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "colorizer", {
             selectOrigin = "     "..sm.gui.getKeyBinding("ForceBuild", true) .. " Change Color",
             selectFinal = "",
             confirm = ""

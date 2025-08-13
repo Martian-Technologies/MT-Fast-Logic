@@ -805,7 +805,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 extraTooltip.selectOrigin = extraTooltip.selectOrigin .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target surface"
                 extraTooltip.selectFinal = extraTooltip.selectFinal .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target surface"
             end
-            local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, extraTooltip)
+            local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "copyPaste", extraTooltip)
             if #self.selectedShapes ~= 0 then
                 local siliconFound = false
                 -- local interactableIds = {}

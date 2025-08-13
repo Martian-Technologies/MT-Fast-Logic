@@ -16,7 +16,7 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
     multitool.VolumeSelector.selectionMode = "outside"
     multitool.VolumeSelector.doConfirm = true
 
-    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "volumePlacer")
     if result == nil then
         return
     end

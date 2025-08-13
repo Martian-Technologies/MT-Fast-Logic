@@ -15,7 +15,7 @@ function VolumeDeleter.trigger(multitool, primaryState, secondaryState, forceBui
     multitool.VolumeSelector.selectionMode = "inside"
     multitool.VolumeSelector.doConfirm = true
 
-    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild)
+    local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "volumeDeleter")
     if result == nil then
         return
     end

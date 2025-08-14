@@ -138,10 +138,23 @@ function StateDisplay.client_onUpdate(multitool)
             return
         end
         local uuid = tostring(shape:getShapeUuid())
-        local state = interactable:isActive()
-        local power = interactable:getPower()
+        local state
+        local power
+        local isFastLogic = false
+        if sm and sm.MTFastLogic and sm.MTFastLogic.client_FastLogicBlockLookUp then
+            local flb = sm.MTFastLogic.client_FastLogicBlockLookUp[interactable.id]
+            if flb ~= nil then
+                isFastLogic = true
+                state = flb.state
+                power = nil -- always hide power for fast logic blocks
+            end
+        end
+        if not isFastLogic then
+            state = interactable:isActive()
+            power = interactable:getPower()
+        end
         local stateText = ""
-        local ignorePower = table.contains(noDisplayUUIDs, uuid) or table.contains(stateOnlyUUIDs, uuid)
+        local ignorePower = isFastLogic or table.contains(noDisplayUUIDs, uuid) or table.contains(stateOnlyUUIDs, uuid)
         local ignoreState = table.contains(noDisplayUUIDs, uuid)
         if ignorePower then
             power = nil

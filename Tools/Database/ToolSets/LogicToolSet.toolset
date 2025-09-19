@@ -21,6 +21,17 @@
             "file" : "$CONTENT_DATA/Scripts/MTMultitool/MTMultitool.lua"
          },
          "uuid" : "018e4ca0-c5be-7f80-a80f-259c5951594b"
+      },
+      {
+         "name" : "[BETA] MT Multitool",
+         "previewRenderable" : "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote.rend",
+         "previewRotation" : [ -1, 0, 0, 0, 0, 1, 0, 1, 0 ],
+         "script" : {
+            "class" : "NeoTool",
+            "data" : {},
+            "file" : "$CONTENT_DATA/Scripts/NeoTool/NeoTool.lua"
+         },
+         "uuid" : "91ed19ff-871c-4187-9d73-b8937d96f5c1"
       }
    ]
 }

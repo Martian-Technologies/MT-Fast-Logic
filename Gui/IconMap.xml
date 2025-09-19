@@ -2255,6 +2255,9 @@
             <Index name="018e4ca0-c5be-7f80-a80f-259c5951594b">
                 <Frame point="3360 1632"/>
             </Index>
+            <Index name="91ed19ff-871c-4187-9d73-b8937d96f5c1">
+                <Frame point="3456 1632"/>
+            </Index>
         </Group>
     </Resource>
 </MyGUI>

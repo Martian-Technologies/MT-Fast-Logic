@@ -81,8 +81,9 @@ function FastLogicRunnerRunner.server_convertBody(self, data)
         sm.MTBackupEngine.sv_backupCreation({
             hasCreationData = false,
             body = body,
-            name = "Conversion Backup",
-            description = "Backup created by LogicConverter.lua. Converting to " .. wantedType,
+            nameId = "mt.backup.name.conversion",
+            descriptionId = "mt.backup.description.logic_conversion",
+            descriptionVars = { type = wantedType == "FastLogic" and "mt.backup.type.fast_logic" or "mt.backup.type.vanilla_logic" },
         })
         if wantedType == "FastLogic" then
             sm.MTFastLogic.FastLogicRunnerRunner:convertToFastInternal(body)
@@ -96,8 +97,9 @@ function FastLogicRunnerRunner.convertBodyInternal(self, body, wantedType)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
-        name = "Conversion Backup",
-        description = "Backup created by LogicConverter.lua. Converting to " .. wantedType,
+        nameId = "mt.backup.name.conversion",
+        descriptionId = "mt.backup.description.logic_conversion",
+        descriptionVars = { type = wantedType == "FastLogic" and "mt.backup.type.fast_logic" or "mt.backup.type.vanilla_logic" },
     })
     if wantedType == "FastLogic" then
         sm.MTFastLogic.FastLogicRunnerRunner:convertToFastInternal(body)

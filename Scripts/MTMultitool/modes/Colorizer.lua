@@ -109,14 +109,14 @@ local function injectElements(multitool)
         type = "button",
         position = { a = 0.21 * fovMult, e = 0.07 * 0.5 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.9, 0.2, 0.2),
-        text = "Close",
+        text = "mt.colorizer.close",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = 0.05 * fovMult,
         onclick = function()
             multitool.colorizer.displayingGUI = false
         end,
         tooltip = function()
-            return "Close the color selection menu. Pressing escape also works."
+            return "mt.colorizer.close_tooltip"
         end,
     })
     table.insert(hUI.elements, {
@@ -126,9 +126,9 @@ local function injectElements(multitool)
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = 0.05 * fovMult,
         getrender = function(hovering)
-            local text = "Connection"
+            local text = tr("mt.colorizer.connection")
             if self.parameterMode == "Block" then
-                text = "Block"
+                text = tr("mt.colorizer.block")
             end
             if hovering then
                 text = "[ " .. text .. " ]"
@@ -147,9 +147,9 @@ local function injectElements(multitool)
         end,
         tooltip = function()
             if self.parameterMode == "Connection" then
-                return "Currently, the color of connection dots will be changed. Click to change to block color."
+                return "mt.colorizer.connection_mode_tooltip"
             else
-                return "Currently, the color of blocks will be changed. Click to change to connection dot color."
+                return "mt.colorizer.block_mode_tooltip"
             end
         end,
     })
@@ -160,9 +160,9 @@ local function injectElements(multitool)
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = 0.05 * fovMult,
         getrender = function(hovering)
-            local text = "Match / I"
+            local text = tr("mt.colorizer.match")
             if self.specialModeLast == "invert" then
-                text = "Invert / M"
+                text = tr("mt.colorizer.invert")
             end
             if hovering then
                 text = "|" .. text .. "|"
@@ -189,15 +189,15 @@ local function injectElements(multitool)
         end,
         tooltip = function()
             if self.selectedColor == "match" and self.parameterMode == "Connection" then
-                return "Currently, the color of connection dots will be matched to the color of the block. Click to invert."
+                return "mt.colorizer.match_connection_tooltip"
             elseif self.selectedColor == "match" and self.parameterMode == "Block" then
-                return "Currently, the color of blocks will be matched to the color of the connection dot. Click to invert."
+                return "mt.colorizer.match_block_tooltip"
             elseif self.selectedColor == "invert" and self.parameterMode == "Connection" then
-                return "Currently, the color of connection dots will be inverted from the color of the block. Click to match."
+                return "mt.colorizer.invert_connection_tooltip"
             elseif self.selectedColor == "invert" and self.parameterMode == "Block" then
-                return "Currently, the color of blocks will be inverted from the color of the connection dot. Click to match."
+                return "mt.colorizer.invert_block_tooltip"
             end
-            return "Click to enable special color modes."
+            return "mt.colorizer.special_tooltip"
         end,
     })
     table.insert(hUI.elements, {
@@ -206,7 +206,7 @@ local function injectElements(multitool)
         position = { a = 0, e = 0.07 * -0.5 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.9, 0.9, 0.9),
         getText = function()
-            return "Changing the color of connection dots only works on Fast Logic gates."
+            return "mt.colorizer.info"
         end,
         angleBoundHorizontal = 0.2 * fovMult,
         angleBoundVertical = 0.05 * fovMult,
@@ -225,7 +225,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
     if not self.displayingGUI then
         HoveringUI.cleanUp(multitool)
         multitool.VolumeSelector.modes = nil
-        multitool.VolumeSelector.actionWord = "Colorize"
+        multitool.VolumeSelector.actionWord = "mt.action.colorize"
         multitool.VolumeSelector.isBeta = false
         multitool.VolumeSelector.selectionMode = "inside"
         local previewColor = nil
@@ -241,7 +241,7 @@ function Colorizer.trigger(multitool, primaryState, secondaryState, forceBuild, 
 
         -- print("Colorizer")
         local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "colorizer", {
-            selectOrigin = "     "..sm.gui.getKeyBinding("ForceBuild", true) .. " Change Color",
+            selectOrigin = "     "..sm.gui.getKeyBinding("ForceBuild", true) .. " " .. tr("mt.colorizer.change_color"),
             selectFinal = "",
             confirm = ""
         })

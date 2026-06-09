@@ -98,23 +98,23 @@ local defaultEnabledModes = {
 }
 
 MTMultitool.modes = {
-    -- "Multiblock Detector",
-	"Fast Logic Convert",
-	"Silicon Convert",
-    "Settings",
-    "Volume Placer",
-    "Mode Changer",
-    "Merger",
-    "Deleter",
-    "Colorizer",
-    "Heatmap",
-    "Decoder Maker",
-    "Copy Paste",
-    "Multipoint",
-    "Series",
-	"N to N",
-    "Parallel",
-    "Tensor"
+    -- "mt.mode.multiblock_detector",
+	"mt.mode.logic_converter",
+	"mt.mode.silicon_converter",
+    "mt.mode.settings",
+    "mt.mode.volume_placer",
+    "mt.mode.mode_changer",
+    "mt.mode.merger",
+    "mt.mode.deleter",
+    "mt.mode.colorizer",
+    "mt.mode.heatmap",
+    "mt.mode.decoder_maker",
+    "mt.mode.copy_paste",
+    "mt.mode.single_connect",
+    "mt.mode.series_connect",
+	"mt.mode.nto_n_connect",
+    "mt.mode.parallel_connect",
+    "mt.mode.tensor_connect"
 }
 
 MTMultitool.internalModes = {
@@ -650,11 +650,11 @@ function MTMultitool.client_onEquippedUpdate(self, primaryState, secondaryState,
 
     -- print("EEEEEEE")
     if MTMultitool.modes[self.mode] ~= nil then
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("NextCreateRotation", true), "Rotate Mode ",
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("NextCreateRotation", true), tr("mt.multitool.rotate_mode") .. " ",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            MTMultitool.modes[self.mode] .. " (" .. modeOfEnabled .. "/" .. enabledModes .. ")</p>")
+            tr(MTMultitool.modes[self.mode]) .. " (" .. modeOfEnabled .. "/" .. enabledModes .. ")</p>")
     else
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("NextCreateRotation", true), "Rotate Mode ",
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("NextCreateRotation", true), tr("mt.multitool.rotate_mode") .. " ",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
             self.mode .. "</p>")
     end
@@ -768,8 +768,8 @@ function MTMultitool.server_changeModes(self, data)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
-        name = "Mode Changer Backup",
-        description = "Backup made by mode changer"
+        nameId = "mt.backup.name.mode_changer",
+        descriptionId = "mt.backup.description.mode_changer"
     })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
@@ -851,8 +851,8 @@ function MTMultitool.server_blockMerge(self, data)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
-        name = "Block Merge Backup",
-        description = "Backup made by block merge"
+        nameId = "mt.backup.name.block_merge",
+        descriptionId = "mt.backup.description.block_merge"
     })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
@@ -908,8 +908,8 @@ function MTMultitool.server_volumeDelete(self, data)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
-        name = "Volume Deleter Backup",
-        description = "Backup made by volume deleter"
+        nameId = "mt.backup.name.volume_deleter",
+        descriptionId = "mt.backup.description.volume_deleter"
     })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock
@@ -953,8 +953,8 @@ function MTMultitool.server_volumePlace(self, data)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
-        name = "Volume Placer Backup",
-        description = "Backup made by volume placer"
+        nameId = "mt.backup.name.volume_placer",
+        descriptionId = "mt.backup.description.volume_placer"
     })
     local placingType = data.placingType -- "vanilla" | "fast"
     local uuidPlacing = sm.uuid.new("9f0f56e8-2c31-4d83-996c-d00a9b296c3f")
@@ -985,6 +985,19 @@ end
 
 function MTMultitool.client_callCallCallbackFromServer(self, data)
     CallbackEngine.client_callCallCallbackFromServer(self, data)
+end
+
+local function backupColorizerValueId(value)
+    if value == "match" then
+        return "mt.backup.color.match"
+    elseif value == "invert" then
+        return "mt.backup.color.invert"
+    elseif value == "Connection" then
+        return "mt.colorizer.connection"
+    elseif value == "Block" then
+        return "mt.colorizer.block"
+    end
+    return value
 end
 
 local function getInverseColor(colorId)
@@ -1027,8 +1040,12 @@ function MTMultitool.server_recolor(self, data)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
-        name = "Colorizer Backup",
-        description = "Backup made by Colorizer - " .. colorId .. " - " .. mode,
+        nameId = "mt.backup.name.colorizer",
+        descriptionId = "mt.backup.description.colorizer",
+        descriptionVars = {
+            color = backupColorizerValueId(colorId),
+            mode = backupColorizerValueId(mode)
+        },
     })
     local halfBlock = 0.125
     local x = math.min(originLocal.x, finalLocal.x) - halfBlock

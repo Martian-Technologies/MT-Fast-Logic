@@ -25,14 +25,14 @@ function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBu
             body = res:getJoint().shapeA.body
         end
         if hit and res.type == "character" then
-            sm.gui.setInteractionText("No.. you can't just convert your friend to fast logic and expect him to get smarter.", "", "")
+            sm.gui.setInteractionText("mt.logic_converter.friend", "", "")
         end
         if body == nil then
-            sm.gui.setInteractionText("Aim at a creation", "", "")
+            sm.gui.setInteractionText("mt.heatmap.aim", "", "")
             return
         end
         if body:isOnLift() then
-            sm.gui.setInteractionText("Take the creation off the lift", "", "")
+            sm.gui.setInteractionText("mt.logic_converter.off_lift", "", "")
             return
         elseif primaryState == 1 then
             self.confirming = body
@@ -56,7 +56,7 @@ function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBu
         sm.visualization.setLiftValid( true )
         sm.visualization.setCreationVisible(true)
         
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Convert to FastLogic     ", sm.gui.getKeyBinding("Attack", true), "Convert to Vanilla Logic")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), tr("mt.logic_converter.convert_fast") .. "     ", sm.gui.getKeyBinding("Attack", true), "mt.logic_converter.convert_vanilla")
         -- sm.gui.setInteractionText("")
     else
         -- check if the body is still valid
@@ -66,13 +66,13 @@ function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBu
             return
         end
         if self.confirming:isOnLift() then
-            sm.gui.setInteractionText("Take the creation off the lift", "", "")
+            sm.gui.setInteractionText("mt.logic_converter.off_lift", "", "")
             self.confirming = nil
             self.confirmingType = nil
             return
         end
         if not sm.exists(self.confirming) then
-            sm.gui.setInteractionText("Body is invalid", "", "")
+            sm.gui.setInteractionText("mt.logic_converter.invalid_body", "", "")
             self.confirming = nil
             self.confirmingType = nil
             return
@@ -83,8 +83,8 @@ function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBu
         sm.visualization.setLiftValid( true )
         sm.visualization.setCreationVisible(true)
         if self.confirmingType == "FastLogic" then
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Confirm convert to Fast Logic     ",
-                sm.gui.getKeyBinding("Attack", true), "Cancel")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), tr("mt.logic_converter.confirm_fast") .. "     ",
+                sm.gui.getKeyBinding("Attack", true), "mt.common.cancel")
             if primaryState == 1 then
                 -- BackupEngine.backupCreation(multitool, self.confirming, "ConvertLogicToFast",
                 --     CallbackEngine.client_registerCallback(multitool, function(multitool)
@@ -108,7 +108,7 @@ function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBu
                 self.confirmingType = nil
             end
         elseif self.confirmingType == "VanillaLogic" then
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Cancel     ", sm.gui.getKeyBinding("Attack", true), "Confirm convert to Vanilla Logic")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), tr("mt.common.cancel") .. "     ", sm.gui.getKeyBinding("Attack", true), "mt.logic_converter.confirm_vanilla")
             if secondaryState == 1 then
                 -- BackupEngine.backupCreation(multitool, self.confirming, "ConvertLogicToVanilla",
                 --     CallbackEngine.client_registerCallback(multitool, function(multitool)

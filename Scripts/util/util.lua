@@ -1,6 +1,7 @@
 local random = math.random
 sm.MTUtil = sm.MTUtil or {}
 dofile "profiler.lua"
+dofile "Localization.lua"
 
 -- deque class --
 local deque = {

@@ -30,7 +30,11 @@ function NametagManager.createController(multitool)
             local distance = (camPos - newNametags[i].pos):length()
             local newNametag = newNametags[i]
             nametag:setWorldPosition(newNametag.pos - RangeOffset.rangeOffset * distance)
-            nametag:setText("Text", "#" .. MTMultitoolLib.colorToHexNoAlpha(newNametag.color) .. newNametag.txt)
+            local text = newNametag.txt
+            if MTLocalization ~= nil then
+                text = MTLocalization.resolve(text)
+            end
+            nametag:setText("Text", "#" .. MTMultitoolLib.colorToHexNoAlpha(newNametag.color) .. text)
         end
         self.nametagPositions = {}
         for i, nametag in pairs(newNametags) do

@@ -99,8 +99,9 @@ function FastLogicRunnerRunner.convertSilicon(self, wantedType, body, localLocat
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = body,
-        name = "Silicon Conversion Backup",
-        description = "Backup created by convertSilicon() in FastLogicRunnerRunner.lua. Converting to " .. wantedType,
+        nameId = "mt.backup.name.silicon_conversion",
+        descriptionId = "mt.backup.description.silicon_conversion",
+        descriptionVars = { type = wantedType == "toSilicon" and "mt.backup.type.silicon" or "mt.backup.type.fast_logic" },
     })
     local creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
     local creation = sm.MTFastLogic.Creations[creationId]

@@ -11,8 +11,8 @@ function SiliconConverterTool.trigger(multitool, primaryState, secondaryState, f
     multitool.SelectionModeController.modeActive = "VolumeSelector"
 
     multitool.VolumeSelector.modes = { "toSilicon", "toFastLogic" }
-    multitool.VolumeSelector.modesNice = { "To Silicon", "To Fast Logic" }
-    multitool.VolumeSelector.actionWord = "Convert"
+    multitool.VolumeSelector.modesNice = { "mt.volume.to_silicon", "mt.volume.to_fast_logic" }
+    multitool.VolumeSelector.actionWord = "mt.action.convert"
     multitool.VolumeSelector.isBeta = false
     multitool.VolumeSelector.selectionMode = "inside"
     multitool.VolumeSelector.doConfirm = true

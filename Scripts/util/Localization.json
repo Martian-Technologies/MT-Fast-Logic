@@ -1,0 +1,714 @@
+{
+  "mt.mode.logic_converter": {
+    "English": "Fast Logic Convert",
+    "Russian": "Конвертация в быструю логику"
+  },
+  "mt.mode.silicon_converter": {
+    "English": "Silicon Convert",
+    "Russian": "Литография"
+  },
+  "mt.mode.settings": {
+    "English": "Settings",
+    "Russian": "Настройки"
+  },
+  "mt.mode.volume_placer": {
+    "English": "Volume Placer",
+    "Russian": "Быстрое размещение"
+  },
+  "mt.mode.mode_changer": {
+    "English": "Mode Changer",
+    "Russian": "Изменить режим работы"
+  },
+  "mt.mode.merger": {
+    "English": "Merger",
+    "Russian": "Оптимизатор"
+  },
+  "mt.mode.deleter": {
+    "English": "Deleter",
+    "Russian": "Уничтожение"
+  },
+  "mt.mode.colorizer": {
+    "English": "Colorizer",
+    "Russian": "Краскопульт"
+  },
+  "mt.mode.heatmap": {
+    "English": "Heatmap",
+    "Russian": "Тепловизор"
+  },
+  "mt.mode.decoder_maker": {
+    "English": "Decoder Maker",
+    "Russian": "Создание декодера"
+  },
+  "mt.mode.copy_paste": {
+    "English": "Copy Paste",
+    "Russian": "Копировать"
+  },
+  "mt.mode.single_connect": {
+    "English": "Multipoint",
+    "Russian": "Мультиподключение"
+  },
+  "mt.mode.series_connect": {
+    "English": "Series",
+    "Russian": "Подключение в цепочку"
+  },
+  "mt.mode.nto_n_connect": {
+    "English": "N to N",
+    "Russian": "Подключение всех ко всем"
+  },
+  "mt.mode.parallel_connect": {
+    "English": "Parallel",
+    "Russian": "Параллельное подключение"
+  },
+  "mt.mode.tensor_connect": {
+    "English": "Tensor",
+    "Russian": "Матричное подключение"
+  },
+  "mt.common.select": {
+    "English": "Select",
+    "Russian": "Выбрать"
+  },
+  "mt.common.toggle": {
+    "English": "Toggle",
+    "Russian": "Переключить"
+  },
+  "mt.common.connect": {
+    "English": "Connect",
+    "Russian": "Подключить"
+  },
+  "mt.common.disconnect": {
+    "English": "Disconnect",
+    "Russian": "Отключить"
+  },
+  "mt.common.cancel": {
+    "English": "Cancel",
+    "Russian": "Отменить"
+  },
+  "mt.common.source": {
+    "English": "Source",
+    "Russian": "Источник"
+  },
+  "mt.common.target": {
+    "English": "Target",
+    "Russian": "Цель"
+  },
+  "mt.common.on": {
+    "English": "On",
+    "Russian": "Вкл"
+  },
+  "mt.common.off": {
+    "English": "Off",
+    "Russian": "Выкл"
+  },
+  "mt.common.warn": {
+    "English": "! WARN !",
+    "Russian": "! ВНИМАНИЕ !"
+  },
+  "mt.action.colorize": {
+    "English": "Colorize",
+    "Russian": "Покрасить"
+  },
+  "mt.action.merge": {
+    "English": "Merge",
+    "Russian": "Оптимизировать"
+  },
+  "mt.action.change_mode": {
+    "English": "Change Mode",
+    "Russian": "Переключить режим"
+  },
+  "mt.action.delete": {
+    "English": "Delete",
+    "Russian": "УНИЧТОЖИТЬ"
+  },
+  "mt.action.place": {
+    "English": "Place",
+    "Russian": "Установить"
+  },
+  "mt.action.convert": {
+    "English": "Convert",
+    "Russian": "Конвертировать"
+  },
+  "mt.volume.select_first_corner": {
+    "English": "Select first corner",
+    "Russian": "Выберите первый угол"
+  },
+  "mt.volume.select_second_corner": {
+    "English": "Select second corner",
+    "Russian": "Выберите второй угол"
+  },
+  "mt.volume.toggle_mode": {
+    "English": "Toggle mode",
+    "Russian": "Переключить режим"
+  },
+  "mt.volume.vanilla_logic": {
+    "English": "Vanilla Logic",
+    "Russian": "Ванильная логика"
+  },
+  "mt.volume.fast_logic": {
+    "English": "Fast Logic",
+    "Russian": "Быстрая логика"
+  },
+  "mt.volume.to_silicon": {
+    "English": "To Silicon",
+    "Russian": "В кремний"
+  },
+  "mt.volume.to_fast_logic": {
+    "English": "To Fast Logic",
+    "Russian": "В быструю логику"
+  },
+  "mt.colorizer.close": {
+    "English": "Close",
+    "Russian": "Закрыть"
+  },
+  "mt.colorizer.close_tooltip": {
+    "English": "Close the color selection menu. Pressing escape also works.",
+    "Russian": "Закрыть меню краскопульта, escape тоже работает."
+  },
+  "mt.colorizer.connection": {
+    "English": "Connection",
+    "Russian": "Подключение"
+  },
+  "mt.colorizer.block": {
+    "English": "Block",
+    "Russian": "Блок"
+  },
+  "mt.colorizer.connection_mode_tooltip": {
+    "English": "Currently, the color of connection dots will be changed. Click to change to block color.",
+    "Russian": "Включен режим подкрашивания точек соединения. Нажми чтобы это изменить."
+  },
+  "mt.colorizer.block_mode_tooltip": {
+    "English": "Currently, the color of blocks will be changed. Click to change to connection dot color.",
+    "Russian": "Включен режим подкрашивания блоков. Нажми чтобы это изменить.."
+  },
+  "mt.colorizer.match": {
+    "English": "Match / I",
+    "Russian": "Совпадает / О"
+  },
+  "mt.colorizer.invert": {
+    "English": "Invert / M",
+    "Russian": "Отразить / С"
+  },
+  "mt.colorizer.match_connection_tooltip": {
+    "English": "Currently, the color of connection dots will be matched to the color of the block. Click to invert.",
+    "Russian": "Сейчас цвет точек соединения будет совпадать с цветом блоков. Нажмите чтобы изменить."
+  },
+  "mt.colorizer.match_block_tooltip": {
+    "English": "Currently, the color of blocks will be matched to the color of the connection dot. Click to invert.",
+    "Russian": "Сейчас цвет блоков будет совпадать с цветом точек соединения. Нажмите чтобы изменить."
+  },
+  "mt.colorizer.invert_connection_tooltip": {
+    "English": "Currently, the color of connection dots will be inverted from the color of the block. Click to match.",
+    "Russian": "Сейчас цвет точек соединения будет негативом цвета блоков. Нажмите чтобы изменить."
+  },
+  "mt.colorizer.invert_block_tooltip": {
+    "English": "Currently, the color of blocks will be inverted from the color of the connection dot. Click to match.",
+    "Russian": "Сейчас цвет блоков будет негативом цвета точек соединения. Нажмите чтобы изменить."
+  },
+  "mt.colorizer.special_tooltip": {
+    "English": "Click to enable special color modes.",
+    "Russian": "Нажми чтобы включить режим особенных цветов."
+  },
+  "mt.colorizer.info": {
+    "English": "Changing the color of connection dots only works on Fast Logic gates.",
+    "Russian": "Подкрашивание точек соединения работает только на быстрой логике."
+  },
+  "mt.colorizer.change_color": {
+    "English": "Change Color",
+    "Russian": "Поменять цвет"
+  },
+  "mt.copy.confirm_selection": {
+    "English": "Confirm selection",
+    "Russian": "Подтвердить выделение"
+  },
+  "mt.copy.target_subsurface": {
+    "English": "Target subsurface",
+    "Russian": "Целиться под поверхность"
+  },
+  "mt.copy.target_surface": {
+    "English": "Target surface",
+    "Russian": "Целиться на поверхность"
+  },
+  "mt.copy.silicon_warning": {
+    "English": "Connections to Silicon will not be copied",
+    "Russian": "Подключения к кремнию не подлежат копированию"
+  },
+  "mt.copy.select_origin": {
+    "English": "Select origin",
+    "Russian": "Выберите якорь"
+  },
+  "mt.copy.click_select_origin": {
+    "English": "Click to select origin",
+    "Russian": "Нажмите чтобы выбрать якорь"
+  },
+  "mt.copy.select_step": {
+    "English": "Select step",
+    "Russian": "Выберите шаг"
+  },
+  "mt.copy.click_select_step": {
+    "English": "Click to select step",
+    "Russian": "Нажмите чтобы выбрать шаг"
+  },
+  "mt.copy.click_select_range": {
+    "English": "Click to select range",
+    "Russian": "Укажите количество повторений"
+  },
+  "mt.copy.external_connections_policy": {
+    "English": "Change External Connections Policy:",
+    "Russian": "Сохранение внешних подключений:"
+  },
+  "mt.copy.confirm": {
+    "English": "Confirm Copy/Paste",
+    "Russian": "Подтвердите копирование"
+  },
+  "mt.copy.add_shapes": {
+    "English": "Add Shapes",
+    "Russian": "Добавить детали"
+  },
+  "mt.copy.click_add_shape": {
+    "English": "Click to add shape",
+    "Russian": "Нажмите, чтобы добавить деталь"
+  },
+  "mt.decoder.normal_start": {
+    "English": "Select the start of the normal input",
+    "Russian": "Выбрать начало нормального ввода"
+  },
+  "mt.decoder.normal_end": {
+    "English": "Select the end of the normal input",
+    "Russian": "Выбрать конец нормального ввода"
+  },
+  "mt.decoder.inverted_start": {
+    "English": "Select the start of the inverted input",
+    "Russian": "Выбрать начало инвертированного ввода"
+  },
+  "mt.decoder.inverted_end": {
+    "English": "Select the end of the inverted input",
+    "Russian": "Выбрать конец инвертированного ввода"
+  },
+  "mt.decoder.output_origin": {
+    "English": "Select the origin of the output row of gates",
+    "Russian": "Выбрать блок с нулевым адрессом"
+  },
+  "mt.decoder.output_next": {
+    "English": "Select the next gate in the output row",
+    "Russian": "Выбрать блок следующего адресса"
+  },
+  "mt.decoder.build": {
+    "English": "Press to build the decoder",
+    "Russian": "Нажми чтобы построить декодер"
+  },
+  "mt.heatmap.tracking": {
+    "English": "Heatmap is tracking a creation.",
+    "Russian": "Места нагревания видны."
+  },
+  "mt.heatmap.stop": {
+    "English": "Stop tracking",
+    "Russian": "Стереть флюс."
+  },
+  "mt.heatmap.aim": {
+    "English": "Aim at a creation",
+    "Russian": "Наведитесь на постройку"
+  },
+  "mt.heatmap.track": {
+    "English": "Track creation",
+    "Russian": "Распылить флюс"
+  },
+  "mt.logic_converter.friend": {
+    "English": "No.. you can't just convert your friend to fast logic and expect him to get smarter.",
+    "Russian": "Люди на скорости не становяться умнее ;)"
+  },
+  "mt.logic_converter.convert_fast": {
+    "English": "Convert to FastLogic",
+    "Russian": "Перейти на быструю логику"
+  },
+  "mt.logic_converter.convert_vanilla": {
+    "English": "Convert to Vanilla Logic",
+    "Russian": "Перейти на ванильную логику"
+  },
+  "mt.logic_converter.confirm_fast": {
+    "English": "Confirm convert to Fast Logic",
+    "Russian": "Подтвердите переход на быструю логику"
+  },
+  "mt.logic_converter.confirm_vanilla": {
+    "English": "Confirm convert to Vanilla Logic",
+    "Russian": "Подтвердите переход на ванильную логику"
+  },
+  "mt.logic_converter.off_lift": {
+    "English": "Take the creation off the lift",
+    "Russian": "Снимите постройку с подъёмника"
+  },
+  "mt.logic_converter.invalid_body": {
+    "English": "Body is invalid",
+    "Russian": "Постройка недействительна"
+  },
+  "mt.connect.first_series_start": {
+    "English": "Select the start of the first series",
+    "Russian": "Выберите начало первой группы"
+  },
+  "mt.connect.first_series_end": {
+    "English": "Select the end of the first series",
+    "Russian": "Выберите конец первой группы"
+  },
+  "mt.connect.second_series_start": {
+    "English": "Select the start of the second series",
+    "Russian": "Выберите начало второй группы"
+  },
+  "mt.connect.second_series_end": {
+    "English": "Select the end of the second series",
+    "Russian": "Выберите конец второй группы"
+  },
+  "mt.connect.series_start": {
+    "English": "Select the start of the series",
+    "Russian": "Выберите начало цепочки"
+  },
+  "mt.connect.series_end": {
+    "English": "Select the end of the series",
+    "Russian": "Выберите конец цепочки"
+  },
+  "mt.connect.parallel": {
+    "English": "Parallel",
+    "Russian": "Параллельно"
+  },
+  "mt.connect.nto_n": {
+    "English": "NtoN",
+    "Russian": "Все ко всем"
+  },
+  "mt.connect.change_mode": {
+    "English": "Change mode",
+    "Russian": "Поменять режим"
+  },
+  "mt.connect.preview_unavailable": {
+    "English": "Connect (preview unavailable)",
+    "Russian": "Подключить (предпросмотр недоступен)"
+  },
+  "mt.tensor.source_origin": {
+    "English": "Select the origin of source tensor",
+    "Russian": "Выберите начальную точку исходной матрицы"
+  },
+  "mt.tensor.destination_origin": {
+    "English": "Select the origin of destination tensor",
+    "Russian": "Выберите начальную точку итоговой матрицы"
+  },
+  "mt.tensor.destination_vector": {
+    "English": "Specify the {ordinal} dimension vector of the destination tensor",
+    "Russian": "Укажите {ordinal} базисный вектор итоговой матрицы"
+  },
+  "mt.tensor.source_vector": {
+    "English": "Specify the {ordinal} dimension vector of the source tensor",
+    "Russian": "Укажите {ordinal} базисный вектор исходной матрицы"
+  },
+  "mt.tensor.complete_source": {
+    "English": "Complete Source Tensor; Begin Destination Tensor",
+    "Russian": "Завершите исходную матрицу; Начните итоговую матрицу"
+  },
+  "mt.tensor.destination_range": {
+    "English": "Specify the range of the {ordinal} dimension vector of the destination tensor",
+    "Russian": "Укажите количество повторений {ordinal} базисного вектора итоговой матрицы"
+  },
+  "mt.tensor.source_range": {
+    "English": "Specify the range of the {ordinal} dimension vector of the source tensor",
+    "Russian": "Укажите количество повторений {ordinal} базисного вектора исходной матрицы"
+  },
+  "mt.settings.desc.logic_converter": {
+    "English": "Lets you convert Vanilla Logic to Fast Logic and vice versa.",
+    "Russian": "Позваляет заменить логику на быструю и наоборот."
+  },
+  "mt.settings.desc.silicon_converter": {
+    "English": "Lets you convert Fast Logic to Silicon and vice versa. Silicon helps reduce lag and file size.",
+    "Russian": "Позволяет превратить быструю логику в печатную плату и наоборот."
+  },
+  "mt.settings.desc.mode_changer": {
+    "English": "Lets you select a lot of gates and change their modes (AND/NOR/XOR/etc..) all at once",
+    "Russian": "Позволяет выбрать множество логических затворов и поменять их режим (AND/OR/XOR итд)."
+  },
+  "mt.settings.desc.volume_placer": {
+    "English": "Lets you place a cuboid of logic gates all at once",
+    "Russian": "Позволяет установить множество логических затворов за раз."
+  },
+  "mt.settings.desc.merger": {
+    "English": "Lets you merge gates. Merging takes all of a gates inputs and wires them into the gate's outputs deleting the gate.",
+    "Russian": "Позволяет оптимизировать логические затворы. Берёт все входящие сигналы и подключает их ко всем выходящим."
+  },
+  "mt.settings.desc.volume_deleter": {
+    "English": "Lets you delete a volumetric selection of gates, parts, and other shapes.",
+    "Russian": "Позволяет удалить все выделенные детали/блоки."
+  },
+  "mt.settings.desc.heatmap": {
+    "English": "Can show you the parts of your circuit that are using up the most compute.",
+    "Russian": "Показывает самые часто-обновляемые блоки (самые лагающие)."
+  },
+  "mt.settings.desc.colorizer": {
+    "English": "Changes the connection dot color of Fast Logic gates.",
+    "Russian": "Меняет цвет блока или точки подключения у быстрых логических затворов."
+  },
+  "mt.settings.desc.decoder_maker": {
+    "English": "Goofy tool that wires up decoders for you.",
+    "Russian": "Инструмент который быстро создаёт декодеры."
+  },
+  "mt.settings.desc.single_connect": {
+    "English": "Allows you to select multiple source and destination gates and wire them together.",
+    "Russian": "Позволяет выбрать н-ное количество входов и выходов и подключить их разными способами."
+  },
+  "mt.settings.desc.series_connect": {
+    "English": "Connects a row of gates in series, one into the next.",
+    "Russian": "Подключает логические затворы по очереди в одну цепочку."
+  },
+  "mt.settings.desc.nto_n_connect": {
+    "English": "Crosswires one row of gates into another.",
+    "Russian": "Подключает каждый затвор из первой группы к каждому из второй группы."
+  },
+  "mt.settings.desc.parallel_connect": {
+    "English": "Wires two rows of gates of identical length together in parallel.",
+    "Russian": "Подключает два ряда затворов параллельно."
+  },
+  "mt.settings.desc.tensor_connect": {
+    "English": "Lets you define two tensors of the same size and connect them together in parallel.",
+    "Russian": "Позволяет подключить соответствующие затворы по заданной вами матрице."
+  },
+  "mt.settings.save_index": {
+    "English": "Save Index: {index}",
+    "Russian": "Индекс раскладки: {index}"
+  },
+  "mt.settings.save_index_tooltip": {
+    "English": "The save index is used to store different settings profiles.",
+    "Russian": "Индекс раскладки используемый для сохранения настроек."
+  },
+  "mt.settings.increment_save_index": {
+    "English": "Increment the save index.",
+    "Russian": "Увеличить индекс для записи."
+  },
+  "mt.settings.decrement_save_index": {
+    "English": "Decrement the save index.",
+    "Russian": "Уменьшить индекс для записи."
+  },
+  "mt.settings.fly_mode": {
+    "English": "Fly Mode: {state}",
+    "Russian": "Режим полёта: {state}"
+  },
+  "mt.settings.fly_tooltip": {
+    "English": "Toggles flight mode for you. Not recommended for multiplayer.",
+    "Russian": "Переключает режим полёта для тебя. Не рекомендуеться использовать в мультиплеере."
+  },
+  "mt.settings.connection_display_limit": {
+    "English": "Connection Display Limit: {limit}",
+    "Russian": "Кол-во отображаемых подключений: {limit}"
+  },
+  "mt.settings.connection_display_limit_tooltip": {
+    "English": "The maximum number of connections that will be displayed in connection previews.",
+    "Russian": "Максимальное количество подключений в режиме предпросмотра подключений."
+  },
+  "mt.settings.show_connections": {
+    "English": "Show Connections",
+    "Russian": "Показать соединения"
+  },
+  "mt.settings.show_connections_tooltip": {
+    "English": "Toggles the display of connections between gates when looking at them with a connection tool.",
+    "Russian": "Переключает отображение подключений при наведении на логический затвор."
+  },
+  "mt.settings.hide_connection": {
+    "English": "Hide Connection on Look Away",
+    "Russian": "Прятать подключения когда не наведён"
+  },
+  "mt.settings.hide_connection_tooltip": {
+    "English": "Toggles if the connection display should hide when you look away from the gate.",
+    "Russian": "Переключает должен ли пропадать предпросмотр подключений к затвору когда инструмент не наведён на блок."
+  },
+  "mt.settings.show_gate_states": {
+    "English": "Show Gate States",
+    "Russian": "Показать состояние затвора"
+  },
+  "mt.settings.show_gate_states_tooltip": {
+    "English": "Lets you see the state of a logic gate when looking at it.",
+    "Russian": "Позволяет узнать состояние логического затвора при наведении."
+  },
+  "mt.settings.import_creation": {
+    "English": "Import Creation",
+    "Russian": "Импортировать строение"
+  },
+  "mt.settings.import_creation_tooltip": {
+    "English": "Spawns the creation from the blueprint.json file in C:\\Program Files (x86)\\Steam\\steamapps\\common\\Scrap Mechanic\\Data",
+    "Russian": "Размещает чертёж blueprint.json из папки: C:\\Program Files (x86)\\Steam\\steamapps\\common\\Scrap Mechanic\\Data"
+  },
+  "mt.settings.import_caption": {
+    "English": "from Scrap Mechanic\\Data\\blueprint.json",
+    "Russian": "из Scrap Mechanic\\Data\\blueprint.json"
+  },
+  "mt.settings.import_caption_tooltip": {
+    "English": "You can get here by browsing SM's local files on Steam, and then opening the Data folder. You will need to make the blueprint.json yourself.",
+    "Russian": "Постройку для создания нужно сохранить в файле blueprint.json в папке Data."
+  },
+  "mt.settings.hammer_one_tick": {
+    "English": "Hammer One Tick (fast logic)",
+    "Russian": "Ударный импульс"
+  },
+  "mt.settings.hammer_one_tick_tooltip": {
+    "English": "Lets you smack the shit out of a Fast Logic gate with a hammer to pulse it for a tick.",
+    "Russian": "Позволяет ёбнуть затвор молотком чтобы подать импульс."
+  },
+  "mt.settings.open_backup_menu": {
+    "English": "Open Backup Menu",
+    "Russian": "Открыть меню бэкапов"
+  },
+  "mt.multitool.rotate_mode": {
+    "English": "Rotate Mode",
+    "Russian": "Переключить режим"
+  },
+  "mt.chat.updates_per_tick": {
+    "English": "UpdatesPerTick = {value}",
+    "Russian": "Обновлений в такт: {value}"
+  },
+  "mt.connection.inputs": {
+    "English": "INPUTS: {value}",
+    "Russian": "ВХОДЫ: {value}"
+  },
+  "mt.connection.outputs": {
+    "English": "OUTPUTS: {value}",
+    "Russian": "ВЫХОДЫ: {value}"
+  },
+  "mt.mode.multiblock_detector": {
+    "English": "Multiblock Detector",
+    "Russian": "Детектор Мультиблоков"
+  },
+  "mt.backup.none": {
+    "English": "No backups found :(",
+    "Russian": "Бэкапы не найдены :("
+  },
+  "mt.backup.entry": {
+    "English": "{name} - {description} - created {age} ago",
+    "Russian": "{name} - {description} - создано {age} назад"
+  },
+  "mt.backup.age.seconds_one": {
+    "English": "{count} second",
+    "Russian": "{count} секунду"
+  },
+  "mt.backup.age.seconds_few": {
+    "English": "{count} seconds",
+    "Russian": "{count} секунды"
+  },
+  "mt.backup.age.seconds_many": {
+    "English": "{count} seconds",
+    "Russian": "{count} секунд"
+  },
+  "mt.backup.name.unnamed": {
+    "English": "Unnamed",
+    "Russian": "Без названия"
+  },
+  "mt.backup.name.custom": {
+    "English": "{text}",
+    "Russian": "{text}"
+  },
+  "mt.backup.name.conversion": {
+    "English": "Conversion Backup",
+    "Russian": "Бэкап конвертации"
+  },
+  "mt.backup.name.silicon_conversion": {
+    "English": "Silicon Conversion Backup",
+    "Russian": "Бэкап литографии"
+  },
+  "mt.backup.name.mode_changer": {
+    "English": "Mode Changer Backup",
+    "Russian": "Бэкап изменения режима"
+  },
+  "mt.backup.name.block_merge": {
+    "English": "Block Merge Backup",
+    "Russian": "Бэкап оптимизации блоков"
+  },
+  "mt.backup.name.volume_deleter": {
+    "English": "Volume Deleter Backup",
+    "Russian": "Бэкап удаления"
+  },
+  "mt.backup.name.volume_placer": {
+    "English": "Volume Placer Backup",
+    "Russian": "Бэкап размещения"
+  },
+  "mt.backup.name.colorizer": {
+    "English": "Colorizer Backup",
+    "Russian": "Бэкап покраски"
+  },
+  "mt.backup.name.copy_paste": {
+    "English": "CopyPaste Backup",
+    "Russian": "Бэкап копирования"
+  },
+  "mt.backup.name.decoder": {
+    "English": "Decoder Backup",
+    "Russian": "Бэкап декодера"
+  },
+  "mt.backup.name.tensor": {
+    "English": "{dimensions}-dim Tensor Connection Backup",
+    "Russian": "Бэкап {dimensions}D матричного подключения"
+  },
+  "mt.backup.name.tensor_previewless": {
+    "English": "Previewless {dimensions}-dim Tensor Connection Backup",
+    "Russian": "Бэкап {dimensions}D матричного подключения без предпросмотра"
+  },
+  "mt.backup.description.none": {
+    "English": "No description",
+    "Russian": "Без описания"
+  },
+  "mt.backup.description.custom": {
+    "English": "{text}",
+    "Russian": "{text}"
+  },
+  "mt.backup.description.mode_changer": {
+    "English": "Backup made by mode changer",
+    "Russian": "Бэкап создан изменением режима"
+  },
+  "mt.backup.description.block_merge": {
+    "English": "Backup made by block merge",
+    "Russian": "Бэкап создан оптимизатором блоков"
+  },
+  "mt.backup.description.volume_deleter": {
+    "English": "Backup made by volume deleter",
+    "Russian": "Бэкап создан удалением объёма"
+  },
+  "mt.backup.description.volume_placer": {
+    "English": "Backup made by volume placer",
+    "Russian": "Бэкап создан размещением объёма"
+  },
+  "mt.backup.description.copy_paste": {
+    "English": "Backup created by CopyPaste.lua",
+    "Russian": "Бэкап создан копированием"
+  },
+  "mt.backup.description.decoder": {
+    "English": "Backup created by decoder maker",
+    "Russian": "Бэкап создан построителем декодера"
+  },
+  "mt.backup.description.tensor": {
+    "English": "Backup created by TensorConnect.trigger() in TensorConnect.lua.",
+    "Russian": "Бэкап создан матричным подключением."
+  },
+  "mt.backup.description.tensor_previewless": {
+    "English": "Backup created by sv_connectTensors() in TensorConnect.lua.",
+    "Russian": "Бэкап создан матричным подключением без предпросмотра."
+  },
+  "mt.backup.description.logic_conversion": {
+    "English": "Backup created by LogicConverter.lua. Converting to {type}",
+    "Russian": "Бэкап создан конвертацией логики в {type}"
+  },
+  "mt.backup.description.silicon_conversion": {
+    "English": "Backup created by convertSilicon() in FastLogicRunnerRunner.lua. Converting to {type}",
+    "Russian": "Бэкап создан литографией в {type}"
+  },
+  "mt.backup.description.colorizer": {
+    "English": "Backup made by Colorizer - {color} - {mode}",
+    "Russian": "Бэкап создан краскопультом - {color} - {mode}"
+  },
+  "mt.backup.type.fast_logic": {
+    "English": "Fast Logic",
+    "Russian": "быструю логику"
+  },
+  "mt.backup.type.vanilla_logic": {
+    "English": "Vanilla Logic",
+    "Russian": "ванильную логику"
+  },
+  "mt.backup.type.silicon": {
+    "English": "Silicon",
+    "Russian": "кремний"
+  },
+  "mt.backup.color.match": {
+    "English": "match",
+    "Russian": "совпадение"
+  },
+  "mt.backup.color.invert": {
+    "English": "invert",
+    "Russian": "инверсия"
+  }
+}

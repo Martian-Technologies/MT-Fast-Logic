@@ -5,6 +5,57 @@ function BackupMenu.inject(multitool)
     local self = multitool.BackupMenu
 end
 
+local function localizeVars(vars)
+    if vars == nil then
+        return nil
+    end
+
+    local localized = {}
+    for key, value in pairs(vars) do
+        if MTLocalization ~= nil then
+            localized[key] = MTLocalization.resolve(value)
+        else
+            localized[key] = value
+        end
+    end
+    return localized
+end
+
+local function localizeBackupText(id, vars, fallback)
+    if id ~= nil then
+        return tr(id, localizeVars(vars))
+    end
+    if fallback ~= nil then
+        return fallback
+    end
+    return ""
+end
+
+local function getRussianPluralSuffix(value)
+    local lastTwo = value % 100
+    if lastTwo >= 11 and lastTwo <= 14 then
+        return "many"
+    end
+
+    local last = value % 10
+    if last == 1 then
+        return "one"
+    elseif last >= 2 and last <= 4 then
+        return "few"
+    end
+    return "many"
+end
+
+local function formatAge(seconds)
+    if MTLocalization ~= nil and MTLocalization.isLanguage("Russian") then
+        return tr("mt.backup.age.seconds_" .. getRussianPluralSuffix(seconds), { count = seconds })
+    end
+    if seconds == 1 then
+        return tr("mt.backup.age.seconds_one", { count = seconds })
+    end
+    return tr("mt.backup.age.seconds_many", { count = seconds })
+end
+
 local function injectElements(multitool)
     local fovMult = sm.camera.getFov() / 90
     local self = multitool.BackupMenu
@@ -18,11 +69,7 @@ local function injectElements(multitool)
             position = { a = 0, e = 0.07 * fovMult },
             color = sm.color.new(1, 0, 0),
             getText = function()
-                return "No backups found :("
-                -- {
-                --     text = "No backups found :(",
-                --     color = sm.color.new(1, 0, 0)
-                -- }
+                return "mt.backup.none"
             end
         })
     else
@@ -30,7 +77,11 @@ local function injectElements(multitool)
             local backup = backups[#backups - i + 1]
             local timeNow = os.time()
             local timeDiff = timeNow - backup.timeCreated
-            local backupString = backup.name .. " - " .. backup.description .. " - created " .. timeDiff .. " seconds ago"
+            local backupString = tr("mt.backup.entry", {
+                name = localizeBackupText(backup.nameId, backup.nameVars, backup.name),
+                description = localizeBackupText(backup.descriptionId, backup.descriptionVars, backup.description),
+                age = formatAge(timeDiff)
+            })
             table.insert(hUI.elements, {
                 name = "backup_" .. i,
                 type = "button",

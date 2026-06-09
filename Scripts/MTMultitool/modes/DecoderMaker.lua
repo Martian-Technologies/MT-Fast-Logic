@@ -16,26 +16,26 @@ function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuil
     local self = multitool.DecoderMaker
     if self.normalStart == nil then
         multitool.SelectionModeController.modeActive = "BlockSelector"
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the start of the normal input")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.normal_start")
     elseif self.normalEnd == nil then
         multitool.SelectionModeController.modeActive = "BlockSelector"
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the end of the normal input")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.normal_end")
     elseif self.invertedStart == nil then
         multitool.SelectionModeController.modeActive = "BlockSelector"
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the start of the inverted input")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.inverted_start")
     elseif self.invertedEnd == nil then
         multitool.SelectionModeController.modeActive = "BlockSelector"
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the end of the inverted input")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.inverted_end")
     elseif self.outputOrigin == nil then
         multitool.SelectionModeController.modeActive = "BlockSelector"
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the origin of the output row of gates")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.output_origin")
     elseif self.outputStep == nil then
         multitool.SelectionModeController.modeActive = "BlockSelector"
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Select the next gate in the output row")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.output_next")
     else
         multitool.SelectionModeController.modeActive = nil
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Press to build the decoder")
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Toggle",
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.build")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
             multitool.ConnectionManager.mode .. "<p>")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
@@ -62,8 +62,8 @@ function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuil
             ConnectionManager.commitPreviewWithBackup(multitool, {
                 hasCreationData = false,
                 body = self.outputOrigin:getBody(),
-                name = "Decoder Backup",
-                description = "Backup created by decoder maker",
+                nameId = "mt.backup.name.decoder",
+                descriptionId = "mt.backup.description.decoder",
             })
             DecoderMaker.cleanUp(multitool, true)
         end

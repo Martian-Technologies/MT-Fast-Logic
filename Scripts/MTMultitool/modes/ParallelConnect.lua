@@ -170,19 +170,19 @@ function ParallelConnect.trigger(multitool, primaryState, secondaryState, forceB
         end
     end
     if #selfData.selected == 0 then
-        sm.gui.setInteractionText("Select the start of the first series", sm.gui.getKeyBinding("Create", true), "Select")
+        sm.gui.setInteractionText("mt.connect.first_series_start", sm.gui.getKeyBinding("Create", true), "mt.common.select")
     elseif #selfData.selected == 1 then
-        sm.gui.setInteractionText("Select the end of the first series", sm.gui.getKeyBinding("Create", true), "Select")
+        sm.gui.setInteractionText("mt.connect.first_series_end", sm.gui.getKeyBinding("Create", true), "mt.common.select")
         ParallelConnect.recalculateSequences(multitool, lookingAt)
     elseif #selfData.selected == 2 then
-        sm.gui.setInteractionText("Select the start of the second series", sm.gui.getKeyBinding("Create", true), "Select")
+        sm.gui.setInteractionText("mt.connect.second_series_start", sm.gui.getKeyBinding("Create", true), "mt.common.select")
         ParallelConnect.recalculateSequences(multitool, lookingAt)
     elseif #selfData.selected == 3 then
-        sm.gui.setInteractionText("Select the end of the second series", sm.gui.getKeyBinding("Create", true), "Select")
+        sm.gui.setInteractionText("mt.connect.second_series_end", sm.gui.getKeyBinding("Create", true), "mt.common.select")
         ParallelConnect.recalculateSequences(multitool, lookingAt)
     elseif #selfData.selected == 4 then
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Toggle", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. multitool.ConnectionManager.mode .. "<p>")
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Connect")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. tr("mt.common." .. multitool.ConnectionManager.mode) .. "<p>")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.common.connect")
         ParallelConnect.recalculateSequences(multitool, lookingAt)
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)

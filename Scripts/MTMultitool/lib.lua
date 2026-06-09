@@ -288,6 +288,16 @@ function MTMultitoolLib.getShapeAtVoxelGrid(grid, position)
 end
 
 function MTMultitoolLib.formatOrdinal(n)
+    if MTLocalization ~= nil and MTLocalization.isLanguage("Russian") then
+        local suffix = "-ый"
+        if (n % 10 == 2 and n % 100 ~= 12) or (n % 10 == 6 and n % 100 ~= 16) or (n % 10 == 7 and n % 100 ~= 17) or (n % 10 == 8 and n % 100 ~= 18) then
+            suffix = "-ой"
+        elseif n % 10 == 3 and n % 100 ~= 13 then
+            suffix = "-ий"
+        end
+        return n .. suffix
+    end
+
     local suffix = "th"
     if n % 10 == 1 and n % 100 ~= 11 then
         suffix = "st"
@@ -297,6 +307,18 @@ function MTMultitoolLib.formatOrdinal(n)
         suffix = "rd"
     end
     return n .. suffix
+end
+
+function MTMultitoolLib.formatOrdinalOf(n)
+    if MTLocalization ~= nil and MTLocalization.isLanguage("Russian") then
+        local suffix = "-ого"
+        if n % 10 == 3 and n % 100 ~= 13 then
+            suffix = "-его"
+        end
+        return n .. suffix
+    end
+
+    return MTMultitoolLib.formatOrdinal(n)
 end
 
 function MTMultitoolLib.getVoxelMap(body, override_cache)

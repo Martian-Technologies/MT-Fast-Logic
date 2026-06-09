@@ -35,6 +35,149 @@ end
 
 local coordinatorFileName = "$CONTENT_DATA/Backups/AllBackupCoordinator.json"
 
+local legacyBackupNameIds = {
+    ["Unnamed"] = "mt.backup.name.unnamed",
+    ["Conversion Backup"] = "mt.backup.name.conversion",
+    ["Silicon Conversion Backup"] = "mt.backup.name.silicon_conversion",
+    ["Mode Changer Backup"] = "mt.backup.name.mode_changer",
+    ["Block Merge Backup"] = "mt.backup.name.block_merge",
+    ["Volume Deleter Backup"] = "mt.backup.name.volume_deleter",
+    ["Volume Placer Backup"] = "mt.backup.name.volume_placer",
+    ["Colorizer Backup"] = "mt.backup.name.colorizer",
+    ["CopyPaste Backup"] = "mt.backup.name.copy_paste",
+    ["Decoder Backup"] = "mt.backup.name.decoder"
+}
+
+local legacyBackupDescriptionIds = {
+    ["No description"] = "mt.backup.description.none",
+    ["Backup made by mode changer"] = "mt.backup.description.mode_changer",
+    ["Backup made by block merge"] = "mt.backup.description.block_merge",
+    ["Backup made by volume deleter"] = "mt.backup.description.volume_deleter",
+    ["Backup made by volume placer"] = "mt.backup.description.volume_placer",
+    ["Backup created by CopyPaste.lua"] = "mt.backup.description.copy_paste",
+    ["Backup created by decoder maker"] = "mt.backup.description.decoder",
+    ["Backup created by TensorConnect.trigger() in TensorConnect.lua."] = "mt.backup.description.tensor",
+    ["Backup created by sv_connectTensors() in TensorConnect.lua."] = "mt.backup.description.tensor_previewless"
+}
+
+local function backupConversionTypeId(value)
+    if value == "FastLogic" or value == "toFastLogic" then
+        return "mt.backup.type.fast_logic"
+    elseif value == "VanillaLogic" then
+        return "mt.backup.type.vanilla_logic"
+    elseif value == "toSilicon" then
+        return "mt.backup.type.silicon"
+    end
+    return value
+end
+
+local function backupColorizerValueId(value)
+    if value == "match" then
+        return "mt.backup.color.match"
+    elseif value == "invert" then
+        return "mt.backup.color.invert"
+    elseif value == "Connection" then
+        return "mt.colorizer.connection"
+    elseif value == "Block" then
+        return "mt.colorizer.block"
+    end
+    return value
+end
+
+local function convertLegacyBackupName(name)
+    if name == nil then
+        return "mt.backup.name.unnamed", nil
+    end
+
+    local previewlessDims = string.match(name, "^Prieviewless (%d+)%-dim Tensor Connection Backup$") or
+        string.match(name, "^Previewless (%d+)%-dim Tensor Connection Backup$")
+    if previewlessDims ~= nil then
+        return "mt.backup.name.tensor_previewless", { dimensions = previewlessDims }
+    end
+
+    local dims = string.match(name, "^(%d+)%-dim Tensor Connection Backup$")
+    if dims ~= nil then
+        return "mt.backup.name.tensor", { dimensions = dims }
+    end
+
+    return legacyBackupNameIds[name], nil
+end
+
+local function convertLegacyBackupDescription(description)
+    if description == nil then
+        return "mt.backup.description.none", nil
+    end
+
+    local logicType = string.match(description, "^Backup created by LogicConverter%.lua%. Converting to (.+)$")
+    if logicType ~= nil then
+        return "mt.backup.description.logic_conversion", { type = backupConversionTypeId(logicType) }
+    end
+
+    local siliconType = string.match(description, "^Backup created by convertSilicon%(%) in FastLogicRunnerRunner%.lua%. Converting to (.+)$")
+    if siliconType ~= nil then
+        return "mt.backup.description.silicon_conversion", { type = backupConversionTypeId(siliconType) }
+    end
+
+    local color, mode = string.match(description, "^Backup made by Colorizer %- (.+) %- (.+)$")
+    if color ~= nil then
+        return "mt.backup.description.colorizer", {
+            color = backupColorizerValueId(color),
+            mode = backupColorizerValueId(mode)
+        }
+    end
+
+    return legacyBackupDescriptionIds[description], nil
+end
+
+local function normalizeBackupMetadata(backup)
+    local changed = false
+
+    if backup.nameId == nil then
+        local id, vars = convertLegacyBackupName(backup.name)
+        if id == nil then
+            id = "mt.backup.name.custom"
+            vars = { text = backup.name or "Unnamed" }
+        end
+        backup.nameId = id
+        backup.nameVars = vars
+        changed = true
+    end
+    if backup.name ~= nil then
+        backup.name = nil
+        changed = true
+    end
+
+    if backup.descriptionId == nil then
+        local id, vars = convertLegacyBackupDescription(backup.description)
+        if id == nil then
+            id = "mt.backup.description.custom"
+            vars = { text = backup.description or "No description" }
+        end
+        backup.descriptionId = id
+        backup.descriptionVars = vars
+        changed = true
+    end
+    if backup.description ~= nil then
+        backup.description = nil
+        changed = true
+    end
+
+    return changed
+end
+
+local function getBackupMetadata(data)
+    local backup = {
+        nameId = data.nameId,
+        nameVars = data.nameVars,
+        descriptionId = data.descriptionId,
+        descriptionVars = data.descriptionVars,
+        name = data.name,
+        description = data.description
+    }
+    normalizeBackupMetadata(backup)
+    return backup.nameId, backup.nameVars, backup.descriptionId, backup.descriptionVars
+end
+
 local function saveCoordinator(data)
     sm.json.save(data, coordinatorFileName)
 end
@@ -78,7 +221,7 @@ local function correctOldVersions(playerData)
             playerData.backupsInUse = {}
         end
         local newPlayerData = {
-            version = 2,
+            version = 3,
             backups = {},
             unusedBackupFilenames = {}
         }
@@ -87,14 +230,16 @@ local function correctOldVersions(playerData)
             if not backupData.isPinned and os.time() - backupData.timeCreated > 604800 then
                 table.insert(newPlayerData.unusedBackupFilenames, backupFilename)
             else
-                table.insert(newPlayerData.backups, {
+                local backup = {
                     name = backupData.name,
                     description = backupData.description,
                     creationType = backupData.creationType,
                     timeCreated = backupData.timeCreated,
                     isPinned = backupData.isPinned,
                     backupFilename = backupFilename
-                })
+                }
+                normalizeBackupMetadata(backup)
+                table.insert(newPlayerData.backups, backup)
             end
         end
         for _, backupFilename in pairs(playerData.unusedBackups) do
@@ -108,14 +253,24 @@ local function correctOldVersions(playerData)
     if playerData.unusedBackupFilenames == nil then
         playerData.unusedBackupFilenames = {}
     end
-    return playerData, false
+    local doSave = false
+    if playerData.version ~= 3 then
+        playerData.version = 3
+        doSave = true
+    end
+    for _, backup in pairs(playerData.backups) do
+        if normalizeBackupMetadata(backup) then
+            doSave = true
+        end
+    end
+    return playerData, doSave
 end
 
 local function loadPlayerCoordinator()
     local allData = loadCoordinator()
     if allData.players[getPlayerName()] == nil then
         allData.players[getPlayerName()] = {
-            version = 2,
+            version = 3,
             backups = {},
             unusedBackupFilenames = {}
         }
@@ -163,9 +318,12 @@ function sm.MTBackupEngine.sv_backupCreation(data)
         backupFilename = backupsCoordinator.unusedBackupFilenames[#backupsCoordinator.unusedBackupFilenames]
         table.remove(backupsCoordinator.unusedBackupFilenames, #backupsCoordinator.unusedBackupFilenames)
     end
+    local nameId, nameVars, descriptionId, descriptionVars = getBackupMetadata(data)
     table.insert(backupsCoordinator.backups, {
-        name = data.name or "Unnamed",
-        description = data.description or "No description",
+        nameId = nameId,
+        nameVars = nameVars,
+        descriptionId = descriptionId,
+        descriptionVars = descriptionVars,
         creationType = data.creationType or "Unknown",
         timeCreated = os.time(),
         isPinned = data.isPinned or false,

@@ -41,7 +41,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
     end
     if self.origin == nil and self.final == nil then
         sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true),
-            "Select first corner" .. (extraTooltip.selectOrigin or "") .. betaTextEnd)
+            tr("mt.volume.select_first_corner") .. (extraTooltip.selectOrigin or "") .. betaTextEnd)
         needToRaycast = true
     elseif self.origin ~= nil and self.final == nil then
         needToRaycast = true
@@ -66,8 +66,8 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         self.toolIndices[toolName] = self.index
         local niceMode = self.modesNice[self.index]
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
-            "Toggle mode <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            niceMode .. "</p>")
+            tr("mt.volume.toggle_mode") .. " <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            MTLocalization.resolve(niceMode) .. "</p>")
     end
 
     local tags = {}
@@ -125,11 +125,11 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         local zWidth = z2 - z1
         local sizeString = "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>("..(xWidth*4).." x "..(yWidth*4).." x "..(zWidth*4)..")</p>"
         if self.origin ~= nil and self.final == nil then
-            sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), "Select second corner     "..sizeString.."     ",
-                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd .. extraTooltip.selectFinal)
+            sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), tr("mt.volume.select_second_corner") .. "     "..sizeString.."     ",
+                sm.gui.getKeyBinding("Attack", true), tr("mt.common.cancel") .. betaTextEnd .. extraTooltip.selectFinal)
         elseif self.origin ~= nil and self.final ~= nil then
-            sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), self.actionWord .. "     "..sizeString.."     ",
-                sm.gui.getKeyBinding("Attack", true), "Cancel" .. betaTextEnd .. extraTooltip.confirm)
+            sm.gui.setInteractionText(betaTextStart, sm.gui.getKeyBinding("Create", true), MTLocalization.resolve(self.actionWord) .. "     "..sizeString.."     ",
+                sm.gui.getKeyBinding("Attack", true), tr("mt.common.cancel") .. betaTextEnd .. extraTooltip.confirm)
         end
         local stepsPerBlock = 2
         local xSteps = math.floor(xWidth / 0.25) * stepsPerBlock

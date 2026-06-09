@@ -297,7 +297,7 @@ function BaseFastLogicBlock.server_changeSpeed(self, isCrouching)
             self.creation.FastLogicRunner.numberOfUpdatesPerTick = self.creation.FastLogicRunner.numberOfUpdatesPerTick * 2
         end
     end
-    self:sendMessageToAll("UpdatesPerTick = " .. tostring(self.creation.FastLogicRunner.numberOfUpdatesPerTick))
+    self:sendMessageToAll({ id = "mt.chat.updates_per_tick", vars = { value = self.creation.FastLogicRunner.numberOfUpdatesPerTick } })
 end
 
 function BaseFastLogicBlock.client_updateTexture(self, state)
@@ -308,6 +308,9 @@ function BaseFastLogicBlock.sendMessageToAll(self, message)
 end
 
 function BaseFastLogicBlock.client_sendMessage(self, message)
+    if type(message) == "table" and message.id ~= nil then
+        message = tr(message.id, message.vars)
+    end
     sm.gui.chatMessage(message)
 end
 

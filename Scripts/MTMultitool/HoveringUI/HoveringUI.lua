@@ -30,11 +30,17 @@ local function button(multitool, ctx)
     end
 
     local text = element.text
+    if MTLocalization ~= nil then
+        text = MTLocalization.resolve(text)
+    end
     local primaryState = ctx.buttonClicks.primaryState
     local color = element.color
     local tooltip = nil
     if element.tooltip ~= nil then
         tooltip = element.tooltip()
+        if MTLocalization ~= nil then
+            tooltip = MTLocalization.resolve(tooltip)
+        end
     end
     if hover then
         if tooltip ~= nil then
@@ -77,6 +83,9 @@ local function toggleButton(multitool, ctx)
     end
 
     local text = element.text
+    if MTLocalization ~= nil then
+        text = MTLocalization.resolve(text)
+    end
     local primaryState = ctx.buttonClicks.primaryState
     local state = element.getState()
     local color = element.color.off
@@ -86,6 +95,9 @@ local function toggleButton(multitool, ctx)
     local tooltip = nil
     if element.tooltip ~= nil then
         tooltip = element.tooltip(state)
+        if MTLocalization ~= nil then
+            tooltip = MTLocalization.resolve(tooltip)
+        end
     end
     if hover then
         if tooltip ~= nil then
@@ -129,10 +141,16 @@ local function customButton(multitool, ctx)
 
     local render = element.getrender(hover)
     local text = render.text
+    if MTLocalization ~= nil then
+        text = MTLocalization.resolve(text)
+    end
     local color = render.color
     local tooltip = nil
     if element.tooltip ~= nil then
         tooltip = element.tooltip()
+        if MTLocalization ~= nil then
+            tooltip = MTLocalization.resolve(tooltip)
+        end
     end
     if hover then
         if tooltip ~= nil then
@@ -165,6 +183,9 @@ local function indicator(multitool, ctx)
     local tooltip = nil
     if element.tooltip ~= nil then
         tooltip = element.tooltip()
+        if MTLocalization ~= nil then
+            tooltip = MTLocalization.resolve(tooltip)
+        end
     end
 
     if tooltip ~= nil then
@@ -185,6 +206,9 @@ local function indicator(multitool, ctx)
 
 
     local text = element.getText()
+    if MTLocalization ~= nil then
+        text = MTLocalization.resolve(text)
+    end
 
     table.insert(tags, {
         pos = pos,

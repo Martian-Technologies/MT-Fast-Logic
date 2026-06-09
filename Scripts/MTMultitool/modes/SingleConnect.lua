@@ -81,22 +81,22 @@ function SingleConnect.trigger(multitool, primaryState, secondaryState, forceBui
         end
     end
     self.updateNametags(tags)
-    sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Source     ",
-        sm.gui.getKeyBinding("Attack", true), "Target")
+    sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), tr("mt.common.source") .. "     ",
+        sm.gui.getKeyBinding("Attack", true), "mt.common.target")
     if #self.selectedSource > 0 and #self.selectedTarget > 0 then
         self.readingRotate = true
         local canParallel = false
-        local action = "Connect"
+        local action = tr("mt.common.connect")
         local cm = multitool.ConnectionManager
         if cm.mode == "disconnect" then
-            action = "Disconnect"
+            action = tr("mt.common.disconnect")
         end
         if #self.selectedSource == #self.selectedTarget then
             canParallel = true
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " NtoN     ",
-                sm.gui.getKeyBinding("Reload", true), action .. " Parallel" .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " Change mode")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " " .. tr("mt.connect.nto_n") .. "     ",
+                sm.gui.getKeyBinding("Reload", true), action .. " " .. tr("mt.connect.parallel") .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " " .. tr("mt.connect.change_mode"))
         else
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " NtoN" .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " Change mode")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " " .. tr("mt.connect.nto_n") .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " " .. tr("mt.connect.change_mode"))
         end
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             cm.preview = {}

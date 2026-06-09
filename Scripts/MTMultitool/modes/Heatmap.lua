@@ -14,8 +14,8 @@ function Heatmap.trigger(multitool, primaryState, secondaryState, forceBuild, lo
     local self = multitool.Heatmap
     multitool.SelectionModeController.modeActive = nil
     if self.creationTracking ~= nil then
-        sm.gui.setInteractionText("Heatmap is tracking a creation.     ", sm.gui.getKeyBinding("Attack", true),
-            "Stop tracking")
+        sm.gui.setInteractionText(tr("mt.heatmap.tracking") .. "     ", sm.gui.getKeyBinding("Attack", true),
+            "mt.heatmap.stop")
         if secondaryState == 1 then
             self.creationTracking = nil
             self.updateNametags(nil)
@@ -34,10 +34,10 @@ function Heatmap.trigger(multitool, primaryState, secondaryState, forceBuild, lo
             body = res:getJoint().shapeA.body
         end
         if body == nil then
-            sm.gui.setInteractionText("Aim at a creation", "", "")
+            sm.gui.setInteractionText("mt.heatmap.aim", "", "")
             return
         end
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Track creation")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.heatmap.track")
         if primaryState == 1 then
             self.creationTracking = body:getCreationBodies()
             self.blockUsageTracker = {}

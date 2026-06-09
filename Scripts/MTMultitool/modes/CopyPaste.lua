@@ -208,8 +208,8 @@ function CopyPaste.doCopyPaste(multitool, data)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreation = false,
         body = targetBody,
-        name = "CopyPaste Backup",
-        description = "Backup created by CopyPaste.lua",
+        nameId = "mt.backup.name.copy_paste",
+        descriptionId = "mt.backup.description.copy_paste",
     })
 
     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
@@ -681,7 +681,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             undoShapeSelect(multitool)
         end
         if self.selectionMode == "individual" then
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Click to add shape")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.copy.click_add_shape")
             local localPosition, bodyhit = ConnectionRaycaster:raycastToBlock(self.targeting == "surface")
             if (bodyhit ~= self.activeBody) and (self.activeBody ~= nil) then
                 localPosition = nil
@@ -788,7 +788,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             else
                 vs.selectionMode = "inside"
             end
-            vs.actionWord = "Add Shapes"
+            vs.actionWord = "mt.copy.add_shapes"
             vs.doConfirm = false
             local extraTooltip = {
                 selectOrigin = "",
@@ -796,14 +796,14 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 confirm = "",
             }
             if #self.selectedShapes ~= 0 then
-                extraTooltip.selectOrigin = "     " .. sm.gui.getKeyBinding("ForceBuild", true) .. "Confirm selection"
+                extraTooltip.selectOrigin = "     " .. sm.gui.getKeyBinding("ForceBuild", true) .. tr("mt.copy.confirm_selection")
             end
             if self.targeting == "surface" then
-                extraTooltip.selectOrigin = extraTooltip.selectOrigin .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target subsurface"
-                extraTooltip.selectFinal = extraTooltip.selectFinal .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target subsurface"
+                extraTooltip.selectOrigin = extraTooltip.selectOrigin .. "     " .. sm.gui.getKeyBinding("Reload", true) .. tr("mt.copy.target_subsurface")
+                extraTooltip.selectFinal = extraTooltip.selectFinal .. "     " .. sm.gui.getKeyBinding("Reload", true) .. tr("mt.copy.target_subsurface")
             else
-                extraTooltip.selectOrigin = extraTooltip.selectOrigin .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target surface"
-                extraTooltip.selectFinal = extraTooltip.selectFinal .. "     " .. sm.gui.getKeyBinding("Reload", true) .. "Target surface"
+                extraTooltip.selectOrigin = extraTooltip.selectOrigin .. "     " .. sm.gui.getKeyBinding("Reload", true) .. tr("mt.copy.target_surface")
+                extraTooltip.selectFinal = extraTooltip.selectFinal .. "     " .. sm.gui.getKeyBinding("Reload", true) .. tr("mt.copy.target_surface")
             end
             local result = VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, "copyPaste", extraTooltip)
             if #self.selectedShapes ~= 0 then
@@ -822,7 +822,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 end
                 if siliconFound then
                     sm.gui.setInteractionText(
-                    "<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p> Connections to Silicon will not be copied <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>")
+                    "<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>" .. tr("mt.common.warn") .. "</p> " .. tr("mt.copy.silicon_warning") .. " <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>" .. tr("mt.common.warn") .. "</p>")
                 end
             end
             if result ~= nil then
@@ -1090,7 +1090,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
         end
 
         if state == "selectOrigin" then
-            sm.gui.setInteractionText("Select origin", sm.gui.getKeyBinding("Create", true), "Click to select origin")
+            sm.gui.setInteractionText("mt.copy.select_origin", sm.gui.getKeyBinding("Create", true), "mt.copy.click_select_origin")
             if primaryState == 1 and localPosition ~= nil then
                 table.insert(self.actions, {
                     action = "selectOrigin",
@@ -1099,7 +1099,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             end
         elseif state == "selectStep" then
             if localPosition ~= nil then
-                sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true), "Click to select step")
+                sm.gui.setInteractionText("mt.copy.select_step", sm.gui.getKeyBinding("Create", true), "mt.copy.click_select_step")
                 local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(#self.vectors, #sm.MTTensorUtil.colorOrder) + 1]
                 sm.MTTensorUtil.renderVector(tags, self.activeBody:transformPoint(self.origin),
                     self.activeBody:transformPoint(localPosition),
@@ -1135,13 +1135,13 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     range = nSteps
                 })
             end
-            sm.gui.setInteractionText("Select step", sm.gui.getKeyBinding("Create", true),
-                "Click to select range <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>(" ..
+            sm.gui.setInteractionText("mt.copy.select_step", sm.gui.getKeyBinding("Create", true),
+                tr("mt.copy.click_select_range") .. " <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>(" ..
                 (nSteps + 1) .. ")</p>")
         elseif state == "confirm" then
             sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
-                "Change External Connections Policy: <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-                self.externalConnectionsPolicy .. "</p>     ", sm.gui.getKeyBinding("Create", true), "Confirm Copy/Paste")
+                tr("mt.copy.external_connections_policy") .. " <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+                self.externalConnectionsPolicy .. "</p>     ", sm.gui.getKeyBinding("Create", true), "mt.copy.confirm")
             if primaryState == 1 then
                 doCopyPaste(multitool)
                 CopyPaste.cleanUp(multitool)
@@ -1169,7 +1169,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 end
             end
             if siliconFound then
-                sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p> Connections to Silicon will not be copied <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>! WARN !</p>")
+                sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>" .. tr("mt.common.warn") .. "</p> " .. tr("mt.copy.silicon_warning") .. " <p textShadow='false' bg='gui_keybinds_bg' color='#ff2211' spacing='4'>" .. tr("mt.common.warn") .. "</p>")
             end
         end
         for i = 1, #self.vectors do
@@ -1188,7 +1188,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             end
         end
         if canConfirm then
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Confirm Copy/Paste")
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.copy.confirm")
             if MTMultitool.handleForceBuild(multitool, forceBuild) then
                 table.insert(self.actions, {
                     action = "confirm"

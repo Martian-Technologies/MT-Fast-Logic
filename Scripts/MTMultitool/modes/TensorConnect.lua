@@ -41,12 +41,12 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     elseif selfData.nextAction == "selectOrigin" then
         if selfData.selecting == "from" then
             multitool.BlockSelector.bodyConstraint = nil
-            sm.gui.setInteractionText("Select the origin of source tensor", sm.gui.getKeyBinding("Create", true),
-                "Select")
+            sm.gui.setInteractionText("mt.tensor.source_origin", sm.gui.getKeyBinding("Create", true),
+                "mt.common.select")
         elseif selfData.selecting == "to" then
             multitool.BlockSelector.bodyConstraint = selfData.fromOrigin:getBody():getCreationBodies()
-            sm.gui.setInteractionText("Select the origin of destination tensor", sm.gui.getKeyBinding("Create", true),
-                "Select")
+            sm.gui.setInteractionText("mt.tensor.destination_origin", sm.gui.getKeyBinding("Create", true),
+                "mt.common.select")
         end
         multitool.SelectionModeController.modeActive = "BlockSelector"
         if primaryState == 1 then
@@ -67,10 +67,9 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
                 multitool.BlockSelector.bodyConstraint = { selfData.toOrigin:getBody() }
             end
             sm.gui.setInteractionText(
-                "Specify the " ..
-                MTMultitoolLib.formatOrdinal(selfData.nDimsTo + 1) ..
-                " dimension vector of the destination tensor <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>(" ..
-                selfData.nDimsTo .. "/" .. selfData.nDimsFrom .. ")</p>", sm.gui.getKeyBinding("Create", true), "Select")
+                tr("mt.tensor.destination_vector", { ordinal = MTMultitoolLib.formatOrdinal(selfData.nDimsTo + 1) }) ..
+                " <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>(" ..
+                selfData.nDimsTo .. "/" .. selfData.nDimsFrom .. ")</p>", sm.gui.getKeyBinding("Create", true), "mt.common.select")
         else
             if selfData.fromOrigin:getBody():isOnLift() then
                 multitool.BlockSelector.bodyConstraint = selfData.fromOrigin:getBody():getCreationBodies()
@@ -78,11 +77,10 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
                 multitool.BlockSelector.bodyConstraint = { selfData.fromOrigin:getBody() }
             end
             sm.gui.setInteractionText(
-            "Specify the " ..
-            MTMultitoolLib.formatOrdinal(selfData.nDimsFrom + 1) .. " dimension vector of the source tensor",
-                sm.gui.getKeyBinding("Create", true), "Select")
+            tr("mt.tensor.source_vector", { ordinal = MTMultitoolLib.formatOrdinal(selfData.nDimsFrom + 1) }),
+                sm.gui.getKeyBinding("Create", true), "mt.common.select")
             sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
-                "Complete Source Tensor; Begin Destination Tensor")
+                "mt.tensor.complete_source")
         end
         if MTMultitool.handleForceBuild(multitool, forceBuild) and selfData.selecting == "from" then
             selfData.actions[#selfData.actions + 1] = {
@@ -197,11 +195,9 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
                 multitool.BlockSelector.bodyConstraint = { selfData.toOrigin:getBody() }
             end
             sm.gui.setInteractionText(
-            "Specify the range of the " ..
-            MTMultitoolLib.formatOrdinal(selfData.nDimsTo) ..
-            " dimension vector of the destination tensor" ..
+            tr("mt.tensor.destination_range", { ordinal = MTMultitoolLib.formatOrdinalOf(selfData.nDimsTo) }) ..
             " <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>(" .. (nSteps + 1) .. ")</p>",
-                sm.gui.getKeyBinding("Create", true), "Select")
+                sm.gui.getKeyBinding("Create", true), "mt.common.select")
         else
             if selfData.fromOrigin:getBody():isOnLift() then
                 multitool.BlockSelector.bodyConstraint = selfData.fromOrigin:getBody():getCreationBodies()
@@ -209,17 +205,15 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
                 multitool.BlockSelector.bodyConstraint = { selfData.fromOrigin:getBody() }
             end
             sm.gui.setInteractionText(
-            "Specify the range of the " ..
-            MTMultitoolLib.formatOrdinal(selfData.nDimsFrom) ..
-            " dimension vector of the source tensor" ..
+            tr("mt.tensor.source_range", { ordinal = MTMultitoolLib.formatOrdinalOf(selfData.nDimsFrom) }) ..
             " <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>(" .. (nSteps + 1) .. ")</p>",
-                sm.gui.getKeyBinding("Create", true), "Select")
+                sm.gui.getKeyBinding("Create", true), "mt.common.select")
         end
     elseif selfData.nextAction == "confirm" then
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Toggle",
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            multitool.ConnectionManager.mode .. "<p>")
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Connect")
+            tr("mt.common." .. multitool.ConnectionManager.mode) .. "<p>")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.common.connect")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)
         end
@@ -229,16 +223,17 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
             ConnectionManager.commitPreviewWithBackup(multitool, {
                 hasCreationData = false,
                 body = selfData.toOrigin:getBody(),
-                name = (table.length(selfData.dimSteps)).."-dim Tensor Connection Backup",
-                description = "Backup created by TensorConnect.trigger() in TensorConnect.lua.",
+                nameId = "mt.backup.name.tensor",
+                nameVars = { dimensions = table.length(selfData.dimSteps) },
+                descriptionId = "mt.backup.description.tensor",
             })
             TensorConnect.cleanUp(multitool, true)
         end
     elseif selfData.nextAction == "previewlessConfirm" then
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "Toggle",
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            multitool.ConnectionManager.mode .. "<p>")
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "Connect (preview unavailable)")
+            tr("mt.common." .. multitool.ConnectionManager.mode) .. "<p>")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.connect.preview_unavailable")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)
         end
@@ -585,8 +580,9 @@ function TensorConnect.sv_connectTensors(multitool, packet)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = packet.toOrigin:getBody(),
-        name = "Prieviewless "..(table.length(packet.dimSteps)).."-dim Tensor Connection Backup",
-        description = "Backup created by sv_connectTensors() in TensorConnect.lua.",
+        nameId = "mt.backup.name.tensor_previewless",
+        nameVars = { dimensions = table.length(packet.dimSteps) },
+        descriptionId = "mt.backup.description.tensor_previewless",
     })
     local fromOrigin = packet.fromOrigin
     local toOrigin = packet.toOrigin

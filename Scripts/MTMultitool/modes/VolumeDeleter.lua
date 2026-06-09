@@ -11,7 +11,7 @@ function VolumeDeleter.trigger(multitool, primaryState, secondaryState, forceBui
 
     multitool.VolumeSelector.modes = nil
     multitool.VolumeSelector.isBeta = false
-    multitool.VolumeSelector.actionWord = "Delete"
+    multitool.VolumeSelector.actionWord = "mt.action.delete"
     multitool.VolumeSelector.selectionMode = "inside"
     multitool.VolumeSelector.doConfirm = true
 

@@ -6,22 +6,20 @@ function Settings.inject(multitool)
 end
 
 local modesAndTheirFunctions = {
-    ["LogicConverter"] = "Lets you convert Vanilla Logic to Fast Logic and vice versa.",
-    ["SiliconConverter"] =
-    "Lets you convert Fast Logic to Silicon and vice versa. Silicon helps reduce lag and file size.",
-    ["ModeChanger"] = "Lets you select a lot of gates and change their modes (AND/NOR/XOR/etc..) all at once",
-    ["VolumePlacer"] = "Lets you place a cuboid of logic gates all at once",
-    ["Merger"] =
-    "Lets you merge gates. Merging takes all of a gates inputs and wires them into the gate's outputs deleting the gate.",
-    ["VolumeDeleter"] = "Lets you delete a volumetric selection of gates, parts, and other shapes.",
-    ["Heatmap"] = "Can show you the parts of your circuit that are using up the most compute.",
-    ["Colorizer"] = "Changes the connection dot color of Fast Logic gates.",
-    ["DecoderMaker"] = "Goofy tool that wires up decoders for you.",
-    ["SingleConnect"] = "Allows you to select multiple source and destination gates and wire them together.",
-    ["SeriesConnect"] = "Connects a row of gates in series, one into the next.",
-    ["NtoNConnect"] = "Crosswires one row of gates into another.",
-    ["ParallelConnect"] = "Wires two rows of gates of identical length together in parallel.",
-    ["TensorConnect"] = "Lets you define two tensors of the same size and connect them together in parallel.",
+    ["LogicConverter"] = "mt.settings.desc.logic_converter",
+    ["SiliconConverter"] = "mt.settings.desc.silicon_converter",
+    ["ModeChanger"] = "mt.settings.desc.mode_changer",
+    ["VolumePlacer"] = "mt.settings.desc.volume_placer",
+    ["Merger"] = "mt.settings.desc.merger",
+    ["VolumeDeleter"] = "mt.settings.desc.volume_deleter",
+    ["Heatmap"] = "mt.settings.desc.heatmap",
+    ["Colorizer"] = "mt.settings.desc.colorizer",
+    ["DecoderMaker"] = "mt.settings.desc.decoder_maker",
+    ["SingleConnect"] = "mt.settings.desc.single_connect",
+    ["SeriesConnect"] = "mt.settings.desc.series_connect",
+    ["NtoNConnect"] = "mt.settings.desc.nto_n_connect",
+    ["ParallelConnect"] = "mt.settings.desc.parallel_connect",
+    ["TensorConnect"] = "mt.settings.desc.tensor_connect",
 }
 
 local function injectElements(multitool)
@@ -75,10 +73,10 @@ local function injectElements(multitool)
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = 0.03 * fovMult,
         getText = function()
-            return "Save Index: " .. tostring(multitool.saveIdx)
+            return tr("mt.settings.save_index", { index = multitool.saveIdx })
         end,
         tooltip = function()
-            return "The save index is used to store different settings profiles."
+            return "mt.settings.save_index_tooltip"
         end,
     })
 
@@ -87,7 +85,7 @@ local function injectElements(multitool)
         type = "button",
         position = { a = -math.pi/8 * fovMult, e = 3 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
-        text = "↑",
+        text = "/\\",
         angleBoundHorizontal = 0.03 * fovMult,
         angleBoundVertical = 0.03 * fovMult,
         onclick = function()
@@ -99,7 +97,7 @@ local function injectElements(multitool)
             MTMultitool.repullSettings(multitool)
         end,
         tooltip = function()
-            return "Increment the save index."
+            return "mt.settings.increment_save_index"
         end,
     })
 
@@ -108,7 +106,7 @@ local function injectElements(multitool)
         type = "button",
         position = { a = -math.pi/8 * fovMult, e = 1 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
-        text = "↓",
+        text = "\\/",
         angleBoundHorizontal = 0.03 * fovMult,
         angleBoundVertical = 0.03 * fovMult,
         onclick = function()
@@ -120,7 +118,7 @@ local function injectElements(multitool)
             MTMultitool.repullSettings(multitool)
         end,
         tooltip = function()
-            return "Decrement the save index."
+            return "mt.settings.decrement_save_index"
         end,
     })
 
@@ -132,7 +130,7 @@ local function injectElements(multitool)
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getrender = function(hovering)
             local isFlying = multitool.MTFlying.flying
-            local text = "Fly Mode: " .. (isFlying and "On" or "Off")
+            local text = tr("mt.settings.fly_mode", { state = isFlying and tr("mt.common.on") or tr("mt.common.off") })
             local color = isFlying and sm.color.new(0.2, 0.9, 0.2) or sm.color.new(0.9, 0.2, 0.2)
             if hovering then
                 text = "[ " .. text .. " ]"
@@ -146,7 +144,7 @@ local function injectElements(multitool)
             MTFlying.toggleFlying(multitool)
         end,
         tooltip = function()
-            return "Toggles flight mode for you. Not recommended for multiplayer."
+            return "mt.settings.fly_tooltip"
         end,
     })
 
@@ -157,7 +155,7 @@ local function injectElements(multitool)
         angleBoundHorizontal = 0.1,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getrender = function(hover)
-            local text = "Connection Display Limit: " .. multitool.ConnectionManager.connectionDisplayLimit
+            local text = tr("mt.settings.connection_display_limit", { limit = multitool.ConnectionManager.connectionDisplayLimit })
             if hover then
                 text = "[ " .. text .. " ]"
             end
@@ -176,7 +174,7 @@ local function injectElements(multitool)
             ConnectionManager.updateConnectionLimitDisplay(multitool, newLimit)
         end,
         tooltip = function()
-            return "The maximum number of connections that will be displayed in connection previews."
+            return "mt.settings.connection_display_limit_tooltip"
         end,
     })
 
@@ -188,7 +186,7 @@ local function injectElements(multitool)
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
-        text = "Show Connections",
+        text = "mt.settings.show_connections",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getState = function()
@@ -198,7 +196,7 @@ local function injectElements(multitool)
             ConnectionShower.toggle(multitool)
         end,
         tooltip = function()
-            return "Toggles the display of connections between gates when looking at them with a connection tool."
+            return "mt.settings.show_connections_tooltip"
         end,
     })
 
@@ -210,7 +208,7 @@ local function injectElements(multitool)
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
-        text = "Hide Connection on Look Away",
+        text = "mt.settings.hide_connection",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getState = function()
@@ -220,7 +218,7 @@ local function injectElements(multitool)
             ConnectionShower.toggleHideOnPanAway(multitool)
         end,
         tooltip = function()
-            return "Toggles if the connection display should hide when you look away from the gate."
+            return "mt.settings.hide_connection_tooltip"
         end,
     })
 
@@ -232,7 +230,7 @@ local function injectElements(multitool)
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
-        text = "Show Gate States",
+        text = "mt.settings.show_gate_states",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getState = function()
@@ -242,7 +240,7 @@ local function injectElements(multitool)
             StateDisplay.toggle(multitool)
         end,
         tooltip = function()
-            return "Lets you see the state of a logic gate when looking at it."
+            return "mt.settings.show_gate_states_tooltip"
         end,
     })
 
@@ -251,14 +249,14 @@ local function injectElements(multitool)
         type = "button",
         position = { a = math.pi / 8 * fovMult, e = 10 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
-        text = "Import Creation",
+        text = "mt.settings.import_creation",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         onclick = function()
             BlueprintSpawner.cl_spawn(multitool)
         end,
         tooltip = function()
-            return "Spawns the creation from the blueprint.json file in C:\\Program Files (x86)\\Steam\\steamapps\\common\\Scrap Mechanic\\Data"
+            return "mt.settings.import_creation_tooltip"
         end,
     })
     table.insert(hUI.elements, {
@@ -267,12 +265,12 @@ local function injectElements(multitool)
         position = { a = math.pi / 8 * fovMult, e = 9 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         getText = function()
-            return "from Scrap Mechanic\\Data\\blueprint.json"
+            return "mt.settings.import_caption"
         end,
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         tooltip = function()
-            return "You can get here by browsing SM's local files on Steam, and then opening the Data folder. You will need to make the blueprint.json yourself."
+            return "mt.settings.import_caption_tooltip"
         end,
     })
 
@@ -284,7 +282,7 @@ local function injectElements(multitool)
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
-        text = "Hammer One Tick (fast logic)",
+        text = "mt.settings.hammer_one_tick",
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getState = function()
@@ -294,7 +292,7 @@ local function injectElements(multitool)
             DoMeleeState.toggle(multitool)
         end,
         tooltip = function()
-            return "Lets you smack the shit out of a Fast Logic gate with a hammer to pulse it for a tick."
+            return "mt.settings.hammer_one_tick_tooltip"
         end,
     })
 
@@ -304,7 +302,7 @@ local function injectElements(multitool)
             type = "button",
             position = { a = math.pi / 8 * fovMult, e = 14 * math.pi / 90 * fovMult },
             color = sm.color.new(0.2, 0.2, 0.9),
-            text = "Open Backup Menu",
+            text = "mt.settings.open_backup_menu",
             angleBoundHorizontal = 0.1 * fovMult,
             angleBoundVertical = math.pi / 90 / 2 * fovMult,
             onclick = function()

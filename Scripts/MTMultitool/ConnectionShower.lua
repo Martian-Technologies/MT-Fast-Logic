@@ -307,10 +307,8 @@ function ConnectionShower.client_onUpdate(multitool)
         end
         self.updateNametags(nametags)
         if displayUI then
-            sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>INPUTS: " ..
-            numInputs .. "</p>")
-            sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>OUTPUTS: " ..
-            numOutputs .. "</p>")
+            sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. tr("mt.connection.inputs", { value = numInputs }) .. "</p>")
+            sm.gui.setInteractionText("", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. tr("mt.connection.outputs", { value = numOutputs }) .. "</p>")
         end
     else
         if self.hideOnPanAway then

@@ -10,8 +10,8 @@ function VolumePlacer.trigger(multitool, primaryState, secondaryState, forceBuil
     multitool.SelectionModeController.modeActive = "VolumeSelector"
 
     multitool.VolumeSelector.modes = { "vanilla", "fast" }
-    multitool.VolumeSelector.modesNice = { "Vanilla Logic", "Fast Logic" }
-    multitool.VolumeSelector.actionWord = "Place"
+    multitool.VolumeSelector.modesNice = { "mt.volume.vanilla_logic", "mt.volume.fast_logic" }
+    multitool.VolumeSelector.actionWord = "mt.action.place"
     multitool.VolumeSelector.isBeta = false
     multitool.VolumeSelector.selectionMode = "outside"
     multitool.VolumeSelector.doConfirm = true

@@ -56,6 +56,9 @@ function VertexRenderer.cl_setGUI(self, vertices)
     -- dots decreasing in size
     local scaleConstant = 41 * 0.95
     local dots = {"●", "•", "·"}
+    if MTLocalization ~= nil and MTLocalization.isLanguage("Russian") then
+        dots = {"•", "•", "·"}
+    end
     local offsets = { 0.02, 0.02, 0.02 }
     local distanceMargin = { scaleConstant/41, scaleConstant/23, scaleConstant/11 }
     -- print(vertices)

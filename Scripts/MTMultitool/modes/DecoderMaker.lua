@@ -37,7 +37,7 @@ function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuil
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.decoder.build")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            multitool.ConnectionManager.mode .. "<p>")
+            tr("mt.common." .. multitool.ConnectionManager.mode) .. "</p>")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)
         end

@@ -212,7 +212,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     elseif selfData.nextAction == "confirm" then
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            tr("mt.common." .. multitool.ConnectionManager.mode) .. "<p>")
+            tr("mt.common." .. multitool.ConnectionManager.mode) .. "</p>")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.common.connect")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)
@@ -232,7 +232,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     elseif selfData.nextAction == "previewlessConfirm" then
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle",
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            tr("mt.common." .. multitool.ConnectionManager.mode) .. "<p>")
+            tr("mt.common." .. multitool.ConnectionManager.mode) .. "</p>")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.connect.preview_unavailable")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)

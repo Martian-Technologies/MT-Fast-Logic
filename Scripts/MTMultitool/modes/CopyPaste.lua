@@ -22,6 +22,10 @@ end
 
 local plasticUuid = sm.uuid.new("628b2d61-5ceb-43e9-8334-a4135566df7a")
 
+local function localizeExternalConnectionsPolicy(policy)
+    return tr("mt.copy.policy." .. policy)
+end
+
 local function getEffectData(shape)
 	local isShape = type(shape) == "Shape"
 	local scale = sm.vec3.one() / 4
@@ -860,7 +864,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                     end
                 end
                 if hitSilicon then
-                    sm.gui.displayAlertText("Silicon blocks cannot be copied")
+                    sm.gui.displayAlertText(tr("mt.copy.silicon_blocks_cannot_be_copied"))
                 end
                 addShapes(multitool, allShapes)
                 VolumeSelector.cleanUp(multitool)
@@ -1141,7 +1145,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
         elseif state == "confirm" then
             sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true),
                 tr("mt.copy.external_connections_policy") .. " <p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-                self.externalConnectionsPolicy .. "</p>     ", sm.gui.getKeyBinding("Create", true), "mt.copy.confirm")
+                localizeExternalConnectionsPolicy(self.externalConnectionsPolicy) .. "</p>     ", sm.gui.getKeyBinding("Create", true), "mt.copy.confirm")
             if primaryState == 1 then
                 doCopyPaste(multitool)
                 CopyPaste.cleanUp(multitool)

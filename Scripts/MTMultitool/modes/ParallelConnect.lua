@@ -181,7 +181,7 @@ function ParallelConnect.trigger(multitool, primaryState, secondaryState, forceB
         sm.gui.setInteractionText("mt.connect.second_series_end", sm.gui.getKeyBinding("Create", true), "mt.common.select")
         ParallelConnect.recalculateSequences(multitool, lookingAt)
     elseif #selfData.selected == 4 then
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. tr("mt.common." .. multitool.ConnectionManager.mode) .. "<p>")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. tr("mt.common." .. multitool.ConnectionManager.mode) .. "</p>")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.common.connect")
         ParallelConnect.recalculateSequences(multitool, lookingAt)
         if MTMultitool.handleForceBuild(multitool, forceBuild) then

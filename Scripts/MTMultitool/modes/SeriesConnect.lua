@@ -104,7 +104,7 @@ function SeriesConnect.trigger(multitool, primaryState, secondaryState, forceBui
     elseif #selfData.selected == 1 then
         sm.gui.setInteractionText("mt.connect.series_end", sm.gui.getKeyBinding("Create", true), "mt.common.select")
     else
-        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. tr("mt.common." .. multitool.ConnectionManager.mode) .. "<p>")
+        sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), "mt.common.toggle", "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" .. tr("mt.common." .. multitool.ConnectionManager.mode) .. "</p>")
         sm.gui.setInteractionText("", sm.gui.getKeyBinding("Create", true), "mt.common.connect")
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             ConnectionManager.toggleMode(multitool)

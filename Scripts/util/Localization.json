@@ -255,6 +255,22 @@
     "English": "Change External Connections Policy:",
     "Russian": "Сохранение внешних подключений:"
   },
+  "mt.copy.policy.absolute": {
+    "English": "absolute",
+    "Russian": "абсолютно"
+  },
+  "mt.copy.policy.relative": {
+    "English": "relative",
+    "Russian": "относительно"
+  },
+  "mt.copy.policy.ignore": {
+    "English": "ignore",
+    "Russian": "игнорировать"
+  },
+  "mt.copy.silicon_blocks_cannot_be_copied": {
+    "English": "Silicon blocks cannot be copied",
+    "Russian": "Кремниевые блоки нельзя скопировать"
+  },
   "mt.copy.confirm": {
     "English": "Confirm Copy/Paste",
     "Russian": "Подтвердите копирование"

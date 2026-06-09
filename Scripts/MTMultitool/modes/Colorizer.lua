@@ -75,26 +75,23 @@ local function injectElements(multitool)
             local i = 41 - (row + (col - 1) * 4)
             table.insert(hUI.elements, {
                 name = "color_" .. i,
-                type = "customButton",
+                type = "dotCircleButton",
                 position = { a = (col - 5.5) * 0.07 * fovMult, e = (row + 0.5) * 0.07 * fovMult + 0.0 }, -- a = azimuth, e = elevation
                 color = sm.MTFastLogic.FastLogicBlockColors[i],
                 angleBoundHorizontal = 0.035 * fovMult,
                 angleBoundVertical = 0.035 * fovMult,
-                -- getText = function()
-                --     return "▉"
-                -- end,
+                dot = "•",
+                dotRadius = 0.023 * fovMult,
+                dotInnerRadius = 0.016 * fovMult,
+                dotSegments = 12,
+                dotInnerSegments = 8,
+                fillDotSpacing = 0.006 * fovMult,
+                fillRadius = 0.014 * fovMult,
                 getrender = function(hovering)
-                    local text = "▉"
-                    local color = sm.MTFastLogic.FastLogicBlockColors[i]
-                    if self.selectedColor == i then
-                        text = "▉▉"
-                    end
-                    if hovering then
-                        text = "|" .. text .. "|"
-                    end
                     return {
-                        text = text,
-                        color = color,
+                        color = sm.MTFastLogic.FastLogicBlockColors[i],
+                        selected = self.selectedColor == i,
+                        radiusScale = hovering and 1.25 or 1,
                     }
                 end,
                 onclick = function()

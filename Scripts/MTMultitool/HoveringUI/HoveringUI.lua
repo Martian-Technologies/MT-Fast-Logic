@@ -170,6 +170,102 @@ local function customButton(multitool, ctx)
     })
 end
 
+local function getOffsetPos(ctx, offsetA, offsetE)
+    local element = ctx.element
+    local elevationQuat = sm.quat.fromEuler(sm.vec3.new(0, -(element.position.e + offsetE) * 180 / math.pi, 0))
+    local azimuthQuat = sm.quat.fromEuler(sm.vec3.new(-(ctx.startAngle + element.position.a + offsetA) * 180 / math.pi, 0, 0))
+    return (ctx.levelQuat * azimuthQuat * elevationQuat) * sm.vec3.new(0, 0, 25) + ctx.cameraPos
+end
+
+local function dotCircleButton(multitool, ctx)
+    local element = ctx.element
+    local tags = ctx.tags
+
+    local horizontalAngle = ctx.horizontalAngle
+    local verticalAngle = ctx.verticalAngle
+
+    local hover = not ctx.block.hovered
+    if horizontalAngle > element.angleBoundHorizontal or verticalAngle > element.angleBoundVertical then
+        hover = false
+    else
+        ctx.block.hovered = true
+    end
+
+    local render = element.getrender(hover)
+    local color = render.color or element.color
+    local tooltip = nil
+    if element.tooltip ~= nil then
+        tooltip = element.tooltip()
+        if MTLocalization ~= nil then
+            tooltip = MTLocalization.resolve(tooltip)
+        end
+    end
+    if hover then
+        if tooltip ~= nil then
+            sm.gui.setInteractionText("<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..tooltip.."</p>")
+        end
+        if ctx.buttonClicks.primaryState > 0 then
+            color = sm.color.new(0, 0, 0)
+        end
+        if ctx.buttonClicks.primaryState == 1 then
+            element.onclick()
+        end
+    end
+
+    local dot = render.dot or element.dot or "."
+    local radiusScale = render.radiusScale or element.radiusScale or 1
+    local baseRadius = element.dotRadius or 0.022
+    local radius = baseRadius * radiusScale
+    local innerRadius = (element.dotInnerRadius or baseRadius * 0.72) * radiusScale
+    local segments = element.dotSegments or 16
+    local innerSegments = element.dotInnerSegments or 12
+
+    local function emitDot(offsetA, offsetE)
+        table.insert(tags, {
+            pos = getOffsetPos(ctx, offsetA, offsetE),
+            txt = dot,
+            color = color
+        })
+    end
+
+    local function emitCircle(circleRadius, circleSegments)
+        for i = 1, circleSegments do
+            local angle = (i - 1) * 2 * math.pi / circleSegments
+            emitDot(math.cos(angle) * circleRadius, math.sin(angle) * circleRadius)
+        end
+    end
+
+    if render.selected then
+        local fillSpacing = (element.fillDotSpacing or baseRadius * 0.25) * radiusScale
+        local fillRadius = (element.fillRadius or baseRadius * 0.62) * radiusScale
+        local fillSteps = math.ceil(fillRadius / fillSpacing)
+        local fillDots = {}
+        for x = -fillSteps, fillSteps do
+            for y = -fillSteps, fillSteps do
+                local offsetA = x * fillSpacing
+                local offsetE = y * fillSpacing
+                if offsetA * offsetA + offsetE * offsetE <= fillRadius * fillRadius then
+                    table.insert(fillDots, { a = offsetA, e = offsetE })
+                end
+            end
+        end
+        table.sort(fillDots, function(left, right)
+            local leftOrder = left.a - left.e
+            local rightOrder = right.a - right.e
+            if leftOrder == rightOrder then
+                return left.a > right.a
+            end
+            return leftOrder > rightOrder
+        end)
+        for i = 1, #fillDots do
+            emitDot(fillDots[i].a, fillDots[i].e)
+        end
+    end
+
+    emitCircle(radius, segments)
+    emitCircle(innerRadius, innerSegments)
+end
+
 local function indicator(multitool, ctx)
     local element = ctx.element
     local tags = ctx.tags
@@ -259,6 +355,7 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
             azimuthQuat = azimuthQuat,
             cameraVec = cameraVec,
             cameraPos = sm.camera.getPosition(),
+            startAngle = self.startAngle,
             horizontalAngle = horizontalAngle,
             verticalAngle = verticalAngle,
             block = block,
@@ -274,6 +371,8 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
             toggleButton(multitool, ctx)
         elseif element.type == "customButton" then
             customButton(multitool, ctx)
+        elseif element.type == "dotCircleButton" then
+            dotCircleButton(multitool, ctx)
         elseif element.type == "indicator" then
             indicator(multitool, ctx)
         end

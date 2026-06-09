@@ -22,8 +22,50 @@ local modesAndTheirFunctions = {
     ["TensorConnect"] = "mt.settings.desc.tensor_connect",
 }
 
+local function localizeLanguageName(language)
+    if language == "English" then
+        return tr("mt.settings.localization_english")
+    elseif language == "Russian" then
+        return tr("mt.settings.localization_russian")
+    end
+    return language
+end
+
+local function getLocalizationOverrideText()
+    if MTLocalization == nil then
+        return "Localization Override"
+    end
+
+    local override = MTLocalization.getOverrideLanguage()
+    local languageText = nil
+    if override == nil then
+        languageText = tr("mt.settings.localization_auto", {
+            language = localizeLanguageName(MTLocalization.getSystemLanguage())
+        })
+    else
+        languageText = localizeLanguageName(override)
+    end
+
+    return tr("mt.settings.localization_override", { language = languageText })
+end
+
+local function getNextLocalizationOverride()
+    if MTLocalization == nil then
+        return nil
+    end
+
+    if MTLocalization.getOverrideLanguage() == nil then
+        return "English"
+    end
+    return nil
+end
+
 local function injectElements(multitool)
     local fovMult = sm.camera.getFov() / 90
+    local sideColumnAzimuth = math.pi / 8 * fovMult
+    if MTLocalization ~= nil and MTLocalization.isLanguage("Russian") then
+        sideColumnAzimuth = math.pi / 6 * fovMult
+    end
 
     local hUI = multitool.HoveringUI
 
@@ -66,9 +108,38 @@ local function injectElements(multitool)
     end
 
     table.insert(hUI.elements, {
+        name = "localizationOverride",
+        type = "customButton",
+        position = { a = -sideColumnAzimuth, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        angleBoundHorizontal = 0.13 * fovMult,
+        angleBoundVertical = math.pi / 90 / 2 * fovMult,
+        getrender = function(hovering)
+            local text = getLocalizationOverrideText()
+            if hovering then
+                text = "[ " .. text .. " ]"
+            end
+            return {
+                text = text,
+                color = sm.color.new(0.2, 0.2, 0.9),
+            }
+        end,
+        onclick = function()
+            local nextOverride = getNextLocalizationOverride()
+            local saveData = SaveFile.getSaveData(1)
+            saveData.config.localizationOverride = nextOverride
+            SaveFile.setSaveData(1, saveData)
+            MTLocalization.setOverrideLanguage(nextOverride)
+            HoveringUI.cleanUp(multitool)
+        end,
+        tooltip = function()
+            return "mt.settings.localization_override_tooltip"
+        end,
+    })
+
+    table.insert(hUI.elements, {
         name = "saveIndexDisplay",
         type = "indicator",
-        position = { a = -math.pi/8 * fovMult, e = 2 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = -sideColumnAzimuth, e = 2 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = 0.03 * fovMult,
@@ -83,7 +154,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "saveIndexIncrease",
         type = "button",
-        position = { a = -math.pi/8 * fovMult, e = 3 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = -sideColumnAzimuth, e = 3 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         text = "/\\",
         angleBoundHorizontal = 0.03 * fovMult,
@@ -104,7 +175,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "saveIndexDecrease",
         type = "button",
-        position = { a = -math.pi/8 * fovMult, e = 1 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = -sideColumnAzimuth, e = 1 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         text = "\\/",
         angleBoundHorizontal = 0.03 * fovMult,
@@ -125,7 +196,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "flyModeToggle",
         type = "customButton",
-        position = { a = math.pi / 8 * fovMult, e = 2 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 2 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         angleBoundHorizontal = 0.1 * fovMult,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getrender = function(hovering)
@@ -151,7 +222,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "connectionDisplayLimit",
         type = "customButton",
-        position = { a = math.pi / 8 * fovMult, e = 3 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 3 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         angleBoundHorizontal = 0.1,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getrender = function(hover)
@@ -181,7 +252,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "showConnections",
         type = "toggleButton",
-        position = { a = math.pi / 8 * fovMult, e = 7 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 7 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
@@ -203,7 +274,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "hideOnPanAway",
         type = "toggleButton",
-        position = { a = math.pi / 8 * fovMult, e = 6 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 6 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
@@ -225,7 +296,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "showGateState",
         type = "toggleButton",
-        position = { a = math.pi / 8 * fovMult, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
@@ -247,7 +318,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "importCreation",
         type = "button",
-        position = { a = math.pi / 8 * fovMult, e = 10 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 10 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         text = "mt.settings.import_creation",
         angleBoundHorizontal = 0.1 * fovMult,
@@ -262,7 +333,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "importCreationCaption",
         type = "indicator",
-        position = { a = math.pi / 8 * fovMult, e = 9 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 9 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = sm.color.new(0.2, 0.2, 0.9),
         getText = function()
             return "mt.settings.import_caption"
@@ -277,7 +348,7 @@ local function injectElements(multitool)
     table.insert(hUI.elements, {
         name = "doMeleeState",
         type = "toggleButton",
-        position = { a = math.pi / 8 * fovMult, e = 12 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
+        position = { a = sideColumnAzimuth, e = 12 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
             on = sm.color.new(0.2, 0.9, 0.2),
             off = sm.color.new(0.9, 0.2, 0.2)
@@ -300,7 +371,7 @@ local function injectElements(multitool)
         table.insert(hUI.elements, {
             name = "goToBackupMenu",
             type = "button",
-            position = { a = math.pi / 8 * fovMult, e = 14 * math.pi / 90 * fovMult },
+            position = { a = sideColumnAzimuth, e = 14 * math.pi / 90 * fovMult },
             color = sm.color.new(0.2, 0.2, 0.9),
             text = "mt.settings.open_backup_menu",
             angleBoundHorizontal = 0.1 * fovMult,

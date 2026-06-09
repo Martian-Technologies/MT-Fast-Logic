@@ -225,6 +225,10 @@ end
 function MTMultitool.repullSettings(self)
     self.lastSettingsRepull = os.clock()
     local data = SaveFile.getSaveData(self.saveIdx)
+    if MTLocalization ~= nil and MTLocalization.setOverrideLanguage ~= nil then
+        local localizationData = SaveFile.getSaveData(1)
+        MTLocalization.setOverrideLanguage(localizationData.config.localizationOverride)
+    end
     for i = 1, #defaultEnabledModes do
         self.enabledModes[i] = defaultEnabledModes[i]
     end

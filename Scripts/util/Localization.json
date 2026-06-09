@@ -479,6 +479,26 @@
     "English": "Decrement the save index.",
     "Russian": "Уменьшить индекс для записи."
   },
+  "mt.settings.localization_override": {
+    "English": "Language: {language}",
+    "Russian": "Язык: {language}"
+  },
+  "mt.settings.localization_override_tooltip": {
+    "English": "Switches between Auto and English override. Auto uses Scrap Mechanic's language setting.",
+    "Russian": "Переключает между авто и английским языком. Авто использует язык Scrap Mechanic."
+  },
+  "mt.settings.localization_auto": {
+    "English": "Auto ({language})",
+    "Russian": "Авто ({language})"
+  },
+  "mt.settings.localization_english": {
+    "English": "English",
+    "Russian": "Английский"
+  },
+  "mt.settings.localization_russian": {
+    "English": "Russian",
+    "Russian": "Русский"
+  },
   "mt.settings.fly_mode": {
     "English": "Fly Mode: {state}",
     "Russian": "Режим полёта: {state}"

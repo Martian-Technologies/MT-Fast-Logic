@@ -12,6 +12,7 @@ MTLocalization = MTLocalization or {}
 MTLocalization.defaultLanguage = "English"
 MTLocalization.path = "$CONTENT_DATA/Scripts/util/Localization.json"
 MTLocalization.strings = MTLocalization.strings or nil
+MTLocalization.overrideLanguage = MTLocalization.overrideLanguage or nil
 
 local function substitute(text, vars)
     if vars == nil then
@@ -47,7 +48,7 @@ function MTLocalization.loadStrings()
     return MTLocalization.strings
 end
 
-function MTLocalization.getLanguage()
+function MTLocalization.getSystemLanguage()
     if sm ~= nil and sm.gui ~= nil and sm.gui.getCurrentLanguage ~= nil then
         local ok, language = pcall(sm.gui.getCurrentLanguage)
         if ok and type(language) == "string" then
@@ -55,6 +56,24 @@ function MTLocalization.getLanguage()
         end
     end
     return MTLocalization.defaultLanguage
+end
+
+function MTLocalization.getLanguage()
+    if MTLocalization.overrideLanguage ~= nil then
+        return MTLocalization.overrideLanguage
+    end
+    return MTLocalization.getSystemLanguage()
+end
+
+function MTLocalization.setOverrideLanguage(language)
+    if language ~= "English" then
+        language = nil
+    end
+    MTLocalization.overrideLanguage = language
+end
+
+function MTLocalization.getOverrideLanguage()
+    return MTLocalization.overrideLanguage
 end
 
 function MTLocalization.get(id, vars, language)

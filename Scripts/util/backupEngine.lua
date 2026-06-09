@@ -365,14 +365,16 @@ function sm.MTBackupEngine.sv_deleteBackup(uuid)
     -- we cannot actually delete files, but we can mark them as unused
     local backupsCoordinator = loadPlayerCoordinator()
     local backupFilename = "$CONTENT_DATA/Backups/Backup_" .. uuid .. ".json"
-    for i, backup in pairs(backupsCoordinator.backupsInUse) do
-        if backup == backupFilename then
-            table.remove(backupsCoordinator.backupsInUse, i)
+
+    for i, backup in pairs(backupsCoordinator.backups) do
+        if backup.backupFilename == backupFilename then
+            table.remove(backupsCoordinator.backups, i)
             table.insert(backupsCoordinator.unusedBackupFilenames, backupFilename)
             savePlayerCoordinator(backupsCoordinator)
             return
         end
     end
+
     error("Backup not found")
 end
 

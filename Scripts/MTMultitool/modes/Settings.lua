@@ -226,7 +226,11 @@ local function injectElements(multitool)
         angleBoundHorizontal = 0.1,
         angleBoundVertical = math.pi / 90 / 2 * fovMult,
         getrender = function(hover)
-            local text = tr("mt.settings.connection_display_limit", { limit = multitool.ConnectionManager.connectionDisplayLimit })
+            local limit = multitool.ConnectionManager.connectionDisplayLimit
+            if limit == "unlimited" then
+                limit = tr("mt.settings.connection_display_limit_unlimited")
+            end
+            local text = tr("mt.settings.connection_display_limit", { limit = limit })
             if hover then
                 text = "[ " .. text .. " ]"
             end

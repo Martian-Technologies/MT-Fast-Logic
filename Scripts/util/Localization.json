@@ -555,6 +555,10 @@
     "English": "The maximum number of connections that will be displayed in connection previews.",
     "Russian": "Максимальное количество подключений в режиме предпросмотра подключений."
   },
+  "mt.settings.connection_display_limit_unlimited": {
+    "English": "unlimited",
+    "Russian": "без ограничений"
+  },
   "mt.settings.show_connections": {
     "English": "Show Connections",
     "Russian": "Показать соединения"

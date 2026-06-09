@@ -93,7 +93,7 @@ end
 function BaseFastLogicBlock.server_onCreate(self)
     local success, result = pcall(self.pcalled_server_onCreate, self)
     if not success then
-        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 5). Please report to ItchyTrack on discord")
+        self:sendMessageToAll({ id = "mt.error.fast_logic", vars = { id = 5 } })
         self:sendMessageToAll(result)
     end
 end
@@ -142,7 +142,7 @@ function BaseFastLogicBlock.server_onDestroy(self)
         sm.event.sendToTool(
             sm.MTFastLogic.FastLogicRunnerRunner.tool,
             "sendMessageToAll",
-            "AN ERROR OCCURRED IN FAST LOGIC (id: 6). Please report to ItchyTrack on discord"
+            { id = "mt.error.fast_logic", vars = { id = 6 } }
         )
         sm.event.sendToTool(
             sm.MTFastLogic.FastLogicRunnerRunner.tool,

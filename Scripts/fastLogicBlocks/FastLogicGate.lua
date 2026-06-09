@@ -29,12 +29,12 @@ local modeToIndex = {
 }
 
 local descriptions = {
-    ["And"] = "Active if all of the linked triggers are active",
-    ["Or"] = "Active if any of the linked triggers are active",
-    ["Xor"] = "Active if an odd number of linked triggers are active",
-    ["Nand"] = "Active if any of the linked triggers are inactive",
-    ["Nor"] = "Active if all of the linked triggers are inactive",
-    ["Xnor"] = "Active if an even number of linked triggers are active"
+    ["And"] = "mt.logic_gate.desc.and",
+    ["Or"] = "mt.logic_gate.desc.or",
+    ["Xor"] = "mt.logic_gate.desc.xor",
+    ["Nand"] = "mt.logic_gate.desc.nand",
+    ["Nor"] = "mt.logic_gate.desc.nor",
+    ["Xnor"] = "mt.logic_gate.desc.xnor"
 }
 
 function FastLogicGate.client_checkSelfwired(self)
@@ -148,6 +148,8 @@ function FastLogicGate.gui_createNewGui(self)
 end
 
 function FastLogicGate.gui_update(self)
+    self.gui:setText("SelfwireButtonText", trNative("mt.logic_gate.selfwire"))
+    self.gui:setText("UnselfwireButtonText", trNative("mt.logic_gate.unselfwire"))
     local wantedMode = indexToMode[self.client_modeIndex]
     local lampPattern = modeToLampPattern[wantedMode]
     self.gui:setVisible("Lamp00on", lampPattern[1])
@@ -159,7 +161,7 @@ function FastLogicGate.gui_update(self)
     for i = 1, #indexToMode do
         if self.client_modeIndex == i then
             self.gui:setButtonState(wantedMode, true)
-            self.gui:setText("DescriptionText", descriptions[wantedMode])
+            self.gui:setText("DescriptionText", trNative(descriptions[wantedMode]))
         else
             self.gui:setButtonState(indexToMode[i], false)
         end

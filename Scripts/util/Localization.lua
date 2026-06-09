@@ -126,5 +126,9 @@ function tr(id, vars)
     return MTLocalization.get(id, vars)
 end
 
+function trNative(id, vars)
+    return MTLocalization.get(id, vars, MTLocalization.getSystemLanguage())
+end
+
 MTLocalization.loadStrings()
 MTLocalization.patchGui()

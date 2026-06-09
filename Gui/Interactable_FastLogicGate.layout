@@ -93,17 +93,31 @@
         </Widget>
         <!-- here we will have a button that will allow you to self-wire the gate -->
         <Widget type="Button" skin="SettingsButton" name="SelfwireButton"
-            position_real="0.0527778 0.8 0.119205 0.1">
-            <Property key="Caption" value="SELFWIRE" />
+            position_real="0.0527778 0.8 0.15 0.1">
+            <Property key="Caption" value="" />
             <Property key="FontName" value="SM_ButtonSmall" />
             <Property key="TextAlign" value="Center" />
+            <Widget type="TextBox" skin="TextBox" position_real="0 0 1 1" name="SelfwireButtonText">
+                <Property key="Caption" value="SELFWIRE" />
+                <Property key="FontName" value="SM_ButtonSmall" />
+                <Property key="TextAlign" value="Center" />
+                <Property key="NeedKey" value="false" />
+                <Property key="NeedMouse" value="false" />
+            </Widget>
         </Widget>
         <Widget type="Button" skin="SettingsButton" name="UnselfwireButton"
-            position_real="0.0527778 0.8 0.119205 0.1">
-            <Property key="Caption" value="UNSELFWIRE" />
+            position_real="0.0527778 0.8 0.15 0.1">
+            <Property key="Caption" value="" />
             <Property key="FontName" value="SM_ButtonSmall" />
             <Property key="TextAlign" value="Center" />
             <Property key="Checked" value="true" />
+            <Widget type="TextBox" skin="TextBox" position_real="0 0 1 1" name="UnselfwireButtonText">
+                <Property key="Caption" value="UNSELFWIRE" />
+                <Property key="FontName" value="SM_ButtonSmall" />
+                <Property key="TextAlign" value="Center" />
+                <Property key="NeedKey" value="false" />
+                <Property key="NeedMouse" value="false" />
+            </Widget>
         </Widget>
         <Widget type="ImageBox" skin="ImageBox" position_real="0.649074 0.794411 0.0138889 0.0279441">
             <Property key="ImageResource" value="LogicGateDescriptionDots" />

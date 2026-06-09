@@ -407,7 +407,7 @@ end
 function FastLogicBlockMemory.client_onInteract(self, character, state)
     if state then
         if not sm.json.fileExists("$CONTENT_DATA/memoryBlockData/data.json") then
-            sm.gui.chatMessage("Can't find file at $CONTENT_DATA/memoryBlockData/data.json")
+            sm.gui.chatMessage(tr("mt.memory.file_not_found"))
             return
         end
         local allData = sm.json.open("$CONTENT_DATA/memoryBlockData/data.json")
@@ -427,10 +427,7 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
             data = allData.data
         end
         if data == nil then
-            sm.gui.chatMessage(
-                "Could not read data in memoryBlockData/data.json\nMake sure its formatted:" ..
-                "\n{\n    \"data\": [],\n    \"color hex 1\": [],\n    \"color hex 2\": [],\n    ...\n}"
-            )
+            sm.gui.chatMessage(tr("mt.memory.read_failed"))
             return
         end
         local memory = {}
@@ -459,13 +456,7 @@ function FastLogicBlockMemory.client_onInteract(self, character, state)
                 invalidValue = invalidValue + 1
             end
         end
-        sm.gui.chatMessage(
-            "Imported: " ..
-            tostring(validValues) ..
-            " values.   Fail to import: " ..
-            tostring(invalidValue) ..
-            " values."
-        )
+        sm.gui.chatMessage(tr("mt.memory.imported", { valid = validValues, invalid = invalidValue }))
         memory = sm.MTFastLogic.CompressionUtil.hashToString(memory)
         local packets = {}
         local packetSize = 50000

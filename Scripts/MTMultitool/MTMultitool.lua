@@ -751,7 +751,7 @@ function MTMultitool.server_convertSilicon(self, data)
         sm.MTFastLogic.FastLogicRunnerRunner, wantedType, data.originBody, positions
     )
     if not success then
-        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 4). Please report to ItchyTrack on discord")
+        self:sendMessageToAll({ id = "mt.error.fast_logic", vars = { id = 4 } })
         self:sendMessageToAll(result)
     end
     

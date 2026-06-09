@@ -5,7 +5,7 @@
   },
   "mt.mode.silicon_converter": {
     "English": "Silicon Convert",
-    "Russian": "Литография"
+    "Russian": "Конвертация в кремний"
   },
   "mt.mode.settings": {
     "English": "Settings",
@@ -113,11 +113,15 @@
   },
   "mt.state_display.power": {
     "English": "Power: {power}",
-    "Russian": "Число: {power}"
+    "Russian": "Сила: {power}"
   },
   "mt.state_display.state_power": {
     "English": "State: {state}\nPower: {power}",
-    "Russian": "Состояние: {state} | Число: {power}"
+    "Russian": "Состояние: {state}\nСила: {power}"
+  },
+  "mt.state_display.state_power_inline": {
+    "English": "State: {state} | Power: {power}",
+    "Russian": "Состояние: {state} | Сила сигнала: {power}"
   },
   "mt.common.warn": {
     "English": "! WARN !",
@@ -193,11 +197,11 @@
   },
   "mt.colorizer.connection_mode_tooltip": {
     "English": "Currently, the color of connection dots will be changed. Click to change to block color.",
-    "Russian": "Включен режим подкрашивания точек соединения. Нажми чтобы это изменить."
+    "Russian": "Включен режим подкрашивания точек соединения. Нажмите, чтобы это изменить."
   },
   "mt.colorizer.block_mode_tooltip": {
     "English": "Currently, the color of blocks will be changed. Click to change to connection dot color.",
-    "Russian": "Включен режим подкрашивания блоков. Нажми чтобы это изменить.."
+    "Russian": "Включен режим подкрашивания блоков. Нажмите, чтобы это изменить."
   },
   "mt.colorizer.match": {
     "English": "Match / I",
@@ -209,23 +213,23 @@
   },
   "mt.colorizer.match_connection_tooltip": {
     "English": "Currently, the color of connection dots will be matched to the color of the block. Click to invert.",
-    "Russian": "Сейчас цвет точек соединения будет совпадать с цветом блоков. Нажмите чтобы изменить."
+    "Russian": "Сейчас цвет точек соединения будет совпадать с цветом блоков. Нажмите, чтобы изменить."
   },
   "mt.colorizer.match_block_tooltip": {
     "English": "Currently, the color of blocks will be matched to the color of the connection dot. Click to invert.",
-    "Russian": "Сейчас цвет блоков будет совпадать с цветом точек соединения. Нажмите чтобы изменить."
+    "Russian": "Сейчас цвет блоков будет совпадать с цветом точек соединения. Нажмите, чтобы изменить."
   },
   "mt.colorizer.invert_connection_tooltip": {
     "English": "Currently, the color of connection dots will be inverted from the color of the block. Click to match.",
-    "Russian": "Сейчас цвет точек соединения будет негативом цвета блоков. Нажмите чтобы изменить."
+    "Russian": "Сейчас цвет точек соединения будет негативом цвета блоков. Нажмите, чтобы изменить."
   },
   "mt.colorizer.invert_block_tooltip": {
     "English": "Currently, the color of blocks will be inverted from the color of the connection dot. Click to match.",
-    "Russian": "Сейчас цвет блоков будет негативом цвета точек соединения. Нажмите чтобы изменить."
+    "Russian": "Сейчас цвет блоков будет негативом цвета точек соединения. Нажмите, чтобы изменить."
   },
   "mt.colorizer.special_tooltip": {
     "English": "Click to enable special color modes.",
-    "Russian": "Нажми чтобы включить режим особенных цветов."
+    "Russian": "Нажмите, чтобы включить режим особых цветов."
   },
   "mt.colorizer.info": {
     "English": "Changing the color of connection dots only works on Fast Logic gates.",
@@ -257,7 +261,7 @@
   },
   "mt.copy.click_select_origin": {
     "English": "Click to select origin",
-    "Russian": "Нажмите чтобы выбрать якорь"
+    "Russian": "Нажмите, чтобы выбрать якорь"
   },
   "mt.copy.select_step": {
     "English": "Select step",
@@ -265,7 +269,7 @@
   },
   "mt.copy.click_select_step": {
     "English": "Click to select step",
-    "Russian": "Нажмите чтобы выбрать шаг"
+    "Russian": "Нажмите, чтобы выбрать шаг"
   },
   "mt.copy.click_select_range": {
     "English": "Click to select range",
@@ -321,23 +325,23 @@
   },
   "mt.decoder.output_origin": {
     "English": "Select the origin of the output row of gates",
-    "Russian": "Выбрать блок с нулевым адрессом"
+    "Russian": "Выбрать блок с нулевым адресом"
   },
   "mt.decoder.output_next": {
     "English": "Select the next gate in the output row",
-    "Russian": "Выбрать блок следующего адресса"
+    "Russian": "Выбрать блок следующего адреса"
   },
   "mt.decoder.build": {
     "English": "Press to build the decoder",
-    "Russian": "Нажми чтобы построить декодер"
+    "Russian": "Нажмите, чтобы построить декодер"
   },
   "mt.heatmap.tracking": {
     "English": "Heatmap is tracking a creation.",
-    "Russian": "Места нагревания видны."
+    "Russian": "Тепловая карта отслеживает постройку."
   },
   "mt.heatmap.stop": {
     "English": "Stop tracking",
-    "Russian": "Стереть флюс."
+    "Russian": "Остановить отслеживание"
   },
   "mt.heatmap.aim": {
     "English": "Aim at a creation",
@@ -345,11 +349,11 @@
   },
   "mt.heatmap.track": {
     "English": "Track creation",
-    "Russian": "Распылить флюс"
+    "Russian": "Отслеживать постройку"
   },
   "mt.logic_converter.friend": {
     "English": "No.. you can't just convert your friend to fast logic and expect him to get smarter.",
-    "Russian": "Люди на скорости не становяться умнее ;)"
+    "Russian": "Люди на скорости не становятся умнее ;)"
   },
   "mt.logic_converter.convert_fast": {
     "English": "Convert to FastLogic",
@@ -445,7 +449,7 @@
   },
   "mt.settings.desc.logic_converter": {
     "English": "Lets you convert Vanilla Logic to Fast Logic and vice versa.",
-    "Russian": "Позваляет заменить логику на быструю и наоборот."
+    "Russian": "Позволяет заменить логику на быструю и наоборот."
   },
   "mt.settings.desc.silicon_converter": {
     "English": "Lets you convert Fast Logic to Silicon and vice versa. Silicon helps reduce lag and file size.",
@@ -541,7 +545,7 @@
   },
   "mt.settings.fly_tooltip": {
     "English": "Toggles flight mode for you. Not recommended for multiplayer.",
-    "Russian": "Переключает режим полёта для тебя. Не рекомендуеться использовать в мультиплеере."
+    "Russian": "Переключает режим полёта для вас. Не рекомендуется использовать в мультиплеере."
   },
   "mt.settings.connection_display_limit": {
     "English": "Connection Display Limit: {limit}",
@@ -596,8 +600,8 @@
     "Russian": "Ударный импульс"
   },
   "mt.settings.hammer_one_tick_tooltip": {
-    "English": "Lets you smack the shit out of a Fast Logic gate with a hammer to pulse it for a tick.",
-    "Russian": "Позволяет ёбнуть затвор молотком чтобы подать импульс."
+    "English": "Lets you hit a Fast Logic gate with a hammer to pulse it for a tick.",
+    "Russian": "Позволяет ударить затвор молотком, чтобы подать импульс."
   },
   "mt.settings.open_backup_menu": {
     "English": "Open Backup Menu",
@@ -766,5 +770,165 @@
   "mt.backup.color.invert": {
     "English": "invert",
     "Russian": "инверсия"
+  },
+  "mt.logic_gate.desc.and": {
+    "English": "Active if all of the linked triggers are active",
+    "Russian": "Активен, если все подключённые триггеры активны"
+  },
+  "mt.logic_gate.desc.or": {
+    "English": "Active if any of the linked triggers are active",
+    "Russian": "Активен, если любой подключённый триггер активен"
+  },
+  "mt.logic_gate.desc.xor": {
+    "English": "Active if an odd number of linked triggers are active",
+    "Russian": "Активен, если активно нечётное число подключённых триггеров"
+  },
+  "mt.logic_gate.desc.nand": {
+    "English": "Active if any of the linked triggers are inactive",
+    "Russian": "Активен, если любой подключённый триггер неактивен"
+  },
+  "mt.logic_gate.desc.nor": {
+    "English": "Active if all of the linked triggers are inactive",
+    "Russian": "Активен, если все подключённые триггеры неактивны"
+  },
+  "mt.logic_gate.desc.xnor": {
+    "English": "Active if an even number of linked triggers are active",
+    "Russian": "Активен, если активно чётное число подключённых триггеров"
+  },
+  "mt.interface.mode.address": {
+    "English": "Address",
+    "Russian": "Адрес"
+  },
+  "mt.interface.mode.data_in": {
+    "English": "Data In",
+    "Russian": "Вход данных"
+  },
+  "mt.interface.mode.data_out": {
+    "English": "Data Out",
+    "Russian": "Выход данных"
+  },
+  "mt.interface.mode.write_data": {
+    "English": "Write Data",
+    "Russian": "Запись данных"
+  },
+  "mt.interface.valid": {
+    "English": "Valid Interface",
+    "Russian": "Интерфейс действителен"
+  },
+  "mt.interface.no_interface": {
+    "English": "No Interface Found",
+    "Russian": "Интерфейс не найден"
+  },
+  "mt.interface.error.address_too_many_outputs": {
+    "English": "Address has too many outputs. Max 1",
+    "Russian": "У адреса слишком много выходов. Максимум 1"
+  },
+  "mt.interface.error.cant_output_to_address": {
+    "English": "{mode} can't output to Address",
+    "Russian": "{mode} не может выводить сигнал в адрес"
+  },
+  "mt.interface.error.data_in_too_many_outputs": {
+    "English": "Data In has too many outputs. Max 1",
+    "Russian": "У входа данных слишком много выходов. Максимум 1"
+  },
+  "mt.interface.error.cant_output_to_data_out": {
+    "English": "{mode} can't output to Data Out",
+    "Russian": "{mode} не может выводить сигнал в выход данных"
+  },
+  "mt.interface.error.write_data_too_many_outputs": {
+    "English": "Write Data has too many outputs. Max 1",
+    "Russian": "У записи данных слишком много выходов. Максимум 1"
+  },
+  "mt.interface.error.cant_output_to_write_data": {
+    "English": "{mode} can't output to Write Data",
+    "Russian": "{mode} не может выводить сигнал в запись данных"
+  },
+  "mt.interface.error.loop": {
+    "English": "ERROR: Interface code never stopped looping! Report to ItchyTrack",
+    "Russian": "ОШИБКА: код интерфейса не остановил цикл! Сообщите ItchyTrack"
+  },
+  "mt.interface.error.cant_end_with": {
+    "English": "Interface can't end with {mode}",
+    "Russian": "Интерфейс не может заканчиваться на {mode}"
+  },
+  "mt.interface.error.invalid": {
+    "English": "Invalid interface",
+    "Russian": "Недействительный интерфейс"
+  },
+  "mt.interface.error.cant_end_without_write_data": {
+    "English": "Interface can't end with {mode} without a Write Data",
+    "Russian": "Интерфейс не может заканчиваться на {mode} без записи данных"
+  },
+  "mt.interface.error.cant_end_without_data_in": {
+    "English": "Interface can't end with {mode} without Data In blocks",
+    "Russian": "Интерфейс не может заканчиваться на {mode} без блоков входа данных"
+  },
+  "mt.interface.error.data_out_too_many_inputs": {
+    "English": "Data Out has too many inputs. Max 1",
+    "Russian": "У выхода данных слишком много входов. Максимум 1"
+  },
+  "mt.interface.error.unknown": {
+    "English": "Unknown error??",
+    "Russian": "Неизвестная ошибка??"
+  },
+  "mt.tick_step.stepped": {
+    "English": "Stepped",
+    "Russian": "Шаг выполнен"
+  },
+  "mt.memory.file_not_found": {
+    "English": "Can't find file at $CONTENT_DATA/memoryBlockData/data.json",
+    "Russian": "Не удалось найти файл $CONTENT_DATA/memoryBlockData/data.json"
+  },
+  "mt.memory.read_failed": {
+    "English": "Could not read data in memoryBlockData/data.json\nMake sure it is formatted:\n{\n    \"data\": [],\n    \"color hex 1\": [],\n    \"color hex 2\": [],\n    ...\n}",
+    "Russian": "Не удалось прочитать данные в memoryBlockData/data.json\nУбедитесь, что формат правильный:\n{\n    \"data\": [],\n    \"color hex 1\": [],\n    \"color hex 2\": [],\n    ...\n}"
+  },
+  "mt.memory.imported": {
+    "English": "Imported: {valid} values.   Failed to import: {invalid} values.",
+    "Russian": "Импортировано значений: {valid}.   Не удалось импортировать: {invalid}."
+  },
+  "mt.error.fast_logic": {
+    "English": "AN ERROR OCCURRED IN FAST LOGIC (id: {id}). Please report to ItchyTrack on Discord",
+    "Russian": "В БЫСТРОЙ ЛОГИКЕ ПРОИЗОШЛА ОШИБКА (id: {id}). Сообщите ItchyTrack в Discord"
+  },
+  "mt.error.fast_timer_conversion": {
+    "English": "Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack",
+    "Russian": "Критическая ошибка при конвертации быстрых таймеров. Отправьте скриншот ItchyTrack"
+  },
+  "mt.end_tick.logic_only": {
+    "English": "Sorry, the end tick button has to be activated by logic. Just connect a regular button to it and press that.",
+    "Russian": "Кнопку завершения такта нужно активировать логикой. Просто подключите к ней обычную кнопку и нажмите её."
+  },
+  "mt.timer.ticks": {
+    "English": "{ticks} TICKS",
+    "Russian": "{ticks} ТИКОВ"
+  },
+  "mt.interface.title": {
+    "English": "INTERFACE",
+    "Russian": "ИНТЕРФЕЙС"
+  },
+  "mt.interface.button.address": {
+    "English": "ADDRESS",
+    "Russian": "АДРЕС"
+  },
+  "mt.interface.button.data_in": {
+    "English": "DATA IN",
+    "Russian": "ВХОД ДАННЫХ"
+  },
+  "mt.interface.button.data_out": {
+    "English": "DATA OUT",
+    "Russian": "ВЫХОД ДАННЫХ"
+  },
+  "mt.interface.button.write_data": {
+    "English": "WRITE DATA",
+    "Russian": "ЗАПИСЬ ДАННЫХ"
+  },
+  "mt.logic_gate.selfwire": {
+    "English": "SELFWIRE",
+    "Russian": "ПОДКЛ. К СЕБЕ"
+  },
+  "mt.logic_gate.unselfwire": {
+    "English": "UNSELFWIRE",
+    "Russian": "ОТКЛ. ОТ СЕБЯ"
   }
 }

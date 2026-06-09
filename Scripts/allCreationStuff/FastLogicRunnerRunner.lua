@@ -34,7 +34,7 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
                 for i = 1, #self.bodiesToConvert[1] do
                     local success, result = pcall(self.convertBodyInternal, self, self.bodiesToConvert[1][i].body, self.bodiesToConvert[1][i].wantedType)
                     if not success then
-                        self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 1). Please report to ItchyTrack on discord")
+                        self:sendMessageToAll({ id = "mt.error.fast_logic", vars = { id = 1 } })
                         self:sendMessageToAll(result)
                     end
                 end
@@ -47,13 +47,13 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
             -- v.FastLogicRealBlockManager:update()
             local success, result = pcall(v.FastLogicRealBlockManager.update, v.FastLogicRealBlockManager)
             if not success then
-                self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 2). Please report to ItchyTrack on discord")
+                self:sendMessageToAll({ id = "mt.error.fast_logic", vars = { id = 2 } })
                 self:sendMessageToAll(result)
             end
         end
         local success, result = pcall(self.updatedDisplays, self)
         if not success then
-            self:sendMessageToAll("AN ERROR OCCURRED IN FAST LOGIC (id: 3). Please report to ItchyTrack on discord")
+            self:sendMessageToAll({ id = "mt.error.fast_logic", vars = { id = 3 } })
             self:sendMessageToAll(result)
         end
     end
@@ -81,6 +81,9 @@ function FastLogicRunnerRunner.sendMessageToAll(self, message)
 end
 
 function FastLogicRunnerRunner.client_sendMessage(self, message)
+    if type(message) == "table" and message.id ~= nil then
+        message = tr(message.id, message.vars)
+    end
     sm.gui.chatMessage(message)
 end
 

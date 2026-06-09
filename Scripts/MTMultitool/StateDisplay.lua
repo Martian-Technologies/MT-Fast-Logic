@@ -167,7 +167,11 @@ function StateDisplay.client_onUpdate(multitool)
         end
         local stateValue = state and tr("mt.common.true") or tr("mt.common.false")
         if state ~= nil and power ~= nil then
-            stateText = tr("mt.state_display.state_power", { state = stateValue, power = power })
+            local statePowerId = "mt.state_display.state_power"
+            if MTLocalization ~= nil and MTLocalization.getSystemLanguage() == "Russian" then
+                statePowerId = "mt.state_display.state_power_inline"
+            end
+            stateText = tr(statePowerId, { state = stateValue, power = power })
         elseif state ~= nil then
             stateText = tr("mt.state_display.state", { state = stateValue })
         elseif power ~= nil then

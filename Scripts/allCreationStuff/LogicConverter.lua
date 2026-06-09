@@ -235,7 +235,7 @@ function FastLogicRunnerRunner.convertToVanillaInternal(self, bodyToGetData)
                 end
 
                 if (seconds < 0) or (seconds > 59) or (ticks < 0) or (ticks > 40) then
-                    sm.gui.chatMessage("Fatal error while converting Fast Timers, please send a screenshot of this to ItchyTrack")
+                    sm.gui.chatMessage(tr("mt.error.fast_timer_conversion"))
                     sm.gui.chatMessage(childdata .. " " .. seconds .. " " .. ticks)
                     return
                 end

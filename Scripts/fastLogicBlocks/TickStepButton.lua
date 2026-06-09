@@ -23,13 +23,13 @@ function TickStepButton.client_onCreate(self)
 end
 
 function TickStepButton.client_onProjectile(self, position, airTime, velocity, projectileName, shooter, damage, customData, normal, uuid)
-    sm.gui.chatMessage("Stepped")
+    sm.gui.chatMessage(tr("mt.tick_step.stepped"))
     self.network:sendToServer("server_triggerUpdate")
 end
 
 function TickStepButton.client_onInteract(self, character, state)
     if state then
-        sm.gui.chatMessage("Stepped")
+        sm.gui.chatMessage(tr("mt.tick_step.stepped"))
         self.interactable:setPoseWeight(0, 1)
         self.network:sendToServer("server_triggerUpdate")
     else

@@ -16,7 +16,7 @@ FastLogicBlockInterface.connectionInput = (
 
 local modes = { "Address", "DataIn", "DataOut", "WriteData" }
 local modeNames = { "Address", "Data In", "Data Out", "Write Data" }
-local modeNamesForErrors = { "Address", "Data Out", "Data In", "Write Data" }
+local modeNameIdsForErrors = { "mt.interface.mode.address", "mt.interface.mode.data_out", "mt.interface.mode.data_in", "mt.interface.mode.write_data" }
 
 local indexToMode = { "Address", "DataIn", "DataOut", "WriteData" }
 
@@ -83,6 +83,11 @@ function FastLogicBlockInterface.gui_createNewGui(self)
 end
 
 function FastLogicBlockInterface.gui_update(self)
+    self.gui:setText("TitleText", trNative("mt.interface.title"))
+    self.gui:setText("Address", trNative("mt.interface.button.address"))
+    self.gui:setText("DataIn", trNative("mt.interface.button.data_in"))
+    self.gui:setText("DataOut", trNative("mt.interface.button.data_out"))
+    self.gui:setText("WriteData", trNative("mt.interface.button.write_data"))
     local wantedMode = indexToMode[self.client_modeIndex]
     for i = 1, #indexToMode do
         if self.client_modeIndex == i then
@@ -96,36 +101,37 @@ function FastLogicBlockInterface.gui_update(self)
 end
 
 function FastLogicBlockInterface.makeErrorMessage(self)
-    if self.error == nil then return "Valid Interface" end
-    if self.error == "none" then return "No Interface Found" end
+    if self.error == nil then return { id = "mt.interface.valid" } end
+    if self.error == "none" then return { id = "mt.interface.no_interface" } end
     local type = self.error[1]
     local stage = self.error[2]
+    local vars = { modeId = modeNameIdsForErrors[stage] }
     if type == 1 then
-        return "Address has to many outputs. Max 1"
+        return { id = "mt.interface.error.address_too_many_outputs" }
     elseif type == 2 then
-        return modeNamesForErrors[stage] .. " can't output to Address"
+        return { id = "mt.interface.error.cant_output_to_address", vars = vars }
     elseif type == 3 then
-        return "Data In has to many outputs. Max 1"
+        return { id = "mt.interface.error.data_in_too_many_outputs" }
     elseif type == 4 then
-        return modeNamesForErrors[stage] .. " can't output to Data Out"
+        return { id = "mt.interface.error.cant_output_to_data_out", vars = vars }
     elseif type == 5 then
-        return "Write Data has to many outputs. Max 1"
+        return { id = "mt.interface.error.write_data_too_many_outputs" }
     elseif type == 6 then
-        return modeNamesForErrors[stage] .. " can't output to Write Data"
+        return { id = "mt.interface.error.cant_output_to_write_data", vars = vars }
     elseif type == 7 then
-        return "ERROR: Interface code never stopped looping! Report to ItchyTrack"
+        return { id = "mt.interface.error.loop" }
     elseif type == 8 then
-        return "Interface can't end with " .. modeNamesForErrors[stage]
+        return { id = "mt.interface.error.cant_end_with", vars = vars }
     elseif type == 9 then
-        return "Invalid interface"
+        return { id = "mt.interface.error.invalid" }
     elseif type == 10 then
-        return "Interface can't end with " .. modeNamesForErrors[stage] .. " without a Write Data"
+        return { id = "mt.interface.error.cant_end_without_write_data", vars = vars }
     elseif type == 11 then
-        return "Interface can't end with " .. modeNamesForErrors[stage] .. " without Data In blocks"
+        return { id = "mt.interface.error.cant_end_without_data_in", vars = vars }
     elseif type == 12 then
-        return "Data Out has to many inputs. Max 1"
+        return { id = "mt.interface.error.data_out_too_many_inputs" }
     else
-        return "Unknow error??"
+        return { id = "mt.interface.error.unknown" }
     end
 end
 
@@ -135,6 +141,13 @@ end
 
 function FastLogicBlockInterface.client_setError(self, error)
     if self.gui == nil then return end
+    if type(error) == "table" and error.id ~= nil then
+        local vars = error.vars
+        if vars ~= nil and vars.modeId ~= nil then
+            vars.mode = trNative(vars.modeId)
+        end
+        error = trNative(error.id, vars)
+    end
     self.gui:setText("DescriptionText", error)
 end
 

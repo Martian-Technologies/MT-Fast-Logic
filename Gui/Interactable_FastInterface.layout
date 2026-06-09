@@ -4,7 +4,7 @@
         <Property key="NeedKey" value="false"/>
         <Property key="NeedMouse" value="true"/>
         <Property key="InheritsAlpha" value="false"/>
-        <Widget type="TextBox" skin="TextBox" position_real="0 0.0898204 1 0.0978044">
+        <Widget type="TextBox" skin="TextBox" position_real="0 0.0898204 1 0.0978044" name="TitleText">
             <Property key="Caption" value="Interface"/>
             <Property key="FontName" value="SM_HeaderLarge_Wide"/>
             <Property key="TextAlign" value="Center"/>

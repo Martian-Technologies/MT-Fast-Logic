@@ -29,13 +29,13 @@ end
 function EndTickButton.client_onInteract(self, character, state)
     local success, result = pcall(self.pcalled_client_onInteract, self, character, state)
     if not success then
-        self:client_sendMessage("AN ERROR OCCURRED IN FAST LOGIC (id: 5). Please report to ItchyTrack on discord")
+        self:client_sendMessage({ id = "mt.error.fast_logic", vars = { id = 5 } })
         self:client_sendMessage(result)
     end
 end
 
 function EndTickButton.pcalled_client_onInteract(self, character, state)
-    self:client_sendMessage("Sorry, the end tick button has to be activated by logic. Just connect a regular button to it and press that.")
+    self:client_sendMessage({ id = "mt.end_tick.logic_only" })
     -- self.FastLogicRunner:externalChangeNonFastOnInput(sewlf.data.uuid, state and 1 or -1)
     -- self.FastLogicRunner:externalAddBlockToUpdate(self.data.uuid)
 end

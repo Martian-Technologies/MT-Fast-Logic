@@ -3500,7 +3500,7 @@ do
           i = i + 1
           local dict_filename = arg[i]
           if not dict_filename then
-            io.stderr:write("You must speicify the dict filename")
+            io.stderr:write("You must specify the dict filename")
             os.exit(1)
           end
           local dict_file, dict_status = io.open(dict_filename, "rb")

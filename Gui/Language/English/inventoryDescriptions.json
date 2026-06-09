@@ -8,15 +8,15 @@
       "title" : "Fast Logic Gate"
    },
    "d8b529ad-3865-40fa-b798-cb2868e5dc4d" : {
-      "description" : "This block is used to end the current simulation tick.\n\nBy powering it by with a logic input it makes the creation only run one more simulation tick till the next game tick.\n\nThis is can be used to automatically syncing a clock to the speedup ticks",
+      "description" : "This block is used to end the current simulation tick.\n\nBy powering it with a logic input, it makes the creation run only one more simulation tick before the next game tick.\n\nThis can be used to automatically sync a clock to the speedup ticks.",
       "title" : "End Tick Button"
    },
    "d8b529ad-3865-40fa-b798-b8a6b83f898b" : {
-      "description" : "This block can be used to stop the simulation of Fast Logic.\n\nWhen pressing it the firsttime the simulation speed will be set to 0. Every time you press it after that it will step the simulation one tick.\n\nThis is useful when debugging a creation because you can see exactly what happens on every tick.",
+      "description" : "This block can be used to stop the simulation of Fast Logic.\n\nWhen pressing it the first time, the simulation speed will be set to 0. Every time you press it after that it will step the simulation one tick.\n\nThis is useful when debugging a creation because you can see exactly what happens on every tick.",
       "title" : "Single Tick Step Button"
    },
    "db0bc11b-c083-4a6a-843f-73ac1033e6fe" : {
-      "description" :"Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
+      "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.",
       "title" : "Fast Timer"
    },
    "f36e03b4-eea7-4c0a-842d-225ed50e5635" : {
@@ -52,7 +52,7 @@
       "title" : "Fast Warehouse Spotlight"
    },
    "1d4f99c0-1df8-4acb-9fd4-f3437062016c" : {
-      "description" : "This block allows for highly compact memory. Used with Interface blocks.\n\nInput: Make a line of Address gates then one Data Write gate and a line of Data In Gates. Connect these all in series going out from the Memory.\n\nOutput: Make a line of Address gates then a line of Data Out Gates. Connect these in series like the input. You can disable the output with a Data Write gate inbetween the Address and Data.",
+      "description" : "This block allows for highly compact memory. Used with Interface blocks.\n\nInput: Make a line of Address gates then one Write Data gate and a line of Data In Gates. Connect these all in series going out from the Memory.\n\nOutput: Make a line of Address gates then a line of Data Out Gates. Connect these in series like the input. You can disable the output with a Write Data gate in between the Address and Data.",
       "title" : "Fast Logic Memory"
    },
    "ce73327a-1cf9-49cc-9ee7-e63110ccc43f" : {

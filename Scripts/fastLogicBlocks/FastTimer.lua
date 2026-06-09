@@ -71,7 +71,7 @@ end
 function FastTimer.gui_update(self)
     self.gui:setText("SecondsText", string.format("%02d", self.client_seconds + (self.client_ticks == 40 and 1 or 0)))
     self.gui:setText("MillisecondsText", string.format("%03d", self.client_ticks*25))
-    self.gui:setText("TicksText", tostring(self.client_seconds * 40 + self.client_ticks) .. " TICKS")
+    self.gui:setText("TicksText", trNative("mt.timer.ticks", { ticks = self.client_seconds * 40 + self.client_ticks }))
     self.gui:setSliderPosition("Ticks", self.client_ticks)
     self.gui:setSliderPosition("Seconds", self.client_seconds)
 end

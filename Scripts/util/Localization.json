@@ -99,6 +99,26 @@
     "English": "Off",
     "Russian": "Выкл"
   },
+  "mt.common.true": {
+    "English": "True",
+    "Russian": "Истина"
+  },
+  "mt.common.false": {
+    "English": "False",
+    "Russian": "Ложь"
+  },
+  "mt.state_display.state": {
+    "English": "State: {state}",
+    "Russian": "Состояние: {state}"
+  },
+  "mt.state_display.power": {
+    "English": "Power: {power}",
+    "Russian": "Число: {power}"
+  },
+  "mt.state_display.state_power": {
+    "English": "State: {state}\nPower: {power}",
+    "Russian": "Состояние: {state} | Число: {power}"
+  },
   "mt.common.warn": {
     "English": "! WARN !",
     "Russian": "! ВНИМАНИЕ !"

@@ -165,11 +165,13 @@ function StateDisplay.client_onUpdate(multitool)
         if state == nil and power == nil then
             return
         end
-        if state ~= nil then
-            stateText = stateText .. "State: " .. (state and "True" or "False") .. "\n"
-        end
-        if power ~= nil then
-            stateText = stateText .. "Power: " .. power
+        local stateValue = state and tr("mt.common.true") or tr("mt.common.false")
+        if state ~= nil and power ~= nil then
+            stateText = tr("mt.state_display.state_power", { state = stateValue, power = power })
+        elseif state ~= nil then
+            stateText = tr("mt.state_display.state", { state = stateValue })
+        elseif power ~= nil then
+            stateText = tr("mt.state_display.power", { power = power })
         end
         sm.gui.displayAlertText(stateText, 1)
     end

@@ -141,7 +141,7 @@
   },
   "mt.action.delete": {
     "English": "Delete",
-    "Russian": "УНИЧТОЖИТЬ"
+    "Russian": "Удалить"
   },
   "mt.action.place": {
     "English": "Place",
@@ -665,7 +665,7 @@
   },
   "mt.backup.name.silicon_conversion": {
     "English": "Silicon Conversion Backup",
-    "Russian": "Бэкап литографии"
+    "Russian": "Бэкап конвертации в/из кремния"
   },
   "mt.backup.name.mode_changer": {
     "English": "Mode Changer Backup",
@@ -749,7 +749,7 @@
   },
   "mt.backup.description.silicon_conversion": {
     "English": "Backup created by convertSilicon() in FastLogicRunnerRunner.lua. Converting to {type}",
-    "Russian": "Бэкап создан литографией в {type}"
+    "Russian": "Бэкап создан конвертацией в {type}"
   },
   "mt.backup.description.colorizer": {
     "English": "Backup made by Colorizer - {color} - {mode}",

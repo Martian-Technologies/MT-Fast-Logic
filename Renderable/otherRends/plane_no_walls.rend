@@ -1,0 +1,13 @@
+{
+    "lodList": [
+        {
+            "mesh": "$CONTENT_DATA/Renderable/otherModels/plane.obj",
+            "subMeshList": [
+                {
+                    "material": "ConnectJoint",
+                    "textureList": []
+                }
+            ]
+        }
+    ]
+}

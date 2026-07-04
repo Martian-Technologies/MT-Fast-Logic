@@ -467,6 +467,17 @@ function table.makeArray(size, val)
     return tbl
 end
 
+function table.concatTables(table1, table2)
+    local out = {}
+    for _, v in pairs(table1) do
+        table.insert(out, v)
+    end
+    for _, v in pairs(table2) do
+        table.insert(out, v)
+    end
+    return out
+end
+
 function string.replace_char(pos, str, r)
     return str:sub(1, pos - 1) .. r .. str:sub(pos + 1)
 end

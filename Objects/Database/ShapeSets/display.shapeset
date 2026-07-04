@@ -1,0 +1,26 @@
+{
+    "partList": [
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "000000",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/plane.rend",
+            "uuid": "6a012633-b97e-4591-8566-00047c9d3856",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "000000",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/plane_no_walls.rend",
+            "uuid": "d43a391f-913d-488b-b8ac-247644b02b8b",
+            "showInInventory": false
+        }
+    ]
+}

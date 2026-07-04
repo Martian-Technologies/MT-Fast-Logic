@@ -1,13 +1,14 @@
 {
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.diagnostics.globals": [
+        "setTpAnimation",
+        "concatTables",
+        "swapFpAnimation",
+        "updateFpAnimations",
+        "createFpAnimations",
+        "createTpAnimations"
+    ],
     "Lua.diagnostics.disable": [
-        "undefined-global",
-        "unused-local",
-        "inject-field",
-        "undefined-field",
-        "need-check-nil",
-        "param-type-mismatch",
-        "cast-local-type",
-        "assign-type-mismatch",
-        "deprecated"
+        "duplicate-set-field"
     ]
 }

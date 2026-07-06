@@ -46,7 +46,7 @@ function ImRend.init(tool)
     end
 
     self.unusedIds = {}
-    function self.new(origin, orientation, width, height, rectsPath)
+    function self.new(origin, rotation, width, height, rectsPath)
         local id
         local rectData = getRectData(rectsPath)
         local image
@@ -54,24 +54,23 @@ function ImRend.init(tool)
             id = table.remove(self.unusedIds)
             image = self.images[id]
             image.origin = origin
-            image.orientation = orientation
+            image.rotation = rotation
             image.width = width
             image.height = height
-            image.rects_path = rectsPath
+            image.rectsPath = rectsPath
         else
             id = getNewId()
             image = {
                 origin = origin,
-                orientation = orientation,
+                rotation = rotation,
                 width = width,
                 height = height,
-                rects_path = rectsPath,
+                rectsPath = rectsPath,
                 effects = {}
             }
             self.images[id] = image
         end
-        local numPixels = rectData.w * rectData.h
-        while #self.images[id].effects < numPixels do
+        while #self.images[id].effects < rectData.n do
             local effect = sm.effect.createEffect("ShapeRenderable")
             effect:setParameter("uuid", plane_no_walls_uuid)
             image.effects[#image.effects + 1] = effect
@@ -79,6 +78,7 @@ function ImRend.init(tool)
         local xFitScale = width / rectData.w
         local yFitScale = height / rectData.h
         local fitScale = math.min(xFitScale, yFitScale)
+        local imageRotation = rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
         for index = 1, rectData.n do
             local effect = self.images[id].effects[index]
             local x = rectData.rects[index * 6 - 5]
@@ -87,14 +87,52 @@ function ImRend.init(tool)
             local w = rectData.rects[index * 6 - 2]
             local h = rectData.rects[index * 6 - 1]
             local c = rectData.rects[index * 6]
-            print(x, y, z, w, h, c)
             local color = rectData.palette[c + 1]
+            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
+            (y + h / 2 - rectData.h / 2) * -fitScale)
             effect:setScale(sm.vec3.new(1, w * fitScale * 100, h * fitScale * 100))
-            effect:setPosition(origin + sm.vec3.new(z * 0.0001, (x + w / 2) * fitScale, (y + h / 2) * -fitScale))
-            -- effect:setRotation(orientation)
+            effect:setPosition(origin + imageRotation * localOffset)
+            effect:setRotation(imageRotation)
             effect:setParameter("color", color)
             effect:start()
         end
         return id
+    end
+
+    function self.updateOrientation(id, origin, rotation)
+        local image = self.images[id]
+        if image == nil then return end
+        image.origin = origin
+        image.rotation = rotation
+        local rectData = getRectData(image.rectsPath)
+        local xFitScale = image.width / rectData.w
+        local yFitScale = image.height / rectData.h
+        local fitScale = math.min(xFitScale, yFitScale)
+        local imageRotation = rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
+        for index = 1, rectData.n do
+            local effect = self.images[id].effects[index]
+            local x = rectData.rects[index * 6 - 5]
+            local y = rectData.rects[index * 6 - 4]
+            local z = rectData.rects[index * 6 - 3]
+            local w = rectData.rects[index * 6 - 2]
+            local h = rectData.rects[index * 6 - 1]
+            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
+            (y + h / 2 - rectData.h / 2) * -fitScale)
+            effect:setPosition(origin + imageRotation * localOffset)
+            effect:setRotation(imageRotation)
+        end
+    end
+
+    function self.destroy(id)
+        if not self.unusedIds:contains(id) then
+            return
+        end
+        if self.images[id] == nil then
+            return
+        end
+        for _, effect in ipairs(self.images[id].effects) do
+            effect:stop()
+        end
+        table.insert(self.unusedIds, id)
     end
 end

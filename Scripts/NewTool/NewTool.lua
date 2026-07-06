@@ -25,7 +25,9 @@ function NewTool:client_onCreate()
 end
 
 function NewTool:client_onUpdate(dt)
-    self.Menu.client_onUpdate(dt)
+    if self.tool:isLocal() then
+        self.Menu.client_onUpdate(dt)
+    end
 
     self:cl_handleAnimationsOnUpdate(dt)
     return true

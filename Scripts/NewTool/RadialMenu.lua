@@ -5,6 +5,8 @@ function RadialMenu.init(tool)
     local self = tool.RadialMenu
     local timeForceBuild = 0
 
+    local maxTimeToOpenBigMenu = 0.3
+
     local menuOptions = nil
 
     local menuDistance = 20
@@ -29,7 +31,7 @@ function RadialMenu.init(tool)
 
     local function getRadialOffset(cameraRot, cameraDir, angle)
         if angle == nil then
-            return cameraDir * menuDistance, cameraDir
+            return cameraDir, cameraDir
         end
 
         -- Put the options on a cone/sphere around the camera, not on a flat
@@ -37,7 +39,27 @@ function RadialMenu.init(tool)
         local right, up = getCameraBasis(cameraRot, cameraDir)
         local radialDir = (cameraDir * math.cos(menuRadiusAngle) +
             (right * math.cos(angle) + up * math.sin(angle)) * math.sin(menuRadiusAngle)):normalize()
-        return radialDir * menuDistance, radialDir
+        return radialDir, radialDir
+    end
+
+    local function getClosestOption()
+        if menuOptions == nil then
+            return nil, nil
+        end
+
+        local cameraDir = sm.camera.getDirection()
+        local bestOption = nil
+        local bestDot = -math.huge
+
+        for index, option in ipairs(menuOptions) do
+            local dot = cameraDir:dot(option.direction)
+            if dot > bestDot then
+                bestDot = dot
+                bestOption = index
+            end
+        end
+
+        return bestOption, bestDot
     end
 
     function self.run(dt, primaryState, secondaryState, forceBuild)
@@ -52,7 +74,7 @@ function RadialMenu.init(tool)
                         local menuOffset, menuDirection = getRadialOffset(cameraRot, cameraDir, slot.angle)
                         local menuRot = sm.vec3.getRotation(cameraDir, menuDirection) * cameraRot
                         local image = tool.ImRend.new(
-                            cameraPos + menuOffset,
+                            cameraPos + menuOffset * menuDistance,
                             menuRot,
                             3,
                             3,
@@ -60,17 +82,9 @@ function RadialMenu.init(tool)
                         )
                         table.insert(menuOptions, {
                             image = image,
-                            positionOffset = menuOffset
+                            direction = menuOffset
                         })
                     end
-                    -- menuDirection = sm.camera.getDirection()
-                    -- cancelImage = tool.ImRend.new(
-                    --     sm.camera.getPosition() + menuDirection * 20,
-                    --     sm.camera.getRotation(),
-                    --     5,
-                    --     5,
-                    --     "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
-                    -- )
                 end
             end
             timeForceBuild = timeForceBuild + dt
@@ -87,8 +101,15 @@ function RadialMenu.init(tool)
         end
         if menuOptions ~= nil then
             local cameraPos = sm.camera.getPosition()
-            for _, option in ipairs(menuOptions) do
-                tool.ImRend.updateOrigin(option.image, cameraPos + option.positionOffset)
+            local bestOption, bestDot = getClosestOption()
+            for index, option in ipairs(menuOptions) do
+                local offsetScale = menuDistance
+                local dir = option.direction
+                if index == bestOption then
+                    offsetScale = offsetScale * 0.75
+                    dir = sm.vec3.lerp(sm.camera.getDirection(), dir, 0.9):normalize()
+                end
+                tool.ImRend.updateOrigin(option.image, cameraPos + dir * offsetScale)
             end
         end
     end

@@ -145,6 +145,30 @@ function ImRend.init(tool)
         end
     end
 
+    function self.updateSize(id, width, height)
+        local image = self.images[id]
+        if image == nil then return end
+        image.width = width
+        image.height = height
+        local rectData = getRectData(image.rectsPath)
+        local xFitScale = width / rectData.w
+        local yFitScale = height / rectData.h
+        local fitScale = math.min(xFitScale, yFitScale)
+        local imageRotation = image.rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
+        for index = 1, rectData.n do
+            local effect = self.images[id].effects[index]
+            local x = rectData.rects[index * 6 - 5]
+            local y = rectData.rects[index * 6 - 4]
+            local z = rectData.rects[index * 6 - 3]
+            local w = rectData.rects[index * 6 - 2]
+            local h = rectData.rects[index * 6 - 1]
+            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
+            (y + h / 2 - rectData.h / 2) * -fitScale)
+            effect:setScale(sm.vec3.new(1, w * fitScale * 100, h * fitScale * 100))
+            effect:setPosition(image.origin + imageRotation * localOffset)
+        end
+    end
+
     function self.destroy(id)
         if table.contains(self.unusedIds, id) then
             print("error: self.unusedIds contains id", self.unusedIds, id)

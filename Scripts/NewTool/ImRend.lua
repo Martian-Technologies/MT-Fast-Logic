@@ -3,14 +3,16 @@ dofile "../util/util.lua"
 ImRend = {}
 
 local plane_no_walls_uuid = sm.uuid.new("d43a391f-913d-488b-b8ac-247644b02b8b")
+local render_rotation_offset = sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
 
 function ImRend.init(tool)
     tool.ImRend = {}
     local self = tool.ImRend
     self.images = {}
-    local nextId = 1
-
     self.rect_data = {}
+    self.unusedIds = {}
+
+    local nextId = 1
 
     local function getNewId()
         local newId = nextId
@@ -19,37 +21,98 @@ function ImRend.init(tool)
     end
 
     local function getRectData(rectsPath)
-        if self.rect_data[rectsPath] == nil then
-            local data = sm.json.open(rectsPath)
-            local parsed = {
-                w = data.width,
-                h = data.height,
-                l = data.layer_count,
-                n = #data.rectangles,
-                palette = {},
-                rects = {}
-            }
-            for _, color in ipairs(data.color_palette) do
-                table.insert(parsed.palette, sm.color.new(color[1] / 255, color[2] / 255, color[3] / 255))
-            end
-            for _, rect in ipairs(data.rectangles) do
-                table.insert(parsed.rects, rect.x)
-                table.insert(parsed.rects, rect.y)
-                table.insert(parsed.rects, rect.z)
-                table.insert(parsed.rects, rect.w)
-                table.insert(parsed.rects, rect.h)
-                table.insert(parsed.rects, rect.c)
-            end
-            self.rect_data[rectsPath] = parsed
+        local cached = self.rect_data[rectsPath]
+        if cached ~= nil then return cached end
+
+        local data = sm.json.open(rectsPath)
+        local palette = {}
+        for _, color in ipairs(data.color_palette) do
+            palette[#palette + 1] = sm.color.new(color[1] / 255, color[2] / 255, color[3] / 255)
         end
-        return self.rect_data[rectsPath]
+
+        local parsed = {
+            w = data.width,
+            h = data.height,
+            l = data.layer_count,
+            n = #data.rectangles,
+            x = {},
+            y = {},
+            z = {},
+            wRect = {},
+            hRect = {},
+            color = {}
+        }
+
+        local halfWidth = data.width / 2
+        local halfHeight = data.height / 2
+        for index, rect in ipairs(data.rectangles) do
+            parsed.x[index] = rect.x + rect.w / 2 - halfWidth
+            parsed.y[index] = -(rect.y + rect.h / 2 - halfHeight)
+            parsed.z[index] = rect.z * 0.0005
+            parsed.wRect[index] = rect.w
+            parsed.hRect[index] = rect.h
+            parsed.color[index] = palette[rect.c + 1]
+        end
+
+        self.rect_data[rectsPath] = parsed
+        return parsed
     end
 
-    self.unusedIds = {}
-    function self.new(origin, rotation, width, height, rectsPath)
+    local function ensureEffects(image, count)
+        while #image.effects < count do
+            local effect = sm.effect.createEffect("ShapeRenderable")
+            effect:setParameter("uuid", plane_no_walls_uuid)
+            image.effects[#image.effects + 1] = effect
+        end
+    end
+
+    local function stopEffectsAfter(image, count)
+        for index = count + 1, #image.effects do
+            image.effects[index]:stop()
+        end
+    end
+
+    local function syncImage(image, updatePosition, updateRotation, updateScale, updateColor, startEffects)
+        local rectData = image.rectData
+        local fitScale = math.min(image.width / rectData.w, image.height / rectData.h)
+        local imageRotation = image.rotation * render_rotation_offset
+        local origin = image.origin
+        local effects = image.effects
+
+        for index = 1, rectData.n do
+            local effect = effects[index]
+
+            if updateScale then
+                effect:setScale(sm.vec3.new(1, rectData.wRect[index] * fitScale * 100, rectData.hRect[index] * fitScale * 100))
+            end
+
+            if updatePosition then
+                local localOffset = sm.vec3.new(
+                    rectData.z[index],
+                    rectData.x[index] * fitScale,
+                    rectData.y[index] * fitScale
+                )
+                effect:setPosition(origin + imageRotation * localOffset)
+            end
+
+            if updateRotation then
+                effect:setRotation(imageRotation)
+            end
+
+            if updateColor then
+                effect:setParameter("color", rectData.color[index])
+            end
+
+            if startEffects then
+                effect:start()
+            end
+        end
+    end
+
+    local function recycleOrCreateImage(origin, rotation, width, height, rectsPath, rectData)
         local id
-        local rectData = getRectData(rectsPath)
         local image
+
         if #self.unusedIds > 0 then
             id = table.remove(self.unusedIds)
             image = self.images[id]
@@ -58,6 +121,7 @@ function ImRend.init(tool)
             image.width = width
             image.height = height
             image.rectsPath = rectsPath
+            image.rectData = rectData
         else
             id = getNewId()
             image = {
@@ -66,107 +130,89 @@ function ImRend.init(tool)
                 width = width,
                 height = height,
                 rectsPath = rectsPath,
+                rectData = rectData,
                 effects = {}
             }
             self.images[id] = image
         end
-        while #self.images[id].effects < rectData.n do
-            local effect = sm.effect.createEffect("ShapeRenderable")
-            effect:setParameter("uuid", plane_no_walls_uuid)
-            image.effects[#image.effects + 1] = effect
-        end
-        local xFitScale = width / rectData.w
-        local yFitScale = height / rectData.h
-        local fitScale = math.min(xFitScale, yFitScale)
-        local imageRotation = rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
-        for index = 1, rectData.n do
-            local effect = self.images[id].effects[index]
-            local x = rectData.rects[index * 6 - 5]
-            local y = rectData.rects[index * 6 - 4]
-            local z = rectData.rects[index * 6 - 3]
-            local w = rectData.rects[index * 6 - 2]
-            local h = rectData.rects[index * 6 - 1]
-            local c = rectData.rects[index * 6]
-            local color = rectData.palette[c + 1]
-            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
-                (y + h / 2 - rectData.h / 2) * -fitScale)
-            effect:setScale(sm.vec3.new(1, w * fitScale * 100, h * fitScale * 100))
-            effect:setPosition(origin + imageRotation * localOffset)
-            effect:setRotation(imageRotation)
-            effect:setParameter("color", color)
-            effect:start()
-        end
+
+        ensureEffects(image, rectData.n)
+        return id, image
+    end
+
+    function self.new(origin, rotation, width, height, rectsPath)
+        local rectData = getRectData(rectsPath)
+        local id, image = recycleOrCreateImage(origin, rotation, width, height, rectsPath, rectData)
+        syncImage(image, true, true, true, true, true)
         return id
     end
 
-    function self.updateOrigin(id, origin)
+    -- Batched update API. Prefer this when multiple properties change; it does one rect pass.
+    function self.update(id, changes)
         local image = self.images[id]
         if image == nil then return end
-        image.origin = origin
-        local rectData = getRectData(image.rectsPath)
-        local xFitScale = image.width / rectData.w
-        local yFitScale = image.height / rectData.h
-        local fitScale = math.min(xFitScale, yFitScale)
-        local imageRotation = image.rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
-        for index = 1, rectData.n do
-            local effect = self.images[id].effects[index]
-            local x = rectData.rects[index * 6 - 5]
-            local y = rectData.rects[index * 6 - 4]
-            local z = rectData.rects[index * 6 - 3]
-            local w = rectData.rects[index * 6 - 2]
-            local h = rectData.rects[index * 6 - 1]
-            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
-            (y + h / 2 - rectData.h / 2) * -fitScale)
-            effect:setPosition(origin + imageRotation * localOffset)
+
+        local updatePosition = false
+        local updateRotation = false
+        local updateScale = false
+        local updateColor = false
+
+        if changes.origin ~= nil then
+            image.origin = changes.origin
+            updatePosition = true
         end
+
+        if changes.rotation ~= nil then
+            image.rotation = changes.rotation
+            updatePosition = true
+            updateRotation = true
+        end
+
+        if changes.width ~= nil then
+            image.width = changes.width
+            updatePosition = true
+            updateScale = true
+        end
+
+        if changes.height ~= nil then
+            image.height = changes.height
+            updatePosition = true
+            updateScale = true
+        end
+
+        if changes.rectsPath ~= nil and changes.rectsPath ~= image.rectsPath then
+            image.rectsPath = changes.rectsPath
+            image.rectData = getRectData(changes.rectsPath)
+            ensureEffects(image, image.rectData.n)
+            stopEffectsAfter(image, image.rectData.n)
+            updatePosition = true
+            updateRotation = true
+            updateScale = true
+            updateColor = true
+        end
+
+        if changes.size ~= nil then
+            image.width = changes.size[1] or changes.size.width or image.width
+            image.height = changes.size[2] or changes.size.height or image.height
+            updatePosition = true
+            updateScale = true
+        end
+
+        if updatePosition or updateRotation or updateScale or updateColor then
+            syncImage(image, updatePosition, updateRotation, updateScale, updateColor, false)
+        end
+    end
+
+    function self.updateOrigin(id, origin)
+        self.update(id, { origin = origin })
     end
 
     function self.updateOrientation(id, origin, rotation)
-        local image = self.images[id]
-        if image == nil then return end
-        image.origin = origin
-        image.rotation = rotation
-        local rectData = getRectData(image.rectsPath)
-        local xFitScale = image.width / rectData.w
-        local yFitScale = image.height / rectData.h
-        local fitScale = math.min(xFitScale, yFitScale)
-        local imageRotation = rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
-        for index = 1, rectData.n do
-            local effect = self.images[id].effects[index]
-            local x = rectData.rects[index * 6 - 5]
-            local y = rectData.rects[index * 6 - 4]
-            local z = rectData.rects[index * 6 - 3]
-            local w = rectData.rects[index * 6 - 2]
-            local h = rectData.rects[index * 6 - 1]
-            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
-            (y + h / 2 - rectData.h / 2) * -fitScale)
-            effect:setPosition(origin + imageRotation * localOffset)
-            effect:setRotation(imageRotation)
-        end
+        self.update(id, { origin = origin, rotation = rotation })
     end
 
     function self.updateSize(id, width, height)
-        local image = self.images[id]
-        if image == nil then return end
-        image.width = width
-        image.height = height
-        local rectData = getRectData(image.rectsPath)
-        local xFitScale = width / rectData.w
-        local yFitScale = height / rectData.h
-        local fitScale = math.min(xFitScale, yFitScale)
-        local imageRotation = image.rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
-        for index = 1, rectData.n do
-            local effect = self.images[id].effects[index]
-            local x = rectData.rects[index * 6 - 5]
-            local y = rectData.rects[index * 6 - 4]
-            local z = rectData.rects[index * 6 - 3]
-            local w = rectData.rects[index * 6 - 2]
-            local h = rectData.rects[index * 6 - 1]
-            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
-            (y + h / 2 - rectData.h / 2) * -fitScale)
-            effect:setScale(sm.vec3.new(1, w * fitScale * 100, h * fitScale * 100))
-            effect:setPosition(image.origin + imageRotation * localOffset)
-        end
+        self.update(id, { width = width, height = height })
     end
 
     function self.destroy(id)

@@ -225,6 +225,15 @@ function table.getKeysSortedByValue(tbl, sortFunction, validationFunction)
     return keys
 end
 
+function table.findFirstNil(tbl)
+    if #tbl == 0 then return 1 end
+    local index = 1
+    while tbl[index] ~= nil do
+        index = index + 1
+    end
+    return index
+end
+
 printOld = printOld or print
 formater = {}
 local formater = formater

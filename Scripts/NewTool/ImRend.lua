@@ -89,7 +89,7 @@ function ImRend.init(tool)
             local c = rectData.rects[index * 6]
             local color = rectData.palette[c + 1]
             local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
-            (y + h / 2 - rectData.h / 2) * -fitScale)
+                (y + h / 2 - rectData.h / 2) * -fitScale)
             effect:setScale(sm.vec3.new(1, w * fitScale * 100, h * fitScale * 100))
             effect:setPosition(origin + imageRotation * localOffset)
             effect:setRotation(imageRotation)
@@ -97,6 +97,28 @@ function ImRend.init(tool)
             effect:start()
         end
         return id
+    end
+
+    function self.updateOrigin(id, origin)
+        local image = self.images[id]
+        if image == nil then return end
+        image.origin = origin
+        local rectData = getRectData(image.rectsPath)
+        local xFitScale = image.width / rectData.w
+        local yFitScale = image.height / rectData.h
+        local fitScale = math.min(xFitScale, yFitScale)
+        local imageRotation = image.rotation * sm.quat.fromEuler(sm.vec3.new(0, 0, -90))
+        for index = 1, rectData.n do
+            local effect = self.images[id].effects[index]
+            local x = rectData.rects[index * 6 - 5]
+            local y = rectData.rects[index * 6 - 4]
+            local z = rectData.rects[index * 6 - 3]
+            local w = rectData.rects[index * 6 - 2]
+            local h = rectData.rects[index * 6 - 1]
+            local localOffset = sm.vec3.new(z * 0.0005, (x + w / 2 - rectData.w / 2) * fitScale,
+            (y + h / 2 - rectData.h / 2) * -fitScale)
+            effect:setPosition(origin + imageRotation * localOffset)
+        end
     end
 
     function self.updateOrientation(id, origin, rotation)
@@ -124,10 +146,12 @@ function ImRend.init(tool)
     end
 
     function self.destroy(id)
-        if not self.unusedIds:contains(id) then
+        if table.contains(self.unusedIds, id) then
+            print("error: self.unusedIds contains id", self.unusedIds, id)
             return
         end
         if self.images[id] == nil then
+            print("error: self.images[id] == nil", self.images, id, self.images[id])
             return
         end
         for _, effect in ipairs(self.images[id].effects) do

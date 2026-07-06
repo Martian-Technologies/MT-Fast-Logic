@@ -5,7 +5,9 @@ print("loading NewTool.lua")
 dofile("../util/util.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
-dofile("$CONTENT_DATA/Scripts/NewTool/Menu.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/MenuManager.lua")
+
+dofile("$CONTENT_DATA/Scripts/NewTool/RadialMenu.lua")
 
 local toolModelRends = { "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote.rend" }
 local toolAnimsThirdPerson = { "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote_tp_animlist.rend" }
@@ -16,8 +18,11 @@ sm.tool.preloadRenderables( toolAnimsThirdPerson )
 sm.tool.preloadRenderables( toolAnimsFirstPerson )
 
 function NewTool:client_onCreate()
+    self.lastTime = os.clock()
+
     ImRend.init(self)
-    Menu.init(self)
+    MenuManager.init(self)
+    RadialMenu.init(self)
 
     self.tool:setCrossHairAlpha(0.3)
     self.tool:setDispersionFraction(0)
@@ -26,7 +31,7 @@ end
 
 function NewTool:client_onUpdate(dt)
     if self.tool:isLocal() then
-        self.Menu.client_onUpdate(dt)
+        self.MenuManager.client_onUpdate(dt)
     end
 
     self:cl_handleAnimationsOnUpdate(dt)
@@ -51,7 +56,14 @@ function NewTool:client_onToggle()
 end
 
 function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuild)
+    local currentTime = os.clock()
+    local dt = currentTime - self.lastTime
+    self.lastTime = currentTime
     -- print(primaryState, secondaryState, forceBuild)
+    if self.tool:isLocal() then
+        if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
+    end
+    ::done::
     return true, true
 end
 

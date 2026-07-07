@@ -48,7 +48,9 @@ function RadialMenu.init(tool)
             rectsPath = nil
         },
         {
-            action = "toggleFlight",
+            action = {
+                type = "toggleFlight"
+            },
             rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/toggleFlight.json"
         },
         {
@@ -140,11 +142,12 @@ function RadialMenu.init(tool)
             frameCountForceBuild = frameCountForceBuild + 1
         elseif timeForceBuild ~= 0 then
             local bestOption, _ = getClosestOption()
-            print(timeForceBuild, bestOption)
-
             local action = nil
             if bestOption == 1 and timeForceBuild < maxTimeToOpenBigMenu or frameCountForceBuild < 3 then
-                action = "openMainMenu" -- open the full menu listing off every mode and every setting
+                action = {
+                    type = "openMenu",
+                    menu = "main"
+                } -- open the full menu listing off every mode and every setting
             else
                 action = radialMenuActions[bestOption].action
             end
@@ -160,7 +163,7 @@ function RadialMenu.init(tool)
                 menuOptions = nil
             end
 
-            print(action)
+            if action ~= nil then tool:executeAction(action) end
         end
         if menuOptions ~= nil then
             local cameraPos = sm.camera.getPosition()

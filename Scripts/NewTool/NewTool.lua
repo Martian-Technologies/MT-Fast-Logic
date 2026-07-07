@@ -8,6 +8,7 @@ dofile("../util/util.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManager.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/ActionManager.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/RadialMenu.lua")
 
@@ -22,6 +23,7 @@ sm.tool.preloadRenderables( toolAnimsFirstPerson )
 function NewTool:client_onCreate()
     self.lastTime = os.clock()
 
+    ActionManager.init(self)
     ImRend.init(self)
     MenuManager.init(self)
     RadialMenu.init(self)
@@ -59,6 +61,10 @@ end
 function NewTool:client_onToggle()
     print("NewTool toggle")
     return true
+end
+
+function NewTool:executeAction(action)
+    self.ActionManager.executeAction(action)
 end
 
 function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuild)

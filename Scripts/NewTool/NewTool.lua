@@ -70,7 +70,7 @@ function NewTool:client_onUnequip(animate)
 end
 
 function NewTool:client_onToggle()
-    MTFlight.toggleFlying(self)
+    -- MTFlight.toggleFlying(self) maybe bring back later, but i have other ideas for rotating actually
     return true
 end
 

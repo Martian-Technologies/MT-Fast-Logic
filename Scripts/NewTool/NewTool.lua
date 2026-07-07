@@ -2,6 +2,8 @@ NewTool = class()
 
 print("loading NewTool.lua")
 
+dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
+
 dofile("../util/util.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
@@ -47,6 +49,10 @@ function NewTool:client_onEquip(animate)
 end
 
 function NewTool:client_onUnequip(animate)
+    if self.tool:isLocal() then
+        self.RadialMenu.unequip()
+    end
+
     self:cl_handleAnimationsOnUnequip(animate)
 end
 

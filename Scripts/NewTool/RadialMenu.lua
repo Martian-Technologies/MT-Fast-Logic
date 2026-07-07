@@ -105,13 +105,16 @@ function RadialMenu.init(tool)
 
     function self.run(dt, primaryState, secondaryState, forceBuild)
         if forceBuild then
+            local cameraPos
+            local cameraRot
+            local cameraDir
             if timeForceBuild ~= 0 then goto continue end
             if menuOptions ~= nil then goto continue end
 
             menuOptions = {}
-            local cameraPos = sm.camera.getPosition()
-            local cameraRot = sm.camera.getRotation()
-            local cameraDir = sm.camera.getDirection()
+            cameraPos = sm.camera.getPosition()
+            cameraRot = sm.camera.getRotation()
+            cameraDir = sm.camera.getDirection()
             for index, slot in ipairs(menuSlots) do
                 local rectsPath = radialMenuActions[index].rectsPath
                 local menuOffset, menuDirection = getRadialOffset(cameraRot, cameraDir, slot.angle)
@@ -141,7 +144,7 @@ function RadialMenu.init(tool)
 
             local action = nil
             if bestOption == 1 and timeForceBuild < maxTimeToOpenBigMenu or frameCountForceBuild < 3 then
-                action = "openMainMenu"
+                action = "openMainMenu" -- open the full menu listing off every mode and every setting
             else
                 action = radialMenuActions[bestOption].action
             end
@@ -176,5 +179,17 @@ function RadialMenu.init(tool)
                 ::continue::
             end
         end
+    end
+
+    function self.unequip()
+        timeForceBuild = 0
+        frameCountForceBuild = 0
+        if menuOptions == nil then return end
+        for _, option in ipairs(menuOptions) do
+            if option.image == nil then goto continue end
+            tool.ImRend.destroy(option.image)
+            ::continue::
+        end
+        menuOptions = nil
     end
 end

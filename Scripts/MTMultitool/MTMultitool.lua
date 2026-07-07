@@ -7,6 +7,8 @@ dofile("../util/util.lua")
 
 dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
 
+dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/SelectionModeController.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/VertexRenderer.lua")
@@ -32,8 +34,6 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionShower.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/StateDisplay.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
-
-dofile("$CONTENT_DATA/Scripts/MTMultitool/Flying.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/MultiblockDetector.lua")
 
@@ -150,7 +150,7 @@ MTMultitool.DevModeModes = {
 }
 
 function MTMultitool.server_onCreate(self)
-    MTFlying.sv_inject(self)
+    MTFlight.sv_inject(self)
 end
 
 function MTMultitool.client_onCreate(self)
@@ -164,7 +164,7 @@ function MTMultitool.client_onCreate(self)
 
     CallbackEngine.inject(self)
 
-    MTFlying.inject(self)
+    MTFlight.inject(self)
     ConnectionShower.inject(self)
     StateDisplay.inject(self)
     DoMeleeState.inject(self)
@@ -294,13 +294,13 @@ function MTMultitool.client_onUpdate(self, dt)
             end
         end
     end
-    -- MTFlying.cl_onUpdate(self, dt)
+    -- MTFlight.cl_onUpdate(self, dt)
     -- VolumeSelector.client_onUpdate(self, dt)
     -- ConnectionShower.client_onUpdate(self)
     local success, result
-    success, result = pcall(MTFlying.cl_onUpdate, self, dt)
+    success, result = pcall(MTFlight.cl_onUpdate, self, dt)
     if not success then
-        print("Error in MTFlying.cl_onUpdate: " .. result)
+        print("Error in MTFlight.cl_onUpdate: " .. result)
     end
     success, result = pcall(VolumeSelector.client_onUpdate, self, dt)
     if not success then
@@ -722,7 +722,7 @@ MTGateUUIDs = {
 }
 
 function MTMultitool.server_onFixedUpdate(self, dt)
-    MTFlying.server_onFixedUpdate(self, dt)
+    MTFlight.server_onFixedUpdate(self, dt)
     TensorConnect.server_onFixedUpdate(self, dt)
     Heatmap.server_onFixedUpdate(self, dt)
     CopyPaste.server_onFixedUpdate(self, dt)
@@ -1200,11 +1200,11 @@ function MTMultitool.server_recolor(self, data)
 end
 
 function MTMultitool.cl_notifyFlying(self, data)
-    MTFlying.cl_notifyFlying(self, data)
+    MTFlight.cl_notifyFlying(self, data)
 end
 
-function MTMultitool.sv_toggleFlying(self, data)
-    MTFlying.sv_toggleFlying(self, data)
+function MTMultitool.sv_toggleFlying(self, data, player)
+    MTFlight.sv_toggleFlying(self, data, player)
 end
 
 function MTMultitool.sv_connectTensors(self, data)

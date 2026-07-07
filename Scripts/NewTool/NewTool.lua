@@ -5,6 +5,7 @@ print("loading NewTool.lua")
 dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
 
 dofile("../util/util.lua")
+dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManager.lua")
@@ -20,9 +21,14 @@ sm.tool.preloadRenderables( toolModelRends )
 sm.tool.preloadRenderables( toolAnimsThirdPerson )
 sm.tool.preloadRenderables( toolAnimsFirstPerson )
 
+function NewTool:server_onCreate()
+    MTFlight.sv_inject(self)
+end
+
 function NewTool:client_onCreate()
     self.lastTime = os.clock()
 
+    MTFlight.inject(self)
     ActionManager.init(self)
     ImRend.init(self)
     MenuManager.init(self)
@@ -38,8 +44,13 @@ function NewTool:client_onUpdate(dt)
         self.MenuManager.client_onUpdate(dt)
     end
 
+    MTFlight.cl_onUpdate(self, dt)
     self:cl_handleAnimationsOnUpdate(dt)
     return true
+end
+
+function NewTool:server_onFixedUpdate(dt)
+    MTFlight.server_onFixedUpdate(self, dt)
 end
 
 function NewTool:client_onReload()
@@ -59,12 +70,20 @@ function NewTool:client_onUnequip(animate)
 end
 
 function NewTool:client_onToggle()
-    print("NewTool toggle")
+    MTFlight.toggleFlying(self)
     return true
 end
 
 function NewTool:executeAction(action)
     self.ActionManager.executeAction(action)
+end
+
+function NewTool:cl_notifyFlying(data)
+    MTFlight.cl_notifyFlying(self, data)
+end
+
+function NewTool:sv_toggleFlying(data, player)
+    MTFlight.sv_toggleFlying(self, data, player)
 end
 
 function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuild)

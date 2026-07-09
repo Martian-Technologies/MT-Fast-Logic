@@ -1,5 +1,0 @@
-# NewTool workflow lifecycle
-
-NewTool Tool Workflows persist beyond the Workflow Hub. Selecting a Tool Workflow closes the hub and makes it active; primary use completes it, secondary use cancels it, and selecting a Pinned Tool from the radial menu cancels the current active workflow before activating the new one. Selecting the already-active Tool Workflow restarts it by cancelling the current instance and activating a fresh one.
-
-Short-tapping ForceBuild while a Tool Workflow is active opens the Workflow Hub without cancelling the active workflow; the workflow is only cancelled when the player explicitly cancels it or selects a replacement Tool Workflow. Commands declare their own active-workflow policy, such as keep, cancel, or complete. Unequipping NewTool does not cancel the active workflow. Instead, the workflow enters a Sleeping Tool Workflow state where its state and visuals remain and the workflow resumes when NewTool is equipped again. The radial menu remains accessible while a Tool Workflow is active; future Radial Override Slots may allow active workflows to temporarily expose their own settings through selected radial slots.

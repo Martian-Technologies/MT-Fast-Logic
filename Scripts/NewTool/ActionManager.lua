@@ -1,11 +1,12 @@
 ActionManager = {}
 
-function ActionManager.init(tool)
+function ActionManager.init(tool, actionRegistry)
     tool.ActionManager = {}
     local self = tool.ActionManager
+    local registry = actionRegistry
 
     local function executeRegistered(actionId)
-        local action = NewToolActionRegistry.get(actionId)
+        local action = registry.get(actionId)
         if action == nil then
             print("Unknown NewTool registered action: " .. tostring(actionId))
             return
@@ -47,11 +48,6 @@ function ActionManager.init(tool)
 
         if action.type == "openMenu" then
             tool.MenuManager.open(action.menu or "main")
-            return
-        end
-
-        if action.type == "toggleFlight" then
-            executeRegistered("toggle_flight")
             return
         end
 

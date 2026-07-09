@@ -4,6 +4,15 @@ MenuLayout.defaults = {
     menuDistance = 18,
     hoverDistanceScale = 0.75,
     hoverDirectionLerp = 0.9,
+    radial = {
+        slotCount = 8,
+        menuDistance = 20,
+        radiusAngle = math.pi / 14,
+        iconSize = 3,
+        hoverDistanceScale = 0.75,
+        hoverDirectionLerp = 0.9,
+        emptyIcon = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
+    },
     slots = {
         left = { x = -4.4, y = 0 },
         right = { x = 3.2, y = 0 }
@@ -49,8 +58,22 @@ local validDirections = { vertical = true, horizontal = true }
 local validSwitcherAlign = { top = true, center = true, bottom = true }
 local validateWidget = nil
 local layoutWidget = nil
+local actionRegistry = nil
+local fail = nil
 
-local function fail(message)
+function MenuLayout.configure(dependencies)
+    dependencies = dependencies or {}
+    actionRegistry = dependencies.actionRegistry
+end
+
+local function getAction(actionId)
+    if actionRegistry == nil or actionRegistry.get == nil then
+        fail("action registry is not configured")
+    end
+    return actionRegistry.get(actionId)
+end
+
+fail = function(message)
     local fullMessage = "MenuLayout validation failed: " .. tostring(message)
     print(fullMessage)
     error(fullMessage)
@@ -96,7 +119,7 @@ end
 local function resolveActionItem(item)
     if item.actionId == nil then return item end
 
-    local action = NewToolActionRegistry.get(item.actionId)
+    local action = getAction(item.actionId)
     if action == nil then
         fail("unknown actionId '" .. tostring(item.actionId) .. "'")
     end
@@ -317,6 +340,20 @@ local function validateNonNegativeNumber(value, path)
     end
 end
 
+local function validatePositiveNumber(value, path)
+    if value == nil then return end
+    if type(value) ~= "number" or value <= 0 then
+        fail(path .. " must be a positive number")
+    end
+end
+
+local function validateUnitInterval(value, path)
+    if value == nil then return end
+    if type(value) ~= "number" or value < 0 or value > 1 then
+        fail(path .. " must be between 0 and 1")
+    end
+end
+
 local function validatePositiveInteger(value, path)
     if type(value) ~= "number" or value < 1 or math.floor(value) ~= value then
         fail(path .. " must be a positive integer")
@@ -392,7 +429,7 @@ local function validateSwitcher(widget, path, textMeasurer)
     end
 end
 
-validateWidget = function(widget, path, requireSlot, textMeasurer)
+validateWidget = function(widget, path, requireSlot, textMeasurer, slots)
     if widget == nil then fail(path .. " is nil") end
     if widget.kind == "tileStack" then
         validateTileStack(widget, path)
@@ -406,8 +443,21 @@ validateWidget = function(widget, path, requireSlot, textMeasurer)
 
     if requireSlot then
         if widget.slot == nil then fail(path .. " is missing slot") end
-        local slot = MenuLayout.defaults.slots[widget.slot]
+        local slot = (slots or MenuLayout.defaults.slots)[widget.slot]
         if slot == nil then fail(path .. " uses unknown slot '" .. tostring(widget.slot) .. "'") end
+    end
+end
+
+local function collectWidgetIds(widget, widgetIds, path)
+    if widgetIds[widget.id] ~= nil then
+        fail(path .. " duplicates widget id '" .. tostring(widget.id) .. "' first used at " .. widgetIds[widget.id])
+    end
+    widgetIds[widget.id] = path
+
+    if widget.kind == "switcher" then
+        for childId, child in pairs(widget.children or {}) do
+            collectWidgetIds(child, widgetIds, path .. ".children." .. tostring(childId))
+        end
     end
 end
 
@@ -454,11 +504,29 @@ end
 function MenuLayout.validateMenu(menu, menuId, textMeasurer)
     if menu == nil then fail("menu '" .. tostring(menuId) .. "' is nil") end
     if menu.layout == nil then fail("menu '" .. tostring(menuId) .. "' is missing layout") end
-    if menu.layout.widgets == nil then fail("menu '" .. tostring(menuId) .. "' layout is missing widgets") end
+    if type(menu.layout.widgets) ~= "table" then fail("menu '" .. tostring(menuId) .. "' layout widgets must be a table") end
+    if menu.presentation ~= nil and type(menu.presentation) ~= "table" then
+        fail("menu '" .. tostring(menuId) .. "'.presentation must be a table")
+    end
+
+    local presentation = menu.presentation or {}
+    local slots = presentation.slots or MenuLayout.defaults.slots
+    validatePositiveNumber(presentation.menuDistance, "menu '" .. tostring(menuId) .. "'.presentation.menuDistance")
+    validatePositiveNumber(presentation.hoverDistanceScale, "menu '" .. tostring(menuId) .. "'.presentation.hoverDistanceScale")
+    validateUnitInterval(presentation.hoverDirectionLerp, "menu '" .. tostring(menuId) .. "'.presentation.hoverDirectionLerp")
+    if type(slots) ~= "table" then fail("menu '" .. tostring(menuId) .. "'.presentation.slots must be a table") end
+    for slotId, slot in pairs(slots) do
+        if type(slot) ~= "table" or type(slot.x) ~= "number" or type(slot.y) ~= "number" then
+            fail("menu '" .. tostring(menuId) .. "'.presentation.slots." .. tostring(slotId) .. " must have numeric x and y")
+        end
+    end
 
     local switchers = {}
+    local widgetIds = {}
     for index, widget in ipairs(menu.layout.widgets) do
-        validateWidget(widget, "menu '" .. tostring(menuId) .. "'.layout.widgets[" .. tostring(index) .. "]", true, textMeasurer)
+        local path = "menu '" .. tostring(menuId) .. "'.layout.widgets[" .. tostring(index) .. "]"
+        validateWidget(widget, path, true, textMeasurer, slots)
+        collectWidgetIds(widget, widgetIds, path)
         collectSwitchers(widget, switchers)
     end
     for index, widget in ipairs(menu.layout.widgets) do
@@ -466,10 +534,69 @@ function MenuLayout.validateMenu(menu, menuId, textMeasurer)
     end
 end
 
+function MenuLayout.validateRadial(radial, menuId)
+    if radial == nil then fail("radial menu '" .. tostring(menuId) .. "' is nil") end
+
+    local defaults = MenuLayout.defaults.radial
+    local slotCount = radial.slotCount or defaults.slotCount
+    validatePositiveInteger(slotCount, "radial menu '" .. tostring(menuId) .. "'.slotCount")
+    validatePositiveNumber(radial.menuDistance, "radial menu '" .. tostring(menuId) .. "'.menuDistance")
+    validatePositiveNumber(radial.radiusAngle, "radial menu '" .. tostring(menuId) .. "'.radiusAngle")
+    if radial.radiusAngle ~= nil and radial.radiusAngle >= math.pi then
+        fail("radial menu '" .. tostring(menuId) .. "'.radiusAngle must be less than pi")
+    end
+    validatePositiveNumber(radial.iconSize, "radial menu '" .. tostring(menuId) .. "'.iconSize")
+    validatePositiveNumber(radial.hoverDistanceScale, "radial menu '" .. tostring(menuId) .. "'.hoverDistanceScale")
+    validateUnitInterval(radial.hoverDirectionLerp, "radial menu '" .. tostring(menuId) .. "'.hoverDirectionLerp")
+    if radial.emptyIcon ~= nil and type(radial.emptyIcon) ~= "string" then
+        fail("radial menu '" .. tostring(menuId) .. "'.emptyIcon must be a path string")
+    end
+
+    local actionIds = {}
+    local seen = {}
+    local function collect(groupName, ids)
+        if ids ~= nil and type(ids) ~= "table" then
+            fail("radial menu '" .. tostring(menuId) .. "'." .. groupName .. " must be a table")
+        end
+        for index, actionId in ipairs(ids or {}) do
+            if type(actionId) ~= "string" then
+                fail("radial menu '" .. tostring(menuId) .. "'." .. groupName .. "[" .. tostring(index) .. "] must be an action id")
+            end
+            local action = getAction(actionId)
+            if action == nil then
+                fail("radial menu '" .. tostring(menuId) .. "' references unknown actionId '" .. tostring(actionId) .. "'")
+            end
+            if action.label == nil or action.icon == nil then
+                fail("radial menu '" .. tostring(menuId) .. "' actionId '" .. tostring(actionId) .. "' needs label and icon")
+            end
+            if seen[actionId] then
+                fail("radial menu '" .. tostring(menuId) .. "' duplicates actionId '" .. tostring(actionId) .. "'")
+            end
+            seen[actionId] = true
+            actionIds[#actionIds + 1] = actionId
+        end
+    end
+
+    collect("pinnedTools", radial.pinnedTools)
+    collect("commands", radial.commands)
+    if #actionIds > slotCount then
+        fail("radial menu '" .. tostring(menuId) .. "' has " .. tostring(#actionIds) ..
+            " actions but only " .. tostring(slotCount) .. " slots")
+    end
+end
+
 function MenuLayout.validateAll(manifests, textMeasurer)
     for menuId, menu in pairs(manifests or {}) do
-        if type(menu) == "table" and menu.layout ~= nil then
+        if type(menu) ~= "table" then
+            fail("menu manifest entry '" .. tostring(menuId) .. "' must be a table")
+        elseif menu.id ~= menuId then
+            fail("menu manifest entry '" .. tostring(menuId) .. "' must declare the same id")
+        elseif menu.kind == "radial" then
+            MenuLayout.validateRadial(menu, menuId)
+        elseif menu.kind == "hub" then
             MenuLayout.validateMenu(menu, menuId, textMeasurer)
+        else
+            fail("menu manifest entry '" .. tostring(menuId) .. "' has unknown kind '" .. tostring(menu.kind) .. "'")
         end
     end
 end
@@ -685,18 +812,64 @@ layoutWidget = function(plan, widget, originX, originY, state, idPrefix, textMea
 end
 
 function MenuLayout.build(menu, state, textMeasurer)
+    local presentation = menu.presentation or {}
+    local slots = presentation.slots or MenuLayout.defaults.slots
     local plan = {
         tiles = {},
         texts = {},
         hitboxes = {},
-        menuDistance = MenuLayout.defaults.menuDistance,
-        hoverDistanceScale = MenuLayout.defaults.hoverDistanceScale,
-        hoverDirectionLerp = MenuLayout.defaults.hoverDirectionLerp
+        menuDistance = presentation.menuDistance or MenuLayout.defaults.menuDistance,
+        hoverDistanceScale = presentation.hoverDistanceScale or MenuLayout.defaults.hoverDistanceScale,
+        hoverDirectionLerp = presentation.hoverDirectionLerp or MenuLayout.defaults.hoverDirectionLerp
     }
 
     for _, widget in ipairs(menu.layout.widgets or {}) do
-        local slot = MenuLayout.defaults.slots[widget.slot]
+        local slot = slots[widget.slot]
         layoutWidget(plan, widget, slot.x, slot.y, state, widget.id, textMeasurer)
+    end
+
+    return plan
+end
+
+function MenuLayout.buildRadial(radial)
+    local defaults = MenuLayout.defaults.radial
+    local slotCount = radial.slotCount or defaults.slotCount
+    local actionIds = {}
+    for _, actionId in ipairs(radial.pinnedTools or {}) do
+        actionIds[#actionIds + 1] = actionId
+    end
+    for _, actionId in ipairs(radial.commands or {}) do
+        actionIds[#actionIds + 1] = actionId
+    end
+
+    local plan = {
+        menuDistance = radial.menuDistance or defaults.menuDistance,
+        radiusAngle = radial.radiusAngle or defaults.radiusAngle,
+        iconSize = radial.iconSize or defaults.iconSize,
+        hoverDistanceScale = radial.hoverDistanceScale or defaults.hoverDistanceScale,
+        hoverDirectionLerp = radial.hoverDirectionLerp or defaults.hoverDirectionLerp,
+        options = {
+            {
+                id = "center",
+                angle = nil,
+                action = nil,
+                label = nil,
+                rectsPath = nil
+            }
+        }
+    }
+
+    for slot = 1, slotCount do
+        local actionId = actionIds[slot]
+        local action = actionId and getAction(actionId) or nil
+        plan.options[#plan.options + 1] = {
+            id = "slot." .. tostring(slot),
+            angle = math.pi * 2 * (slot - 1) / slotCount,
+            action = actionId and { type = "registered", id = actionId } or nil,
+            label = action and action.label or nil,
+            description = action and action.description or nil,
+            rectsPath = action and action.icon or (radial.emptyIcon or defaults.emptyIcon)
+        }
     end
 
     return plan

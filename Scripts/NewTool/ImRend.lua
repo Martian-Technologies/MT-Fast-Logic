@@ -242,6 +242,9 @@ function ImRend.init(tool)
         if changes.color ~= nil then
             image.color = changes.color
             updateColor = true
+        elseif changes.clearColor then
+            image.color = nil
+            updateColor = true
         end
 
         if changes.size ~= nil then

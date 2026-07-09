@@ -16,6 +16,7 @@ end
 
 NewToolMenuManifest.main = {
     id = "main",
+    kind = "hub",
     layout = {
         widgets = {
             {
@@ -111,6 +112,15 @@ NewToolMenuManifest.main = {
 }
 
 NewToolMenuManifest.radial = {
+    id = "radial",
+    kind = "radial",
+    slotCount = 8,
+    menuDistance = 20,
+    radiusAngle = math.pi / 14,
+    iconSize = 3,
+    hoverDistanceScale = 0.75,
+    hoverDirectionLerp = 0.9,
+    emptyIcon = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json",
     pinnedTools = {
         "single_connect",
         "series_connect",

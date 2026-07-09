@@ -11,9 +11,12 @@ dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/LineRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/BlockSelector.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/MenuRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManifest.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuLayout.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/HubMenuView.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/RadialMenuView.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ToolWorkflowManager.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManager.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionManager.lua")
@@ -40,11 +43,15 @@ function NewTool:client_onCreate()
     LineRend.init(self)
     NewToolBlockSelector.init(self)
     HologramText.init(self)
+    MenuRenderer.init(self)
+    MenuLayout.configure({ actionRegistry = NewToolActionRegistry })
     MenuLayout.validateAll(NewToolMenuManifest, self.HologramText)
+    HubMenuView.init(self, MenuLayout)
+    RadialMenuView.init(self)
     ToolWorkflowManager.init(self)
-    MenuManager.init(self)
-    ActionManager.init(self)
-    RadialMenu.init(self)
+    MenuManager.init(self, NewToolMenuManifest, MenuLayout, self.HubMenuView)
+    ActionManager.init(self, NewToolActionRegistry)
+    RadialMenu.init(self, NewToolMenuManifest.radial, MenuLayout, self.RadialMenuView)
 
     self.tool:setCrossHairAlpha(0.3)
     self.tool:setDispersionFraction(0)
@@ -54,7 +61,6 @@ end
 function NewTool:client_onUpdate(dt)
     if self.tool:isLocal() then
         self.LineRend.client_onUpdate(dt)
-        self.MenuManager.client_onUpdate(dt)
     end
 
     MTFlight.cl_onUpdate(self, dt)
@@ -70,8 +76,18 @@ function NewTool:client_onReload()
     return true
 end
 
+function NewTool:client_onDestroy()
+    if self.tool:isLocal() then
+        self.MenuManager.close()
+        self.RadialMenu.unequip()
+        self.MenuRenderer.clearAll()
+        self.LineRend.suspend()
+    end
+end
+
 function NewTool:client_onEquip(animate)
     if self.tool:isLocal() then
+        self.lastTime = os.clock()
         self.LineRend.resume()
         self.ToolWorkflowManager.wake()
     end

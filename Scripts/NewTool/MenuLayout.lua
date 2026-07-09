@@ -5,8 +5,8 @@ MenuLayout.defaults = {
     hoverDistanceScale = 0.75,
     hoverDirectionLerp = 0.9,
     slots = {
-        left = { x = -4.4, y = 0, maxWidth = 6.0, maxHeight = 16.0 },
-        right = { x = 3.2, y = 0, maxWidth = 8.0, maxHeight = 25.0 }
+        left = { x = -4.4, y = 0 },
+        right = { x = 3.2, y = 0 }
     },
     tileSizes = {
         goal = {
@@ -408,14 +408,6 @@ validateWidget = function(widget, path, requireSlot, textMeasurer)
         if widget.slot == nil then fail(path .. " is missing slot") end
         local slot = MenuLayout.defaults.slots[widget.slot]
         if slot == nil then fail(path .. " uses unknown slot '" .. tostring(widget.slot) .. "'") end
-        local size = measureWidget(widget, textMeasurer)
-        local maxWidth = slot.maxWidth or math.huge
-        local maxHeight = slot.maxHeight or math.huge
-        if size.width > maxWidth or size.height > maxHeight then
-            print("MenuLayout warning: " .. path .. " overflows slot '" .. tostring(widget.slot) .. "' (" ..
-                tostring(size.width) .. "x" .. tostring(size.height) .. " > " ..
-                tostring(maxWidth) .. "x" .. tostring(maxHeight) .. "); allowing natural size")
-        end
     end
 end
 

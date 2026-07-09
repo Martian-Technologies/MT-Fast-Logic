@@ -9,6 +9,7 @@ dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/LineRend.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/BlockSelector.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManifest.lua")
@@ -37,6 +38,7 @@ function NewTool:client_onCreate()
     MTFlight.inject(self)
     ImRend.init(self)
     LineRend.init(self)
+    NewToolBlockSelector.init(self)
     HologramText.init(self)
     MenuLayout.validateAll(NewToolMenuManifest, self.HologramText)
     ToolWorkflowManager.init(self)
@@ -78,6 +80,7 @@ end
 
 function NewTool:client_onUnequip(animate)
     if self.tool:isLocal() then
+        self.BlockSelector.client_onUnequip()
         self.LineRend.suspend()
         self.MenuManager.close()
         self.RadialMenu.unequip()
@@ -113,6 +116,7 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
         self.LineRend.beginFrame()
         if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
+        self.BlockSelector.client_onEquippedUpdate()
         if self.ToolWorkflowManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
     end
     ::done::

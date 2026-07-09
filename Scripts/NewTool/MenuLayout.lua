@@ -5,18 +5,20 @@ MenuLayout.defaults = {
     hoverDistanceScale = 0.75,
     hoverDirectionLerp = 0.9,
     slots = {
-        left = { x = -4.0, y = 0, maxWidth = 6.0, maxHeight = 16.0 },
-        right = { x = 2.75, y = 0, maxWidth = 8.0, maxHeight = 25.0 }
+        left = { x = -4.4, y = 0, maxWidth = 6.0, maxHeight = 16.0 },
+        right = { x = 3.2, y = 0, maxWidth = 8.0, maxHeight = 25.0 }
     },
     tileSizes = {
         goal = {
-            iconSize = 1.75,
+            iconSize = 3.0,
             labelLayoutId = "hub_label",
-            labelCellHeight = 0.6,
-            labelGap = 0.05,
-            itemGap = 0.15,
-            labelWidth = 2.8,
-            labelHeight = 0.6
+            labelCellHeight = 0.75,
+            labelGap = 0.12,
+            itemGap = 0.25,
+            labelBackgroundPaddingX = 3,
+            labelBackgroundPaddingY = 2,
+            labelWidth = 3.2,
+            labelHeight = 0.9
         },
         action = {
             iconSize = 3.0,
@@ -26,6 +28,19 @@ MenuLayout.defaults = {
             itemGap = 0.25,
             labelWidth = 3.6,
             labelHeight = 0.7
+        },
+        actionGrid = {
+            iconSize = 3.0,
+            labelCellHeight = 0.65,
+            labelGap = 0.12,
+            labelMaxColumns = 10,
+            labelMaxLines = 2,
+            labelAlign = "center",
+            labelBackgroundPaddingX = 3,
+            labelBackgroundPaddingY = 2,
+            labelWidth = 3.2,
+            labelHeight = 1.3,
+            itemGap = 0.35
         }
     }
 }
@@ -62,6 +77,18 @@ local function getStackItemGap(widget, tileSize)
     return tileSize.itemGap or 0
 end
 
+local function getGridColumnGap(widget, tileSize)
+    if widget.columnGap ~= nil then return widget.columnGap end
+    if widget.itemGap ~= nil then return widget.itemGap end
+    return tileSize.columnGap or tileSize.itemGap or 0
+end
+
+local function getGridRowGap(widget, tileSize)
+    if widget.rowGap ~= nil then return widget.rowGap end
+    if widget.itemGap ~= nil then return widget.itemGap end
+    return tileSize.rowGap or tileSize.itemGap or 0
+end
+
 local function getItemId(item)
     return item.id or item.actionId or item.child
 end
@@ -88,7 +115,14 @@ local function getLabelOptions(tileSize)
     return {
         layoutId = tileSize.labelLayoutId,
         cellHeight = tileSize.labelCellHeight,
-        background = true
+        background = true,
+        fitBackground = tileSize.labelFitBackground ~= false,
+        backgroundPaddingX = tileSize.labelBackgroundPaddingX,
+        backgroundPaddingY = tileSize.labelBackgroundPaddingY,
+        backgroundPadding = tileSize.labelBackgroundPadding,
+        maxColumns = tileSize.labelMaxColumns,
+        maxLines = tileSize.labelMaxLines,
+        align = tileSize.labelAlign
     }
 end
 
@@ -176,9 +210,90 @@ local function measureTileStack(widget, textMeasurer)
     return { width = stack.width, height = stack.height }
 end
 
+local function measureTileGridDetailed(widget, textMeasurer)
+    local tileSize = getTileSize(widget.tileSize)
+    local items = widget.items or {}
+    local count = #items
+    local configuredColumns = widget.columns or 1
+    local columns = configuredColumns
+    local rows = 0
+    local columnGap = getGridColumnGap(widget, tileSize)
+    local rowGap = getGridRowGap(widget, tileSize)
+    local tiles = {}
+    local cells = {}
+    local columnWidths = {}
+    local rowHeights = {}
+
+    if count == 0 then
+        return {
+            width = 0,
+            height = 0,
+            tiles = tiles,
+            cells = cells,
+            columns = 0,
+            rows = 0,
+            columnWidths = columnWidths,
+            rowHeights = rowHeights,
+            columnGap = columnGap,
+            rowGap = rowGap
+        }
+    end
+
+    columns = math.min(configuredColumns, count)
+    rows = math.ceil(count / configuredColumns)
+
+    for index, rawItem in ipairs(items) do
+        local tile = measureTile(widget, rawItem, textMeasurer)
+        local row = math.floor((index - 1) / configuredColumns) + 1
+        local column = ((index - 1) % configuredColumns) + 1
+        tile.gridRow = row
+        tile.gridColumn = column
+        tiles[index] = tile
+
+        cells[row] = cells[row] or {}
+        cells[row][column] = tile
+        columnWidths[column] = math.max(columnWidths[column] or 0, tile.width)
+        rowHeights[row] = math.max(rowHeights[row] or 0, tile.height)
+    end
+
+    local width = 0
+    for column = 1, columns do
+        width = width + (columnWidths[column] or 0)
+    end
+    width = width + math.max(columns - 1, 0) * columnGap
+
+    local height = 0
+    for row = 1, rows do
+        height = height + (rowHeights[row] or 0)
+    end
+    height = height + math.max(rows - 1, 0) * rowGap
+
+    return {
+        width = width,
+        height = height,
+        tiles = tiles,
+        cells = cells,
+        columns = columns,
+        rows = rows,
+        columnWidths = columnWidths,
+        rowHeights = rowHeights,
+        columnGap = columnGap,
+        rowGap = rowGap
+    }
+end
+
+local function measureTileGrid(widget, textMeasurer)
+    local grid = measureTileGridDetailed(widget, textMeasurer)
+    return { width = grid.width, height = grid.height }
+end
+
 local function measureWidget(widget, textMeasurer)
     if widget.kind == "tileStack" then
         return measureTileStack(widget, textMeasurer)
+    end
+
+    if widget.kind == "tileGrid" then
+        return measureTileGrid(widget, textMeasurer)
     end
 
     if widget.kind == "switcher" then
@@ -202,16 +317,13 @@ local function validateNonNegativeNumber(value, path)
     end
 end
 
-local function validateTileStack(widget, path)
-    if widget.id == nil then fail(path .. " is missing id") end
-    if widget.direction == nil or not validDirections[widget.direction] then
-        fail(path .. " has invalid direction '" .. tostring(widget.direction) .. "'")
+local function validatePositiveInteger(value, path)
+    if type(value) ~= "number" or value < 1 or math.floor(value) ~= value then
+        fail(path .. " must be a positive integer")
     end
-    if widget.tileSize == nil then fail(path .. " is missing tileSize") end
-    local tileSize = getTileSize(widget.tileSize)
-    validateNonNegativeNumber(widget.itemGap, path .. ".itemGap")
-    validateNonNegativeNumber(tileSize.itemGap, "tileSize '" .. tostring(widget.tileSize) .. "'.itemGap")
-    validateNonNegativeNumber(tileSize.labelGap, "tileSize '" .. tostring(widget.tileSize) .. "'.labelGap")
+end
+
+local function validateTileItems(widget, path)
     if widget.items == nil then fail(path .. " is missing items") end
 
     local itemIds = {}
@@ -232,6 +344,35 @@ local function validateTileStack(widget, path)
             fail(path .. ".items[" .. tostring(index) .. "] is missing icon")
         end
     end
+end
+
+local function validateTileStack(widget, path)
+    if widget.id == nil then fail(path .. " is missing id") end
+    if widget.direction == nil or not validDirections[widget.direction] then
+        fail(path .. " has invalid direction '" .. tostring(widget.direction) .. "'")
+    end
+    if widget.tileSize == nil then fail(path .. " is missing tileSize") end
+    local tileSize = getTileSize(widget.tileSize)
+    validateNonNegativeNumber(widget.itemGap, path .. ".itemGap")
+    validateNonNegativeNumber(tileSize.itemGap, "tileSize '" .. tostring(widget.tileSize) .. "'.itemGap")
+    validateNonNegativeNumber(tileSize.labelGap, "tileSize '" .. tostring(widget.tileSize) .. "'.labelGap")
+    validateTileItems(widget, path)
+end
+
+local function validateTileGrid(widget, path)
+    if widget.id == nil then fail(path .. " is missing id") end
+    if widget.columns == nil then fail(path .. " is missing columns") end
+    validatePositiveInteger(widget.columns, path .. ".columns")
+    if widget.tileSize == nil then fail(path .. " is missing tileSize") end
+    local tileSize = getTileSize(widget.tileSize)
+    validateNonNegativeNumber(widget.itemGap, path .. ".itemGap")
+    validateNonNegativeNumber(widget.columnGap, path .. ".columnGap")
+    validateNonNegativeNumber(widget.rowGap, path .. ".rowGap")
+    validateNonNegativeNumber(tileSize.itemGap, "tileSize '" .. tostring(widget.tileSize) .. "'.itemGap")
+    validateNonNegativeNumber(tileSize.columnGap, "tileSize '" .. tostring(widget.tileSize) .. "'.columnGap")
+    validateNonNegativeNumber(tileSize.rowGap, "tileSize '" .. tostring(widget.tileSize) .. "'.rowGap")
+    validateNonNegativeNumber(tileSize.labelGap, "tileSize '" .. tostring(widget.tileSize) .. "'.labelGap")
+    validateTileItems(widget, path)
 end
 
 local function validateSwitcher(widget, path, textMeasurer)
@@ -255,6 +396,8 @@ validateWidget = function(widget, path, requireSlot, textMeasurer)
     if widget == nil then fail(path .. " is nil") end
     if widget.kind == "tileStack" then
         validateTileStack(widget, path)
+    elseif widget.kind == "tileGrid" then
+        validateTileGrid(widget, path)
     elseif widget.kind == "switcher" then
         validateSwitcher(widget, path, textMeasurer)
     else
@@ -266,10 +409,12 @@ validateWidget = function(widget, path, requireSlot, textMeasurer)
         local slot = MenuLayout.defaults.slots[widget.slot]
         if slot == nil then fail(path .. " uses unknown slot '" .. tostring(widget.slot) .. "'") end
         local size = measureWidget(widget, textMeasurer)
-        if size.width > slot.maxWidth or size.height > slot.maxHeight then
-            fail(path .. " overflows slot '" .. tostring(widget.slot) .. "' (" ..
+        local maxWidth = slot.maxWidth or math.huge
+        local maxHeight = slot.maxHeight or math.huge
+        if size.width > maxWidth or size.height > maxHeight then
+            print("MenuLayout warning: " .. path .. " overflows slot '" .. tostring(widget.slot) .. "' (" ..
                 tostring(size.width) .. "x" .. tostring(size.height) .. " > " ..
-                tostring(slot.maxWidth) .. "x" .. tostring(slot.maxHeight) .. ")")
+                tostring(maxWidth) .. "x" .. tostring(maxHeight) .. "); allowing natural size")
         end
     end
 end
@@ -287,7 +432,7 @@ local function collectSwitchers(widget, switchers)
 end
 
 local function validateMenuEvents(widget, path, switchers)
-    if widget.kind == "tileStack" then
+    if widget.kind == "tileStack" or widget.kind == "tileGrid" then
         for index, rawItem in ipairs(widget.items or {}) do
             local item = resolveActionItem(rawItem)
             local event = item.onSelect
@@ -343,7 +488,7 @@ local function collectInitialStateFromWidget(widget, switchers)
         for _, child in pairs(widget.children or {}) do
             collectInitialStateFromWidget(child, switchers)
         end
-    elseif widget.kind == "tileStack" then
+    elseif widget.kind == "tileStack" or widget.kind == "tileGrid" then
         return
     end
 end
@@ -474,6 +619,48 @@ local function layoutTileStack(plan, widget, originX, originY, state, idPrefix, 
     end
 end
 
+local function layoutTileGrid(plan, widget, originX, originY, state, idPrefix, textMeasurer)
+    local grid = measureTileGridDetailed(widget, textMeasurer)
+    local gridPrefix = idPrefix or widget.id
+    local cursorTop = originY + grid.height / 2
+
+    for row = 1, grid.rows do
+        local rowHeight = grid.rowHeights[row] or 0
+        local rowCenterY = cursorTop - rowHeight / 2
+        local cursorLeft = originX - grid.width / 2
+
+        for column = 1, grid.columns do
+            local columnWidth = grid.columnWidths[column] or 0
+            local columnCenterX = cursorLeft + columnWidth / 2
+            local tile = grid.cells[row] and grid.cells[row][column]
+
+            if tile ~= nil then
+                local tileTop = rowCenterY + tile.height / 2
+                local iconY = tileTop - tile.iconHeight / 2
+                local labelY = tileTop - tile.iconHeight - tile.labelGap - tile.label.height / 2
+
+                addTile(
+                    plan,
+                    widget,
+                    tile,
+                    columnCenterX,
+                    iconY,
+                    columnCenterX,
+                    labelY,
+                    columnCenterX,
+                    rowCenterY,
+                    state,
+                    gridPrefix
+                )
+            end
+
+            cursorLeft = cursorLeft + columnWidth + grid.columnGap
+        end
+
+        cursorTop = cursorTop - rowHeight - grid.rowGap
+    end
+end
+
 local function layoutSwitcher(plan, widget, originX, originY, state, idPrefix, textMeasurer)
     assert(layoutWidget ~= nil)
     local activeChildId = state.switchers[widget.id] or widget.initialChild
@@ -498,6 +685,8 @@ end
 layoutWidget = function(plan, widget, originX, originY, state, idPrefix, textMeasurer)
     if widget.kind == "tileStack" then
         layoutTileStack(plan, widget, originX, originY, state, idPrefix or widget.id, textMeasurer)
+    elseif widget.kind == "tileGrid" then
+        layoutTileGrid(plan, widget, originX, originY, state, idPrefix or widget.id, textMeasurer)
     elseif widget.kind == "switcher" then
         layoutSwitcher(plan, widget, originX, originY, state, idPrefix or widget.id, textMeasurer)
     end

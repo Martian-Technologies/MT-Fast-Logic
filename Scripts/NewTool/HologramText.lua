@@ -259,12 +259,88 @@ function HologramText.init(tool)
         }
     end
 
-    local function cacheKey(text, layout, options)
-        local backgroundKey = options and options.background and "bg" or "plain"
-        return tostring(layout.id or "runtime") .. "\31" .. tostring(layout.max_columns) .. "\31" .. tostring(layout.max_lines) .. "\31" .. tostring(layout.align) .. "\31" .. backgroundKey .. "\31" .. tostring(text)
+    local function getBackgroundPadding(options)
+        options = options or {}
+        local padding = options.backgroundPadding or 0
+        return options.backgroundPaddingX or padding, options.backgroundPaddingY or padding
     end
 
-    local function withBackground(payload)
+    local function cacheKey(text, layout, options)
+        local backgroundKey = options and options.background and "bg" or "plain"
+        local fitKey = options and options.fitBackground and "fit" or "fixed"
+        local paddingX, paddingY = getBackgroundPadding(options)
+        return tostring(layout.id or "runtime") .. "\31" .. tostring(layout.max_columns) .. "\31" .. tostring(layout.max_lines) .. "\31" .. tostring(layout.align) .. "\31" .. backgroundKey .. "\31" .. fitKey .. "\31" .. tostring(paddingX) .. "\31" .. tostring(paddingY) .. "\31" .. tostring(text)
+    end
+
+    local function getPayloadBounds(payload, options)
+        local paddingX, paddingY = getBackgroundPadding(options)
+        local minX = payload.w or 0
+        local minY = payload.h or 0
+        local maxX = 0
+        local maxY = 0
+
+        for _, rect in ipairs(payload.r or {}) do
+            local x = rect[1]
+            local y = rect[2]
+            local w = rect[3]
+            local h = rect[4]
+            minX = math.min(minX, x)
+            minY = math.min(minY, y)
+            maxX = math.max(maxX, x + w)
+            maxY = math.max(maxY, y + h)
+        end
+
+        if maxX <= minX or maxY <= minY then
+            return {
+                x = -paddingX,
+                y = -paddingY,
+                w = math.max(cellWidth + paddingX * 2, 1),
+                h = math.max(cellHeight + paddingY * 2, 1)
+            }
+        end
+
+        return {
+            x = minX - paddingX,
+            y = minY - paddingY,
+            w = math.max(maxX - minX + paddingX * 2, 1),
+            h = math.max(maxY - minY + paddingY * 2, 1)
+        }
+    end
+
+    local function cropPayload(payload, bounds)
+        if bounds == nil then return payload end
+
+        local croppedRects = {}
+        local cropRight = bounds.x + bounds.w
+        local cropBottom = bounds.y + bounds.h
+
+        for _, rect in ipairs(payload.r or {}) do
+            local x = rect[1]
+            local y = rect[2]
+            local w = rect[3]
+            local h = rect[4]
+            local left = math.max(x, bounds.x)
+            local top = math.max(y, bounds.y)
+            local right = math.min(x + w, cropRight)
+            local bottom = math.min(y + h, cropBottom)
+
+            if right > left and bottom > top then
+                local croppedRect = { left - bounds.x, top - bounds.y, right - left, bottom - top }
+                if rect[5] ~= nil then croppedRect[5] = rect[5] end
+                if rect[6] ~= nil then croppedRect[6] = rect[6] end
+                croppedRects[#croppedRects + 1] = croppedRect
+            end
+        end
+
+        return {
+            w = bounds.w,
+            h = bounds.h,
+            r = croppedRects
+        }
+    end
+
+    local function withBackground(payload, bounds)
+        payload = cropPayload(payload, bounds)
         local rects = {
             { 0, 0, payload.w, payload.h, 0, 0 }
         }
@@ -297,7 +373,11 @@ function HologramText.init(tool)
         end
 
         if useBackground then
-            cached = withBackground(basePayload)
+            local bounds = nil
+            if options.fitBackground then
+                bounds = getPayloadBounds(basePayload, options)
+            end
+            cached = withBackground(basePayload, bounds)
         else
             cached = basePayload
         end

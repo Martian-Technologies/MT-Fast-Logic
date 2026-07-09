@@ -28,50 +28,26 @@ NewToolMenuManifest.main = {
                     {
                         id = "connect",
                         label = "Connect",
-                        description = "Wire logic together using single, series, N-to-N, parallel, or tensor workflows.",
+                        description = "Wire logic together and generate connected helper structures.",
                         icon = icon("connect"),
                         selectedIcon = icon("connect_selected"),
                         onSelect = selectGoal("connect")
                     },
                     {
-                        id = "build",
-                        label = "Build",
-                        description = "Create new logic structures and helper constructions.",
-                        icon = icon("build"),
-                        selectedIcon = icon("build_selected"),
-                        onSelect = selectGoal("build")
-                    },
-                    {
-                        id = "convert",
-                        label = "Convert",
-                        description = "Transform existing logic into faster or more compact forms.",
-                        icon = icon("convert"),
-                        selectedIcon = icon("convert_selected"),
-                        onSelect = selectGoal("convert")
-                    },
-                    {
-                        id = "modify",
-                        label = "Modify",
-                        description = "Change existing creations without treating the action as a conversion.",
+                        id = "edit",
+                        label = "Edit",
+                        description = "Create, change, convert, delete, or rearrange existing creation content.",
                         icon = icon("modify"),
                         selectedIcon = icon("modify_selected"),
-                        onSelect = selectGoal("modify")
+                        onSelect = selectGoal("edit")
                     },
                     {
-                        id = "inspect",
-                        label = "Inspect",
-                        description = "Understand, debug, and inspect existing logic creations.",
-                        icon = icon("inspect"),
-                        selectedIcon = icon("inspect_selected"),
-                        onSelect = selectGoal("inspect")
-                    },
-                    {
-                        id = "manage",
-                        label = "Manage",
-                        description = "Manage NewTool settings and tool-level behavior.",
+                        id = "utility",
+                        label = "Utility",
+                        description = "Inspect creations and manage NewTool behavior.",
                         icon = icon("manage"),
                         selectedIcon = icon("manage_selected"),
-                        onSelect = selectGoal("manage")
+                        onSelect = selectGoal("utility")
                     }
                 }
             },
@@ -83,66 +59,48 @@ NewToolMenuManifest.main = {
                 align = "center",
                 children = {
                     connect = {
-                        kind = "tileStack",
+                        kind = "tileGrid",
                         id = "connect_actions",
-                        direction = "vertical",
-                        tileSize = "action",
+                        columns = 3,
+                        tileSize = "actionGrid",
+                        columnGap = 0.5,
+                        rowGap = 0.45,
                         items = {
                             { actionId = "single_connect" },
                             { actionId = "series_connect" },
                             { actionId = "nto_n_connect" },
                             { actionId = "parallel_connect" },
-                            { actionId = "tensor_connect" }
-                        }
-                    },
-                    build = {
-                        kind = "tileStack",
-                        id = "build_actions",
-                        direction = "vertical",
-                        tileSize = "action",
-                        items = {
-                            { actionId = "volume_placer" },
+                            { actionId = "tensor_connect" },
                             { actionId = "decoder_maker" }
                         }
                     },
-                    convert = {
-                        kind = "tileStack",
-                        id = "convert_actions",
-                        direction = "vertical",
-                        tileSize = "action",
+                    edit = {
+                        kind = "tileGrid",
+                        id = "edit_actions",
+                        columns = 3,
+                        tileSize = "actionGrid",
+                        columnGap = 0.5,
+                        rowGap = 0.45,
                         items = {
+                            { actionId = "volume_placer" },
+                            { actionId = "volume_deleter" },
+                            { actionId = "copy_paste" },
+                            { actionId = "colorizer" },
+                            { actionId = "mode_changer" },
                             { actionId = "logic_converter" },
                             { actionId = "silicon_converter" },
                             { actionId = "merger" }
                         }
                     },
-                    modify = {
-                        kind = "tileStack",
-                        id = "modify_actions",
-                        direction = "vertical",
-                        tileSize = "action",
+                    utility = {
+                        kind = "tileGrid",
+                        id = "utility_actions",
+                        columns = 3,
+                        tileSize = "actionGrid",
+                        columnGap = 0.5,
+                        rowGap = 0.45,
                         items = {
-                            { actionId = "mode_changer" },
-                            { actionId = "volume_deleter" },
-                            { actionId = "colorizer" },
-                            { actionId = "copy_paste" }
-                        }
-                    },
-                    inspect = {
-                        kind = "tileStack",
-                        id = "inspect_actions",
-                        direction = "vertical",
-                        tileSize = "action",
-                        items = {
-                            { actionId = "heatmap" }
-                        }
-                    },
-                    manage = {
-                        kind = "tileStack",
-                        id = "manage_actions",
-                        direction = "vertical",
-                        tileSize = "action",
-                        items = {
+                            { actionId = "heatmap" },
                             { actionId = "settings" }
                         }
                     }

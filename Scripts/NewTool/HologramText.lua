@@ -357,6 +357,14 @@ function HologramText.init(tool)
         tool.ImRend.update(block.imageId, update)
     end
 
+    function self.measure(text, options)
+        options = options or {}
+        local rectData = getRectData(text, options)
+        local cellWorldHeight = options.cellHeight or 0.2
+        local width, height = getWorldSize(rectData, cellWorldHeight)
+        return { width = width, height = height }
+    end
+
     function self.new(origin, rotation, text, options)
         options = options or {}
         local id = allocId()

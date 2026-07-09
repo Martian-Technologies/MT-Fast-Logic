@@ -5,33 +5,20 @@ function MenuManager.init(tool)
     local self = tool.MenuManager
 
     local menuId = nil
-    local images = {}
-    local labelTexts = {}
-    local previewTitleText = nil
-    local previewDescriptionText = nil
-    local selectedGoalIndex = 1
+    local menuState = nil
+    local imageById = {}
+    local textById = {}
+    local tileById = {}
     local startYaw = nil
     local startRotation = nil
     local forceBuildHeldTime = 0
 
-    local menuDistance = 18
-    local goalX = -4.0
-    local actionX = 2.75
-    local goalRowSpacing = 2.05
-    local actionRowSpacing = 3.25
-    local goalTileSize = 1.75
-    local goalHoveredTileSize = 2.0
-    local goalSelectedTileSize = 1.9
-    local actionTileSize = 3.0
-    local actionHoveredTileSize = 3.35
     local tapMaxTime = 0.2
-    local labelGap = 0
-    local labelCellHeight = 0.5
-    local previewX = -0.6
-    local previewTitleY = -9.25
-    local previewDescriptionY = -9.95
-    local previewTitleCellHeight = 0.42
-    local previewDescriptionCellHeight = 0.3
+
+    local function getManifest()
+        if menuId == nil then return nil end
+        return NewToolMenuManifest[menuId]
+    end
 
     local function getBasis()
         if startYaw == nil then
@@ -49,157 +36,40 @@ function MenuManager.init(tool)
         return startRotation or sm.camera.getRotation()
     end
 
-    local function getRowY(index, count, spacing)
-        return ((count + 1) / 2 - index) * spacing
-    end
-
-    local function clearImages()
-        for _, imageId in ipairs(images) do
+    local function clearRenderables()
+        for _, imageId in pairs(imageById) do
             tool.ImRend.destroy(imageId)
         end
-        images = {}
+        imageById = {}
 
-        for _, textId in ipairs(labelTexts) do
+        for _, textId in pairs(textById) do
             tool.HologramText.destroy(textId)
         end
-        labelTexts = {}
-
-        if previewTitleText ~= nil then
-            tool.HologramText.destroy(previewTitleText)
-            previewTitleText = nil
-        end
-        if previewDescriptionText ~= nil then
-            tool.HologramText.destroy(previewDescriptionText)
-            previewDescriptionText = nil
-        end
+        textById = {}
+        tileById = {}
     end
 
-    local function addImage(rectsPath)
-        local forward, _, _ = getBasis()
-        local id = tool.ImRend.new(
-            sm.camera.getPosition() + forward * menuDistance,
-            getMenuRotation(forward),
-            goalTileSize,
-            goalTileSize,
-            rectsPath
-        )
-        table.insert(images, id)
-        return id
+    local function toWorld(localX, localY, plan)
+        local forward, right, up = getBasis()
+        local cameraPos = sm.camera.getPosition()
+        local planeCenter = cameraPos + forward * (plan.menuDistance or MenuLayout.defaults.menuDistance)
+        return planeCenter + right * localX + up * localY
     end
 
-    local function addLabelText()
-        local forward, _, _ = getBasis()
-        local id = tool.HologramText.new(
-            sm.camera.getPosition() + forward * menuDistance,
-            getMenuRotation(forward),
-            "",
-            { layoutId = "hub_label", cellHeight = labelCellHeight, background = true }
-        )
-        table.insert(labelTexts, id)
-        return id
+    local function getPoppedWorldOrigin(stableOrigin, plan)
+        local cameraPos = sm.camera.getPosition()
+        local stableOffset = stableOrigin - cameraPos
+        local stableDistance = stableOffset:length()
+        local stableDir = stableOffset:safeNormalize(sm.camera.getDirection())
+        local popDir = sm.vec3.lerp(sm.camera.getDirection(), stableDir, plan.hoverDirectionLerp or 0.9):safeNormalize(stableDir)
+        return cameraPos + popDir * stableDistance * (plan.hoverDistanceScale or 0.75)
     end
 
-    local function ensurePreviewText()
-        if previewTitleText == nil then
-            local forward, _, _ = getBasis()
-            previewTitleText = tool.HologramText.new(
-                sm.camera.getPosition() + forward * menuDistance,
-                getMenuRotation(forward),
-                "",
-                { layoutId = "hub_preview_title", cellHeight = previewTitleCellHeight, background = true }
-            )
-            previewDescriptionText = tool.HologramText.new(
-                sm.camera.getPosition() + forward * menuDistance,
-                getMenuRotation(forward),
-                "",
-                { layoutId = "hub_preview_description", cellHeight = previewDescriptionCellHeight, background = true }
-            )
-        end
-    end
-
-    local function getManifest()
-        if menuId == "main" then
-            return NewToolMenuManifest.main
-        end
-        return nil
-    end
-
-    local function buildTiles()
-        local manifest = getManifest()
-        local tiles = {}
-        if manifest == nil then return tiles end
-
-        local goals = manifest.goals or {}
-        if selectedGoalIndex < 1 then selectedGoalIndex = 1 end
-        if selectedGoalIndex > #goals then selectedGoalIndex = #goals end
-
-        for index, goal in ipairs(goals) do
-            table.insert(tiles, {
-                type = "goal",
-                goalIndex = index,
-                label = goal.label,
-                description = goal.description,
-                icon = goal.icon,
-                x = goalX,
-                y = getRowY(index, #goals, goalRowSpacing),
-                size = goalTileSize,
-                hoveredSize = goalHoveredTileSize,
-                selectedSize = goalSelectedTileSize,
-                selected = index == selectedGoalIndex
-            })
-        end
-
-        local selectedGoal = goals[selectedGoalIndex]
-        if selectedGoal ~= nil then
-            local actionIds = selectedGoal.actions or {}
-            for index, actionId in ipairs(actionIds) do
-                local action = NewToolActionRegistry.get(actionId)
-                if action ~= nil then
-                    table.insert(tiles, {
-                        type = "action",
-                        actionId = actionId,
-                        label = action.label,
-                        description = action.description,
-                        icon = action.icon,
-                        x = actionX,
-                        y = getRowY(index, #actionIds, actionRowSpacing),
-                        size = actionTileSize,
-                        hoveredSize = actionHoveredTileSize,
-                        selectedSize = actionTileSize,
-                        selected = false
-                    })
-                end
-            end
-        end
-
-        return tiles
-    end
-
-    local function syncImageCount(tiles)
-        while #images < #tiles do
-            addImage(tiles[#images + 1].icon)
-        end
-        while #images > #tiles do
-            tool.ImRend.destroy(images[#images])
-            table.remove(images, #images)
-        end
-
-        while #labelTexts < #tiles do
-            addLabelText()
-        end
-        while #labelTexts > #tiles do
-            tool.HologramText.destroy(labelTexts[#labelTexts])
-            table.remove(labelTexts, #labelTexts)
-        end
-
-        ensurePreviewText()
-    end
-
-    local function getHoveredTile(tiles)
+    local function getHoveredTile(plan)
         local forward, right, up = getBasis()
         local cameraPos = sm.camera.getPosition()
         local cameraDir = sm.camera.getDirection()
-        local planeCenter = cameraPos + forward * menuDistance
+        local planeCenter = cameraPos + forward * (plan.menuDistance or MenuLayout.defaults.menuDistance)
         local denom = cameraDir:dot(forward)
         if denom <= 0.05 then return nil end
 
@@ -211,88 +81,155 @@ function MenuManager.init(tool)
         local x = localHit:dot(right)
         local y = localHit:dot(up)
 
-        for index, tile in ipairs(tiles) do
-            local halfSize = (tile.size or goalTileSize) * 0.65
-            if x >= tile.x - halfSize and x <= tile.x + halfSize and y >= tile.y - halfSize and y <= tile.y + halfSize then
-                return index, tile
+        for _, hitbox in ipairs(plan.hitboxes or {}) do
+            local halfWidth = hitbox.width / 2
+            local halfHeight = hitbox.height / 2
+            if x >= hitbox.localX - halfWidth and x <= hitbox.localX + halfWidth and
+                y >= hitbox.localY - halfHeight and y <= hitbox.localY + halfHeight then
+                return tileById[hitbox.id]
             end
         end
 
         return nil
     end
 
-    local function getFallbackPreviewTile()
-        local manifest = getManifest()
-        local goals = manifest and manifest.goals or {}
-        local selectedGoal = goals[selectedGoalIndex]
-        if selectedGoal == nil then return nil end
-        return {
-            label = selectedGoal.label,
-            description = selectedGoal.description
-        }
-    end
-
-    local function updateImages(tiles, hoveredIndex, hoveredTile)
-        local forward, right, up = getBasis()
-        local cameraPos = sm.camera.getPosition()
+    local function reconcileImages(plan, hoveredTile)
+        local seen = {}
+        local forward = getBasis()
         local rotation = getMenuRotation(forward)
-        local planeCenter = cameraPos + forward * menuDistance
 
-        for index, tile in ipairs(tiles) do
-            local size = tile.size or goalTileSize
-            if tile.selected then size = tile.selectedSize or size end
-            if index == hoveredIndex then size = tile.hoveredSize or size end
+        for _, tile in ipairs(plan.tiles or {}) do
+            local imageId = imageById[tile.id]
+            local stableOrigin = toWorld(tile.localX, tile.localY, plan)
+            local origin = stableOrigin
+            if hoveredTile ~= nil and hoveredTile.id == tile.id then
+                origin = getPoppedWorldOrigin(stableOrigin, plan)
+            end
 
-            tool.ImRend.update(images[index], {
-                origin = planeCenter + right * tile.x + up * tile.y,
-                rotation = rotation,
-                size = { size, size },
-                rectsPath = tile.icon
-            })
+            if imageId == nil then
+                imageId = tool.ImRend.new(
+                    origin,
+                    rotation,
+                    tile.width,
+                    tile.height,
+                    tile.rectsPath
+                )
+                imageById[tile.id] = imageId
+            else
+                tool.ImRend.update(imageId, {
+                    origin = origin,
+                    rotation = rotation,
+                    size = { tile.width, tile.height },
+                    rectsPath = tile.rectsPath
+                })
+            end
 
-            local labelY = tile.y - (tile.size or goalTileSize) * 0.65 - labelGap
-            tool.HologramText.update(labelTexts[index], {
-                origin = planeCenter + right * tile.x + up * labelY,
-                rotation = rotation,
-                text = tostring(tile.label or "")
-            })
+            tileById[tile.id] = tile
+            seen[tile.id] = true
         end
 
-        local previewTile = hoveredTile or getFallbackPreviewTile()
-        if previewTile ~= nil and previewTitleText ~= nil and previewDescriptionText ~= nil then
-            tool.HologramText.update(previewTitleText, {
-                origin = planeCenter + right * previewX + up * previewTitleY,
-                rotation = rotation,
-                text = tostring(previewTile.label or "")
-            })
-            tool.HologramText.update(previewDescriptionText, {
-                origin = planeCenter + right * previewX + up * previewDescriptionY,
-                rotation = rotation,
-                text = tostring(previewTile.description or "")
-            })
+        for id, imageId in pairs(imageById) do
+            if not seen[id] then
+                tool.ImRend.destroy(imageId)
+                imageById[id] = nil
+                tileById[id] = nil
+            end
         end
     end
 
-    local function showFocusedText(tile)
+    local function reconcileTexts(plan)
+        local seen = {}
+        local forward = getBasis()
+        local rotation = getMenuRotation(forward)
+
+        for _, text in ipairs(plan.texts or {}) do
+            local textId = textById[text.id]
+            local origin = toWorld(text.localX, text.localY, plan)
+
+            if textId == nil then
+                textId = tool.HologramText.new(
+                    origin,
+                    rotation,
+                    text.text,
+                    text.options
+                )
+                textById[text.id] = textId
+            else
+                tool.HologramText.update(textId, {
+                    origin = origin,
+                    rotation = rotation,
+                    text = text.text,
+                    cellHeight = text.options and text.options.cellHeight or nil
+                })
+            end
+
+            seen[text.id] = true
+        end
+
+        for id, textId in pairs(textById) do
+            if not seen[id] then
+                tool.HologramText.destroy(textId)
+                textById[id] = nil
+            end
+        end
+    end
+
+    local function buildAndRender()
+        local manifest = getManifest()
+        if manifest == nil or menuState == nil then return nil, nil end
+
+        local plan = MenuLayout.build(manifest, menuState, tool.HologramText)
+        tileById = {}
+        for _, tile in ipairs(plan.tiles or {}) do
+            tileById[tile.id] = tile
+        end
+        local hoveredTile = getHoveredTile(plan)
+        reconcileImages(plan, hoveredTile)
+        reconcileTexts(plan)
+        return plan, hoveredTile
+    end
+
+    local function formatInteractionText(text)
+        sm.gui.setInteractionText(
+            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            tostring(text or "") .. "</p>"
+        )
+    end
+
+    local function showInteractionText(tile)
         if tile == nil then
-            sm.gui.setInteractionText(
-                "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-                "Aim at an icon | Left-click: select | Right-click/F: close</p>"
-            )
+            formatInteractionText("Aim at an icon | Left-click: select | Right-click/F: close")
             return
         end
 
-        local action = "select"
-        if tile.type == "goal" then
-            action = "show actions"
-        elseif tile.type == "action" then
-            action = "activate"
+        local actionText = "select"
+        if tile.action ~= nil then
+            actionText = "activate"
+        elseif tile.onSelect ~= nil then
+            actionText = "show actions"
         end
 
-        sm.gui.setInteractionText(
-            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            "Left-click: " .. action .. " | Right-click/F: close</p>"
-        )
+        local label = tostring(tile.label or "")
+        local description = tostring(tile.description or "")
+        if description ~= "" then
+            formatInteractionText(label .. " - " .. description .. " | Left-click: " .. actionText .. " | Right-click/F: close")
+        else
+            formatInteractionText(label .. " | Left-click: " .. actionText .. " | Right-click/F: close")
+        end
+    end
+
+    local function handleMenuEvent(event)
+        assert(menuState ~= nil)
+        if event == nil then return end
+
+        if event.type == "selectSwitcher" then
+            if menuState.switchers[event.switcher] == event.child then return end
+            menuState.switchers[event.switcher] = event.child
+            print("NewTool hub selected switcher child: " .. tostring(event.switcher) .. " = " .. tostring(event.child))
+            return
+        end
+
+        print("Unknown NewTool menu event: " .. tostring(event.type))
     end
 
     function self.isOpen()
@@ -301,14 +238,21 @@ function MenuManager.init(tool)
 
     function self.open(id)
         menuId = id or "main"
-        selectedGoalIndex = 1
+        local manifest = getManifest()
+        if manifest == nil then
+            print("Unknown NewTool menu: " .. tostring(menuId))
+            menuId = nil
+            return
+        end
+
+        menuState = MenuLayout.createState(manifest)
         forceBuildHeldTime = 0
         local cameraDir = sm.camera.getDirection()
         local flatDir = sm.vec3.new(cameraDir.x, cameraDir.y, 0)
         local forward = flatDir:safeNormalize(sm.vec3.new(1, 0, 0))
         startYaw = math.atan2(forward.y, forward.x)
         startRotation = sm.vec3.getRotation(cameraDir, forward) * sm.camera.getRotation()
-        clearImages()
+        clearRenderables()
         print("NewTool hub opened: " .. tostring(menuId))
     end
 
@@ -316,28 +260,23 @@ function MenuManager.init(tool)
         if menuId == nil then return end
         print("NewTool hub closed")
         menuId = nil
+        menuState = nil
         startYaw = nil
         startRotation = nil
         forceBuildHeldTime = 0
-        clearImages()
+        clearRenderables()
     end
 
     function self.client_onUpdate(dt)
         if menuId == nil then return end
-        local tiles = buildTiles()
-        syncImageCount(tiles)
-        local hoveredIndex, hoveredTile = getHoveredTile(tiles)
-        updateImages(tiles, hoveredIndex, hoveredTile)
+        buildAndRender()
     end
 
     function self.run(dt, primaryState, secondaryState, forceBuild)
         if menuId == nil then return false end
 
-        local tiles = buildTiles()
-        syncImageCount(tiles)
-        local hoveredIndex, hoveredTile = getHoveredTile(tiles)
-        updateImages(tiles, hoveredIndex, hoveredTile)
-        showFocusedText(hoveredTile)
+        local _, hoveredTile = buildAndRender()
+        showInteractionText(hoveredTile)
 
         if forceBuild then
             forceBuildHeldTime = forceBuildHeldTime + dt
@@ -356,13 +295,12 @@ function MenuManager.init(tool)
         end
 
         if primaryState == 1 and hoveredTile ~= nil then
-            if hoveredTile.type == "goal" then
-                selectedGoalIndex = hoveredTile.goalIndex
-                print("NewTool hub selected goal: " .. tostring(hoveredTile.label))
-            elseif hoveredTile.type == "action" then
-                local actionId = hoveredTile.actionId
+            if hoveredTile.onSelect ~= nil then
+                handleMenuEvent(hoveredTile.onSelect)
+            elseif hoveredTile.action ~= nil then
+                local action = hoveredTile.action
                 self.close()
-                tool:executeAction({ type = "registered", id = actionId })
+                tool:executeAction(action)
             end
             return true
         end

@@ -10,5 +10,8 @@
     ],
     "Lua.diagnostics.disable": [
         "duplicate-set-field"
-    ]
+    ],
+    "Lua.runtime.special": {
+        "fail": "error"
+    }
 }

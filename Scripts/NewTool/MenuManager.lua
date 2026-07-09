@@ -6,6 +6,9 @@ function MenuManager.init(tool)
 
     local menuId = nil
     local images = {}
+    local labelTexts = {}
+    local previewTitleText = nil
+    local previewDescriptionText = nil
     local selectedGoalIndex = 1
     local startYaw = nil
     local startRotation = nil
@@ -22,6 +25,13 @@ function MenuManager.init(tool)
     local actionTileSize = 3.0
     local actionHoveredTileSize = 3.35
     local tapMaxTime = 0.2
+    local labelGap = 0.45
+    local labelCellHeight = 0.34
+    local previewX = -0.6
+    local previewTitleY = -9.25
+    local previewDescriptionY = -9.95
+    local previewTitleCellHeight = 0.42
+    local previewDescriptionCellHeight = 0.3
 
     local function getBasis()
         if startYaw == nil then
@@ -48,6 +58,20 @@ function MenuManager.init(tool)
             tool.ImRend.destroy(imageId)
         end
         images = {}
+
+        for _, textId in ipairs(labelTexts) do
+            tool.HologramText.destroy(textId)
+        end
+        labelTexts = {}
+
+        if previewTitleText ~= nil then
+            tool.HologramText.destroy(previewTitleText)
+            previewTitleText = nil
+        end
+        if previewDescriptionText ~= nil then
+            tool.HologramText.destroy(previewDescriptionText)
+            previewDescriptionText = nil
+        end
     end
 
     local function addImage(rectsPath)
@@ -61,6 +85,36 @@ function MenuManager.init(tool)
         )
         table.insert(images, id)
         return id
+    end
+
+    local function addLabelText()
+        local forward, _, _ = getBasis()
+        local id = tool.HologramText.new(
+            sm.camera.getPosition() + forward * menuDistance,
+            getMenuRotation(forward),
+            "",
+            { layoutId = "hub_label", cellHeight = labelCellHeight, background = true }
+        )
+        table.insert(labelTexts, id)
+        return id
+    end
+
+    local function ensurePreviewText()
+        if previewTitleText == nil then
+            local forward, _, _ = getBasis()
+            previewTitleText = tool.HologramText.new(
+                sm.camera.getPosition() + forward * menuDistance,
+                getMenuRotation(forward),
+                "",
+                { layoutId = "hub_preview_title", cellHeight = previewTitleCellHeight, background = true }
+            )
+            previewDescriptionText = tool.HologramText.new(
+                sm.camera.getPosition() + forward * menuDistance,
+                getMenuRotation(forward),
+                "",
+                { layoutId = "hub_preview_description", cellHeight = previewDescriptionCellHeight, background = true }
+            )
+        end
     end
 
     local function getManifest()
@@ -129,6 +183,16 @@ function MenuManager.init(tool)
             tool.ImRend.destroy(images[#images])
             table.remove(images, #images)
         end
+
+        while #labelTexts < #tiles do
+            addLabelText()
+        end
+        while #labelTexts > #tiles do
+            tool.HologramText.destroy(labelTexts[#labelTexts])
+            table.remove(labelTexts, #labelTexts)
+        end
+
+        ensurePreviewText()
     end
 
     local function getHoveredTile(tiles)
@@ -157,7 +221,18 @@ function MenuManager.init(tool)
         return nil
     end
 
-    local function updateImages(tiles, hoveredIndex)
+    local function getFallbackPreviewTile()
+        local manifest = getManifest()
+        local goals = manifest and manifest.goals or {}
+        local selectedGoal = goals[selectedGoalIndex]
+        if selectedGoal == nil then return nil end
+        return {
+            label = selectedGoal.label,
+            description = selectedGoal.description
+        }
+    end
+
+    local function updateImages(tiles, hoveredIndex, hoveredTile)
         local forward, right, up = getBasis()
         local cameraPos = sm.camera.getPosition()
         local rotation = getMenuRotation(forward)
@@ -174,18 +249,35 @@ function MenuManager.init(tool)
                 size = { size, size },
                 rectsPath = tile.icon
             })
+
+            local labelY = tile.y - (tile.size or goalTileSize) * 0.65 - labelGap
+            tool.HologramText.update(labelTexts[index], {
+                origin = planeCenter + right * tile.x + up * labelY,
+                rotation = rotation,
+                text = tostring(tile.label or "")
+            })
+        end
+
+        local previewTile = hoveredTile or getFallbackPreviewTile()
+        if previewTile ~= nil and previewTitleText ~= nil and previewDescriptionText ~= nil then
+            tool.HologramText.update(previewTitleText, {
+                origin = planeCenter + right * previewX + up * previewTitleY,
+                rotation = rotation,
+                text = tostring(previewTile.label or "")
+            })
+            tool.HologramText.update(previewDescriptionText, {
+                origin = planeCenter + right * previewX + up * previewDescriptionY,
+                rotation = rotation,
+                text = tostring(previewTile.description or "")
+            })
         end
     end
 
     local function showFocusedText(tile)
         if tile == nil then
-            local manifest = getManifest()
-            local goals = manifest and manifest.goals or {}
-            local selectedGoal = goals[selectedGoalIndex]
-            if selectedGoal == nil then return end
             sm.gui.setInteractionText(
                 "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-                "NewTool Hub | " .. selectedGoal.label .. " selected | Aim at an icon | Left-click: select | Right-click/F: close</p>"
+                "Aim at an icon | Left-click: select | Right-click/F: close</p>"
             )
             return
         end
@@ -199,8 +291,7 @@ function MenuManager.init(tool)
 
         sm.gui.setInteractionText(
             "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            tostring(tile.label) .. " | " .. tostring(tile.description or "") ..
-            " | Left-click: " .. action .. " | Right-click/F: close</p>"
+            "Left-click: " .. action .. " | Right-click/F: close</p>"
         )
     end
 
@@ -235,8 +326,8 @@ function MenuManager.init(tool)
         if menuId == nil then return end
         local tiles = buildTiles()
         syncImageCount(tiles)
-        local hoveredIndex = getHoveredTile(tiles)
-        updateImages(tiles, hoveredIndex)
+        local hoveredIndex, hoveredTile = getHoveredTile(tiles)
+        updateImages(tiles, hoveredIndex, hoveredTile)
     end
 
     function self.run(dt, primaryState, secondaryState, forceBuild)
@@ -245,7 +336,7 @@ function MenuManager.init(tool)
         local tiles = buildTiles()
         syncImageCount(tiles)
         local hoveredIndex, hoveredTile = getHoveredTile(tiles)
-        updateImages(tiles, hoveredIndex)
+        updateImages(tiles, hoveredIndex, hoveredTile)
         showFocusedText(hoveredTile)
 
         if forceBuild then

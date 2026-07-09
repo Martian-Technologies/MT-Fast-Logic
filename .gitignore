@@ -8,3 +8,4 @@ Backups/AllBackup*
 translation_ext/
 CONTEXT.md
 docs/
+__pycache__/

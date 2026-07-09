@@ -20,21 +20,27 @@ function ImRend.init(tool)
         return newId
     end
 
-    local function getRectData(rectsPath)
-        local cached = self.rect_data[rectsPath]
-        if cached ~= nil then return cached end
+    local defaultColor = sm.color.new(1, 1, 1)
 
-        local data = sm.json.open(rectsPath)
+    local function parseRectData(data, fallbackColor)
+        fallbackColor = fallbackColor or defaultColor
+
+        local width = data.width or data.w
+        local height = data.height or data.h
+        local rectangles = data.rectangles or data.r or {}
         local palette = {}
-        for _, color in ipairs(data.color_palette) do
-            palette[#palette + 1] = sm.color.new(color[1] / 255, color[2] / 255, color[3] / 255)
+
+        if data.color_palette ~= nil then
+            for _, color in ipairs(data.color_palette) do
+                palette[#palette + 1] = sm.color.new(color[1] / 255, color[2] / 255, color[3] / 255)
+            end
         end
 
         local parsed = {
-            w = data.width,
-            h = data.height,
-            l = data.layer_count,
-            n = #data.rectangles,
+            w = width,
+            h = height,
+            l = data.layer_count or 1,
+            n = #rectangles,
             x = {},
             y = {},
             z = {},
@@ -43,17 +49,33 @@ function ImRend.init(tool)
             color = {}
         }
 
-        local halfWidth = data.width / 2
-        local halfHeight = data.height / 2
-        for index, rect in ipairs(data.rectangles) do
-            parsed.x[index] = rect.x + rect.w / 2 - halfWidth
-            parsed.y[index] = -(rect.y + rect.h / 2 - halfHeight)
-            parsed.z[index] = rect.z * 0.0005
-            parsed.wRect[index] = rect.w
-            parsed.hRect[index] = rect.h
-            parsed.color[index] = palette[rect.c + 1]
+        local halfWidth = width / 2
+        local halfHeight = height / 2
+        for index, rect in ipairs(rectangles) do
+            local x = rect.x or rect[1]
+            local y = rect.y or rect[2]
+            local w = rect.w or rect[3]
+            local h = rect.h or rect[4]
+            local z = rect.z or rect[5] or 0
+            local colorIndex = rect.c
+            if colorIndex == nil then colorIndex = rect[6] end
+
+            parsed.x[index] = x + w / 2 - halfWidth
+            parsed.y[index] = -(y + h / 2 - halfHeight)
+            parsed.z[index] = z * 0.0005
+            parsed.wRect[index] = w
+            parsed.hRect[index] = h
+            parsed.color[index] = (colorIndex ~= nil and palette[colorIndex + 1]) or fallbackColor
         end
 
+        return parsed
+    end
+
+    local function getRectData(rectsPath)
+        local cached = self.rect_data[rectsPath]
+        if cached ~= nil then return cached end
+
+        local parsed = parseRectData(sm.json.open(rectsPath))
         self.rect_data[rectsPath] = parsed
         return parsed
     end
@@ -100,7 +122,7 @@ function ImRend.init(tool)
             end
 
             if updateColor then
-                effect:setParameter("color", rectData.color[index])
+                effect:setParameter("color", image.color or rectData.color[index])
             end
 
             if startEffects then
@@ -109,7 +131,7 @@ function ImRend.init(tool)
         end
     end
 
-    local function recycleOrCreateImage(origin, rotation, width, height, rectsPath, rectData)
+    local function recycleOrCreateImage(origin, rotation, width, height, rectsPath, rectData, color)
         local id
         local image
 
@@ -122,6 +144,7 @@ function ImRend.init(tool)
             image.height = height
             image.rectsPath = rectsPath
             image.rectData = rectData
+            image.color = color
         else
             id = getNewId()
             image = {
@@ -131,6 +154,7 @@ function ImRend.init(tool)
                 height = height,
                 rectsPath = rectsPath,
                 rectData = rectData,
+                color = color,
                 effects = {}
             }
             self.images[id] = image
@@ -140,9 +164,19 @@ function ImRend.init(tool)
         return id, image
     end
 
-    function self.new(origin, rotation, width, height, rectsPath)
+    function self.makeRectData(data, fallbackColor)
+        return parseRectData(data, fallbackColor)
+    end
+
+    function self.new(origin, rotation, width, height, rectsPath, color)
         local rectData = getRectData(rectsPath)
-        local id, image = recycleOrCreateImage(origin, rotation, width, height, rectsPath, rectData)
+        local id, image = recycleOrCreateImage(origin, rotation, width, height, rectsPath, rectData, color)
+        syncImage(image, true, true, true, true, true)
+        return id
+    end
+
+    function self.newData(origin, rotation, width, height, rectData, color)
+        local id, image = recycleOrCreateImage(origin, rotation, width, height, nil, rectData, color)
         syncImage(image, true, true, true, true, true)
         return id
     end
@@ -156,6 +190,7 @@ function ImRend.init(tool)
         local updateRotation = false
         local updateScale = false
         local updateColor = false
+        local startEffects = false
 
         if changes.origin ~= nil then
             image.origin = changes.origin
@@ -189,6 +224,24 @@ function ImRend.init(tool)
             updateRotation = true
             updateScale = true
             updateColor = true
+            startEffects = true
+        end
+
+        if changes.rectData ~= nil and changes.rectData ~= image.rectData then
+            image.rectsPath = nil
+            image.rectData = changes.rectData
+            ensureEffects(image, image.rectData.n)
+            stopEffectsAfter(image, image.rectData.n)
+            updatePosition = true
+            updateRotation = true
+            updateScale = true
+            updateColor = true
+            startEffects = true
+        end
+
+        if changes.color ~= nil then
+            image.color = changes.color
+            updateColor = true
         end
 
         if changes.size ~= nil then
@@ -199,7 +252,7 @@ function ImRend.init(tool)
         end
 
         if updatePosition or updateRotation or updateScale or updateColor then
-            syncImage(image, updatePosition, updateRotation, updateScale, updateColor, false)
+            syncImage(image, updatePosition, updateRotation, updateScale, updateColor, startEffects)
         end
     end
 

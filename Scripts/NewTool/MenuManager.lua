@@ -32,8 +32,12 @@ function MenuManager.init(tool)
         return forward, right, up
     end
 
-    local function getMenuRotation(forward)
-        return startRotation or sm.camera.getRotation()
+    local function getMenuRotation(forward, direction)
+        local rotation = startRotation or sm.camera.getRotation()
+        if direction ~= nil then
+            rotation = sm.vec3.getRotation(forward, direction) * rotation
+        end
+        return rotation
     end
 
     local function clearRenderables()
@@ -49,11 +53,26 @@ function MenuManager.init(tool)
         tileById = {}
     end
 
-    local function toWorld(localX, localY, plan)
+    local function localToDirection(localX, localY, plan)
         local forward, right, up = getBasis()
+        local distance = plan.menuDistance or MenuLayout.defaults.menuDistance
+
+        -- Project the menu's 2D layout onto a sphere around the camera instead
+        -- of a flat plane. localX/localY keep their old layout scale, but now
+        -- they become angular offsets, so every tile sits on the same radius.
+        return (forward + right * (localX / distance) + up * (localY / distance)):safeNormalize(forward)
+    end
+
+    local function toWorld(localX, localY, plan)
         local cameraPos = sm.camera.getPosition()
-        local planeCenter = cameraPos + forward * (plan.menuDistance or MenuLayout.defaults.menuDistance)
-        return planeCenter + right * localX + up * localY
+        local distance = plan.menuDistance or MenuLayout.defaults.menuDistance
+        return cameraPos + localToDirection(localX, localY, plan) * distance
+    end
+
+    local function getLocalRotation(localX, localY, plan)
+        local forward = getBasis()
+        local direction = localToDirection(localX, localY, plan)
+        return getMenuRotation(forward, direction)
     end
 
     local function getPoppedWorldOrigin(stableOrigin, plan)
@@ -67,19 +86,15 @@ function MenuManager.init(tool)
 
     local function getHoveredTile(plan)
         local forward, right, up = getBasis()
-        local cameraPos = sm.camera.getPosition()
         local cameraDir = sm.camera.getDirection()
-        local planeCenter = cameraPos + forward * (plan.menuDistance or MenuLayout.defaults.menuDistance)
         local denom = cameraDir:dot(forward)
         if denom <= 0.05 then return nil end
 
-        local t = (planeCenter - cameraPos):dot(forward) / denom
-        if t <= 0 then return nil end
-
-        local hit = cameraPos + cameraDir * t
-        local localHit = hit - planeCenter
-        local x = localHit:dot(right)
-        local y = localHit:dot(up)
+        -- Inverse of localToDirection(). This lets the old rectangular hitboxes
+        -- keep working while the rendered menu itself is curved around the camera.
+        local distance = plan.menuDistance or MenuLayout.defaults.menuDistance
+        local x = cameraDir:dot(right) / denom * distance
+        local y = cameraDir:dot(up) / denom * distance
 
         for _, hitbox in ipairs(plan.hitboxes or {}) do
             local halfWidth = hitbox.width / 2
@@ -95,13 +110,11 @@ function MenuManager.init(tool)
 
     local function reconcileImages(plan, hoveredTile)
         local seen = {}
-        local forward = getBasis()
-        local rotation = getMenuRotation(forward)
-
         for _, tile in ipairs(plan.tiles or {}) do
             local imageId = imageById[tile.id]
             local stableOrigin = toWorld(tile.localX, tile.localY, plan)
             local origin = stableOrigin
+            local rotation = getLocalRotation(tile.localX, tile.localY, plan)
             if hoveredTile ~= nil and hoveredTile.id == tile.id then
                 origin = getPoppedWorldOrigin(stableOrigin, plan)
             end
@@ -139,12 +152,10 @@ function MenuManager.init(tool)
 
     local function reconcileTexts(plan)
         local seen = {}
-        local forward = getBasis()
-        local rotation = getMenuRotation(forward)
-
         for _, text in ipairs(plan.texts or {}) do
             local textId = textById[text.id]
             local origin = toWorld(text.localX, text.localY, plan)
+            local rotation = getLocalRotation(text.localX, text.localY, plan)
 
             if textId == nil then
                 textId = tool.HologramText.new(

@@ -18,49 +18,47 @@ function RadialMenu.init(tool)
         { angle = nil }
     }
 
-    local radialMenuActions = {
-        {
-            action = nil,
-            rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
-        },
-        {
-            action = nil,
-            rectsPath = nil
-        },
-        {
-            action = nil,
-            rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
-        },
-        {
-            action = nil,
-            rectsPath = nil
-        },
-        {
-            action = nil,
-            rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
-        },
-        {
-            action = nil,
-            rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
-        },
-        {
-            action = nil,
-            rectsPath = nil
-        },
-        {
-            action = {
-                type = "toggleFlight"
-            },
-            rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/toggleFlight.json"
-        },
-        {
-            action = nil,
-            rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
-        }
-    }
-
     for i = 0, menuOptionCount - 1 do
         table.insert(menuSlots, { angle = math.pi * 2 * i / menuOptionCount })
+    end
+
+    local function getRadialActions()
+        local actions = {
+            {
+                action = nil,
+                rectsPath = nil
+            }
+        }
+
+        local radial = NewToolMenuManifest.radial or {}
+        local pinnedTools = radial.pinnedTools or {}
+        local commands = radial.commands or {}
+        local ids = {}
+
+        for _, actionId in ipairs(pinnedTools) do
+            table.insert(ids, actionId)
+        end
+        for _, actionId in ipairs(commands) do
+            table.insert(ids, actionId)
+        end
+
+        for slot = 1, menuOptionCount do
+            local actionId = ids[slot]
+            local actionDef = actionId and NewToolActionRegistry.get(actionId) or nil
+            if actionDef ~= nil then
+                table.insert(actions, {
+                    action = { type = "registered", id = actionId },
+                    rectsPath = actionDef.icon
+                })
+            else
+                table.insert(actions, {
+                    action = nil,
+                    rectsPath = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json"
+                })
+            end
+        end
+
+        return actions
     end
 
     local function getCameraBasis(cameraRot, cameraDir)
@@ -105,20 +103,34 @@ function RadialMenu.init(tool)
         return bestOption, bestDot
     end
 
+    local function destroyOptions()
+        if menuOptions == nil then return end
+        for _, option in ipairs(menuOptions) do
+            if option.image ~= nil then
+                tool.ImRend.destroy(option.image)
+            end
+        end
+        menuOptions = nil
+    end
+
     function self.run(dt, primaryState, secondaryState, forceBuild)
         if forceBuild then
             local cameraPos
             local cameraRot
             local cameraDir
+            local radialMenuActions
             if timeForceBuild ~= 0 then goto continue end
             if menuOptions ~= nil then goto continue end
 
+            radialMenuActions = getRadialActions()
             menuOptions = {}
             cameraPos = sm.camera.getPosition()
             cameraRot = sm.camera.getRotation()
             cameraDir = sm.camera.getDirection()
             for index, slot in ipairs(menuSlots) do
-                local rectsPath = radialMenuActions[index].rectsPath
+                local actionData = radialMenuActions[index]
+                local rectsPath = actionData and actionData.rectsPath or nil
+                local action = actionData and actionData.action or nil
                 local menuOffset, menuDirection = getRadialOffset(cameraRot, cameraDir, slot.angle)
                 local image = nil
                 if rectsPath ~= nil then
@@ -133,7 +145,8 @@ function RadialMenu.init(tool)
                 end
                 table.insert(menuOptions, {
                     image = image,
-                    direction = menuOffset
+                    direction = menuOffset,
+                    action = action
                 })
             end
 
@@ -143,31 +156,25 @@ function RadialMenu.init(tool)
         elseif timeForceBuild ~= 0 then
             local bestOption, _ = getClosestOption()
             local action = nil
-            if bestOption == 1 and timeForceBuild < maxTimeToOpenBigMenu or frameCountForceBuild < 3 then
+            if (bestOption == 1 and timeForceBuild < maxTimeToOpenBigMenu) or frameCountForceBuild < 3 then
                 action = {
                     type = "openMenu",
                     menu = "main"
-                } -- open the full menu listing off every mode and every setting
-            else
-                action = radialMenuActions[bestOption].action
+                }
+            elseif bestOption ~= nil and menuOptions ~= nil then
+                action = menuOptions[bestOption].action
             end
 
             timeForceBuild = 0
             frameCountForceBuild = 0
-            if menuOptions ~= nil then
-                for _, option in ipairs(menuOptions) do
-                    if option.image ~= nil then
-                        tool.ImRend.destroy(option.image)
-                    end
-                end
-                menuOptions = nil
-            end
+            destroyOptions()
 
             if action ~= nil then tool:executeAction(action) end
+            return true
         end
         if menuOptions ~= nil then
             local cameraPos = sm.camera.getPosition()
-            local bestOption, bestDot = getClosestOption()
+            local bestOption, _ = getClosestOption()
             for index, option in ipairs(menuOptions) do
                 if option.image == nil then goto continue end
 
@@ -176,23 +183,28 @@ function RadialMenu.init(tool)
                 if index == bestOption then
                     offsetScale = offsetScale * 0.75
                     dir = sm.vec3.lerp(sm.camera.getDirection(), dir, 0.9):normalize()
+                    if option.action ~= nil and option.action.id ~= nil then
+                        local actionDef = NewToolActionRegistry.get(option.action.id)
+                        if actionDef ~= nil then
+                            sm.gui.setInteractionText(
+                                "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+                                tostring(actionDef.label) .. " | Release F: select</p>"
+                            )
+                        end
+                    end
                 end
                 tool.ImRend.updateOrigin(option.image, cameraPos + dir * offsetScale)
 
                 ::continue::
             end
+            return true
         end
+        return false
     end
 
     function self.unequip()
         timeForceBuild = 0
         frameCountForceBuild = 0
-        if menuOptions == nil then return end
-        for _, option in ipairs(menuOptions) do
-            if option.image == nil then goto continue end
-            tool.ImRend.destroy(option.image)
-            ::continue::
-        end
-        menuOptions = nil
+        destroyOptions()
     end
 end

@@ -8,6 +8,9 @@ dofile("../util/util.lua")
 dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/MenuManifest.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/ToolWorkflowManager.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManager.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionManager.lua")
 
@@ -29,9 +32,10 @@ function NewTool:client_onCreate()
     self.lastTime = os.clock()
 
     MTFlight.inject(self)
-    ActionManager.init(self)
     ImRend.init(self)
+    ToolWorkflowManager.init(self)
     MenuManager.init(self)
+    ActionManager.init(self)
     RadialMenu.init(self)
 
     self.tool:setCrossHairAlpha(0.3)
@@ -58,12 +62,17 @@ function NewTool:client_onReload()
 end
 
 function NewTool:client_onEquip(animate)
+    if self.tool:isLocal() then
+        self.ToolWorkflowManager.wake()
+    end
     self:cl_handleAnimationsOnEquip(animate)
 end
 
 function NewTool:client_onUnequip(animate)
     if self.tool:isLocal() then
+        self.MenuManager.close()
         self.RadialMenu.unequip()
+        self.ToolWorkflowManager.sleep()
     end
 
     self:cl_handleAnimationsOnUnequip(animate)
@@ -92,7 +101,9 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
     self.lastTime = currentTime
     -- print(primaryState, secondaryState, forceBuild)
     if self.tool:isLocal() then
+        if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
+        if self.ToolWorkflowManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
     end
     ::done::
     return true, true

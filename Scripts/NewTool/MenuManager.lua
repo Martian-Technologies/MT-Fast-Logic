@@ -1,34 +1,281 @@
 MenuManager = {}
 
-local plane_no_walls_uuid = sm.uuid.new("d43a391f-913d-488b-b8ac-247644b02b8b")
-
 function MenuManager.init(tool)
     tool.MenuManager = {}
     local self = tool.MenuManager
 
-    local menus = {}
+    local menuId = nil
+    local images = {}
+    local selectedGoalIndex = 1
+    local startYaw = nil
+    local startRotation = nil
+    local forceBuildHeldTime = 0
 
-    function self.client_onUpdate(dt)
-        -- if not effectsMade then
-        --     effectsMade = true
-        --     id1 = tool.ImRend.new(sm.camera.getPosition() + sm.camera.getDirection() * 20, sm.camera.getRotation(),
-        --         55, 55, "$CONTENT_DATA/Scripts/NewTool/images/rectangles.json")
-        -- end
-        -- tool.ImRend.updateOrientation(id1, sm.camera.getPosition() + sm.camera.getDirection() * 20, sm.camera.getRotation())
+    local menuDistance = 18
+    local goalX = -4.0
+    local actionX = 2.75
+    local goalRowSpacing = 2.05
+    local actionRowSpacing = 3.25
+    local goalTileSize = 1.75
+    local goalHoveredTileSize = 2.0
+    local goalSelectedTileSize = 1.9
+    local actionTileSize = 3.0
+    local actionHoveredTileSize = 3.35
+    local tapMaxTime = 0.2
+
+    local function getBasis()
+        if startYaw == nil then
+            local cameraDir = sm.camera.getDirection()
+            startYaw = math.atan2(cameraDir.y, cameraDir.x)
+        end
+
+        local forward = sm.vec3.new(math.cos(startYaw), math.sin(startYaw), 0):normalize()
+        local right = sm.vec3.new(math.sin(startYaw), -math.cos(startYaw), 0):normalize()
+        local up = sm.vec3.new(0, 0, 1)
+        return forward, right, up
     end
 
-    function self.new()
-        local id = table.findFirstNil(menus)
-        menus[id] = {
-            elements = {},
-            rotation = sm.camera.getRotation()
-        }
+    local function getMenuRotation(forward)
+        return startRotation or sm.camera.getRotation()
+    end
+
+    local function getRowY(index, count, spacing)
+        return ((count + 1) / 2 - index) * spacing
+    end
+
+    local function clearImages()
+        for _, imageId in ipairs(images) do
+            tool.ImRend.destroy(imageId)
+        end
+        images = {}
+    end
+
+    local function addImage(rectsPath)
+        local forward, _, _ = getBasis()
+        local id = tool.ImRend.new(
+            sm.camera.getPosition() + forward * menuDistance,
+            getMenuRotation(forward),
+            goalTileSize,
+            goalTileSize,
+            rectsPath
+        )
+        table.insert(images, id)
         return id
     end
 
-    function self.addElement(id, element)
-        local menu = menus[id]
-        if menu == nil then return end
-        table.insert(menu.elements, element)
+    local function getManifest()
+        if menuId == "main" then
+            return NewToolMenuManifest.main
+        end
+        return nil
+    end
+
+    local function buildTiles()
+        local manifest = getManifest()
+        local tiles = {}
+        if manifest == nil then return tiles end
+
+        local goals = manifest.goals or {}
+        if selectedGoalIndex < 1 then selectedGoalIndex = 1 end
+        if selectedGoalIndex > #goals then selectedGoalIndex = #goals end
+
+        for index, goal in ipairs(goals) do
+            table.insert(tiles, {
+                type = "goal",
+                goalIndex = index,
+                label = goal.label,
+                description = goal.description,
+                icon = goal.icon,
+                x = goalX,
+                y = getRowY(index, #goals, goalRowSpacing),
+                size = goalTileSize,
+                hoveredSize = goalHoveredTileSize,
+                selectedSize = goalSelectedTileSize,
+                selected = index == selectedGoalIndex
+            })
+        end
+
+        local selectedGoal = goals[selectedGoalIndex]
+        if selectedGoal ~= nil then
+            local actionIds = selectedGoal.actions or {}
+            for index, actionId in ipairs(actionIds) do
+                local action = NewToolActionRegistry.get(actionId)
+                if action ~= nil then
+                    table.insert(tiles, {
+                        type = "action",
+                        actionId = actionId,
+                        label = action.label,
+                        description = action.description,
+                        icon = action.icon,
+                        x = actionX,
+                        y = getRowY(index, #actionIds, actionRowSpacing),
+                        size = actionTileSize,
+                        hoveredSize = actionHoveredTileSize,
+                        selectedSize = actionTileSize,
+                        selected = false
+                    })
+                end
+            end
+        end
+
+        return tiles
+    end
+
+    local function syncImageCount(tiles)
+        while #images < #tiles do
+            addImage(tiles[#images + 1].icon)
+        end
+        while #images > #tiles do
+            tool.ImRend.destroy(images[#images])
+            table.remove(images, #images)
+        end
+    end
+
+    local function getHoveredTile(tiles)
+        local forward, right, up = getBasis()
+        local cameraPos = sm.camera.getPosition()
+        local cameraDir = sm.camera.getDirection()
+        local planeCenter = cameraPos + forward * menuDistance
+        local denom = cameraDir:dot(forward)
+        if denom <= 0.05 then return nil end
+
+        local t = (planeCenter - cameraPos):dot(forward) / denom
+        if t <= 0 then return nil end
+
+        local hit = cameraPos + cameraDir * t
+        local localHit = hit - planeCenter
+        local x = localHit:dot(right)
+        local y = localHit:dot(up)
+
+        for index, tile in ipairs(tiles) do
+            local halfSize = (tile.size or goalTileSize) * 0.65
+            if x >= tile.x - halfSize and x <= tile.x + halfSize and y >= tile.y - halfSize and y <= tile.y + halfSize then
+                return index, tile
+            end
+        end
+
+        return nil
+    end
+
+    local function updateImages(tiles, hoveredIndex)
+        local forward, right, up = getBasis()
+        local cameraPos = sm.camera.getPosition()
+        local rotation = getMenuRotation(forward)
+        local planeCenter = cameraPos + forward * menuDistance
+
+        for index, tile in ipairs(tiles) do
+            local size = tile.size or goalTileSize
+            if tile.selected then size = tile.selectedSize or size end
+            if index == hoveredIndex then size = tile.hoveredSize or size end
+
+            tool.ImRend.update(images[index], {
+                origin = planeCenter + right * tile.x + up * tile.y,
+                rotation = rotation,
+                size = { size, size },
+                rectsPath = tile.icon
+            })
+        end
+    end
+
+    local function showFocusedText(tile)
+        if tile == nil then
+            local manifest = getManifest()
+            local goals = manifest and manifest.goals or {}
+            local selectedGoal = goals[selectedGoalIndex]
+            if selectedGoal == nil then return end
+            sm.gui.setInteractionText(
+                "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+                "NewTool Hub | " .. selectedGoal.label .. " selected | Aim at an icon | Left-click: select | Right-click/F: close</p>"
+            )
+            return
+        end
+
+        local action = "select"
+        if tile.type == "goal" then
+            action = "show actions"
+        elseif tile.type == "action" then
+            action = "activate"
+        end
+
+        sm.gui.setInteractionText(
+            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
+            tostring(tile.label) .. " | " .. tostring(tile.description or "") ..
+            " | Left-click: " .. action .. " | Right-click/F: close</p>"
+        )
+    end
+
+    function self.isOpen()
+        return menuId ~= nil
+    end
+
+    function self.open(id)
+        menuId = id or "main"
+        selectedGoalIndex = 1
+        forceBuildHeldTime = 0
+        local cameraDir = sm.camera.getDirection()
+        local flatDir = sm.vec3.new(cameraDir.x, cameraDir.y, 0)
+        local forward = flatDir:safeNormalize(sm.vec3.new(1, 0, 0))
+        startYaw = math.atan2(forward.y, forward.x)
+        startRotation = sm.vec3.getRotation(cameraDir, forward) * sm.camera.getRotation()
+        clearImages()
+        print("NewTool hub opened: " .. tostring(menuId))
+    end
+
+    function self.close()
+        if menuId == nil then return end
+        print("NewTool hub closed")
+        menuId = nil
+        startYaw = nil
+        startRotation = nil
+        forceBuildHeldTime = 0
+        clearImages()
+    end
+
+    function self.client_onUpdate(dt)
+        if menuId == nil then return end
+        local tiles = buildTiles()
+        syncImageCount(tiles)
+        local hoveredIndex = getHoveredTile(tiles)
+        updateImages(tiles, hoveredIndex)
+    end
+
+    function self.run(dt, primaryState, secondaryState, forceBuild)
+        if menuId == nil then return false end
+
+        local tiles = buildTiles()
+        syncImageCount(tiles)
+        local hoveredIndex, hoveredTile = getHoveredTile(tiles)
+        updateImages(tiles, hoveredIndex)
+        showFocusedText(hoveredTile)
+
+        if forceBuild then
+            forceBuildHeldTime = forceBuildHeldTime + dt
+            return true
+        elseif forceBuildHeldTime > 0 then
+            if forceBuildHeldTime <= tapMaxTime then
+                self.close()
+            end
+            forceBuildHeldTime = 0
+            return true
+        end
+
+        if secondaryState == 1 then
+            self.close()
+            return true
+        end
+
+        if primaryState == 1 and hoveredTile ~= nil then
+            if hoveredTile.type == "goal" then
+                selectedGoalIndex = hoveredTile.goalIndex
+                print("NewTool hub selected goal: " .. tostring(hoveredTile.label))
+            elseif hoveredTile.type == "action" then
+                local actionId = hoveredTile.actionId
+                self.close()
+                tool:executeAction({ type = "registered", id = actionId })
+            end
+            return true
+        end
+
+        return true
     end
 end

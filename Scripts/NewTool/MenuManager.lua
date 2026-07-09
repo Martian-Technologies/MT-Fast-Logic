@@ -25,8 +25,8 @@ function MenuManager.init(tool)
     local actionTileSize = 3.0
     local actionHoveredTileSize = 3.35
     local tapMaxTime = 0.2
-    local labelGap = 0.45
-    local labelCellHeight = 0.34
+    local labelGap = 0
+    local labelCellHeight = 0.5
     local previewX = -0.6
     local previewTitleY = -9.25
     local previewDescriptionY = -9.95

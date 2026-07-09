@@ -8,6 +8,7 @@ dofile("../util/util.lua")
 dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/LineRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManifest.lua")
@@ -35,6 +36,7 @@ function NewTool:client_onCreate()
 
     MTFlight.inject(self)
     ImRend.init(self)
+    LineRend.init(self)
     HologramText.init(self)
     MenuLayout.validateAll(NewToolMenuManifest, self.HologramText)
     ToolWorkflowManager.init(self)
@@ -49,6 +51,7 @@ end
 
 function NewTool:client_onUpdate(dt)
     if self.tool:isLocal() then
+        self.LineRend.client_onUpdate(dt)
         self.MenuManager.client_onUpdate(dt)
     end
 
@@ -67,6 +70,7 @@ end
 
 function NewTool:client_onEquip(animate)
     if self.tool:isLocal() then
+        self.LineRend.resume()
         self.ToolWorkflowManager.wake()
     end
     self:cl_handleAnimationsOnEquip(animate)
@@ -74,6 +78,7 @@ end
 
 function NewTool:client_onUnequip(animate)
     if self.tool:isLocal() then
+        self.LineRend.suspend()
         self.MenuManager.close()
         self.RadialMenu.unequip()
         self.ToolWorkflowManager.sleep()
@@ -105,6 +110,7 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
     self.lastTime = currentTime
     -- print(primaryState, secondaryState, forceBuild)
     if self.tool:isLocal() then
+        self.LineRend.beginFrame()
         if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.ToolWorkflowManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end

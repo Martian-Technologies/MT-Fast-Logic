@@ -21,6 +21,17 @@
             "renderable": "$CONTENT_DATA/Renderable/otherRends/plane_no_walls.rend",
             "uuid": "d43a391f-913d-488b-b8ac-247644b02b8b",
             "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/line.rend",
+            "uuid": "1364f63d-663f-4d50-b422-49d3a4ce2938",
+            "showInInventory": false
         }
     ]
 }

@@ -20,7 +20,9 @@ MenuLayout.defaults = {
     tileSizes = {
         goal = {
             iconSize = 3.0,
-            labelLayoutId = "hub_label",
+            labelMaxColumns = 18,
+            labelMaxLines = 1,
+            labelAlign = "center",
             labelCellHeight = 0.75,
             labelGap = 0.12,
             itemGap = 0.25,
@@ -31,7 +33,9 @@ MenuLayout.defaults = {
         },
         action = {
             iconSize = 3.0,
-            labelLayoutId = "hub_label",
+            labelMaxColumns = 18,
+            labelMaxLines = 1,
+            labelAlign = "center",
             labelCellHeight = 0.7,
             labelGap = 0.15,
             itemGap = 0.25,
@@ -136,7 +140,6 @@ end
 
 local function getLabelOptions(tileSize)
     return {
-        layoutId = tileSize.labelLayoutId,
         cellHeight = tileSize.labelCellHeight,
         background = true,
         fitBackground = tileSize.labelFitBackground ~= false,
@@ -150,7 +153,7 @@ local function getLabelOptions(tileSize)
 end
 
 local function measureLabel(text, tileSize, textMeasurer)
-    if text == nil or tileSize.labelLayoutId == false then
+    if text == nil then
         return { width = 0, height = 0, options = nil }
     end
 

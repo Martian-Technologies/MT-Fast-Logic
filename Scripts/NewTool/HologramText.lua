@@ -1,21 +1,17 @@
 HologramText = {}
 
 local glyphPoolPath = "$CONTENT_DATA/Scripts/NewTool/text/generated/glyph_pool.json"
-local phraseCachePath = "$CONTENT_DATA/Scripts/NewTool/text/generated/phrase_cache.json"
 
 function HologramText.init(tool)
     tool.HologramText = {}
     local self = tool.HologramText
 
     local glyphPool = sm.json.open(glyphPoolPath)
-    local phraseCacheData = sm.json.open(phraseCachePath)
     local glyphs = glyphPool.glyphs or {}
     local fallbackKey = glyphPool.fallback or "003F"
     local fallbackGlyph = glyphs[fallbackKey]
     local cellWidth = glyphPool.cell_width
     local cellHeight = glyphPool.cell_height
-    local phraseLayouts = phraseCacheData.layouts or {}
-    local phraseCache = {}
     local compiledCache = {}
     local rectDataCache = {}
     local missingGlyphs = {}
@@ -23,10 +19,6 @@ function HologramText.init(tool)
     local unusedIds = {}
     local nextId = 1
     local defaultColor = sm.color.new(1, 1, 1)
-
-    for _, entry in ipairs(phraseCacheData.entries or {}) do
-        phraseCache[tostring(entry.layout) .. "\31" .. tostring(entry.text)] = entry.rects
-    end
 
     local function allocId()
         if #unusedIds > 0 then
@@ -246,16 +238,10 @@ function HologramText.init(tool)
 
     local function getLayout(options)
         options = options or {}
-        local layout = nil
-        if options.layoutId ~= nil then
-            layout = phraseLayouts[options.layoutId]
-        end
-        layout = layout or {}
         return {
-            id = options.layoutId,
-            max_columns = options.maxColumns or options.max_columns or layout.max_columns or 32,
-            max_lines = options.maxLines or options.max_lines or layout.max_lines or 1,
-            align = options.align or layout.align or "left"
+            max_columns = options.maxColumns or options.max_columns or 32,
+            max_lines = options.maxLines or options.max_lines or 1,
+            align = options.align or "left"
         }
     end
 
@@ -269,7 +255,7 @@ function HologramText.init(tool)
         local backgroundKey = options and options.background and "bg" or "plain"
         local fitKey = options and options.fitBackground and "fit" or "fixed"
         local paddingX, paddingY = getBackgroundPadding(options)
-        return tostring(layout.id or "runtime") .. "\31" .. tostring(layout.max_columns) .. "\31" .. tostring(layout.max_lines) .. "\31" .. tostring(layout.align) .. "\31" .. backgroundKey .. "\31" .. fitKey .. "\31" .. tostring(paddingX) .. "\31" .. tostring(paddingY) .. "\31" .. tostring(text)
+        return tostring(layout.max_columns) .. "\31" .. tostring(layout.max_lines) .. "\31" .. tostring(layout.align) .. "\31" .. backgroundKey .. "\31" .. fitKey .. "\31" .. tostring(paddingX) .. "\31" .. tostring(paddingY) .. "\31" .. tostring(text)
     end
 
     local function getPayloadBounds(payload, options)
@@ -364,13 +350,7 @@ function HologramText.init(tool)
         if cached ~= nil then return cached end
 
         local useBackground = options ~= nil and options.background
-        local basePayload = nil
-        if useBackground and layout.id ~= nil then
-            basePayload = phraseCache[tostring(layout.id) .. "\31" .. tostring(text)]
-        end
-        if basePayload == nil then
-            basePayload = compilePayload(text, layout)
-        end
+        local basePayload = compilePayload(text, layout)
 
         if useBackground then
             local bounds = nil

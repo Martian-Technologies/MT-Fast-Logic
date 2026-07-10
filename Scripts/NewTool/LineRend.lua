@@ -9,8 +9,8 @@
 --   tool.LineRend.draw(from, to, { color = color, thickness = 0.01 })
 --
 -- draw() submissions are visible until the next beginFrame(). NewTool calls
--- beginFrame() once per equipped-tool update, before it runs any workflows, so
--- a workflow keeps a line visible by submitting it once every update.
+-- beginFrame() once per equipped-tool update, before it runs the selected tool
+-- mode, so a mode keeps a line visible by submitting it once every update.
 
 LineRend = {}
 

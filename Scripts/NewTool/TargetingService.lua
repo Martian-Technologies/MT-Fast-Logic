@@ -1,13 +1,11 @@
--- BlockSelector owns looking-at-block queries and their line-only preview.
--- It deliberately has no tool/workflow knowledge: a workflow enables it, reads
--- getTarget(), and may constrain which bodies can be selected.
+-- TargetingService owns shared raycast queries and the DDA voxel cache.
+-- It does not own an active selection; selection components call queryBlock
+-- only while they need a block target.
 
-NewToolBlockSelector = {}
+TargetingService = {}
 
 local defaultMaxDistance = 128
 local defaultConnectionRadius = 0.1
-local defaultPreviewThickness = 0.01
-local defaultPreviewPadding = 0.006
 
 local function containsBody(bodies, body)
     if bodies == nil then return true end
@@ -54,58 +52,61 @@ local function voxelKey(position)
     return position.x .. ";" .. position.y .. ";" .. position.z
 end
 
-function NewToolBlockSelector.init(tool)
-    tool.BlockSelector = {}
-    local self = tool.BlockSelector
-    local voxelMaps = {}
+local function round(value)
+    if value >= 0 then return math.floor(value + 0.5) end
+    return math.ceil(value - 0.5)
+end
 
-    self.enabled = true
-    self.raycastMode = "DDA" -- DDA, blockRaycast, or connectionRaycast
-    self.bodyConstraint = nil
-    self.raycastLookingAt = nil
-    self.hit = nil
-    self.maxDistance = defaultMaxDistance
-    self.connectionRadius = defaultConnectionRadius
-    self.previewThickness = defaultPreviewThickness
-    self.previewPadding = defaultPreviewPadding
-    self.previewColor = nil
+local function centerKey(position)
+    return round(position.x * 4000) .. ";" ..
+        round(position.y * 4000) .. ";" ..
+        round(position.z * 4000)
+end
 
-    local function resetCrosshair()
-        tool.tool:setDispersionFraction(0)
-        tool.tool:setCrossHairAlpha(0.3)
-    end
+function TargetingService.init(tool)
+    tool.TargetingService = {}
+    local self = tool.TargetingService
+    local bodyCaches = {}
 
-    local function getVoxelMap(body)
+    -- DDA targeting and row selection share one structural index. The body is
+    -- scanned only on first use or after Scrap Mechanic reports a change.
+    local function getBodyCache(body)
         local id = body:getId()
-        local cached = voxelMaps[id]
+        local cached = bodyCaches[id]
         if cached ~= nil and not body:hasChanged(cached.tick) then
-            return cached.map
+            return cached
         end
 
-        local map = {}
+        cached = {
+            voxelMap = {},
+            interactableCenterMap = {},
+            tick = sm.game.getCurrentTick()
+        }
         for _, interactable in ipairs(body:getInteractables()) do
             local shape = interactable:getShape()
             if shape ~= nil and sm.exists(shape) then
+                cached.interactableCenterMap[centerKey(getShapeCenterLocal(shape))] = shape
                 for _, position in ipairs(getOccupiedPositions(shape)) do
                     local voxelPosition = position / 4 - sm.vec3.new(0.125, 0.125, 0.125)
-                    map[voxelKey(voxelPosition)] = shape
+                    cached.voxelMap[voxelKey(voxelPosition)] = shape
                 end
             end
         end
 
-        voxelMaps[id] = {
-            map = map,
-            tick = sm.game.getCurrentTick()
-        }
-        return map
+        bodyCaches[id] = cached
+        return cached
     end
 
-    local function raycastBody()
+    local function getVoxelMap(body)
+        return getBodyCache(body).voxelMap
+    end
+
+    local function raycastBody(maxDistance)
         local origin = sm.camera.getPosition()
         local direction = sm.camera.getDirection()
         return sm.physics.raycast(
             origin,
-            origin + direction * self.maxDistance,
+            origin + direction * maxDistance,
             sm.localPlayer.getPlayer().character
         )
     end
@@ -127,28 +128,28 @@ function NewToolBlockSelector.init(tool)
         return shape:getBody()
     end
 
-    local function raycastBlock()
-        local didHit, result = raycastBody()
+    local function raycastBlock(options)
+        local didHit, result = raycastBody(options.maxDistance)
         if not didHit or result.type ~= "body" then return false, result end
 
         local shape = result:getShape()
         if shape == nil or shape:getInteractable() == nil then return false, result end
-        if not containsBody(self.bodyConstraint, shape:getBody()) then return false, nil end
+        if not containsBody(options.bodyConstraint, shape:getBody()) then return false, nil end
         return true, result
     end
 
-    local function raycastConnection()
-        local didHit, result = raycastBody()
+    local function raycastConnection(options)
+        local didHit, result = raycastBody(options.maxDistance)
         if not didHit then return false, result end
 
         local body = getHitBody(result)
-        if body == nil or not containsBody(self.bodyConstraint, body) then return false, nil end
+        if body == nil or not containsBody(options.bodyConstraint, body) then return false, nil end
 
         local origin = sm.camera.getPosition()
         local direction = sm.camera.getDirection()
         local nearestShape = nil
         local nearestDistance = nil
-        local radius2 = self.connectionRadius * self.connectionRadius
+        local radius2 = options.connectionRadius * options.connectionRadius
 
         for _, interactable in ipairs(body:getInteractables()) do
             local shape = interactable:getShape()
@@ -156,7 +157,7 @@ function NewToolBlockSelector.init(tool)
                 local offset = shape:getWorldPosition() - origin
                 local distance = offset:dot(direction)
                 local lateral = offset - direction * distance
-                if distance >= 0 and distance <= self.maxDistance and lateral:length2() <= radius2 and
+                if distance >= 0 and distance <= options.maxDistance and lateral:length2() <= radius2 and
                     (nearestDistance == nil or distance < nearestDistance) then
                     nearestShape = shape
                     nearestDistance = distance
@@ -168,12 +169,12 @@ function NewToolBlockSelector.init(tool)
         return true, makeResult(body, nearestShape, nearestShape:getWorldPosition(), nil)
     end
 
-    local function raycastDda()
-        local didHit, result = raycastBody()
+    local function raycastDda(options)
+        local didHit, result = raycastBody(options.maxDistance)
         if not didHit then return false, result end
 
         local body = getHitBody(result)
-        if body == nil or not containsBody(self.bodyConstraint, body) then return false, nil end
+        if body == nil or not containsBody(options.bodyConstraint, body) then return false, nil end
 
         local localAabbMin, localAabbMax = body:getLocalAabb()
         localAabbMin = localAabbMin / 4
@@ -183,7 +184,7 @@ function NewToolBlockSelector.init(tool)
         local rayDirection = sm.quat.inverse(body.worldRotation) * sm.camera.getDirection()
         rayDirection = rayDirection:safeNormalize(sm.vec3.new(1, 0, 0))
         local voxelMap = getVoxelMap(body)
-        local radius = self.connectionRadius * 4
+        local radius = options.connectionRadius * 4
 
         for _ = 1, 2048 do
             local voxelPosition = sm.vec3.new(
@@ -242,140 +243,32 @@ function NewToolBlockSelector.init(tool)
         return false, nil
     end
 
-    local function raycast()
-        if self.raycastMode == "blockRaycast" then
-            return raycastBlock()
-        elseif self.raycastMode == "connectionRaycast" then
-            return raycastConnection()
-        end
-        return raycastDda()
-    end
-
-    local function getPreviewColor(shape)
-        if self.previewColor ~= nil then return self.previewColor end
-        local shapeColor = shape:getColor()
-        return sm.color.new(1 - shapeColor.r, 1 - shapeColor.g, 1 - shapeColor.b, 1)
-    end
-
-    local function renderPreview(shape)
-        local bounds = shape:getBoundingBox()
-        local position = shape:getWorldPosition()
-        local rotation = shape:getWorldRotation()
-        local padding = self.previewPadding
-        local at = rotation * sm.vec3.new(1, 0, 0)
-        local right = rotation * sm.vec3.new(0, 1, 0)
-        local up = rotation * sm.vec3.new(0, 0, 1)
-        local halfAt = at * (bounds.x / 2 + padding)
-        local halfRight = right * (bounds.y / 2 + padding)
-        local halfUp = up * (bounds.z / 2 + padding)
-        local color = getPreviewColor(shape)
-        local options = { color = color, thickness = self.previewThickness }
-
-        local corners = {
-            position - halfAt - halfRight - halfUp,
-            position - halfAt - halfRight + halfUp,
-            position - halfAt + halfRight - halfUp,
-            position - halfAt + halfRight + halfUp,
-            position + halfAt - halfRight - halfUp,
-            position + halfAt - halfRight + halfUp,
-            position + halfAt + halfRight - halfUp,
-            position + halfAt + halfRight + halfUp
-        }
-        local edges = {
-            { 1, 2 }, { 1, 3 }, { 1, 5 },
-            { 2, 4 }, { 2, 6 }, { 3, 4 },
-            { 3, 7 }, { 4, 8 }, { 5, 6 },
-            { 5, 7 }, { 6, 8 }, { 7, 8 }
+    function self.queryBlock(queryOptions)
+        queryOptions = queryOptions or {}
+        local options = {
+            raycastMode = queryOptions.raycastMode or "DDA",
+            bodyConstraint = queryOptions.bodyConstraint,
+            maxDistance = queryOptions.maxDistance or defaultMaxDistance,
+            connectionRadius = queryOptions.connectionRadius or defaultConnectionRadius
         }
 
-        for _, edge in ipairs(edges) do
-            tool.LineRend.draw(corners[edge[1]], corners[edge[2]], options)
-        end
-    end
-
-    function self.enable(options)
-        self.enabled = true
-        options = options or {}
-        if options.raycastMode ~= nil then self.setRaycastMode(options.raycastMode) end
-        if options.bodyConstraint ~= nil then self.bodyConstraint = options.bodyConstraint end
-        if options.maxDistance ~= nil then self.maxDistance = options.maxDistance end
-        if options.connectionRadius ~= nil then self.connectionRadius = options.connectionRadius end
-        if options.previewThickness ~= nil then self.previewThickness = options.previewThickness end
-        if options.previewPadding ~= nil then self.previewPadding = options.previewPadding end
-        if options.previewColor ~= nil then self.previewColor = options.previewColor end
-    end
-
-    function self.disable()
-        self.enabled = false
-        self.raycastLookingAt = nil
-        self.hit = nil
-        resetCrosshair()
-    end
-
-    function self.setRaycastMode(mode)
-        if mode == "DDA" or mode == "blockRaycast" or mode == "connectionRaycast" then
-            self.raycastMode = mode
-            return true
-        end
-        error("Unknown BlockSelector raycast mode: " .. tostring(mode))
-    end
-
-    function self.setBodyConstraint(bodies)
-        self.bodyConstraint = bodies
-    end
-
-    function self.getTarget()
-        return self.raycastLookingAt
-    end
-
-    function self.getHit()
-        return self.hit
-    end
-
-    function self.reset()
-        self.bodyConstraint = nil
-        self.raycastLookingAt = nil
-        self.hit = nil
-        resetCrosshair()
-    end
-
-    -- Called after LineRend.beginFrame(), once per equipped-tool update.
-    function self.client_onEquippedUpdate()
-        if not self.enabled or not tool.tool:isEquipped() then
-            self.raycastLookingAt = nil
-            self.hit = nil
-            resetCrosshair()
-            return
+        if options.raycastMode == "blockRaycast" then
+            return raycastBlock(options)
+        elseif options.raycastMode == "connectionRaycast" then
+            return raycastConnection(options)
+        elseif options.raycastMode == "DDA" then
+            return raycastDda(options)
         end
 
-        local didHit, result = raycast()
-        if not didHit or result == nil then
-            self.raycastLookingAt = nil
-            self.hit = nil
-            resetCrosshair()
-            return
-        end
-
-        local shape = result:getShape()
-        if shape == nil or not sm.exists(shape) then
-            self.raycastLookingAt = nil
-            self.hit = nil
-            resetCrosshair()
-            return
-        end
-
-        self.raycastLookingAt = shape
-        self.hit = result
-        local hitPosition = result.pointWorld or shape:getWorldPosition()
-        local distance = math.max((hitPosition - sm.camera.getPosition()):length(), 0.01)
-        tool.tool:setDispersionFraction(0.45 / distance)
-        tool.tool:setCrossHairAlpha(1)
-        renderPreview(shape)
+        error("Unknown targeting raycast mode: " .. tostring(options.raycastMode))
     end
 
-    function self.client_onUnequip()
-        self.raycastLookingAt = nil
-        self.hit = nil
-        resetCrosshair()
+    function self.getShapeCenterLocal(shape)
+        return getShapeCenterLocal(shape)
+    end
+
+    function self.getInteractableCenterMap(body)
+        local cache = getBodyCache(body)
+        return cache.interactableCenterMap, cache.tick
     end
 end

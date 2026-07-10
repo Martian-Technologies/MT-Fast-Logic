@@ -13,12 +13,12 @@ function ActionManager.init(tool, actionRegistry)
         end
 
         if action.kind == "tool" then
-            tool.ToolWorkflowManager.start(action)
+            tool.ToolModeManager.select(action)
             return
         end
 
         if action.kind == "command" then
-            tool.ToolWorkflowManager.applyCommandPolicy(action.activePolicy)
+            tool.ToolModeManager.applyCommandPolicy(action.activePolicy)
             print("NewTool command selected: " .. tostring(action.label or action.id))
             if action.run ~= nil then
                 action.run(tool, action)

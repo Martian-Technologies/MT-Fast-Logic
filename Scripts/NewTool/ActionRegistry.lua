@@ -6,18 +6,18 @@ local function icon(name)
     return iconRoot .. name .. ".json"
 end
 
-local function dummyTool(id, label, description, iconName)
+local function toolMode(id, label, description, iconName, create)
     return {
         id = id,
         kind = "tool",
         label = label,
         description = description,
         icon = icon(iconName or id),
-        create = function(tool, action)
+        create = create or function(tool, registeredAction)
             return {
-                id = action.id,
-                label = action.label,
-                description = action.description
+                id = registeredAction.id,
+                label = registeredAction.label,
+                description = registeredAction.description
             }
         end
     }
@@ -39,7 +39,7 @@ NewToolActionRegistry.actions = {
     toggle_flight = command(
         "toggle_flight",
         "Toggle Flight",
-        "Toggle NewTool flight without changing the active workflow.",
+        "Toggle NewTool flight without changing the selected tool mode.",
         "toggle_flight",
         "keep",
         function(tool)
@@ -47,27 +47,35 @@ NewToolActionRegistry.actions = {
         end
     ),
 
-    single_connect = dummyTool("single_connect", "Single Connect", "Dummy workflow for one-to-one connection work.", "single_connect"),
-    series_connect = dummyTool("series_connect", "Series Connect", "Dummy workflow for connecting a sequence of gates.", "series_connect"),
-    nto_n_connect = dummyTool("nto_n_connect", "N-to-N Connect", "Dummy workflow for matching multiple sources to multiple targets.", "nto_n_connect"),
-    parallel_connect = dummyTool("parallel_connect", "Parallel Connect", "Dummy workflow for connecting rows in parallel.", "parallel_connect"),
-    tensor_connect = dummyTool("tensor_connect", "Tensor Connect", "Dummy workflow for high-dimensional bulk connection work.", "tensor_connect"),
+    single_connect = toolMode("single_connect", "Single Connect", "Dummy mode for one-to-one connection work.", "single_connect"),
+    series_connect = toolMode("series_connect", "Series Connect", "Dummy mode for connecting a sequence of gates.", "series_connect"),
+    nto_n_connect = toolMode("nto_n_connect", "N-to-N Connect", "Dummy mode for matching multiple sources to multiple targets.", "nto_n_connect"),
+    parallel_connect = toolMode(
+        "parallel_connect",
+        "Parallel Connect",
+        "Select two rows of gates to connect in parallel.",
+        "parallel_connect",
+        function(tool, action)
+            return NewToolParallelConnect.new(tool, action)
+        end
+    ),
+    tensor_connect = toolMode("tensor_connect", "Tensor Connect", "Dummy mode for high-dimensional bulk connection work.", "tensor_connect"),
 
-    volume_placer = dummyTool("volume_placer", "Volume Placer", "Dummy workflow for placing volumes of logic.", "volume_placer"),
-    decoder_maker = dummyTool("decoder_maker", "Decoder Maker", "Dummy workflow for building decoder structures.", "decoder_maker"),
+    volume_placer = toolMode("volume_placer", "Volume Placer", "Dummy mode for placing volumes of logic.", "volume_placer"),
+    decoder_maker = toolMode("decoder_maker", "Decoder Maker", "Dummy mode for building decoder structures.", "decoder_maker"),
 
-    logic_converter = dummyTool("logic_converter", "Logic Converter", "Dummy workflow for converting logic gates to fast logic.", "logic_converter"),
-    silicon_converter = dummyTool("silicon_converter", "Silicon Converter", "Dummy workflow for converting logic into silicon.", "silicon_converter"),
-    merger = dummyTool("merger", "Merger", "Dummy workflow for merge/conversion work.", "merger"),
+    logic_converter = toolMode("logic_converter", "Logic Converter", "Dummy mode for converting logic gates to fast logic.", "logic_converter"),
+    silicon_converter = toolMode("silicon_converter", "Silicon Converter", "Dummy mode for converting logic into silicon.", "silicon_converter"),
+    merger = toolMode("merger", "Merger", "Dummy mode for merge/conversion work.", "merger"),
 
-    mode_changer = dummyTool("mode_changer", "Mode Changer", "Dummy workflow for changing logic mode settings.", "mode_changer"),
-    volume_deleter = dummyTool("volume_deleter", "Volume Deleter", "Dummy workflow for deleting selected volumes.", "volume_deleter"),
-    colorizer = dummyTool("colorizer", "Colorizer", "Dummy workflow for changing connection dot colors.", "colorizer"),
-    copy_paste = dummyTool("copy_paste", "Copy Paste", "Dummy workflow for copy/paste modification work.", "copy_paste"),
+    mode_changer = toolMode("mode_changer", "Mode Changer", "Dummy mode for changing logic mode settings.", "mode_changer"),
+    volume_deleter = toolMode("volume_deleter", "Volume Deleter", "Dummy mode for deleting selected volumes.", "volume_deleter"),
+    colorizer = toolMode("colorizer", "Colorizer", "Dummy mode for changing connection dot colors.", "colorizer"),
+    copy_paste = toolMode("copy_paste", "Copy Paste", "Dummy mode for copy/paste modification work.", "copy_paste"),
 
-    heatmap = dummyTool("heatmap", "Heatmap", "Dummy workflow for inspecting logic activity.", "heatmap"),
+    heatmap = toolMode("heatmap", "Heatmap", "Dummy mode for inspecting logic activity.", "heatmap"),
 
-    settings = dummyTool("settings", "Settings", "Dummy workflow for NewTool settings and management.", "settings")
+    settings = toolMode("settings", "Settings", "Dummy mode for NewTool settings and management.", "settings")
 }
 
 function NewToolActionRegistry.get(id)

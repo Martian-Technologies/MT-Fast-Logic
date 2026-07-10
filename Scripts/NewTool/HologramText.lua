@@ -251,11 +251,18 @@ function HologramText.init(tool)
         return options.backgroundPaddingX or padding, options.backgroundPaddingY or padding
     end
 
+    local function colorKey(color)
+        if color == nil then return "default" end
+        return tostring(color.r) .. "," .. tostring(color.g) .. "," .. tostring(color.b)
+    end
+
     local function cacheKey(text, layout, options)
         local backgroundKey = options and options.background and "bg" or "plain"
         local fitKey = options and options.fitBackground and "fit" or "fixed"
         local paddingX, paddingY = getBackgroundPadding(options)
-        return tostring(layout.max_columns) .. "\31" .. tostring(layout.max_lines) .. "\31" .. tostring(layout.align) .. "\31" .. backgroundKey .. "\31" .. fitKey .. "\31" .. tostring(paddingX) .. "\31" .. tostring(paddingY) .. "\31" .. tostring(text)
+        local foregroundKey = options and options.background and colorKey(options.color) or ""
+        local backgroundColorKey = options and options.background and colorKey(options.backgroundColor) or ""
+        return tostring(layout.max_columns) .. "\31" .. tostring(layout.max_lines) .. "\31" .. tostring(layout.align) .. "\31" .. backgroundKey .. "\31" .. fitKey .. "\31" .. tostring(paddingX) .. "\31" .. tostring(paddingY) .. "\31" .. foregroundKey .. "\31" .. backgroundColorKey .. "\31" .. tostring(text)
     end
 
     local function getPayloadBounds(payload, options)
@@ -325,7 +332,16 @@ function HologramText.init(tool)
         }
     end
 
-    local function withBackground(payload, bounds)
+    local function paletteColor(color, fallback)
+        color = color or fallback
+        return {
+            math.floor(math.max(0, math.min(color.r, 1)) * 255 + 0.5),
+            math.floor(math.max(0, math.min(color.g, 1)) * 255 + 0.5),
+            math.floor(math.max(0, math.min(color.b, 1)) * 255 + 0.5)
+        }
+    end
+
+    local function withBackground(payload, bounds, options)
         payload = cropPayload(payload, bounds)
         local rects = {
             { 0, 0, payload.w, payload.h, 0, 0 }
@@ -337,8 +353,8 @@ function HologramText.init(tool)
             w = payload.w,
             h = payload.h,
             color_palette = {
-                { 0, 0, 0 },
-                { 255, 255, 255 }
+                paletteColor(options and options.backgroundColor, sm.color.new(0, 0, 0)),
+                paletteColor(options and options.color, defaultColor)
             },
             r = rects
         }
@@ -357,7 +373,7 @@ function HologramText.init(tool)
             if options.fitBackground then
                 bounds = getPayloadBounds(basePayload, options)
             end
-            cached = withBackground(basePayload, bounds)
+            cached = withBackground(basePayload, bounds, options)
         else
             cached = basePayload
         end

@@ -9,15 +9,20 @@ dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/LineRend.lua")
-dofile("$CONTENT_DATA/Scripts/NewTool/BlockSelector.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/TargetingService.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/SelectionRenderer.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/BlockSelection.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/RowSelection.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/ParallelConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
+local newToolActionRegistry = NewToolActionRegistry
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManifest.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuLayout.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HubMenuView.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/RadialMenuView.lua")
-dofile("$CONTENT_DATA/Scripts/NewTool/ToolWorkflowManager.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/ToolModeManager.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManager.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionManager.lua")
 
@@ -41,16 +46,23 @@ function NewTool:client_onCreate()
     MTFlight.inject(self)
     ImRend.init(self)
     LineRend.init(self)
-    NewToolBlockSelector.init(self)
+    TargetingService.init(self)
+    SelectionRenderer.init(self)
+    self.SelectionContext = {
+        targeting = self.TargetingService,
+        renderer = self.SelectionRenderer,
+        lineRenderer = self.LineRend
+    }
     HologramText.init(self)
+    self.SelectionContext.textRenderer = self.HologramText
     MenuRenderer.init(self)
-    MenuLayout.configure({ actionRegistry = NewToolActionRegistry })
+    MenuLayout.configure({ actionRegistry = newToolActionRegistry })
     MenuLayout.validateAll(NewToolMenuManifest, self.HologramText)
     HubMenuView.init(self, MenuLayout)
     RadialMenuView.init(self)
-    ToolWorkflowManager.init(self)
+    ToolModeManager.init(self)
     MenuManager.init(self, NewToolMenuManifest, MenuLayout, self.HubMenuView)
-    ActionManager.init(self, NewToolActionRegistry)
+    ActionManager.init(self, newToolActionRegistry)
     RadialMenu.init(self, NewToolMenuManifest.radial, MenuLayout, self.RadialMenuView)
 
     self.tool:setCrossHairAlpha(0.3)
@@ -61,6 +73,10 @@ end
 function NewTool:client_onUpdate(dt)
     if self.tool:isLocal() then
         self.LineRend.client_onUpdate(dt)
+        if not self.tool:isEquipped() then
+            self.LineRend.beginFrame()
+            self.ToolModeManager.render(self.SelectionContext)
+        end
     end
 
     MTFlight.cl_onUpdate(self, dt)
@@ -81,6 +97,7 @@ function NewTool:client_onDestroy()
         self.MenuManager.close()
         self.RadialMenu.unequip()
         self.MenuRenderer.clearAll()
+        self.ToolModeManager.clear("destroyed")
         self.LineRend.suspend()
     end
 end
@@ -89,18 +106,16 @@ function NewTool:client_onEquip(animate)
     if self.tool:isLocal() then
         self.lastTime = os.clock()
         self.LineRend.resume()
-        self.ToolWorkflowManager.wake()
+        self.ToolModeManager.wake()
     end
     self:cl_handleAnimationsOnEquip(animate)
 end
 
 function NewTool:client_onUnequip(animate)
     if self.tool:isLocal() then
-        self.BlockSelector.client_onUnequip()
-        self.LineRend.suspend()
         self.MenuManager.close()
         self.RadialMenu.unequip()
-        self.ToolWorkflowManager.sleep()
+        self.ToolModeManager.sleep()
     end
 
     self:cl_handleAnimationsOnUnequip(animate)
@@ -130,10 +145,17 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
     -- print(primaryState, secondaryState, forceBuild)
     if self.tool:isLocal() then
         self.LineRend.beginFrame()
+        self.SelectionRenderer.beginFrame()
         if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
-        self.BlockSelector.client_onEquippedUpdate()
-        if self.ToolWorkflowManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
+
+        local input = {
+            dt = dt,
+            primaryState = primaryState,
+            secondaryState = secondaryState,
+            forceBuild = forceBuild
+        }
+        if self.ToolModeManager.run(self.SelectionContext, input) then goto done end
     end
     ::done::
     return true, true

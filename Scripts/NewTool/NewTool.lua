@@ -9,13 +9,16 @@ dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/LineRend.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/CreationSpatialIndex.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/TargetingService.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/SelectionRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/BlockSelection.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/RowSelectionView.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/RowSelection.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ParallelConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuRenderer.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/PromptPresenter.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
 local newToolActionRegistry = NewToolActionRegistry
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManifest.lua")
@@ -46,12 +49,16 @@ function NewTool:client_onCreate()
     MTFlight.inject(self)
     ImRend.init(self)
     LineRend.init(self)
-    TargetingService.init(self)
+    CreationSpatialIndex.init(self)
+    TargetingService.init(self, self.CreationSpatialIndex)
     SelectionRenderer.init(self)
+    PromptPresenter.init(self)
     self.SelectionContext = {
         targeting = self.TargetingService,
+        spatialIndex = self.CreationSpatialIndex,
         renderer = self.SelectionRenderer,
-        lineRenderer = self.LineRend
+        lineRenderer = self.LineRend,
+        prompts = self.PromptPresenter
     }
     HologramText.init(self)
     self.SelectionContext.textRenderer = self.HologramText
@@ -98,6 +105,7 @@ function NewTool:client_onDestroy()
         self.RadialMenu.unequip()
         self.MenuRenderer.clearAll()
         self.ToolModeManager.clear("destroyed")
+        self.PromptPresenter.clear()
         self.LineRend.suspend()
     end
 end
@@ -116,6 +124,7 @@ function NewTool:client_onUnequip(animate)
         self.MenuManager.close()
         self.RadialMenu.unequip()
         self.ToolModeManager.sleep()
+        self.PromptPresenter.clear()
     end
 
     self:cl_handleAnimationsOnUnequip(animate)
@@ -146,6 +155,7 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
     if self.tool:isLocal() then
         self.LineRend.beginFrame()
         self.SelectionRenderer.beginFrame()
+        self.PromptPresenter.beginFrame()
         if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
 
@@ -158,6 +168,7 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
         if self.ToolModeManager.run(self.SelectionContext, input) then goto done end
     end
     ::done::
+    if self.tool:isLocal() then self.PromptPresenter.flush() end
     return true, true
 end
 

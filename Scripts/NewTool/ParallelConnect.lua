@@ -21,11 +21,8 @@ function NewToolParallelConnect.new(tool, action)
     })
     local destinationRow = nil
 
-    local function showStatus(text)
-        sm.gui.setInteractionText(
-            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            tostring(text) .. "</p>"
-        )
+    local function showStatus(context, text)
+        context.prompts.show(tostring(text), 120)
     end
 
     local function makeDestinationRow()
@@ -101,7 +98,7 @@ function NewToolParallelConnect.new(tool, action)
         local destination = destinationRow.getValue()
         assert(source ~= nil)
         assert(destination ~= nil)
-        showStatus("Parallel rows selected | Right-click: undo")
+        showStatus(context, "Parallel rows selected | Right-click: undo")
         return true
     end
 

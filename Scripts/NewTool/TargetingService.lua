@@ -1,6 +1,5 @@
--- TargetingService owns shared raycast queries and the DDA voxel cache.
--- It does not own an active selection; selection components call queryBlock
--- only while they need a block target.
+-- Camera targeting queries. Creation geometry and body indexing are delegated
+-- to CreationSpatialIndex so other selection modes can reuse the same index.
 
 TargetingService = {}
 
@@ -15,91 +14,10 @@ local function containsBody(bodies, body)
     return false
 end
 
-local function getShapeCenterLocal(shape)
-    local bounds = shape:getBoundingBox()
-    return shape:getLocalPosition() / 4 +
-        shape:getXAxis() * (bounds.x / 2) +
-        shape:getYAxis() * (bounds.y / 2) +
-        shape:getZAxis() * (bounds.z / 2)
-end
-
-local function getOccupiedPositions(shape)
-    local bounds = shape:getBoundingBox()
-    local origin = shape:getLocalPosition()
-    local xSize = math.max(math.floor(bounds.x * 4 + 0.5), 1)
-    local ySize = math.max(math.floor(bounds.y * 4 + 0.5), 1)
-    local zSize = math.max(math.floor(bounds.z * 4 + 0.5), 1)
-    local xAxis = shape:getXAxis()
-    local yAxis = shape:getYAxis()
-    local zAxis = shape:getZAxis()
-    local positions = {}
-
-    for x = 0, xSize - 1 do
-        for y = 0, ySize - 1 do
-            for z = 0, zSize - 1 do
-                positions[#positions + 1] = origin +
-                    xAxis * (x + 0.5) +
-                    yAxis * (y + 0.5) +
-                    zAxis * (z + 0.5)
-            end
-        end
-    end
-
-    return positions
-end
-
-local function voxelKey(position)
-    return position.x .. ";" .. position.y .. ";" .. position.z
-end
-
-local function round(value)
-    if value >= 0 then return math.floor(value + 0.5) end
-    return math.ceil(value - 0.5)
-end
-
-local function centerKey(position)
-    return round(position.x * 4000) .. ";" ..
-        round(position.y * 4000) .. ";" ..
-        round(position.z * 4000)
-end
-
-function TargetingService.init(tool)
+function TargetingService.init(tool, spatialIndex)
     tool.TargetingService = {}
     local self = tool.TargetingService
-    local bodyCaches = {}
-
-    -- DDA targeting and row selection share one structural index. The body is
-    -- scanned only on first use or after Scrap Mechanic reports a change.
-    local function getBodyCache(body)
-        local id = body:getId()
-        local cached = bodyCaches[id]
-        if cached ~= nil and not body:hasChanged(cached.tick) then
-            return cached
-        end
-
-        cached = {
-            voxelMap = {},
-            interactableCenterMap = {},
-            tick = sm.game.getCurrentTick()
-        }
-        for _, interactable in ipairs(body:getInteractables()) do
-            local shape = interactable:getShape()
-            if shape ~= nil and sm.exists(shape) then
-                cached.interactableCenterMap[centerKey(getShapeCenterLocal(shape))] = shape
-                for _, position in ipairs(getOccupiedPositions(shape)) do
-                    local voxelPosition = position / 4 - sm.vec3.new(0.125, 0.125, 0.125)
-                    cached.voxelMap[voxelKey(voxelPosition)] = shape
-                end
-            end
-        end
-
-        bodyCaches[id] = cached
-        return cached
-    end
-
-    local function getVoxelMap(body)
-        return getBodyCache(body).voxelMap
-    end
+    local index = spatialIndex
 
     local function raycastBody(maxDistance)
         local origin = sm.camera.getPosition()
@@ -183,19 +101,23 @@ function TargetingService.init(tool)
         local rayPosition = result.pointLocal
         local rayDirection = sm.quat.inverse(body.worldRotation) * sm.camera.getDirection()
         rayDirection = rayDirection:safeNormalize(sm.vec3.new(1, 0, 0))
-        local voxelMap = getVoxelMap(body)
+        local bodyIndex = index.get(body)
+        if bodyIndex == nil then return false, nil end
         local radius = options.connectionRadius * 4
+        local distanceTravelled = (result.pointWorld - sm.camera.getPosition()):length()
 
         for _ = 1, 2048 do
+            if distanceTravelled > options.maxDistance then break end
+
             local voxelPosition = sm.vec3.new(
                 math.floor(rayPosition.x * 4),
                 math.floor(rayPosition.y * 4),
                 math.floor(rayPosition.z * 4)
             ) / 4
-            local shape = voxelMap[voxelKey(voxelPosition)]
+            local shape = index.lookupInteractableVoxel(bodyIndex, voxelPosition)
 
             if shape ~= nil and sm.exists(shape) then
-                local center = getShapeCenterLocal(shape)
+                local center = index.getShapeCenterLocal(shape)
                 local centerOffset = (center - rayPosition) * 4
                 local forwardDistance = centerOffset:dot(rayDirection)
                 local perpendicularDistance2 = centerOffset:length2() - forwardDistance * forwardDistance
@@ -232,7 +154,9 @@ function TargetingService.init(tool)
             considerAxis(rayPosition.z, rayDirection.z, stepZ)
             if nextDistance == nil then break end
 
-            rayPosition = rayPosition + rayDirection * (nextDistance + 0.0001)
+            local advance = nextDistance + 0.0001
+            rayPosition = rayPosition + rayDirection * advance
+            distanceTravelled = distanceTravelled + advance
             if rayPosition.x < localAabbMin.x or rayPosition.x > localAabbMax.x or
                 rayPosition.y < localAabbMin.y or rayPosition.y > localAabbMax.y or
                 rayPosition.z < localAabbMin.z or rayPosition.z > localAabbMax.z then
@@ -261,14 +185,5 @@ function TargetingService.init(tool)
         end
 
         error("Unknown targeting raycast mode: " .. tostring(options.raycastMode))
-    end
-
-    function self.getShapeCenterLocal(shape)
-        return getShapeCenterLocal(shape)
-    end
-
-    function self.getInteractableCenterMap(body)
-        local cache = getBodyCache(body)
-        return cache.interactableCenterMap, cache.tick
     end
 end

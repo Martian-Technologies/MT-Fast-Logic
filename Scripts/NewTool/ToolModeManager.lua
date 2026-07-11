@@ -91,10 +91,7 @@ function ToolModeManager.init(tool)
             return result == true
         end
 
-        sm.gui.setInteractionText(
-            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            getLabel(active) .. " selected | F: choose another tool</p>"
-        )
+        tool.PromptPresenter.show(getLabel(active) .. " selected | F: choose another tool", 100)
         return false
     end
 end

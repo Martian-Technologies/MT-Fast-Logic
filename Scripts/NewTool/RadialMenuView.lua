@@ -26,10 +26,7 @@ function RadialMenuView.init(tool)
         local description = tostring(option.description or "")
         local text = tostring(option.label)
         if description ~= "" then text = text .. " - " .. description end
-        sm.gui.setInteractionText(
-            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            text .. " | Release F: select</p>"
-        )
+        tool.PromptPresenter.show(text .. " | Release F: select", 250)
     end
 
     function self.open(plan)

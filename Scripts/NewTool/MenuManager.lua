@@ -11,16 +11,9 @@ function MenuManager.init(tool, manifests, layoutEngine, view)
     local forceBuildHeldTime = 0
     local tapMaxTime = 0.2
 
-    local function formatInteractionText(text)
-        sm.gui.setInteractionText(
-            "<p textShadow='false' bg='gui_keybinds_bg' color='#ffffff' spacing='4'>" ..
-            tostring(text or "") .. "</p>"
-        )
-    end
-
     local function showInteractionText(tile)
         if tile == nil then
-            formatInteractionText("Aim at an icon | Left-click: select | Right-click/F: close")
+            tool.PromptPresenter.show("Aim at an icon | Left-click: select | Right-click/F: close", 300)
             return
         end
 
@@ -34,9 +27,9 @@ function MenuManager.init(tool, manifests, layoutEngine, view)
         local label = tostring(tile.label or "")
         local description = tostring(tile.description or "")
         if description ~= "" then
-            formatInteractionText(label .. " - " .. description .. " | Left-click: " .. actionText .. " | Right-click/F: close")
+            tool.PromptPresenter.show(label .. " - " .. description .. " | Left-click: " .. actionText .. " | Right-click/F: close", 300)
         else
-            formatInteractionText(label .. " | Left-click: " .. actionText .. " | Right-click/F: close")
+            tool.PromptPresenter.show(label .. " | Left-click: " .. actionText .. " | Right-click/F: close", 300)
         end
     end
 

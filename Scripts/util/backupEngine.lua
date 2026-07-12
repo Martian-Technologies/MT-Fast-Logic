@@ -165,6 +165,27 @@ local function normalizeBackupMetadata(backup)
     return changed
 end
 
+local function normalizeBackupEntry(backup)
+    local changed = normalizeBackupMetadata(backup)
+
+    if type(backup.timeCreated) ~= "number" then
+        backup.timeCreated = os.time()
+        changed = true
+    end
+
+    if type(backup.isPinned) ~= "boolean" then
+        backup.isPinned = false
+        changed = true
+    end
+
+    if backup.creationType == nil then
+        backup.creationType = "Unknown"
+        changed = true
+    end
+
+    return changed
+end
+
 local function getBackupMetadata(data)
     local backup = {
         nameId = data.nameId,
@@ -227,18 +248,22 @@ local function correctOldVersions(playerData)
         }
         for _, backupFilename in pairs(playerData.backupsInUse) do
             local backupData = sm.json.open(backupFilename)
-            if not backupData.isPinned and os.time() - backupData.timeCreated > 604800 then
+            local hasValidTime = type(backupData.timeCreated) == "number"
+            local timeCreated = hasValidTime and backupData.timeCreated or os.time()
+            local isPinned = backupData.isPinned == true
+
+            if not isPinned and hasValidTime and os.time() - timeCreated > 604800 then
                 table.insert(newPlayerData.unusedBackupFilenames, backupFilename)
             else
                 local backup = {
                     name = backupData.name,
                     description = backupData.description,
-                    creationType = backupData.creationType,
-                    timeCreated = backupData.timeCreated,
-                    isPinned = backupData.isPinned,
+                    creationType = backupData.creationType or "Unknown",
+                    timeCreated = timeCreated,
+                    isPinned = isPinned,
                     backupFilename = backupFilename
                 }
-                normalizeBackupMetadata(backup)
+                normalizeBackupEntry(backup)
                 table.insert(newPlayerData.backups, backup)
             end
         end
@@ -259,7 +284,7 @@ local function correctOldVersions(playerData)
         doSave = true
     end
     for _, backup in pairs(playerData.backups) do
-        if normalizeBackupMetadata(backup) then
+        if normalizeBackupEntry(backup) then
             doSave = true
         end
     end
@@ -386,7 +411,8 @@ function sm.MTBackupEngine.sv_deleteOldBackups()
     for i = #backupsCoordinator.backups, 1, -1 do
         local backup = backupsCoordinator.backups[i]
         if not backup.isPinned then
-            if currentTime - backup.timeCreated > 604800 then
+            local timeCreated = tonumber(backup.timeCreated)
+            if timeCreated ~= nil and currentTime - timeCreated > 604800 then
                 table.remove(backupsCoordinator.backups, i)
                 table.insert(backupsCoordinator.unusedBackupFilenames, backup.backupFilename)
                 goto continue

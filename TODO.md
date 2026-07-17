@@ -16,7 +16,7 @@ Goal: make NewTool a full replacement for MTMultitool while keeping both tools i
 
 - [x] Forward all required controls to the active mode, including reload, rotate, and crouch.
 - [ ] Handle equip, unequip, cancel, undo, commit, and invalid selections consistently.
-- [ ] Add a NewTool-owned client/server operation flow for safe mutations and large jobs.
+- [x] Add a NewTool-owned client/server operation flow for safe mutations and large jobs.
 - [ ] Add backup support before destructive operations.
 - [ ] Add localization and NewTool-owned settings storage.
 - [ ] Support a one-time import of existing MTMultitool settings without creating a runtime dependency.
@@ -25,7 +25,7 @@ Goal: make NewTool a full replacement for MTMultitool while keeping both tools i
 
 - [ ] Add connect and disconnect modes.
 - [ ] Add directional previews, preview limits, commit feedback, and safe batching.
-- [ ] Finish Parallel Connect, including commit and reset behavior.
+- [x] Finish Parallel Connect.
 - [ ] Add Series Connect.
 - [ ] Add N-to-N Connect.
 - [ ] Add Multipoint selection with all-to-all and index-paired operations.

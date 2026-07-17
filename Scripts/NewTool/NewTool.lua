@@ -15,6 +15,8 @@ dofile("$CONTENT_DATA/Scripts/NewTool/SelectionRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/BlockSelection.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/RowSelectionView.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/RowSelection.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/OperationManager.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/ConnectionOperations.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ParallelConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuRenderer.lua")
@@ -41,6 +43,8 @@ sm.tool.preloadRenderables( toolAnimsThirdPerson )
 sm.tool.preloadRenderables( toolAnimsFirstPerson )
 
 function NewTool:server_onCreate()
+    NewToolOperationManager.serverInit(self)
+    NewToolConnectionOperations.serverInit(self)
     MTFlight.sv_inject(self)
 end
 
@@ -55,6 +59,8 @@ function NewTool:client_onCreate()
     SelectionRenderer.init(self)
     PromptPresenter.init(self)
     NewToolInputRouter.init(self)
+    NewToolOperationManager.clientInit(self)
+    NewToolConnectionOperations.clientInit(self)
     self.SelectionContext = {
         targeting = self.TargetingService,
         spatialIndex = self.CreationSpatialIndex,
@@ -83,6 +89,7 @@ end
 function NewTool:client_onUpdate(dt)
     if self.tool:isLocal() then
         self.LineRend.client_onUpdate(dt)
+        self.OperationManager.client_onUpdate()
         if not self.tool:isEquipped() then
             self.LineRend.beginFrame()
             self.ToolModeManager.render(self.SelectionContext)
@@ -96,6 +103,16 @@ end
 
 function NewTool:server_onFixedUpdate(dt)
     MTFlight.server_onFixedUpdate(self, dt)
+end
+
+function NewTool:sv_runOperationBatch(data, player)
+    self.ServerOperationManager.receive(data, player)
+end
+
+function NewTool:cl_operationBatchResult(data)
+    if self.tool:isLocal() then
+        self.OperationManager.receiveResult(data)
+    end
 end
 
 function NewTool:client_onReload()

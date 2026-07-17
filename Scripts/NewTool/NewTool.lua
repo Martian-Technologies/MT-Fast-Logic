@@ -21,6 +21,7 @@ dofile("$CONTENT_DATA/Scripts/NewTool/MenuRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/PromptPresenter.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
 local newToolActionRegistry = NewToolActionRegistry
+dofile("$CONTENT_DATA/Scripts/NewTool/InputRouter.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuManifest.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuLayout.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HubMenuView.lua")
@@ -53,6 +54,7 @@ function NewTool:client_onCreate()
     TargetingService.init(self, self.CreationSpatialIndex)
     SelectionRenderer.init(self)
     PromptPresenter.init(self)
+    NewToolInputRouter.init(self)
     self.SelectionContext = {
         targeting = self.TargetingService,
         spatialIndex = self.CreationSpatialIndex,
@@ -72,6 +74,7 @@ function NewTool:client_onCreate()
     ActionManager.init(self, newToolActionRegistry)
     RadialMenu.init(self, NewToolMenuManifest.radial, MenuLayout, self.RadialMenuView)
 
+    self.InputRouter.reset()
     self.tool:setCrossHairAlpha(0.3)
     self.tool:setDispersionFraction(0)
     return true
@@ -96,6 +99,9 @@ function NewTool:server_onFixedUpdate(dt)
 end
 
 function NewTool:client_onReload()
+    if self.tool:isLocal() then
+        self.InputRouter.queueReload()
+    end
     return true
 end
 
@@ -113,6 +119,7 @@ end
 function NewTool:client_onEquip(animate)
     if self.tool:isLocal() then
         self.lastTime = os.clock()
+        self.InputRouter.reset()
         self.LineRend.resume()
         self.ToolModeManager.wake()
     end
@@ -123,6 +130,7 @@ function NewTool:client_onUnequip(animate)
     if self.tool:isLocal() then
         self.MenuManager.close()
         self.RadialMenu.unequip()
+        self.InputRouter.reset()
         self.ToolModeManager.sleep()
         self.PromptPresenter.clear()
     end
@@ -131,7 +139,9 @@ function NewTool:client_onUnequip(animate)
 end
 
 function NewTool:client_onToggle()
-    -- MTFlight.toggleFlying(self) maybe bring back later, but i have other ideas for rotating actually
+    if self.tool:isLocal() then
+        self.InputRouter.queueRotate()
+    end
     return true
 end
 
@@ -156,15 +166,9 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
         self.LineRend.beginFrame()
         self.SelectionRenderer.beginFrame()
         self.PromptPresenter.beginFrame()
+        local input = self.InputRouter.sample(dt, primaryState, secondaryState)
         if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
-
-        local input = {
-            dt = dt,
-            primaryState = primaryState,
-            secondaryState = secondaryState,
-            forceBuild = forceBuild
-        }
         if self.ToolModeManager.run(self.SelectionContext, input) then goto done end
     end
     ::done::

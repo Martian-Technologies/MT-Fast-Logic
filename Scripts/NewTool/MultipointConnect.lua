@@ -2,6 +2,7 @@
 
 NewToolMultipointConnect = {}
 
+local inputGlyph = NewToolInputGlyph.get
 local sourceColor = sm.color.new(0.2, 1, 0.2, 1)
 local destinationColor = sm.color.new(1, 0.25, 0.25, 1)
 local hoverColor = sm.color.new(1, 1, 1, 1)
@@ -29,8 +30,8 @@ function NewToolMultipointConnect.new(tool, action)
     local transientExpiresAt = nil
     local previewPairing = "all"
 
-    local function showStatus(context, text, priority)
-        context.prompts.show(tostring(text), priority or 120)
+    local function showStatus(text)
+        sm.gui.setInteractionText(tostring(text))
     end
 
     local function setTransient(message)
@@ -129,7 +130,7 @@ function NewToolMultipointConnect.new(tool, action)
     local function presentFeedback(context)
         if transientMessage ~= nil then
             if os.clock() <= transientExpiresAt then
-                showStatus(context, transientMessage, 200)
+                showStatus(transientMessage)
             else
                 transientMessage = nil
                 transientExpiresAt = nil
@@ -146,7 +147,7 @@ function NewToolMultipointConnect.new(tool, action)
 
         local progressiveVerb = status.kind == "connect" and "Connecting" or "Disconnecting"
         if not status.complete then
-            showStatus(context, progressiveVerb .. " " .. status.applied .. " of " .. status.total .. " links...", 210)
+            showStatus(progressiveVerb .. " " .. status.applied .. " of " .. status.total .. " links...")
             return
         end
 
@@ -159,13 +160,13 @@ function NewToolMultipointConnect.new(tool, action)
         end
 
         if status.error ~= nil then
-            showStatus(context, "Multipoint operation failed: " .. status.error, 210)
+            showStatus("Multipoint operation failed: " .. status.error)
             return
         end
 
         local completedVerb = status.kind == "connect" and "Connected" or "Disconnected"
         local skipped = status.skipped > 0 and (" | Skipped " .. status.skipped) or ""
-        showStatus(context, completedVerb .. " " .. status.applied .. " of " .. status.total .. " links" .. skipped, 210)
+        showStatus(completedVerb .. " " .. status.applied .. " of " .. status.total .. " links" .. skipped)
     end
 
     local function beginOperation()
@@ -220,7 +221,7 @@ function NewToolMultipointConnect.new(tool, action)
 
         feedbackOperationId = operationId
         feedbackCompletedAt = nil
-        showStatus(context, "Queued " .. #connections .. " multipoint links", 210)
+        showStatus("Queued " .. #connections .. " multipoint links")
         clearSelection()
     end
 
@@ -264,11 +265,17 @@ function NewToolMultipointConnect.new(tool, action)
         local actionLabel = connectionAction == "connect" and "Connect" or "Disconnect"
         local previewWarning = previewTotal > maximumPreviewLines and
             (" | Preview limited to " .. maximumPreviewLines .. " of " .. previewTotal) or ""
-        showStatus(
-            context,
-            "Sources " .. #sources .. " | Targets " .. #destinations ..
-                " | LMB: toggle source | RMB: toggle target | Reload: " .. actionLabel ..
-                " all-to-all | Crouch+Reload: index-paired | Rotate: switch mode" .. previewWarning
+        sm.gui.setInteractionText(
+            "Sources " .. #sources .. " | Targets " .. #destinations .. previewWarning
+        )
+        sm.gui.setInteractionText(
+            "", inputGlyph("left-click"), "toggle source     ",
+            inputGlyph("right-click"), "toggle target     ",
+            inputGlyph("reload"), actionLabel .. " all-to-all"
+        )
+        sm.gui.setInteractionText(
+            "", inputGlyph("crouch"), "+", inputGlyph("reload"), "index-paired     ",
+            inputGlyph("rotate"), "switch mode"
         )
         presentFeedback(context)
         return true

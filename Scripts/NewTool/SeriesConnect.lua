@@ -2,6 +2,7 @@
 
 NewToolSeriesConnect = {}
 
+local inputGlyph = NewToolInputGlyph.get
 local rowColor = sm.color.new(0.2, 1, 0.2, 1)
 local connectPreviewColor = sm.color.new(1, 0.8, 0.15, 1)
 local disconnectPreviewColor = sm.color.new(1, 0.1, 0.1, 1)
@@ -24,8 +25,8 @@ function NewToolSeriesConnect.new(tool, action)
     local transientMessage = nil
     local transientExpiresAt = nil
 
-    local function showStatus(context, text, priority)
-        context.prompts.show(tostring(text), priority or 120)
+    local function showStatus(text)
+        sm.gui.setInteractionText(tostring(text))
     end
 
     local function setTransient(message)
@@ -47,7 +48,7 @@ function NewToolSeriesConnect.new(tool, action)
     local function presentFeedback(context)
         if transientMessage ~= nil then
             if os.clock() <= transientExpiresAt then
-                showStatus(context, transientMessage, 200)
+                showStatus(transientMessage)
             else
                 transientMessage = nil
                 transientExpiresAt = nil
@@ -64,7 +65,7 @@ function NewToolSeriesConnect.new(tool, action)
 
         local progressiveVerb = status.kind == "connect" and "Connecting" or "Disconnecting"
         if not status.complete then
-            showStatus(context, progressiveVerb .. " " .. status.applied .. " of " .. status.total .. " links...", 210)
+            showStatus(progressiveVerb .. " " .. status.applied .. " of " .. status.total .. " links...")
             return
         end
 
@@ -77,13 +78,13 @@ function NewToolSeriesConnect.new(tool, action)
         end
 
         if status.error ~= nil then
-            showStatus(context, "Series operation failed: " .. status.error, 210)
+            showStatus("Series operation failed: " .. status.error)
             return
         end
 
         local completedVerb = status.kind == "connect" and "Connected" or "Disconnected"
         local skipped = status.skipped > 0 and (" | Skipped " .. status.skipped) or ""
-        showStatus(context, completedVerb .. " " .. status.applied .. " of " .. status.total .. " links" .. skipped, 210)
+        showStatus(completedVerb .. " " .. status.applied .. " of " .. status.total .. " links" .. skipped)
     end
 
     local function submitRow(context, gates)
@@ -111,7 +112,7 @@ function NewToolSeriesConnect.new(tool, action)
 
         feedbackOperationId = operationId
         feedbackCompletedAt = nil
-        showStatus(context, "Queued " .. #connections .. " series links", 210)
+        showStatus("Queued " .. #connections .. " series links")
         rowSelection.reset()
     end
 
@@ -159,10 +160,11 @@ function NewToolSeriesConnect.new(tool, action)
         end
 
         local otherAction = connectionAction == "connect" and "disconnect" or "connect"
-        showStatus(
-            context,
-            "Series selected | Left-click: " .. connectionAction .. " " .. (#row.gates - 1) ..
-                " links | Rotate: switch to " .. otherAction .. " | Right-click: undo"
+        sm.gui.setInteractionText("Series selected")
+        sm.gui.setInteractionText(
+            "", inputGlyph("left-click"), connectionAction .. " " .. (#row.gates - 1) .. " links     ",
+            inputGlyph("rotate"), "switch to " .. otherAction .. "     ",
+            inputGlyph("right-click"), "undo"
         )
         presentFeedback(context)
         return true

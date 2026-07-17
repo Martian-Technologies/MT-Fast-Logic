@@ -4,6 +4,7 @@
 
 RowSelection = {}
 
+local inputGlyph = NewToolInputGlyph.get
 local defaultColor = sm.color.new(1, 1, 1, 1)
 
 function RowSelection.new(options)
@@ -30,9 +31,10 @@ function RowSelection.new(options)
 
     local function showPrompt(context, text, warning)
         local warningText = warning ~= nil and (" | " .. tostring(warning)) or ""
-        context.prompts.show(
-            tostring(text) .. warningText .. " | Left-click: select | Right-click: undo",
-            120
+        sm.gui.setInteractionText(tostring(text) .. warningText)
+        sm.gui.setInteractionText(
+            "", inputGlyph("left-click"), "select     ",
+            inputGlyph("right-click"), "undo"
         )
     end
 

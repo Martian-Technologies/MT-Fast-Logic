@@ -7,6 +7,7 @@ dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
 dofile("../util/util.lua")
 dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
+dofile("$CONTENT_DATA/Scripts/NewTool/InputGlyph.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/LineRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/CreationSpatialIndex.lua")
@@ -22,7 +23,6 @@ dofile("$CONTENT_DATA/Scripts/NewTool/SeriesConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ParallelConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuRenderer.lua")
-dofile("$CONTENT_DATA/Scripts/NewTool/PromptPresenter.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
 local newToolActionRegistry = NewToolActionRegistry
 dofile("$CONTENT_DATA/Scripts/NewTool/InputRouter.lua")
@@ -59,7 +59,6 @@ function NewTool:client_onCreate()
     CreationSpatialIndex.init(self)
     TargetingService.init(self, self.CreationSpatialIndex)
     SelectionRenderer.init(self)
-    PromptPresenter.init(self)
     NewToolInputRouter.init(self)
     NewToolOperationManager.clientInit(self)
     NewToolConnectionOperations.clientInit(self)
@@ -67,8 +66,7 @@ function NewTool:client_onCreate()
         targeting = self.TargetingService,
         spatialIndex = self.CreationSpatialIndex,
         renderer = self.SelectionRenderer,
-        lineRenderer = self.LineRend,
-        prompts = self.PromptPresenter
+        lineRenderer = self.LineRend
     }
     HologramText.init(self)
     self.SelectionContext.textRenderer = self.HologramText
@@ -130,7 +128,6 @@ function NewTool:client_onDestroy()
         self.RadialMenu.unequip()
         self.MenuRenderer.clearAll()
         self.ToolModeManager.clear("destroyed")
-        self.PromptPresenter.clear()
         self.LineRend.suspend()
     end
 end
@@ -151,7 +148,6 @@ function NewTool:client_onUnequip(animate)
         self.RadialMenu.unequip()
         self.InputRouter.reset()
         self.ToolModeManager.sleep()
-        self.PromptPresenter.clear()
     end
 
     self:cl_handleAnimationsOnUnequip(animate)
@@ -184,14 +180,12 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
     if self.tool:isLocal() then
         self.LineRend.beginFrame()
         self.SelectionRenderer.beginFrame()
-        self.PromptPresenter.beginFrame()
         local input = self.InputRouter.sample(dt, primaryState, secondaryState)
         if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.ToolModeManager.run(self.SelectionContext, input) then goto done end
     end
     ::done::
-    if self.tool:isLocal() then self.PromptPresenter.flush() end
     return true, true
 end
 

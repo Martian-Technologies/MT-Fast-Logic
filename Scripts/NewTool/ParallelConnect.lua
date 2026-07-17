@@ -2,6 +2,7 @@
 
 NewToolParallelConnect = {}
 
+local inputGlyph = NewToolInputGlyph.get
 local sourceColor = sm.color.new(0.2, 1, 0.2, 1)
 local destinationColor = sm.color.new(1, 0.25, 0.25, 1)
 local connectPreviewColor = sm.color.new(1, 0.8, 0.15, 1)
@@ -26,8 +27,8 @@ function NewToolParallelConnect.new(tool, action)
     local transientMessage = nil
     local transientExpiresAt = nil
 
-    local function showStatus(context, text, priority)
-        context.prompts.show(tostring(text), priority or 120)
+    local function showStatus(text)
+        sm.gui.setInteractionText(tostring(text))
     end
 
     local function setTransient(message)
@@ -74,7 +75,7 @@ function NewToolParallelConnect.new(tool, action)
     local function presentFeedback(context)
         if transientMessage ~= nil then
             if os.clock() <= transientExpiresAt then
-                showStatus(context, transientMessage, 200)
+                showStatus(transientMessage)
             else
                 transientMessage = nil
                 transientExpiresAt = nil
@@ -91,7 +92,7 @@ function NewToolParallelConnect.new(tool, action)
 
         local progressiveVerb = status.kind == "connect" and "Connecting" or "Disconnecting"
         if not status.complete then
-            showStatus(context, progressiveVerb .. " " .. status.applied .. " of " .. status.total .. " pairs...", 210)
+            showStatus(progressiveVerb .. " " .. status.applied .. " of " .. status.total .. " pairs...")
             return
         end
 
@@ -104,13 +105,13 @@ function NewToolParallelConnect.new(tool, action)
         end
 
         if status.error ~= nil then
-            showStatus(context, "Connection operation failed: " .. status.error, 210)
+            showStatus("Connection operation failed: " .. status.error)
             return
         end
 
         local completedVerb = status.kind == "connect" and "Connected" or "Disconnected"
         local skipped = status.skipped > 0 and (" | Skipped " .. status.skipped) or ""
-        showStatus(context, completedVerb .. " " .. status.applied .. " of " .. status.total .. " pairs" .. skipped, 210)
+        showStatus(completedVerb .. " " .. status.applied .. " of " .. status.total .. " pairs" .. skipped)
     end
 
     local function submitRows(context)
@@ -146,7 +147,7 @@ function NewToolParallelConnect.new(tool, action)
 
         feedbackOperationId = operationId
         feedbackCompletedAt = nil
-        showStatus(context, "Queued " .. #connections .. " connection pairs", 210)
+        showStatus("Queued " .. #connections .. " connection pairs")
         resetSelection()
     end
 
@@ -218,10 +219,11 @@ function NewToolParallelConnect.new(tool, action)
         end
 
         local otherAction = connectionAction == "connect" and "disconnect" or "connect"
-        showStatus(
-            context,
-            "Parallel rows selected | Left-click: " .. connectionAction .. " " .. #source.gates ..
-                " pairs | Rotate: switch to " .. otherAction .. " | Right-click: undo"
+        sm.gui.setInteractionText("Parallel rows selected")
+        sm.gui.setInteractionText(
+            "", inputGlyph("left-click"), connectionAction .. " " .. #source.gates .. " pairs     ",
+            inputGlyph("rotate"), "switch to " .. otherAction .. "     ",
+            inputGlyph("right-click"), "undo"
         )
         presentFeedback(context)
         return true

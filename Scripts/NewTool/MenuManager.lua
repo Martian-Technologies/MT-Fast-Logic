@@ -1,5 +1,7 @@
 MenuManager = {}
 
+local inputGlyph = NewToolInputGlyph.get
+
 function MenuManager.init(tool, manifests, layoutEngine, view)
     tool.MenuManager = {}
     local self = tool.MenuManager
@@ -13,7 +15,11 @@ function MenuManager.init(tool, manifests, layoutEngine, view)
 
     local function showInteractionText(tile)
         if tile == nil then
-            tool.PromptPresenter.show("Aim at an icon | Left-click: select | Right-click/F: close", 300)
+            sm.gui.setInteractionText("Aim at an icon")
+            sm.gui.setInteractionText(
+                "", inputGlyph("left-click"), "select     ",
+                inputGlyph("right-click"), "close     "
+            )
             return
         end
 
@@ -26,11 +32,13 @@ function MenuManager.init(tool, manifests, layoutEngine, view)
 
         local label = tostring(tile.label or "")
         local description = tostring(tile.description or "")
-        if description ~= "" then
-            tool.PromptPresenter.show(label .. " - " .. description .. " | Left-click: " .. actionText .. " | Right-click/F: close", 300)
-        else
-            tool.PromptPresenter.show(label .. " | Left-click: " .. actionText .. " | Right-click/F: close", 300)
-        end
+        if description ~= "" then label = label .. " - " .. description end
+
+        sm.gui.setInteractionText(label)
+        sm.gui.setInteractionText(
+            "", inputGlyph("left-click"), actionText .. "     ",
+            inputGlyph("right-click"), "close     "
+        )
     end
 
     local function handleMenuEvent(event)

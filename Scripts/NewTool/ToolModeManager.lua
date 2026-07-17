@@ -3,6 +3,8 @@
 
 ToolModeManager = {}
 
+local inputGlyph = NewToolInputGlyph.get
+
 function ToolModeManager.init(tool)
     tool.ToolModeManager = {}
     local self = tool.ToolModeManager
@@ -91,7 +93,8 @@ function ToolModeManager.init(tool)
             return result == true
         end
 
-        tool.PromptPresenter.show(getLabel(active) .. " selected | F: choose another tool", 100)
+        sm.gui.setInteractionText(getLabel(active) .. " selected")
+        sm.gui.setInteractionText("", inputGlyph("forcebuild"), "choose another tool")
         return false
     end
 end

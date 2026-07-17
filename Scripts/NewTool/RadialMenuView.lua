@@ -1,5 +1,7 @@
 RadialMenuView = {}
 
+local inputGlyph = NewToolInputGlyph.get
+
 function RadialMenuView.init(tool)
     tool.RadialMenuView = {}
     local self = tool.RadialMenuView
@@ -26,7 +28,8 @@ function RadialMenuView.init(tool)
         local description = tostring(option.description or "")
         local text = tostring(option.label)
         if description ~= "" then text = text .. " - " .. description end
-        tool.PromptPresenter.show(text .. " | Release F: select", 250)
+        sm.gui.setInteractionText(text)
+        sm.gui.setInteractionText("Release ", inputGlyph("forcebuild"), "to select")
     end
 
     function self.open(plan)

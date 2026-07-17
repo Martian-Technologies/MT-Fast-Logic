@@ -27,7 +27,7 @@ Goal: make NewTool a full replacement for MTMultitool while keeping both tools i
 - [x] Add Series Connect.
 - [x] Add N-to-N Connect.
 - [x] Add Multipoint selection with all-to-all and index-paired operations.
-- [ ] Add Decoder Maker.
+- [x] Add Decoder Maker.
 
 ### 3. Add the remaining selection types
 

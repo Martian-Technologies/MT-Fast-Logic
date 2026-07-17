@@ -133,6 +133,10 @@ function CreationSpatialIndex.init(tool)
         return bodyIndex and bodyIndex.interactableVoxelMap[voxelKey(position)] or nil
     end
 
+    function self.lookupInteractableCenter(bodyIndex, position)
+        return bodyIndex and bodyIndex.interactableCenterMap[centerKey(position)] or nil
+    end
+
     function self.findStraightRow(startShape, endShape)
         if startShape == nil or endShape == nil or
             not sm.exists(startShape) or not sm.exists(endShape) then

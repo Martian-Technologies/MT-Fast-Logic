@@ -86,7 +86,15 @@ NewToolActionRegistry.actions = {
     tensor_connect = toolMode("tensor_connect", "Tensor Connect", "Dummy mode for high-dimensional bulk connection work.", "tensor_connect"),
 
     volume_placer = toolMode("volume_placer", "Volume Placer", "Dummy mode for placing volumes of logic.", "volume_placer"),
-    decoder_maker = toolMode("decoder_maker", "Decoder Maker", "Dummy mode for building decoder structures.", "decoder_maker"),
+    decoder_maker = toolMode(
+        "decoder_maker",
+        "Decoder Maker",
+        "Connect matching normal and inverted input rows to binary decoder outputs.",
+        "decoder_maker",
+        function(tool, action)
+            return NewToolDecoderMaker.new(tool, action)
+        end
+    ),
 
     logic_converter = toolMode("logic_converter", "Logic Converter", "Dummy mode for converting logic gates to fast logic.", "logic_converter"),
     silicon_converter = toolMode("silicon_converter", "Silicon Converter", "Dummy mode for converting logic into silicon.", "silicon_converter"),

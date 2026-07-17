@@ -65,7 +65,15 @@ NewToolActionRegistry.actions = {
             return NewToolSeriesConnect.new(tool, action)
         end
     ),
-    n_to_n_connect = toolMode("n_to_n_connect", "N-to-N Connect", "Dummy mode for matching multiple sources to multiple targets.", "n_to_n_connect"),
+    n_to_n_connect = toolMode(
+        "n_to_n_connect",
+        "N-to-N Connect",
+        "Connect every gate in one row to every gate in another row.",
+        "n_to_n_connect",
+        function(tool, action)
+            return NewToolNToNConnect.new(tool, action)
+        end
+    ),
     parallel_connect = toolMode(
         "parallel_connect",
         "Parallel Connect",

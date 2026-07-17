@@ -23,16 +23,15 @@ Goal: make NewTool a full replacement for MTMultitool while keeping both tools i
 
 ### 2. Complete connection support
 
-- [ ] Add directional previews, preview limits, commit feedback, and safe batching.
 - [x] Finish Parallel Connect.
 - [x] Add Series Connect.
-- [ ] Add N-to-N Connect.
+- [x] Add N-to-N Connect.
 - [x] Add Multipoint selection with all-to-all and index-paired operations.
 - [ ] Add Decoder Maker.
 
 ### 3. Add the remaining selection types
 
-- [ ] Select a body or full creation.
+- [ ] Select a full creation.
 - [ ] Select inside and outside cuboid volumes.
 - [ ] Select arbitrary shapes and groups with undo support.
 - [ ] Select vectors and discrete ranges.

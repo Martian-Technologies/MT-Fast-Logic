@@ -67,7 +67,7 @@ NewToolMenuManifest.main = {
                         columnGap = 0.5,
                         rowGap = 0.45,
                         items = {
-                            { actionId = "single_connect" },
+                            { actionId = "multipoint_connect" },
                             { actionId = "series_connect" },
                             { actionId = "n_to_n_connect" },
                             { actionId = "parallel_connect" },
@@ -122,7 +122,7 @@ NewToolMenuManifest.radial = {
     hoverDirectionLerp = 0.9,
     emptyIcon = "$CONTENT_DATA/Scripts/NewTool/images/cancel.json",
     pinnedTools = {
-        "single_connect",
+        "multipoint_connect",
         "series_connect",
         "parallel_connect",
         "tensor_connect"

@@ -47,7 +47,15 @@ NewToolActionRegistry.actions = {
         end
     ),
 
-    single_connect = toolMode("single_connect", "Single Connect", "Dummy mode for one-to-one connection work.", "single_connect"),
+    multipoint_connect = toolMode(
+        "multipoint_connect",
+        "Multipoint Connect",
+        "Connect or disconnect source and destination groups.",
+        "single_connect",
+        function(tool, action)
+            return NewToolMultipointConnect.new(tool, action)
+        end
+    ),
     series_connect = toolMode(
         "series_connect",
         "Series Connect",

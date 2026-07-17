@@ -51,7 +51,7 @@
     "English": "Series",
     "Russian": "Подключение в цепочку"
   },
-  "mt.mode.nto_n_connect": {
+  "mt.mode.n_to_n_connect": {
     "English": "N to N",
     "Russian": "Подключение всех ко всем"
   },
@@ -407,7 +407,7 @@
     "English": "Parallel",
     "Russian": "Параллельно"
   },
-  "mt.connect.nto_n": {
+  "mt.connect.n_to_n": {
     "English": "NtoN",
     "Russian": "Все ко всем"
   },
@@ -491,7 +491,7 @@
     "English": "Connects a row of gates in series, one into the next.",
     "Russian": "Подключает логические затворы по очереди в одну цепочку."
   },
-  "mt.settings.desc.nto_n_connect": {
+  "mt.settings.desc.n_to_n_connect": {
     "English": "Crosswires one row of gates into another.",
     "Russian": "Подключает каждый затвор из первой группы к каждому из второй группы."
   },

@@ -17,7 +17,7 @@ local modesAndTheirFunctions = {
     ["DecoderMaker"] = "mt.settings.desc.decoder_maker",
     ["SingleConnect"] = "mt.settings.desc.single_connect",
     ["SeriesConnect"] = "mt.settings.desc.series_connect",
-    ["NtoNConnect"] = "mt.settings.desc.nto_n_connect",
+    ["NtoNConnect"] = "mt.settings.desc.n_to_n_connect",
     ["ParallelConnect"] = "mt.settings.desc.parallel_connect",
     ["TensorConnect"] = "mt.settings.desc.tensor_connect",
 }

@@ -48,8 +48,16 @@ NewToolActionRegistry.actions = {
     ),
 
     single_connect = toolMode("single_connect", "Single Connect", "Dummy mode for one-to-one connection work.", "single_connect"),
-    series_connect = toolMode("series_connect", "Series Connect", "Dummy mode for connecting a sequence of gates.", "series_connect"),
-    nto_n_connect = toolMode("nto_n_connect", "N-to-N Connect", "Dummy mode for matching multiple sources to multiple targets.", "nto_n_connect"),
+    series_connect = toolMode(
+        "series_connect",
+        "Series Connect",
+        "Connect each gate in a straight row to the next gate.",
+        "series_connect",
+        function(tool, action)
+            return NewToolSeriesConnect.new(tool, action)
+        end
+    ),
+    n_to_n_connect = toolMode("n_to_n_connect", "N-to-N Connect", "Dummy mode for matching multiple sources to multiple targets.", "n_to_n_connect"),
     parallel_connect = toolMode(
         "parallel_connect",
         "Parallel Connect",

@@ -112,7 +112,7 @@ MTMultitool.modes = {
     "mt.mode.copy_paste",
     "mt.mode.single_connect",
     "mt.mode.series_connect",
-	"mt.mode.nto_n_connect",
+	"mt.mode.n_to_n_connect",
     "mt.mode.parallel_connect",
     "mt.mode.tensor_connect"
 }

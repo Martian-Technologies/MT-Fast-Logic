@@ -26,7 +26,7 @@ Goal: make NewTool a full replacement for MTMultitool while keeping both tools i
 - [ ] Add connect and disconnect modes.
 - [ ] Add directional previews, preview limits, commit feedback, and safe batching.
 - [x] Finish Parallel Connect.
-- [ ] Add Series Connect.
+- [x] Add Series Connect.
 - [ ] Add N-to-N Connect.
 - [ ] Add Multipoint selection with all-to-all and index-paired operations.
 - [ ] Add Decoder Maker.

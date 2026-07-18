@@ -105,6 +105,26 @@ NewToolActionRegistry.actions = {
     colorizer = toolMode("colorizer", "Colorizer", "Dummy mode for changing connection dot colors.", "colorizer"),
     copy_paste = toolMode("copy_paste", "Copy Paste", "Dummy mode for copy/paste modification work.", "copy_paste"),
 
+    toggle_connection_shower = command(
+        "toggle_connection_shower",
+        "Toggle Connections",
+        "Toggle connection lines and connected-gate highlights for every NewTool mode.",
+        "inspect",
+        "keep",
+        function(tool)
+            tool.InspectionSettings.toggleConnectionShower()
+        end
+    ),
+    toggle_state_display = command(
+        "toggle_state_display",
+        "Toggle State Display",
+        "Toggle the aimed interactable state and power alert.",
+        "settings",
+        "keep",
+        function(tool)
+            tool.InspectionSettings.toggleStateDisplay()
+        end
+    ),
     heatmap = toolMode("heatmap", "Heatmap", "Dummy mode for inspecting logic activity.", "heatmap"),
 
     settings = toolMode("settings", "Settings", "Dummy mode for NewTool settings and management.", "settings")

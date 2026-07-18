@@ -23,6 +23,8 @@ dofile("$CONTENT_DATA/Scripts/NewTool/MultipointConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/NToNConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/SeriesConnect.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ParallelConnect.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/SettingsStore.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/InspectionSettings.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/HologramText.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/MenuRenderer.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ActionRegistry.lua")
@@ -64,6 +66,7 @@ function NewTool:client_onCreate()
     NewToolInputRouter.init(self)
     NewToolOperationManager.clientInit(self)
     NewToolConnectionOperations.clientInit(self)
+    NewToolSettingsStore.init(self)
     self.SelectionContext = {
         targeting = self.TargetingService,
         spatialIndex = self.CreationSpatialIndex,
@@ -72,6 +75,7 @@ function NewTool:client_onCreate()
     }
     HologramText.init(self)
     self.SelectionContext.textRenderer = self.HologramText
+    NewToolInspectionSettings.init(self)
     MenuRenderer.init(self)
     MenuLayout.configure({ actionRegistry = newToolActionRegistry })
     MenuLayout.validateAll(NewToolMenuManifest, self.HologramText)
@@ -94,7 +98,16 @@ function NewTool:client_onUpdate(dt)
         self.OperationManager.client_onUpdate()
         if not self.tool:isEquipped() then
             self.LineRend.beginFrame()
-            self.ToolModeManager.render(self.SelectionContext)
+            if self.InspectionSettings.shouldRunWithConnectionTool() then
+                self.LineRend.resume()
+                self.InspectionSettings.update(self.SelectionContext, {
+                    raycastMode = "connectionRaycast",
+                    maxDistance = 5,
+                    showTarget = false
+                })
+            else
+                self.LineRend.suspend()
+            end
         end
     end
 
@@ -150,6 +163,7 @@ function NewTool:client_onUnequip(animate)
         self.RadialMenu.unequip()
         self.InputRouter.reset()
         self.ToolModeManager.sleep()
+        self.LineRend.suspend()
     end
 
     self:cl_handleAnimationsOnUnequip(animate)
@@ -180,8 +194,10 @@ function NewTool:client_onEquippedUpdate(primaryState, secondaryState, forceBuil
     self.lastTime = currentTime
     -- print(primaryState, secondaryState, forceBuild)
     if self.tool:isLocal() then
+        self.LineRend.resume()
         self.LineRend.beginFrame()
         self.SelectionRenderer.beginFrame()
+        self.InspectionSettings.update(self.SelectionContext)
         local input = self.InputRouter.sample(dt, primaryState, secondaryState)
         if self.MenuManager.run(dt, primaryState, secondaryState, forceBuild) then goto done end
         if self.RadialMenu.run(dt, primaryState, secondaryState, forceBuild) then goto done end

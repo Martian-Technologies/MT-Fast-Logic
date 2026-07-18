@@ -54,8 +54,8 @@ Goal: make NewTool a full replacement for MTMultitool while keeping both tools i
 
 ### 6. Add inspection tools
 
-- [ ] Add Connection Shower for vanilla, Fast Logic, and Silicon connections.
-- [ ] Show interactable state and power where supported.
+- [x] Add Connection Shower for vanilla, Fast Logic, and Silicon connections.
+- [x] Show interactable state and power where supported.
 - [ ] Add the Fast Logic performance heatmap.
 
 ### 7. Complete settings and utilities

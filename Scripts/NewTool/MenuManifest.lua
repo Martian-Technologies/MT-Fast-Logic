@@ -101,6 +101,8 @@ NewToolMenuManifest.main = {
                         columnGap = 0.5,
                         rowGap = 0.45,
                         items = {
+                            { actionId = "toggle_connection_shower" },
+                            { actionId = "toggle_state_display" },
                             { actionId = "heatmap" },
                             { actionId = "settings" }
                         }

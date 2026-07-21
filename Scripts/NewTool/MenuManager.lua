@@ -25,7 +25,7 @@ function MenuManager.init(tool, manifests, layoutEngine, view)
 
         local actionText = "select"
         if tile.action ~= nil then
-            actionText = "activate"
+            actionText = tile.action.closeMenu == false and "toggle" or "activate"
         elseif tile.onSelect ~= nil then
             actionText = "show actions"
         end
@@ -117,7 +117,7 @@ function MenuManager.init(tool, manifests, layoutEngine, view)
                 handleMenuEvent(hoveredTile.onSelect)
             elseif hoveredTile.action ~= nil then
                 local action = hoveredTile.action
-                self.close()
+                if action.closeMenu ~= false then self.close() end
                 tool:executeAction(action)
             end
             return true

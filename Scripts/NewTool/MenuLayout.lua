@@ -47,7 +47,7 @@ MenuLayout.defaults = {
             labelCellHeight = 0.65,
             labelGap = 0.12,
             labelMaxColumns = 10,
-            labelMaxLines = 2,
+            labelMaxLines = 4,
             labelAlign = "center",
             labelBackgroundPaddingX = 3,
             labelBackgroundPaddingY = 2,
@@ -63,11 +63,13 @@ local validSwitcherAlign = { top = true, center = true, bottom = true }
 local validateWidget = nil
 local layoutWidget = nil
 local actionRegistry = nil
+local actionContext = nil
 local fail = nil
 
 function MenuLayout.configure(dependencies)
     dependencies = dependencies or {}
     actionRegistry = dependencies.actionRegistry
+    actionContext = dependencies.tool
 end
 
 local function getAction(actionId)
@@ -128,13 +130,27 @@ local function resolveActionItem(item)
         fail("unknown actionId '" .. tostring(item.actionId) .. "'")
     end
 
+    local state = nil
+    if action.getState ~= nil and actionContext ~= nil then
+        state = action.getState(actionContext)
+    end
+    local label = item.label or action.label
+    if type(state) == "boolean" then
+        label = tostring(label) .. ": " .. (state and "ON" or "OFF")
+    end
+
     return {
         id = item.id or item.actionId,
-        label = item.label or action.label,
+        label = label,
         description = item.description or action.description,
         icon = item.icon or action.icon,
         selectedIcon = item.selectedIcon or action.selectedIcon,
-        action = { type = "registered", id = item.actionId }
+        selected = state == true,
+        action = {
+            type = "registered",
+            id = item.actionId,
+            closeMenu = action.closeMenu ~= false
+        }
     }
 end
 
@@ -624,6 +640,7 @@ function MenuLayout.createState(menu)
 end
 
 local function isItemSelected(item, state)
+    if item.selected ~= nil then return item.selected == true end
     local onSelect = item.onSelect
     if onSelect == nil then return false end
     if onSelect.type == "selectSwitcher" then

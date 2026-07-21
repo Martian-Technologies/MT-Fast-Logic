@@ -43,12 +43,12 @@ NewToolMenuManifest.main = {
                         onSelect = selectGoal("edit")
                     },
                     {
-                        id = "utility",
-                        label = "Utility",
-                        description = "Inspect creations and manage NewTool behavior.",
+                        id = "settings",
+                        label = "Settings",
+                        description = "Configure NewTool's connection and state displays.",
                         icon = icon("manage"),
                         selectedIcon = icon("manage_selected"),
-                        onSelect = selectGoal("utility")
+                        onSelect = selectGoal("settings")
                     }
                 }
             },
@@ -93,9 +93,9 @@ NewToolMenuManifest.main = {
                             { actionId = "merger" }
                         }
                     },
-                    utility = {
+                    settings = {
                         kind = "tileGrid",
-                        id = "utility_actions",
+                        id = "settings_actions",
                         columns = 3,
                         tileSize = "actionGrid",
                         columnGap = 0.5,
@@ -103,8 +103,7 @@ NewToolMenuManifest.main = {
                         items = {
                             { actionId = "toggle_connection_shower" },
                             { actionId = "toggle_state_display" },
-                            { actionId = "heatmap" },
-                            { actionId = "settings" }
+                            { actionId = "toggle_hide_connection_on_look_away" }
                         }
                     }
                 }

@@ -23,7 +23,8 @@ local function toolMode(id, label, description, iconName, create)
     }
 end
 
-local function command(id, label, description, iconName, activePolicy, run)
+local function command(id, label, description, iconName, activePolicy, run, options)
+    options = options or {}
     return {
         id = id,
         kind = "command",
@@ -31,7 +32,9 @@ local function command(id, label, description, iconName, activePolicy, run)
         description = description,
         icon = icon(iconName or id),
         activePolicy = activePolicy or "keep",
-        run = run
+        run = run,
+        getState = options.getState,
+        closeMenu = options.closeMenu
     }
 end
 
@@ -113,17 +116,45 @@ NewToolActionRegistry.actions = {
         "keep",
         function(tool)
             tool.InspectionSettings.toggleConnectionShower()
-        end
+        end,
+        {
+            closeMenu = false,
+            getState = function(tool)
+                return tool.SettingsStore.get("connectionShower") == true
+            end
+        }
     ),
     toggle_state_display = command(
         "toggle_state_display",
-        "Toggle State Display",
+        "Toggle State",
         "Toggle the aimed interactable state and power alert.",
         "settings",
         "keep",
         function(tool)
             tool.InspectionSettings.toggleStateDisplay()
-        end
+        end,
+        {
+            closeMenu = false,
+            getState = function(tool)
+                return tool.SettingsStore.get("stateDisplay") == true
+            end
+        }
+    ),
+    toggle_hide_connection_on_look_away = command(
+        "toggle_hide_connection_on_look_away",
+        "Hide Connection On Look Away",
+        "Hide connection lines when no interactable is being aimed at.",
+        "inspect",
+        "keep",
+        function(tool)
+            tool.InspectionSettings.toggleHideConnectionOnLookAway()
+        end,
+        {
+            closeMenu = false,
+            getState = function(tool)
+                return tool.SettingsStore.get("hideConnectionOnLookAway") == true
+            end
+        }
     ),
     heatmap = toolMode("heatmap", "Heatmap", "Dummy mode for inspecting logic activity.", "heatmap"),
 

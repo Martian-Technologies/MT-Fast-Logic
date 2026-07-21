@@ -98,6 +98,17 @@ local function endpointFromInteractable(interactable, creation)
     }
 end
 
+local function refreshTarget(target)
+    if target == nil then return nil end
+    if target.uuid ~= nil and target.creation ~= nil then
+        return resolveFastEndpoint(target.creation, target.uuid)
+    end
+    if target.shape == nil or not sm.exists(target.shape) then return nil end
+    local interactable = target.shape:getInteractable()
+    if interactable == nil then return nil end
+    return endpointFromInteractable(interactable, getCreation(target.shape:getBody()))
+end
+
 local function findSiliconCell(creation, siliconId)
     local origin = sm.camera.getPosition()
     local direction = sm.camera.getDirection()
@@ -266,6 +277,7 @@ end
 function NewToolInspectionSettings.init(tool)
     tool.InspectionSettings = {}
     local self = tool.InspectionSettings
+    local lastConnectionTarget = nil
 
     local function toggle(name, label)
         local enabled = tool.SettingsStore.toggle(name)
@@ -281,11 +293,21 @@ function NewToolInspectionSettings.init(tool)
         toggle("stateDisplay", "State Display")
     end
 
+    function self.toggleHideConnectionOnLookAway()
+        toggle("hideConnectionOnLookAway", "Hide Connection On Look Away")
+    end
+
     function self.shouldRunWithConnectionTool()
         local activeItem = tostring(sm.localPlayer.getActiveItem())
         local enabled = tool.SettingsStore.get("connectionShower") == true or
             tool.SettingsStore.get("stateDisplay") == true
         return enabled and activeItem == connectionToolUuid
+    end
+
+    function self.shouldRunWhileUnequipped()
+        return lastConnectionTarget ~= nil and
+            tool.SettingsStore.get("connectionShower") == true and
+            tool.SettingsStore.get("hideConnectionOnLookAway") ~= true
     end
 
     function self.update(context, options)
@@ -294,10 +316,23 @@ function NewToolInspectionSettings.init(tool)
         if not showConnections and not showState then return end
 
         options = options or {}
-        local target, shape, result = queryTarget(context, showConnections, options)
+        local target, shape, result = nil, nil, nil
+        if options.forceLookAway ~= true then
+            target, shape, result = queryTarget(context, showConnections, options)
+        end
         if showState then displayState(shape) end
-        if showConnections and target ~= nil then
-            if options.showTarget ~= false then context.renderer.showTarget(result) end
+        if not showConnections then return end
+
+        local isLookingAtTarget = target ~= nil
+        if isLookingAtTarget then
+            lastConnectionTarget = target
+        elseif tool.SettingsStore.get("hideConnectionOnLookAway") ~= true then
+            lastConnectionTarget = refreshTarget(lastConnectionTarget)
+            target = lastConnectionTarget
+        end
+
+        if target ~= nil then
+            if isLookingAtTarget and options.showTarget ~= false then context.renderer.showTarget(result) end
             drawConnections(context, target)
         end
     end

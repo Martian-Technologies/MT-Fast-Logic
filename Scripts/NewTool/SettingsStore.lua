@@ -3,16 +3,18 @@
 NewToolSettingsStore = {}
 
 local defaults = {
-    version = 1,
+    version = 2,
     connectionShower = false,
-    stateDisplay = false
+    stateDisplay = false,
+    hideConnectionOnLookAway = true
 }
 
 local function copyDefaults()
     return {
         version = defaults.version,
         connectionShower = defaults.connectionShower,
-        stateDisplay = defaults.stateDisplay
+        stateDisplay = defaults.stateDisplay,
+        hideConnectionOnLookAway = defaults.hideConnectionOnLookAway
     }
 end
 
@@ -41,6 +43,9 @@ function NewToolSettingsStore.init(tool)
     data.version = defaults.version
     if type(data.connectionShower) ~= "boolean" then data.connectionShower = defaults.connectionShower end
     if type(data.stateDisplay) ~= "boolean" then data.stateDisplay = defaults.stateDisplay end
+    if type(data.hideConnectionOnLookAway) ~= "boolean" then
+        data.hideConnectionOnLookAway = defaults.hideConnectionOnLookAway
+    end
 
     local function save()
         if path == nil then return end

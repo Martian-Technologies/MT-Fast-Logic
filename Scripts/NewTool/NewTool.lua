@@ -77,7 +77,7 @@ function NewTool:client_onCreate()
     self.SelectionContext.textRenderer = self.HologramText
     NewToolInspectionSettings.init(self)
     MenuRenderer.init(self)
-    MenuLayout.configure({ actionRegistry = newToolActionRegistry })
+    MenuLayout.configure({ actionRegistry = newToolActionRegistry, tool = self })
     MenuLayout.validateAll(NewToolMenuManifest, self.HologramText)
     HubMenuView.init(self, MenuLayout)
     RadialMenuView.init(self)
@@ -103,6 +103,12 @@ function NewTool:client_onUpdate(dt)
                 self.InspectionSettings.update(self.SelectionContext, {
                     raycastMode = "connectionRaycast",
                     maxDistance = 5,
+                    showTarget = false
+                })
+            elseif self.InspectionSettings.shouldRunWhileUnequipped() then
+                self.LineRend.resume()
+                self.InspectionSettings.update(self.SelectionContext, {
+                    forceLookAway = true,
                     showTarget = false
                 })
             else
@@ -163,7 +169,9 @@ function NewTool:client_onUnequip(animate)
         self.RadialMenu.unequip()
         self.InputRouter.reset()
         self.ToolModeManager.sleep()
-        self.LineRend.suspend()
+        if not self.InspectionSettings.shouldRunWhileUnequipped() then
+            self.LineRend.suspend()
+        end
     end
 
     self:cl_handleAnimationsOnUnequip(animate)

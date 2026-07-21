@@ -1,0 +1,13 @@
+{
+    "lodList": [
+        {
+            "mesh": "$CONTENT_DATA/Renderable/curve_tubes/Models/curve_tube_30.obj",
+            "subMeshList": [
+                {
+                    "material": "ConnectJoint",
+                    "textureList": []
+                }
+            ]
+        }
+    ]
+}

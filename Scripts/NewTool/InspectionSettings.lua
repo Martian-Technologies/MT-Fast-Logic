@@ -220,13 +220,13 @@ local function drawConnections(context, target)
     local drawn = 0
     for _, endpoint in ipairs(inputs) do
         if drawn >= maximumPreviewLines then break end
-        context.lineRenderer.draw(endpoint.position, target.position, { color = inputColor, thickness = 0.008 })
+        context.lineRenderer.drawCurve(endpoint.position, target.position, { color = inputColor, thickness = 0.008 })
         drawEndpoint(context, endpoint, inputColor)
         drawn = drawn + 1
     end
     for _, endpoint in ipairs(outputs) do
         if drawn >= maximumPreviewLines then break end
-        context.lineRenderer.draw(target.position, endpoint.position, { color = outputColor, thickness = 0.008 })
+        context.lineRenderer.drawCurve(target.position, endpoint.position, { color = outputColor, thickness = 0.008 })
         drawEndpoint(context, endpoint, outputColor)
         drawn = drawn + 1
     end

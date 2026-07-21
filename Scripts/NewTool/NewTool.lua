@@ -9,6 +9,7 @@ dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
 
 dofile("$CONTENT_DATA/Scripts/NewTool/InputGlyph.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/ImRend.lua")
+dofile("$CONTENT_DATA/Scripts/NewTool/CurveTubeModels.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/LineRend.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/CreationSpatialIndex.lua")
 dofile("$CONTENT_DATA/Scripts/NewTool/TargetingService.lua")

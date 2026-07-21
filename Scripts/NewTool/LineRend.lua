@@ -7,6 +7,7 @@
 --
 -- Immediate lines:
 --   tool.LineRend.draw(from, to, { color = color, thickness = 0.01 })
+--   tool.LineRend.drawCurve(from, to, { color = color, thickness = 0.008 })
 --
 -- draw() submissions are visible until the next beginFrame(). NewTool calls
 -- beginFrame() once per equipped-tool update, before it runs the selected tool
@@ -16,9 +17,14 @@ LineRend = {}
 
 local line_uuid = sm.uuid.new("1364f63d-663f-4d50-b422-49d3a4ce2938")
 local line_axis = sm.vec3.new(0, 1, 0)
+local curve_bend_axis = sm.vec3.new(1, 0, 0)
+local world_up = sm.vec3.new(0, 0, 1)
+local world_right = sm.vec3.new(1, 0, 0)
 local default_color = sm.color.new(1, 1, 1, 1)
 local default_thickness = 0.01
+local curve_model_thickness = 0.008
 local minimum_length = 0.0001
+local curve_models = CurveTubeModels or {}
 
 function LineRend.init(tool)
     tool.LineRend = {}
@@ -32,12 +38,12 @@ function LineRend.init(tool)
 
     self.suspended = false
 
-    local function acquireEffect()
+    local function acquireEffect(uuid)
         local effect = table.remove(effectPool)
         if effect == nil then
             effect = sm.effect.createEffect("ShapeRenderable")
-            effect:setParameter("uuid", line_uuid)
         end
+        effect:setParameter("uuid", uuid)
         return effect
     end
 
@@ -61,6 +67,48 @@ function LineRend.init(tool)
         return line.expiresAt ~= nil and now >= line.expiresAt
     end
 
+    local function selectCurveModel(length)
+        local count = #curve_models
+        if count == 0 then return nil, nil end
+        if length <= curve_models[1].length then return curve_models[1], 1 end
+        if length >= curve_models[count].length then return curve_models[count], count end
+
+        local low = 1
+        local high = count
+        while low < high do
+            local middle = math.floor((low + high) * 0.5)
+            if curve_models[middle].length < length then
+                low = middle + 1
+            else
+                high = middle
+            end
+        end
+
+        local upperIndex = low
+        local lowerIndex = upperIndex - 1
+        local lowerDistance = math.abs(math.log(length / curve_models[lowerIndex].length))
+        local upperDistance = math.abs(math.log(length / curve_models[upperIndex].length))
+        if lowerDistance <= upperDistance then
+            return curve_models[lowerIndex], lowerIndex
+        end
+        return curve_models[upperIndex], upperIndex
+    end
+
+    local function curveRotation(direction, bendSign)
+        local bendDirection = direction:cross(sm.camera.getDirection())
+        if bendDirection:length2() < minimum_length then
+            bendDirection = direction:cross(world_up)
+        end
+        if bendDirection:length2() < minimum_length then
+            bendDirection = direction:cross(world_right)
+        end
+        bendDirection = bendDirection:safeNormalize(curve_bend_axis) * bendSign
+
+        local alignment = sm.vec3.getRotation(line_axis, direction)
+        local alignedBendAxis = alignment * curve_bend_axis
+        return sm.vec3.getRotation(alignedBendAxis, bendDirection) * alignment
+    end
+
     local function syncLine(line)
         local delta = line.to - line.from
         local length = delta:length()
@@ -73,8 +121,20 @@ function LineRend.init(tool)
 
         local direction = delta:safeNormalize(line_axis)
         line.effect:setPosition(line.from + delta * 0.5)
-        line.effect:setRotation(sm.vec3.getRotation(line_axis, direction))
-        line.effect:setScale(sm.vec3.new(line.thickness, length, line.thickness))
+        if line.curved then
+            local model, modelIndex = selectCurveModel(length)
+            if model == nil then return false end
+            if line.curveModelIndex ~= modelIndex then
+                line.effect:setParameter("uuid", model.uuid)
+                line.curveModelIndex = modelIndex
+            end
+            local thicknessScale = line.thickness / curve_model_thickness
+            line.effect:setRotation(curveRotation(direction, line.bendSign))
+            line.effect:setScale(sm.vec3.new(thicknessScale, length / model.length, thicknessScale))
+        else
+            line.effect:setRotation(sm.vec3.getRotation(line_axis, direction))
+            line.effect:setScale(sm.vec3.new(line.thickness, length, line.thickness))
+        end
         line.effect:setParameter("color", line.color)
 
         if not self.suspended then
@@ -116,8 +176,9 @@ function LineRend.init(tool)
             to = to,
             color = options.color or default_color,
             thickness = options.thickness or default_thickness,
-            effect = acquireEffect(),
-            visible = false
+            effect = acquireEffect(line_uuid),
+            visible = false,
+            curved = false
         }
     end
 
@@ -168,6 +229,19 @@ function LineRend.init(tool)
         if self.suspended then return nil end
 
         local line = makeLine(from, to, options)
+        immediateLines[#immediateLines + 1] = line
+        syncLine(line)
+        return true
+    end
+
+    function self.drawCurve(from, to, options)
+        if self.suspended then return nil end
+        if #curve_models == 0 then return self.draw(from, to, options) end
+
+        options = options or {}
+        local line = makeLine(from, to, options)
+        line.curved = true
+        line.bendSign = options.bendSign or 1
         immediateLines[#immediateLines + 1] = line
         syncLine(line)
         return true

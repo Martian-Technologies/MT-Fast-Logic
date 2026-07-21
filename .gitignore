@@ -2,6 +2,7 @@
 *.mco
 /Cache
 MTMultitoolSavefile*
+NewToolSettings*
 Backups/Backup*
 Backups/AllBackup*
 /Renderable/Renderer

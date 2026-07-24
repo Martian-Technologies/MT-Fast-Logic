@@ -24,6 +24,7 @@
       },
       {
          "name" : "[BETA] MT Multitool",
+         "showInInventory" : false,
          "previewRenderable" : "$CONTENT_DATA/Objects/Textures/Char_liftremote/char_liftremote.rend",
          "previewRotation" : [ -1, 0, 0, 0, 0, 1, 0, 1, 0 ],
          "script" : {

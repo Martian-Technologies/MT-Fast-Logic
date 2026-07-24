@@ -81,7 +81,7 @@ local function injectElements(multitool)
             type = "toggleButton",
             position = { a = 0, e = (#MTMultitool.internalModes-v) * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
             color = {
-                on = sm.color.new(0.2, 0.9, 0.2),
+                on = sm.color.new(0.0, 0.45, 0.0),
                 off = sm.color.new(0.9, 0.2, 0.2)
             },
             text = MTMultitool.modes[i],
@@ -202,7 +202,7 @@ local function injectElements(multitool)
         getrender = function(hovering)
             local isFlying = multitool.MTFlying.flying
             local text = tr("mt.settings.fly_mode", { state = isFlying and tr("mt.common.on") or tr("mt.common.off") })
-            local color = isFlying and sm.color.new(0.2, 0.9, 0.2) or sm.color.new(0.9, 0.2, 0.2)
+            local color = isFlying and sm.color.new(0.0, 0.45, 0.0) or sm.color.new(0.9, 0.2, 0.2)
             if hovering then
                 text = "[ " .. text .. " ]"
             end
@@ -258,7 +258,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 7 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.show_connections",
@@ -280,7 +280,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 6 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.hide_connection",
@@ -302,7 +302,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.show_gate_states",
@@ -354,7 +354,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 12 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.hammer_one_tick",

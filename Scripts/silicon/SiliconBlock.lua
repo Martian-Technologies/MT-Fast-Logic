@@ -75,7 +75,7 @@ function SiliconBlock.addOutput(self, uuid, uuidToConnect)
         end
     end
     if changed then
-        sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
+        self:server_saveBlocks(self.data.blocks)
     end
 end
 

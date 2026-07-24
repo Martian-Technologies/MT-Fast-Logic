@@ -82,7 +82,7 @@ end
 function SiliconBlock.removeOutput(self, uuid, uuidToDisconnect)
     local changed = false
     for i = 1, #self.data.blocks do
-        if self.data.blocks[i].uuid == uuid and not table.removeValue(self.data.blocks[i].outputs, uuidToDisconnect) then
+        if self.data.blocks[i].uuid == uuid and table.removeValue(self.data.blocks[i].outputs, uuidToDisconnect) then
             changed = true
         end
         if self.data.blocks[i].uuid == uuidToDisconnect and table.removeValue(self.data.blocks[i].inputs, uuid) then
@@ -90,7 +90,7 @@ function SiliconBlock.removeOutput(self, uuid, uuidToDisconnect)
         end
     end
     if changed then
-        sm.event.sendToInteractable(self.interactable, "server_saveBlocks", self.data.blocks)
+        self:server_saveBlocks(self.data.blocks)
     end
 end
 

@@ -39,6 +39,7 @@ function FastLogicRunner.internalAddBlock(self, path, id, state, timerLength, sk
         if pathName == "timerBlocks" then
             self.timerLengths[id] = timerLength + 1
             self.timerInputStates[id] = false
+            self.timerBlockIds[#self.timerBlockIds + 1] = id
             self:updateLongestTimer()
         elseif pathName == "BlockMemory" then
             self.ramBlockData[id] = self.creation.FastLogicBlockMemorys[self.unhashedLookUp[id]].memory
@@ -145,8 +146,16 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     self.runnableBlockPaths[id] = false
     self.nextRunningBlocks[id] = false
     self.runnableBlockPathIds[id] = false
+    if self.timerLengths[id] ~= false then
+        table.removeValue(self.timerBlockIds, id)
+    end
     self.timerLengths[id] = false
     self.timerInputStates[id] = false
+    self.timerUvFrames[id] = nil
+    self.timerUvScratchEpochs[id] = nil
+    self.timerUvScratchStates[id] = nil
+    self.timerUvScratchStarts[id] = nil
+    self.timerUvScratchFrames[id] = nil
     self.altBlockData[id] = false
     self.multiBlockData[id] = false
     self.multiBlockInputMultiBlockId[id] = false
@@ -172,6 +181,9 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
                 end
             end
             blockStates[id] = idStatePairs[i][2]
+            if self.timerLengths[id] ~= false then
+                self.timerUvNeedsUpdate = true
+            end
             blocksToFixInputData[id] = true
             for k = 1, #blockOutputs[id] do
                 blocksToFixInputData[blockOutputs[id][k]] = true
@@ -184,6 +196,9 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
         for i = 1, #idStatePairs do
             local id = idStatePairs[i][1]
             blockStates[id] = idStatePairs[i][2]
+            if self.timerLengths[id] ~= false then
+                self.timerUvNeedsUpdate = true
+            end
         end
     end
 end
@@ -319,6 +334,7 @@ function FastLogicRunner.updateLongestTimeToLength(self, length)
 end
 
 function FastLogicRunner.clearTimerData(self, id)
+    self.timerUvFrames[id] = nil
     local timerData = self.timeData[1]
     for i = 1, #timerData do
         local row = self:getTimeDataRow(1, i)

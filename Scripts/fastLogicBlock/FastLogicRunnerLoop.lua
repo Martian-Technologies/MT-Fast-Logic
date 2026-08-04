@@ -137,7 +137,8 @@ end
 
 function FastLogicRunner.update(self)
     -- fPrint(self, {depth=2, maxTableLength=1000, ignoreTypes={"function"}})
-    
+    self.didLogicalUpdate = false
+
     if self.isNew ~= nil then
         if self.isNew > 1 then
             self.isNew = self.isNew - 1
@@ -155,6 +156,7 @@ function FastLogicRunner.update(self)
         self.updateTicks = self.updateTicks + self.numberOfUpdatesPerTick
     end
     if self.updateTicks >= 1 then
+        self.didLogicalUpdate = true
         -- sm.MTUtil.Profiler.Time.on("doPreUpdate")
         -- make sure all blocks are not broken
         -- fPrint(runningBlockLengths)
@@ -526,7 +528,7 @@ function FastLogicRunner.doUpdate(self)
                 countOfOnInputs[secondBlockId] = countOfOnInputs[secondBlockId] + 1
             end
             local row = getTimeDataRow(otherTimeData, multiData[6])
-            row[#row + 1] = getTimedEvent(1, multiData[4][1], state)
+            row[#row + 1] = getTimedEvent(1, multiData[4][1], notState)
         elseif multiBlockType == 3 then -- ram block input
             local blocksToUpdate = multiData[5]
             for i = 1, #blocksToUpdate do

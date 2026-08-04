@@ -12,6 +12,7 @@ dofile "MultiBlockManager.lua"
 dofile "FastLogicRunnerLoop.lua"
 dofile "BalancedLogicFinder.lua"
 dofile "LogicOptimizer.lua"
+dofile "TimerUv.lua"
 
 function FastLogicRunner.getNew(creationId)
     print("new logic runner")
@@ -26,6 +27,8 @@ function FastLogicRunner.init(self)
     self.creation = sm.MTFastLogic.Creations[self.creationId]
     self.numberOfUpdatesPerTick = self.numberOfUpdatesPerTick or 1
     self.updateTicks = self.updateTicks or 0
+    self.didLogicalUpdate = false
+    self.timerUvNeedsUpdate = self.timerUvNeedsUpdate or false
     self.blocks = self.creation.blocks
     self.blocksOptimized = self.blocksOptimized or -100
     if self.hashData == nil then
@@ -36,6 +39,21 @@ function FastLogicRunner.init(self)
     self.ramOutputMultiBlocksScratch = self.ramOutputMultiBlocksScratch or {}
     self.ramOutputMultiBlocksHashScratch = self.ramOutputMultiBlocksHashScratch or {}
     self.timedEventPool = self.timedEventPool or {}
+    self.timerUvEpoch = self.timerUvEpoch or 0
+    self.timerUvFrames = self.timerUvFrames or {}
+    self.timerUvImplicitRows = self.timerUvImplicitRows or {}
+    self.timerUvScratchEpochs = self.timerUvScratchEpochs or {}
+    self.timerUvScratchStates = self.timerUvScratchStates or {}
+    self.timerUvScratchStarts = self.timerUvScratchStarts or {}
+    self.timerUvScratchFrames = self.timerUvScratchFrames or {}
+    if self.timerBlockIds == nil then
+        self.timerBlockIds = {}
+        for id = 1, #self.timerLengths do
+            if self.timerLengths[id] ~= false then
+                self.timerBlockIds[#self.timerBlockIds + 1] = id
+            end
+        end
+    end
 end
 
 function FastLogicRunner.getTimeDataRow(self, dataIndex, time)
@@ -98,6 +116,7 @@ function FastLogicRunner.makeDataArrays(self)
     self.timedEventPool = {}
     self.timerLengths = table.makeArrayForHash(self.hashData)
     self.timerInputStates = table.makeArrayForHash(self.hashData)
+    self.timerBlockIds = {}
     self.runnableBlockPathIds = table.makeArrayForHash(self.hashData)
     self.longestTimer = 0
     self.altBlockData = table.makeArrayForHash(self.hashData)
@@ -185,14 +204,17 @@ function FastLogicRunner.makeDataArrays(self)
 end
 
 function FastLogicRunner.doLastTickUpdates(self)
+    self:beginTimerUvImplicitEvents()
     local multiBlocks = self.blocksSortedByPath[16]
     local multiBlockData = self.multiBlockData
     local hasTimedMultiBlock = false
+    local timedEndpointProjections = {}
     for i = 1, #multiBlocks do
-        local multiBlockType = multiBlockData[multiBlocks[i]][1]
+        local multiData = multiBlockData[multiBlocks[i]]
+        local multiBlockType = multiData[1]
         if multiBlockType == 1 or multiBlockType == 2 then
             hasTimedMultiBlock = true
-            break
+            timedEndpointProjections[multiData[4][1]] = multiData[7]
         end
     end
     if not hasTimedMultiBlock then
@@ -221,6 +243,9 @@ function FastLogicRunner.doLastTickUpdates(self)
             local item = timeDataAtTime[k]
             if item ~= nil then
                 hashAtTime[item[2]] = k
+                if item[1] == 1 then
+                    self:addTimerUvImplicitEvent(timedEndpointProjections[item[2]], i)
+                end
             end
         end
         otherTimeDataHash[i] = hashAtTime

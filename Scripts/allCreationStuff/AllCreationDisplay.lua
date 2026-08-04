@@ -3,10 +3,34 @@ dofile "../util/util.lua"
 dofile "../util/compressionUtil/CompressionUtil.lua"
 dofile "../util/compressionUtil/LibDeflate.lua"
 
+local function sendTimerUvsToClients(self, changedTimerUvs)
+    local status, result = pcall(self.network.sendToClients, self.network, "client_updateTimerUvs",
+        sm.MTFastLogic.CompressionUtil.arrayToString(changedTimerUvs))
+    if not status then
+        if #changedTimerUvs == 1 then
+            return
+        end
+        local half = math.floor(#changedTimerUvs / 2)
+        local first = {}
+        local second = {}
+        for i = 1, half do
+            first[i] = changedTimerUvs[i]
+        end
+        for i = half + 1, #changedTimerUvs do
+            second[i - half] = changedTimerUvs[i]
+        end
+        sendTimerUvsToClients(self, first)
+        sendTimerUvsToClients(self, second)
+    end
+end
+
 local function sendStatesToClients(self, changedUuidsArray)
     local status, result = pcall(self.network.sendToClients, self.network, "client_updateTexturesAndStates",
         sm.MTFastLogic.CompressionUtil.arrayToString(changedUuidsArray))
     if not status then
+        if #changedUuidsArray == 1 then
+            return
+        end
         -- split changedUuids in two and try again
         local half = math.floor(#changedUuidsArray / 2)
         local t1 = {}
@@ -41,6 +65,22 @@ function FastLogicRunnerRunner.updatedDisplays(self)
             changedUuidsArray = {}
         end
         self.changedUuidsArray = {}
+    end
+
+    if 0 < #self.changedTimerUvsArray then
+        sendTimerUvsToClients(self, self.changedTimerUvsArray)
+        self.changedTimerUvsArray = {}
+    end
+end
+
+function FastLogicRunnerRunner.client_updateTimerUvs(self, changedData)
+    changedData = sm.MTFastLogic.CompressionUtil.stringToArray(changedData)
+    for i = 1, #changedData do
+        local packed = changedData[i]
+        local block = sm.MTFastLogic.client_FastLogicBlockLookUp[math.floor(packed / 1024)]
+        if block ~= nil and block.client_setUvFrame ~= nil then
+            block:client_setUvFrame(packed % 1024)
+        end
     end
 end
 

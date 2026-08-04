@@ -263,16 +263,19 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     spinnersCount = 0
     for i = 0, #selfData.vectorsFrom - 1 do
         local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder) + 1]
-        local fromCreationRotationQuat = selfData.fromOrigin:getBody().worldRotation
+        local fromBody = selfData.fromOrigin:getBody()
+        local fromCreationRotationQuat = fromBody.worldRotation
         local prevPos = selfData.fromOrigin:getWorldPosition()
         if selfData.vectorsFrom[i + 1]:length() > 0 then
             for l = 1, selfData.dimSteps[i + 1] do
                 if l > 10 and l < selfData.dimSteps[i + 1] - 10 then
                     goto continue
                 end
-                -- gotta rotate selfData.vectorsFrom[i + 1] * l / 4 by fromCreationRotationQuat
-                local pos = selfData.fromOrigin:getWorldPosition() +
-                    fromCreationRotationQuat * (selfData.vectorsFrom[i + 1] * l / 4)
+                local offset = selfData.vectorsFrom[i + 1] * l
+                if not fromBody:isOnLift() then
+                    offset = fromCreationRotationQuat * (offset / 4)
+                end
+                local pos = selfData.fromOrigin:getWorldPosition() + offset
                 sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, 0.03)
                 prevPos = pos
                 ::continue::
@@ -287,14 +290,19 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
         local spinnersCount = 0
         for i = 0, #selfData.vectorsTo - 1 do
             local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder) + 1]
-            local toCreationRotationQuat = selfData.toOrigin:getBody().worldRotation
+            local toBody = selfData.toOrigin:getBody()
+            local toCreationRotationQuat = toBody.worldRotation
             local prevPos = selfData.toOrigin:getWorldPosition()
             if selfData.vectorsTo[i + 1]:length() > 0 then
                 for l = 1, selfData.dimSteps[i + 1] do
                     if l > 10 and l < selfData.dimSteps[i + 1] - 10 then
                         goto continue
                     end
-                    local pos = selfData.toOrigin:getWorldPosition() + toCreationRotationQuat * (selfData.vectorsTo[i + 1] * l / 4)
+                    local offset = selfData.vectorsTo[i + 1] * l
+                    if not toBody:isOnLift() then
+                        offset = toCreationRotationQuat * (offset / 4)
+                    end
+                    local pos = selfData.toOrigin:getWorldPosition() + offset
                     sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, 0.03)
                     prevPos = pos
                     ::continue::

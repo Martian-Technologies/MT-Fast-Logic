@@ -212,12 +212,15 @@ end
 
 -- faster than tableToString but only works on 1d arrays of numbers
 function sm.MTFastLogic.CompressionUtil.arrayToString(data)
-    local str = ""
-    for i = 1, #data do
-        if #str > 0 then str = str .. "," end
-        str = str .. tostring(data[i] - (data[i-1] or 0))
+    local count = #data
+    local parts = {}
+    local previous = 0
+    for i = 1, count do
+        local value = data[i]
+        parts[i] = tostring(value - previous)
+        previous = value
     end
-    return str
+    return table.concat(parts, ",")
 end
 
 -- faster than stringToTable but only works on strings made with arrayToString

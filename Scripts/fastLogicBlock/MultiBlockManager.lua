@@ -51,7 +51,7 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
         local timerDataHash = {}
         local otherTimeDataHash = {}
         for i = 1, #timerData do
-            local timerDataAtTime = timerData[i]
+            local timerDataAtTime = self:getTimeDataRow(1, i)
             local hashAtTime = {}
             for k = 1, #timerDataAtTime do
                 hashAtTime[timerDataAtTime[k]] = k
@@ -59,7 +59,7 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
             timerDataHash[i] = hashAtTime
         end
         for i = 1, #otherTimeData do
-            local timeDataAtTime = otherTimeData[i]
+            local timeDataAtTime = self:getTimeDataRow(2, i)
             local hashAtTime = {}
             for k = 1, #timeDataAtTime do
                 local item = timeDataAtTime[k]
@@ -94,7 +94,8 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
                 end
                 if otherTimeDataHash[time][endBlockId] ~= nil then
                     state = not state
-                    timerData[timerSkipCount][#timerData[timerSkipCount]+1] = id
+                    local row = self:getTimeDataRow(1, timerSkipCount)
+                    row[#row + 1] = id
                 end
                 if timerSkipCount == 1 then
                     blockStates[id] = state
@@ -124,7 +125,8 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
                     end
                     if otherTimeDataHash[time][endBlockId] ~= nil then
                         state = not state
-                        timerData[timerSkipCount][#timerData[timerSkipCount]+1] = id
+                        local row = self:getTimeDataRow(1, timerSkipCount)
+                        row[#row + 1] = id
                     end
                 else
                     if otherTimeDataHash[time][endBlockId] ~= nil then
@@ -185,7 +187,7 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
         local numberOfTicksToRun = 0
         local inputStatesOverTime = {}
         for i = 1, length-2 do
-            local timeDataAtTime = otherTimeData[i]
+            local timeDataAtTime = self:getTimeDataRow(2, i)
             for k = 1, #timeDataAtTime do
                 local item = timeDataAtTime[k]
                 if item ~= nil and item[2] == farthestOutput then
@@ -256,7 +258,7 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
         local timerData = self.timeData[1]
         local timerDataHash = {}
         for i = 1, #timerData do
-            local timerDataAtTime = timerData[i]
+            local timerDataAtTime = self:getTimeDataRow(1, i)
             local hashAtTime = {}
             for k = 1, #timerDataAtTime do
                 hashAtTime[timerDataAtTime[k]] = k
@@ -270,7 +272,8 @@ function FastLogicRunner.internalCollapseMultiBlock(self, multiBlockId)
             for i = 1, #timeData do
                 local time = timeData[i]
                 if timerDataHash[time][id] == nil then
-                    timerData[time][#timerData[time]+1] = id
+                    local row = self:getTimeDataRow(1, time)
+                    row[#row + 1] = id
                 end
             end
         end

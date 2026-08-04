@@ -14,6 +14,7 @@ local numberOfOtherInputs = nil
 local blockStates = nil
 local timerData = nil
 local otherTimeData = nil
+local timeDataHead = nil
 local timerLengths = nil
 local timerInputStates = nil
 local blockOutputs = nil
@@ -24,6 +25,10 @@ local ramBlockOtherData = nil
 local unhashedLookUp = nil
 local FastLogicBlockMemorys = nil
 local multiBlockInputMultiBlockId = nil
+local newBlockStatesScratch = nil
+local ramOutputMultiBlocksScratch = nil
+local ramOutputMultiBlocksHashScratch = nil
+local timedEventPool = nil
 local runningBlocks1 = nil
 local runningBlocks3 = nil
 local runningBlocks4 = nil
@@ -50,6 +55,28 @@ local runningBlocks24 = nil
 local runningBlocks26 = nil
 local runningBlocks27 = nil
 
+local function getTimeDataRow(data, time)
+    return data[(timeDataHead + time - 2) % #data + 1]
+end
+
+local function getTimedEvent(item1, item2, item3, item4, item5, item6)
+    local item = remove(timedEventPool) or {}
+    item[1] = item1
+    item[2] = item2
+    item[3] = item3
+    item[4] = item4
+    item[5] = item5
+    item[6] = item6
+    return item
+end
+
+local function releaseTimedEvent(item)
+    for i = 1, 6 do
+        item[i] = nil
+    end
+    timedEventPool[#timedEventPool + 1] = item
+end
+
 function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     nextRunningBlocks = self.nextRunningBlocks
     runningBlockLengths = self.runningBlockLengths
@@ -62,12 +89,17 @@ function FastLogicRunner.setFastReadData(self, needsRunningBlocks)
     numberOfOtherInputs = self.numberOfOtherInputs
     blockStates = self.blockStates
     timerData = self.timeData[1]
+    timeDataHead = self.timeDataHead
     timerLengths = self.timerLengths
     timerInputStates = self.timerInputStates
     blockOutputs = self.blockOutputs
     if needsRunningBlocks == true then
         otherTimeData = self.timeData[2]
         multiBlockInputMultiBlockId = self.multiBlockInputMultiBlockId
+        newBlockStatesScratch = self.newBlockStatesScratch
+        ramOutputMultiBlocksScratch = self.ramOutputMultiBlocksScratch
+        ramOutputMultiBlocksHashScratch = self.ramOutputMultiBlocksHashScratch
+        timedEventPool = self.timedEventPool
         FastLogicBlockMemorys = self.creation.FastLogicBlockMemorys
         unhashedLookUp = self.unhashedLookUp
         multiBlockData = self.multiBlockData
@@ -113,8 +145,8 @@ function FastLogicRunner.update(self)
         end
         self.isNew = nil
     end
-    self:setFastReadData(true)
     self:optimizeLogic()
+    self:setFastReadData(true)
     self.blocksRan = 0
     if self.numberOfUpdatesPerTick == -1 then
         self.numberOfUpdatesPerTick = 0
@@ -191,13 +223,10 @@ end
 
 function FastLogicRunner.doUpdate(self)
     local newBlockStatesLength = 0
-    local newBlockStates = {}
+    local newBlockStates = newBlockStatesScratch
     local lastRunningIndex = self.nextRunningIndex
     local nextRunningIndex = lastRunningIndex + 1
     self.nextRunningIndex = nextRunningIndex
-    local length = #timerData + 1
-    timerData[length] = {}
-    otherTimeData[length] = {}
     -- EndTickButton
     for k = 1, runningBlockLengths[1] do
         self.blocksRan = self.blocksRan + 1
@@ -309,7 +338,7 @@ function FastLogicRunner.doUpdate(self)
         local blockId = runningBlocks5[k]
         if (countOfOnInputs[blockId] + countOfOnOtherInputs[blockId] == 1) ~= timerInputStates[blockId] then
             timerInputStates[blockId] = not timerInputStates[blockId]
-            local row = timerData[timerLengths[blockId]]
+            local row = getTimeDataRow(timerData, timerLengths[blockId])
             row[#row + 1] = blockId
         end
     end
@@ -466,9 +495,9 @@ function FastLogicRunner.doUpdate(self)
     end
     runningBlockLengths[27] = 0
     -- multi blocks
-    local ramOutputMultiBlocks = {}
+    local ramOutputMultiBlocks = ramOutputMultiBlocksScratch
     local ramOutputMultiBlocksLength = 0
-    local ramOutputMultiBlocksHash = {}
+    local ramOutputMultiBlocksHash = ramOutputMultiBlocksHashScratch
     for k = 1, runningMultiBlockLengths do
         self.blocksRan = self.blocksRan + 1
         local blockId = runningBlocks16[k]
@@ -484,8 +513,8 @@ function FastLogicRunner.doUpdate(self)
             else
                 countOfOnInputs[secondBlockId] = countOfOnInputs[secondBlockId] - 1
             end
-            local row = otherTimeData[multiData[6]]
-            row[#row + 1] = {1, multiData[4][1], state}
+            local row = getTimeDataRow(otherTimeData, multiData[6])
+            row[#row + 1] = getTimedEvent(1, multiData[4][1], state)
         elseif multiBlockType == 2 then -- not line
             local firstBlock = multiData[3][1]
             local secondBlockId = blockOutputs[firstBlock][1]
@@ -496,8 +525,8 @@ function FastLogicRunner.doUpdate(self)
             else
                 countOfOnInputs[secondBlockId] = countOfOnInputs[secondBlockId] + 1
             end
-            local row = otherTimeData[multiData[6]]
-            row[#row + 1] = {1, multiData[4][1], state}
+            local row = getTimeDataRow(otherTimeData, multiData[6])
+            row[#row + 1] = getTimedEvent(1, multiData[4][1], state)
         elseif multiBlockType == 3 then -- ram block input
             local blocksToUpdate = multiData[5]
             for i = 1, #blocksToUpdate do
@@ -608,15 +637,15 @@ function FastLogicRunner.doUpdate(self)
                 for i = 1, #outputs do
                     local id = outputs[i]
                     local outputTime = outputTimes[i]
-                    local row = otherTimeData[outputTime]
+                    local row = getTimeDataRow(otherTimeData, outputTime)
                     if id == farthestOutput then
-                        row[#row + 1] = {3, id, i, newData, inputData, multiData}
+                        row[#row + 1] = getTimedEvent(3, id, i, newData, inputData, multiData)
                     else
-                        row[#row + 1] = {2, id, i, newData}
+                        row[#row + 1] = getTimedEvent(2, id, i, newData)
                     end
                     if outputTime > 2 then
-                        row = otherTimeData[outputTime-2]
-                        row[#row + 1] = {4, id}
+                        row = getTimeDataRow(otherTimeData, outputTime - 2)
+                        row[#row + 1] = getTimedEvent(4, id)
                     end
                 end
                 -- run internals
@@ -639,11 +668,11 @@ function FastLogicRunner.doUpdate(self)
             else
                 for i = 1, #outputs do
                     local id = outputs[i]
-                    local row = otherTimeData[outputTimes[i] - 1]
+                    local row = getTimeDataRow(otherTimeData, outputTimes[i] - 1)
                     if id == farthestOutput then
-                        row[#row + 1] = {5, id, data[i], inputData, multiData}
+                        row[#row + 1] = getTimedEvent(5, id, data[i], inputData, multiData)
                     else
-                        row[#row + 1] = {1, id, data[i]}
+                        row[#row + 1] = getTimedEvent(1, id, data[i])
                     end
                 end
             end
@@ -678,7 +707,10 @@ function FastLogicRunner.doUpdate(self)
         --         end
         --     end
         -- end
-        multiBlockData[blockId][5] = {}
+        local blocksToUpdate = multiData[5]
+        for i = 1, #blocksToUpdate do
+            blocksToUpdate[i] = nil
+        end
     end
     runningBlockLengths[16] = 0
     -- ram block reset
@@ -714,7 +746,10 @@ function FastLogicRunner.doUpdate(self)
     runningBlockLengths[26] = 0
     -- ram outputs
     for k = 1, ramOutputMultiBlocksLength do
-        local multiData = multiBlockData[ramOutputMultiBlocks[k]]
+        local multiBlockId = ramOutputMultiBlocks[k]
+        ramOutputMultiBlocks[k] = nil
+        ramOutputMultiBlocksHash[multiBlockId] = nil
+        local multiData = multiBlockData[multiBlockId]
         local data = ""
         if multiData[10] == nil or blockStates[multiData[10]] then
             local addressBlocks = multiData[8]
@@ -757,14 +792,17 @@ function FastLogicRunner.doUpdate(self)
         end
     end
     -- run time stuff
-    local timerReadRow = remove(timerData, 1)
+    local readIndex = timeDataHead
+    local timerReadRow = timerData[readIndex]
     for k = 1, #timerReadRow do
         newBlockStatesLength = newBlockStatesLength + 1
         newBlockStates[newBlockStatesLength] = timerReadRow[k]
+        timerReadRow[k] = nil
     end
-    local otherReadRow = remove(otherTimeData, 1)
+    local otherReadRow = otherTimeData[readIndex]
     for k = 1, #otherReadRow do
         local item = otherReadRow[k]
+        otherReadRow[k] = nil
         local item1 = item[1]
         if item1 == 1 then
             local id = item[2]
@@ -801,10 +839,14 @@ function FastLogicRunner.doUpdate(self)
                 newBlockStates[newBlockStatesLength] = id
             end
         end
+        releaseTimedEvent(item)
     end
+    timeDataHead = timeDataHead % #timerData + 1
+    self.timeDataHead = timeDataHead
     -- update all
     for k = 1, newBlockStatesLength do
         local id = newBlockStates[k]
+        newBlockStates[k] = nil
         local state = not blockStates[id]
         local stateNumber = state and 1 or -1
         blockStates[id] = state

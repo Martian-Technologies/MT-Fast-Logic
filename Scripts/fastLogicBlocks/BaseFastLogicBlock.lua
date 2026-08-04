@@ -180,6 +180,9 @@ end
 function BaseFastLogicBlock.client_onCreate(self)
     sm.MTFastLogic.client_FastLogicBlockLookUp[self.interactable:getId()] = self
     self:client_onCreate2()
+    if self.requestsLogicalState ~= false then
+        self.network:sendToServer("server_requestState", {})
+    end
 end
 
 function BaseFastLogicBlock.client_onCreate2(self)
@@ -298,6 +301,22 @@ function BaseFastLogicBlock.server_changeSpeed(self, isCrouching)
         end
     end
     self:sendMessageToAll({ id = "mt.chat.updates_per_tick", vars = { value = self.creation.FastLogicRunner.numberOfUpdatesPerTick } })
+end
+
+function BaseFastLogicBlock.server_requestState(self, _, player)
+    local state = self.state == true
+    local runner = self.FastLogicRunner
+    if runner ~= nil and self.data ~= nil and self.data.uuid ~= nil then
+        local id = runner.hashedLookUp[self.data.uuid]
+        if id ~= nil then
+            state = runner.blockStates[id] == true
+        end
+    end
+    self.network:sendToClient(player, "client_setState", state)
+end
+
+function BaseFastLogicBlock.client_setState(self, state)
+    self:client_updateTexture(state)
 end
 
 function BaseFastLogicBlock.client_updateTexture(self, state)

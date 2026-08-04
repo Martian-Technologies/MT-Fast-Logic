@@ -4,6 +4,7 @@ dofile "../util/util.lua"
 FastTimer = table.deepCopyTo(BaseFastLogicBlock, (FastTimer or class()))
 FastTimer.maxParentCount = 1
 FastTimer.maxChildCount = -1  -- infinite
+FastTimer.requestsLogicalState = false
 
 function FastTimer.getData2(self)
     self.creation.FastTimers[self.data.uuid] = self

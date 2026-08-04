@@ -27,16 +27,24 @@ local defaultSave = {
     ["version"] = 1
 }
 
+-- TEMPORARY: keep saved JSON authoritative in memory until sm.json.save invalidates the DCO cache again.
+local saveDataCache = {}
+
 function SaveFile.getSaveData(idx)
     local path = SaveFile.getSavePath(idx)
+    if saveDataCache[path] ~= nil then
+        return saveDataCache[path]
+    end
     if not sm.json.fileExists(path) then
-        return table.deepCopy(defaultSave)
+        saveDataCache[path] = table.deepCopy(defaultSave)
+        return saveDataCache[path]
     end
     -- local data = sm.json.open(path)
     -- pcall instead
     local success, data = pcall(sm.json.open, path)
     if not success then
-        return table.deepCopy(defaultSave)
+        saveDataCache[path] = table.deepCopy(defaultSave)
+        return saveDataCache[path]
     end
     if data["version"] == nil then
         data["version"] = 1
@@ -53,10 +61,12 @@ function SaveFile.getSaveData(idx)
     if data["modeStates"] == nil then
         data["modeStates"] = {}
     end
+    saveDataCache[path] = data
     return data
 end
 
 function SaveFile.setSaveData(idx, data)
     local path = SaveFile.getSavePath(idx)
+    saveDataCache[path] = data
     sm.json.save(data, path)
 end

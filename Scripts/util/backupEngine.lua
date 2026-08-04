@@ -200,10 +200,17 @@ local function getBackupMetadata(data)
 end
 
 local function saveCoordinator(data)
+    -- TEMPORARY: keep the coordinator authoritative in memory instead of reopening its stale DCO entry.
+    sm.MTBackupEngine.temporaryCoordinatorCache = data
     sm.json.save(data, coordinatorFileName)
 end
 
 local function loadCoordinator()
+    -- TEMPORARY: remove this cache when sm.json.save invalidates DCO entries again.
+    if sm.MTBackupEngine.temporaryCoordinatorCache ~= nil then
+        return sm.MTBackupEngine.temporaryCoordinatorCache
+    end
+
     local allData
     if not sm.json.fileExists(coordinatorFileName) then
         local filenameBCUC = getBCUCfilenameOLD()
@@ -224,6 +231,7 @@ local function loadCoordinator()
     else
         allData = sm.json.open(coordinatorFileName)
     end
+    sm.MTBackupEngine.temporaryCoordinatorCache = allData
     return allData
 end
 
@@ -336,26 +344,9 @@ function sm.MTBackupEngine.sv_backupCreation(data)
         creationData = sm.creation.exportToTable(body, true, true)
     end
     local backupsCoordinator = loadPlayerCoordinator()
-    local backupFilename
-    if #backupsCoordinator.unusedBackupFilenames == 0 then
-        backupFilename = "$CONTENT_DATA/Backups/Backup_" .. tostring(sm.uuid.new()) .. ".json"
-    else
-        backupFilename = backupsCoordinator.unusedBackupFilenames[#backupsCoordinator.unusedBackupFilenames]
-        table.remove(backupsCoordinator.unusedBackupFilenames, #backupsCoordinator.unusedBackupFilenames)
-    end
+    -- TEMPORARY: never overwrite a backup that may already have a stale DCO entry.
+    local backupFilename = "$CONTENT_DATA/Backups/Backup_" .. tostring(sm.uuid.new()) .. ".json"
     local nameId, nameVars, descriptionId, descriptionVars = getBackupMetadata(data)
-    table.insert(backupsCoordinator.backups, {
-        nameId = nameId,
-        nameVars = nameVars,
-        descriptionId = descriptionId,
-        descriptionVars = descriptionVars,
-        creationType = data.creationType or "Unknown",
-        timeCreated = os.time(),
-        isPinned = data.isPinned or false,
-        backupFilename = backupFilename,
-        creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
-    })
-    savePlayerCoordinator(backupsCoordinator)
     -- local backupData = {
     --     version = 1,
     --     name = data.name or "Unnamed",
@@ -372,7 +363,20 @@ function sm.MTBackupEngine.sv_backupCreation(data)
         version = 2,
         creationData = compressedCreationData
     }
+    -- TEMPORARY: save the fresh payload before exposing it through the in-memory coordinator.
     sm.json.save(backupData, backupFilename)
+    table.insert(backupsCoordinator.backups, {
+        nameId = nameId,
+        nameVars = nameVars,
+        descriptionId = descriptionId,
+        descriptionVars = descriptionVars,
+        creationType = data.creationType or "Unknown",
+        timeCreated = os.time(),
+        isPinned = data.isPinned or false,
+        backupFilename = backupFilename,
+        creationId = sm.MTFastLogic.CreationUtil.getCreationId(body)
+    })
+    savePlayerCoordinator(backupsCoordinator)
     if cleanNeedCountDown == 0 then
         cleanNeedCountDown = 10
         sm.MTBackupEngine.sv_deleteOldBackups()

@@ -2,6 +2,30 @@ dofile "../TensorUtil.lua"
 
 CopyPaste = {}
 
+sm.MTCopyPasteLiftData = sm.MTCopyPasteLiftData or {}
+if sm.isServerMode() and not sm.MTCopyPasteLiftHooked then
+    local originalPlaceLift = sm.player.placeLift
+
+    sm.player.placeLift = function(player, selectedBodies, liftPosition, liftLevel, rotationIndex)
+        local selectedShapes = {}
+        if selectedBodies ~= nil and selectedBodies[1] ~= nil and sm.exists(selectedBodies[1]) then
+            selectedShapes = selectedBodies[1]:getCreationShapes()
+        end
+
+        sm.MTCopyPasteLiftData[player.id] = {
+            player = player,
+            selectedShapes = selectedShapes,
+            liftPosition = liftPosition,
+            liftLevel = liftLevel,
+            rotationIndex = rotationIndex
+        }
+
+        return originalPlaceLift(player, selectedBodies, liftPosition, liftLevel, rotationIndex)
+    end
+
+    sm.MTCopyPasteLiftHooked = true
+end
+
 function CopyPaste.inject(multitool)
     multitool.CopyPaste = {}
     local self = multitool.CopyPaste
@@ -18,6 +42,8 @@ function CopyPaste.inject(multitool)
     self.shapeVisualizations = {}
     self.toCopyPastePackets = {}
     self.externalConnectionsPolicy = "absolute" -- "ignore" | "absolute" | "relative"
+    self.lastLiftId = nil
+    self.lastLiftLevel = nil
 end
 
 local plasticUuid = sm.uuid.new("628b2d61-5ceb-43e9-8334-a4135566df7a")
@@ -129,12 +155,17 @@ local function doCopyPaste(multitool)
             nSteps = vec.range
         })
     end
+    local ownedLift = sm.localPlayer.getOwnedLift()
     local data = {
         interactables = interactables,
         shapes = shapes,
         vectors = vectors,
         body = self.activeBody,
-        externalConnections = self.externalConnectionsPolicy -- "ignore" | "absolute" | "relative"
+        externalConnections = self.externalConnectionsPolicy, -- "ignore" | "absolute" | "relative"
+        ownedLift = ownedLift ~= nil and {
+            liftPosition = ownedLift.worldPosition * 4,
+            liftLevel = ownedLift.level
+        } or nil
     }
     multitool.network:sendToServer("server_copyPaste", data)
 end
@@ -147,8 +178,87 @@ local function findPositionInIntIdMap(intIdMap, intId)
     end
 end
 
-function CopyPaste.server_copyPaste(multitool, data)
+local function findLiftData(body, player)
+    for _, liftData in pairs(sm.MTCopyPasteLiftData) do
+        for _, shape in pairs(liftData.selectedShapes) do
+            if sm.exists(shape) and shape.body.id == body.id then
+                return liftData
+            end
+        end
+    end
+
+    if player ~= nil then
+        return sm.MTCopyPasteLiftData[player.id]
+    end
+end
+
+local function getLiftPositionAdjustment(bodies, liftPosition)
+    local lowest = nil
+    local highest = nil
+    for _, body in pairs(bodies) do
+        local low, high = body:getWorldAabb()
+        lowest = lowest == nil and low or lowest:min(low)
+        highest = highest == nil and high or highest:max(high)
+    end
+
+    if lowest == nil then
+        return sm.vec3.zero()
+    end
+
+    local difference = (lowest + (highest - lowest) / 2 - liftPosition / 4) * 4
+    if difference.x >= -1 and difference.x <= 1 then
+        difference.x = 0
+    end
+    if difference.y >= -1 and difference.y <= 1 then
+        difference.y = 0
+    end
+    difference.z = 0
+    return difference
+end
+
+function CopyPaste.client_onUpdate(multitool)
+    if not multitool.tool:isLocal() then
+        return
+    end
+
     local self = multitool.CopyPaste
+    local lift = sm.localPlayer.getOwnedLift()
+    if lift == nil then
+        self.lastLiftId = nil
+        self.lastLiftLevel = nil
+        return
+    end
+
+    if self.lastLiftId ~= lift.id or self.lastLiftLevel ~= lift.level then
+        self.lastLiftId = lift.id
+        self.lastLiftLevel = lift.level
+        multitool.network:sendToServer("sv_updateCopyPasteLiftLevel", {
+            liftPosition = lift.worldPosition * 4,
+            liftLevel = lift.level
+        })
+    end
+end
+
+function CopyPaste.server_updateLiftLevel(multitool, data, player)
+    local liftData = sm.MTCopyPasteLiftData[player.id]
+    if liftData == nil then
+        liftData = {
+            player = player,
+            selectedShapes = {},
+            rotationIndex = 0
+        }
+        sm.MTCopyPasteLiftData[player.id] = liftData
+    end
+
+    liftData.liftPosition = data.liftPosition
+    liftData.liftLevel = data.liftLevel
+end
+
+function CopyPaste.server_copyPaste(multitool, data, player)
+    local self = multitool.CopyPaste
+    if data.ownedLift ~= nil and player ~= nil then
+        CopyPaste.server_updateLiftLevel(multitool, data.ownedLift, player)
+    end
     -- local targetBody = data.body
     -- local creationTable = sm.creation.exportToTable(targetBody, true, false)
     -- local interactables = data.interactables
@@ -204,7 +314,9 @@ function CopyPaste.doCopyPaste(multitool, data)
     local targetBodyObject = nil
     local externalConnections = data.externalConnections
     local intIdMap = MTMultitoolLib.getVoxelMapInteractableIds(targetBody)
-    local creationTable = sm.creation.exportToTable(targetBody, true, false)
+    local isLifted = targetBody:isOnLift()
+    local liftData = isLifted and findLiftData(targetBody, multitool.tool:getOwner()) or nil
+    local creationTable = sm.creation.exportToTable(targetBody, true, isLifted)
     local generatedShapes = {}
     local originalPositionsTakenUpBySource = {}
     local tensor = {}
@@ -651,7 +763,17 @@ function CopyPaste.doCopyPaste(multitool, data)
     end
     local jsonString = sm.json.writeJsonString(creationTable)
 
-    sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
+    local importedBodies = sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
+    if isLifted and liftData ~= nil and importedBodies ~= nil and #importedBodies > 0 then
+        local adjustment = getLiftPositionAdjustment(importedBodies, liftData.liftPosition)
+        sm.player.placeLift(
+            liftData.player,
+            importedBodies,
+            liftData.liftPosition + adjustment,
+            liftData.liftLevel,
+            liftData.rotationIndex
+        )
+    end
 end
 
 function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)

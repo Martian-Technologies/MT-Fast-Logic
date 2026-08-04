@@ -337,6 +337,10 @@ function MTMultitool.client_onUpdate(self, dt)
     if not success then
         print("Error in Heatmap.client_onUpdate: " .. result)
     end
+    success, result = pcall(CopyPaste.client_onUpdate, self)
+    if not success then
+        print("Error in CopyPaste.client_onUpdate: " .. result)
+    end
 
     local isSprinting = self.tool:isSprinting()
 
@@ -1219,8 +1223,12 @@ function MTMultitool.sv_loadBackup(self, data)
     sm.MTBackupEngine.sv_loadBackup(self, data)
 end
 
-function MTMultitool.server_copyPaste(self, data)
-    CopyPaste.server_copyPaste(self, data)
+function MTMultitool.server_copyPaste(self, data, player)
+    CopyPaste.server_copyPaste(self, data, player)
+end
+
+function MTMultitool.sv_updateCopyPasteLiftLevel(self, data, player)
+    CopyPaste.server_updateLiftLevel(self, data, player)
 end
 
 function MTMultitool.cl_ConnectionManager_commitPreview(self, data)

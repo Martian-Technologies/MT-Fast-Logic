@@ -233,7 +233,7 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect, skipChecksAndU
         self.blockInputsHash[idToConnect][id] = true
         self.numberOfBlockInputs[idToConnect] = self.numberOfBlockInputs[idToConnect] + 1
         -- update states
-        if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
+        if self.blockStates[id] then
             self.countOfOnInputs[idToConnect] = self.countOfOnInputs[idToConnect] + 1
         end
         -- do fixes
@@ -267,7 +267,7 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChec
             self.numberOfBlockInputs[idToDisconnect] = self.numberOfBlockInputs[idToDisconnect] - 1
         end
         -- update states
-        if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
+        if self.blockStates[id] then
             self.countOfOnInputs[idToDisconnect] = self.countOfOnInputs[idToDisconnect] - 1
         end
         if skipChecksAndUpdates ~= true then
@@ -275,7 +275,7 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChec
             self:internalFindRamInterfaces(idToDisconnect)
             self:internalFindRamInterfaces(id)
             self:fixBlockInputData(id)
-            self:internalAddBlockToUpdate(idToDisconnect)
+            self:fixBlockInputData(idToDisconnect)
         end
     end
 end

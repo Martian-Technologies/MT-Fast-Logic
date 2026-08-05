@@ -144,10 +144,10 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
         end
     elseif selfData.nextAction == "setVectorRange" then
         local origin = selfData.fromOrigin
-        local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsFrom, #sm.MTTensorUtil.colorOrder)]
+        local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsFrom - 1, #sm.MTTensorUtil.colorOrder) + 1]
         if selfData.selecting == "to" then
             origin = selfData.toOrigin
-            vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsTo, #sm.MTTensorUtil.colorOrder)]
+            vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsTo - 1, #sm.MTTensorUtil.colorOrder) + 1]
         end
         local closestDistance, closestPosition, nSteps = MathUtil.closestPassBetweenContinuousRayAndDiscreteRay(
             sm.camera.getPosition(),
@@ -486,6 +486,8 @@ function TensorConnect.cleanUp(multitool, noclearpreview)
     selfData.dimSteps = {}
     selfData.vectorsFrom = {}
     selfData.vectorsTo = {}
+    selfData.nametagUpdate(nil)
+    multitool.BlockSelector.bodyConstraint = nil
     if noclearpreview ~= true then
         multitool.ConnectionManager.preview = {}
     end

@@ -194,6 +194,7 @@ function ConnectionShower.client_onUpdate(multitool)
             for _, output in pairs(outputs) do
                 if output == blockFastUuid then
                     selfWired = true
+                    numOutputs = numOutputs + 1
                     goto continue
                 end
                 local block = creation.blocks[output]

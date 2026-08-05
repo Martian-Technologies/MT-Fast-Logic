@@ -240,10 +240,10 @@ local function injectElements(multitool)
             }
         end,
         onclick = function()
-            local options = { 128, 256, 512, 1024, 2048, 4096, 8194, 16384, "unlimited" }
+            local options = { 128, 256, 512, 1024, 2048, 4096, 8192, 16384, "unlimited" }
             local idx = table.find(options, multitool.ConnectionManager.connectionDisplayLimit)
             local newLimit = options[1]
-            if idx ~= #options then
+            if idx and (idx ~= #options) then
                 newLimit = options[idx + 1]
             end
             ConnectionManager.updateConnectionLimitDisplay(multitool, newLimit)

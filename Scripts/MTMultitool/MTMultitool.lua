@@ -500,7 +500,9 @@ function MTMultitool.client_onUnequip(self, animate)
     -- for _, func in pairs(self.subscribtions["client_onUnequip"]) do
     --     func(self, animate)
     -- end
-    if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
+    if MTMultitool.internalModes[self.mode] == "LogicConverter" then
+        LogicConverter.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then
         SiliconConverterTool.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
@@ -548,7 +550,9 @@ function MTMultitool.client_onToggle(self)
     else
         self.SingleConnect.rotated = false
     end
-    if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
+    if MTMultitool.internalModes[self.mode] == "LogicConverter" then
+        LogicConverter.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then
         SiliconConverterTool.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
@@ -556,6 +560,8 @@ function MTMultitool.client_onToggle(self)
         ModeChanger.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "VolumeDeleter" then
+        VolumeDeleter.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
         Colorizer.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "VolumePlacer" then

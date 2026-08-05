@@ -134,3 +134,12 @@ function LogicConverter.trigger(multitool, primaryState, secondaryState, forceBu
         end
     end
 end
+
+function LogicConverter.cleanUp(multitool)
+    local self = multitool.LogicConverter
+    self.confirming = nil
+    self.confirmingType = nil
+    if multitool.tool:isLocal() then
+        sm.visualization.setCreationVisible(false)
+    end
+end

@@ -323,6 +323,10 @@
     "English": "Select the end of the inverted input",
     "Russian": "Выбрать конец инвертированного ввода"
   },
+  "mt.decoder.input_lengths": {
+    "English": "The input rows must have the same length. Cancel the last selection.",
+    "Russian": "Ряды входов должны иметь одинаковую длину. Отмените последний выбор."
+  },
   "mt.decoder.output_origin": {
     "English": "Select the origin of the output row of gates",
     "Russian": "Выбрать блок с нулевым адресом"

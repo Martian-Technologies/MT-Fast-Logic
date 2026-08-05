@@ -153,6 +153,10 @@ function MTMultitool.server_onCreate(self)
     MTFlight.sv_inject(self)
 end
 
+function MTMultitool.server_onDestroy(self)
+    CopyPaste.server_onDestroy(self)
+end
+
 function MTMultitool.client_onCreate(self)
     self.DEVMODE = false
     ThisMultitool = self
@@ -1225,6 +1229,10 @@ end
 
 function MTMultitool.server_copyPaste(self, data, player)
     CopyPaste.server_copyPaste(self, data, player)
+end
+
+function MTMultitool.cl_copyPasteFailed(self, messageId)
+    CopyPaste.client_copyPasteFailed(self, messageId)
 end
 
 function MTMultitool.sv_updateCopyPasteLiftLevel(self, data, player)

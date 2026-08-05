@@ -345,24 +345,43 @@ function BaseFastLogicBlock.remove(self, removeAllData)
 end
 
 function BaseFastLogicBlock.removeUuidData(self)
-    for i = 1, #self.creation.blocks[self.data.uuid].inputs do
-        local otherUuid = self.creation.blocks[self.data.uuid].inputs[i]
-        if self.creation.blocks[otherUuid] ~= nil then
-            if self.creation.blocks[otherUuid].isSilicon then
-                return
-            end
-        end
+    if self:hasSiliconConnection() then
+        return false
     end
-    for i = 1, #self.creation.blocks[self.data.uuid].outputs do
-        local otherUuid = self.creation.blocks[self.data.uuid].outputs[i]
-        if self.creation.blocks[otherUuid] ~= nil then
-            if self.creation.blocks[otherUuid].isSilicon then
-                return
-            end
-        end
+
+    local storageData = self.storage:load()
+    if type(storageData) == "table" then
+        storageData = table.deepCopy(storageData)
     end
+
     local uuid = self.data.uuid
     self.data.uuid = nil
     self:server_saveDataToStorage()
     self.data.uuid = uuid
+    return true, storageData
+end
+
+function BaseFastLogicBlock.restoreUuidData(self, storageData)
+    self.storage:save(storageData)
+end
+
+function BaseFastLogicBlock.hasSiliconConnection(self)
+    local block = self.creation.blocks[self.data.uuid]
+    if block == nil then
+        return false
+    end
+
+    for _, otherUuid in ipairs(block.inputs or {}) do
+        local other = self.creation.blocks[otherUuid]
+        if other ~= nil and other.isSilicon then
+            return true
+        end
+    end
+    for _, otherUuid in ipairs(block.outputs or {}) do
+        local other = self.creation.blocks[otherUuid]
+        if other ~= nil and other.isSilicon then
+            return true
+        end
+    end
+    return false
 end

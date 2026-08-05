@@ -451,6 +451,26 @@
     "English": "Specify the range of the {ordinal} dimension vector of the source tensor",
     "Russian": "Укажите количество повторений {ordinal} базисного вектора исходной матрицы"
   },
+  "mt.tensor.progress_queued": {
+    "English": "Tensor operation queued: {total} pairs",
+    "Russian": "Операция с матрицей поставлена в очередь: {total} пар"
+  },
+  "mt.tensor.progress_connecting": {
+    "English": "Connecting tensor: {percent}% ({completed} / {total})",
+    "Russian": "Подключение матрицы: {percent}% ({completed} / {total})"
+  },
+  "mt.tensor.progress_disconnecting": {
+    "English": "Disconnecting tensor: {percent}% ({completed} / {total})",
+    "Russian": "Отключение матрицы: {percent}% ({completed} / {total})"
+  },
+  "mt.tensor.progress_connected": {
+    "English": "Tensor connection complete: {total} pairs processed",
+    "Russian": "Подключение матрицы завершено: обработано {total} пар"
+  },
+  "mt.tensor.progress_disconnected": {
+    "English": "Tensor disconnection complete: {total} pairs processed",
+    "Russian": "Отключение матрицы завершено: обработано {total} пар"
+  },
   "mt.settings.desc.logic_converter": {
     "English": "Lets you convert Vanilla Logic to Fast Logic and vice versa.",
     "Russian": "Позволяет заменить логику на быструю и наоборот."

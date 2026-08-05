@@ -1221,8 +1221,12 @@ function MTMultitool.sv_toggleFlying(self, data, player)
     MTFlight.sv_toggleFlying(self, data, player)
 end
 
-function MTMultitool.sv_connectTensors(self, data)
-    TensorConnect.sv_connectTensors(self, data)
+function MTMultitool.sv_connectTensors(self, data, player)
+    TensorConnect.sv_connectTensors(self, data, player)
+end
+
+function MTMultitool.cl_tensorProgress(self, data)
+    TensorConnect.cl_tensorProgress(self, data)
 end
 
 function MTMultitool.sv_receiveBlueprintPacket(self, data)

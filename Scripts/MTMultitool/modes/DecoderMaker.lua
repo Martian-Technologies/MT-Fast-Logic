@@ -92,14 +92,13 @@ local function updateDecoderNametags(multitool, lookingAt)
             local origin = self.outputOrigin:getWorldPosition()
             local delta = step:getWorldPosition() - origin
             local numArrows = 2 ^ #normalSequence - 1
-            local function renderArrow(i)
-                sm.MTTensorUtil.renderVector(dots, origin + delta * i, origin + delta * (i + 1), outputColor, 0.03)
-            end
-            for i = 0, math.min(numArrows, 10) - 1 do
-                renderArrow(i)
-            end
-            for i = math.max(10, numArrows - 10), numArrows - 1 do
-                renderArrow(i)
+            local prevPos = origin
+            for i = 1, numArrows do
+                if i <= 10 or i >= numArrows - 10 then
+                    local pos = origin + delta * i
+                    sm.MTTensorUtil.renderVector(dots, prevPos, pos, outputColor, 0.03)
+                    prevPos = pos
+                end
             end
         end
     end

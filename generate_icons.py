@@ -526,23 +526,40 @@ def read_icon_frames(icon_xml: Path) -> dict[str, tuple[int, int]]:
     return frames
 
 
-def read_icon_names(value: object, field: str) -> set[str]:
+def read_icon_names(value: object, field: str, entry_label: str) -> set[str]:
     if value is None:
         return set()
     if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
-        raise GenerationError(
-            f"IconOverlays.json: {field} must be a list of icon names"
-        )
+        raise GenerationError(f"{entry_label} {field} must be a list of icon names")
     return set(value)
+
+
+def read_icon_overlay_entries(gui_dir: Path) -> list[tuple[Path, int, object]]:
+    manifest_paths = sorted(gui_dir.glob("IconOverlays_*.json"))
+    default_manifest = gui_dir / "IconOverlays.json"
+    if default_manifest.is_file():
+        manifest_paths.insert(0, default_manifest)
+    if not manifest_paths:
+        raise GenerationError("Gui contains no IconOverlays.json manifests")
+
+    entries = []
+    for manifest_path in manifest_paths:
+        manifest = read_json(manifest_path)
+        if not isinstance(manifest, dict) or not isinstance(
+            manifest.get("overlays"), list
+        ):
+            raise GenerationError(f"{manifest_path.name} must contain an overlays list")
+        entries.extend(
+            (manifest_path, position, entry)
+            for position, entry in enumerate(manifest["overlays"], start=1)
+        )
+    return entries
 
 
 def apply_icon_overlays(root: Path) -> None:
     gui_dir = root / "Gui"
     icon_png = gui_dir / "IconMap.png"
-    manifest_path = gui_dir / "IconOverlays.json"
-    manifest = read_json(manifest_path)
-    if not isinstance(manifest, dict) or not isinstance(manifest.get("overlays"), list):
-        raise GenerationError("IconOverlays.json must contain an overlays list")
+    overlay_entries = read_icon_overlay_entries(gui_dir)
 
     frames = read_icon_frames(gui_dir / "IconMap.xml")
     shapes = shape_uuids(root)
@@ -554,35 +571,28 @@ def apply_icon_overlays(root: Path) -> None:
         raise GenerationError(f"could not load {icon_png}: {error}") from error
 
     applied_counts: list[tuple[str, int]] = []
-    for position, entry in enumerate(manifest["overlays"], start=1):
+    for manifest_path, position, entry in overlay_entries:
+        entry_label = f"{manifest_path.name}: overlay {position}"
         if not isinstance(entry, dict):
-            raise GenerationError(
-                f"IconOverlays.json: overlay {position} is not an object"
-            )
+            raise GenerationError(f"{entry_label} is not an object")
         image_name = entry.get("image")
         if not isinstance(image_name, str) or not image_name:
-            raise GenerationError(f"IconOverlays.json: overlay {position} has no image")
+            raise GenerationError(f"{entry_label} has no image")
         all_shapes = entry.get("all_shapes", False)
         if not isinstance(all_shapes, bool):
-            raise GenerationError(
-                f"IconOverlays.json: overlay {position} all_shapes must be a boolean"
-            )
+            raise GenerationError(f"{entry_label} all_shapes must be a boolean")
 
         targets = set(shapes) if all_shapes else set()
-        targets.update(read_icon_names(entry.get("icons"), "icons"))
+        targets.update(read_icon_names(entry.get("icons"), "icons", entry_label))
         targets.difference_update(
-            read_icon_names(entry.get("exclude_icons"), "exclude_icons")
+            read_icon_names(entry.get("exclude_icons"), "exclude_icons", entry_label)
         )
         if not targets:
-            raise GenerationError(
-                f"IconOverlays.json: overlay {position} has no targets"
-            )
+            raise GenerationError(f"{entry_label} has no targets")
         missing = targets - frames.keys()
         if missing:
             examples = ", ".join(sorted(missing)[:5])
-            raise GenerationError(
-                f"IconOverlays.json: overlay {position} targets missing icons: {examples}"
-            )
+            raise GenerationError(f"{entry_label} targets missing icons: {examples}")
 
         offset = entry.get("offset", [0, 0])
         if (
@@ -590,9 +600,7 @@ def apply_icon_overlays(root: Path) -> None:
             or len(offset) != 2
             or not all(isinstance(value, int) for value in offset)
         ):
-            raise GenerationError(
-                f"IconOverlays.json: overlay {position} offset must contain two integers"
-            )
+            raise GenerationError(f"{entry_label} offset must contain two integers")
         offset_x, offset_y = offset
 
         image_path = gui_dir / image_name

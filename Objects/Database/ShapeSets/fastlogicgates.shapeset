@@ -621,7 +621,8 @@
                 "classname": "FastLogicGate_25",
                 "filename": "$CONTENT_DATA/Scripts/fastLogicBlocks/FastLogicGateColors.lua"
             },
-            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88112"
+            "uuid": "6a9dbff5-7562-4e9a-99ae-3590ece88112",
+            "showInInventory": true
         },
         {
             "box": {

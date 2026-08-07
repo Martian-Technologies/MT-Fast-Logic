@@ -4,7 +4,7 @@ function Heatmap.inject(multitool)
     multitool.Heatmap = {}
     local self = multitool.Heatmap
     self.creationTracking = nil
-    self.updateNametags = NametagManager.createController(multitool)
+    self.dotSource = VertexRenderer.createSource(multitool)
     self.blockUsageTracker = {}
     self.blockUsageSum = {}
     self.sumMaximum = 0
@@ -18,7 +18,7 @@ function Heatmap.trigger(multitool, primaryState, secondaryState, forceBuild, lo
             "mt.heatmap.stop")
         if secondaryState == 1 then
             self.creationTracking = nil
-            self.updateNametags(nil)
+            self.dotSource:clear()
         end
     else
         local origin = sm.camera.getPosition()
@@ -151,7 +151,7 @@ function Heatmap.client_onUpdate(multitool, dt)
     end
     if not success then
         self.creationTracking = nil
-        self.updateNametags(nil)
+        self.dotSource:clear()
         return
     end
     local creationId = sm.MTFastLogic.CreationUtil.getCreationId(self.creationTracking[1])
@@ -164,16 +164,6 @@ function Heatmap.client_onUpdate(multitool, dt)
     local fastLogicGates = creation.FastLogicGates
     local siliconBlocks = creation.SiliconBlocks
     local tags = {}
-
-    local camPos = sm.camera.getPosition()
-    -- dots decreasing in size
-    local scaleConstant = 41 * 0.95 * 5
-    local dots = {"●", "•", "·"}
-    if MTLocalization ~= nil and MTLocalization.isLanguage("Russian") then
-        dots = {"•", "•", "·"}
-    end
-    local offsets = { 0.02, 0.02, 0.02 }
-    local distanceMargin = { scaleConstant/41, scaleConstant/23, scaleConstant/11 }
 
     for i, block in pairs(blocks) do
         local body
@@ -210,33 +200,19 @@ function Heatmap.client_onUpdate(multitool, dt)
         if computationalLoad < 0.01 then
             goto continue
         end
-        -- local text = "·"
-        -- if computationalLoad > 0.3 then
-        --     text = "•"
-        -- end
-        -- if computationalLoad > 0.7 then
-        --     text = "●"
-        -- end
-        local distance = (camPos - position):length() / (computationalLoad + 0.1)
-        local dotIndex = 1
-        for j = 1, #distanceMargin do
-            if (distance > distanceMargin[j]) then
-                dotIndex = j
-            end
-        end
         local clr = HSVtoRGB((1-computationalLoad)/3, 1, 1)
         table.insert(tags, {
-            txt = dots[dotIndex],
-            pos = position,-- + sm.vec3.new(0, 0, computationalLoad/8),
+            pos = position,
             color = clr,
+            radius = 0.01 + computationalLoad * 0.02
         })
         ::continue::
     end
-    self.updateNametags(tags)
+    self.dotSource:set(tags)
     -- advPrint(FLR, 3, 100, true)
 end
 
 function Heatmap.cleanUp(multitool)
     local self = multitool.Heatmap
-    self.updateNametags(nil)
+    self.dotSource:clear()
 end

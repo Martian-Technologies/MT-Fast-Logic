@@ -6,6 +6,7 @@ function DecoderMaker.inject(multitool)
     multitool.DecoderMaker = {}
     local self = multitool.DecoderMaker
     self.nametagUpdate = NametagManager.createController(multitool)
+    self.dotSource = VertexRenderer.createSource(multitool)
     self.normalStart = nil
     self.normalEnd = nil
     self.invertedStart = nil
@@ -55,6 +56,7 @@ end
 local function updateDecoderNametags(multitool, lookingAt)
     local self = multitool.DecoderMaker
     local tags = {}
+    local dots = {}
     local normalPreviewEnd = self.normalEnd
     local invertedPreviewEnd = self.invertedEnd
     if self.normalStart ~= nil and normalPreviewEnd == nil then
@@ -91,7 +93,7 @@ local function updateDecoderNametags(multitool, lookingAt)
             local delta = step:getWorldPosition() - origin
             local numArrows = 2 ^ #normalSequence - 1
             local function renderArrow(i)
-                sm.MTTensorUtil.renderVector(tags, origin + delta * i, origin + delta * (i + 1), outputColor, 0.03)
+                sm.MTTensorUtil.renderVector(dots, origin + delta * i, origin + delta * (i + 1), outputColor, 0.03)
             end
             for i = 0, math.min(numArrows, 10) - 1 do
                 renderArrow(i)
@@ -103,6 +105,7 @@ local function updateDecoderNametags(multitool, lookingAt)
     end
 
     self.nametagUpdate(tags)
+    self.dotSource:set(dots)
 end
 
 function DecoderMaker.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -257,6 +260,7 @@ end
 function DecoderMaker.cleanUp(multitool, noclearpreview)
     local self = multitool.DecoderMaker
     self.nametagUpdate(nil)
+    self.dotSource:clear()
     self.normalStart = nil
     self.normalEnd = nil
     self.invertedStart = nil

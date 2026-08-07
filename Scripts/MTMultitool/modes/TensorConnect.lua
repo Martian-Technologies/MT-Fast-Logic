@@ -20,7 +20,7 @@ function TensorConnect.inject(multitool)
     selfData.dimSteps = {}
     selfData.vectorsFrom = {}
     selfData.vectorsTo = {}
-    selfData.nametagUpdate = NametagManager.createController(multitool)
+    selfData.dotSource = VertexRenderer.createSource(multitool)
 end
 
 function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -317,7 +317,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     if recalculateNextAction then
         TensorConnect.recalculateNextAction(multitool)
     end
-    selfData.nametagUpdate(tags)
+    selfData.dotSource:set(tags)
 end
 
 function TensorConnect.recalculateNextAction(multitool)
@@ -486,7 +486,7 @@ function TensorConnect.cleanUp(multitool, noclearpreview)
     selfData.dimSteps = {}
     selfData.vectorsFrom = {}
     selfData.vectorsTo = {}
-    selfData.nametagUpdate(nil)
+    selfData.dotSource:clear()
     multitool.BlockSelector.bodyConstraint = nil
     if noclearpreview ~= true then
         multitool.ConnectionManager.preview = {}

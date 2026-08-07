@@ -4,6 +4,7 @@ function HoveringUI.inject(multitool)
     multitool.HoveringUI = {}
     local self = multitool.HoveringUI
     self.updateNametags = NametagManager.createController(multitool)
+    self.dotSource = VertexRenderer.createSource(multitool)
     self.startAngle = nil
     self.elements = nil
 end
@@ -179,7 +180,7 @@ end
 
 local function dotCircleButton(multitool, ctx)
     local element = ctx.element
-    local tags = ctx.tags
+    local tags = ctx.dotVertices
 
     local horizontalAngle = ctx.horizontalAngle
     local verticalAngle = ctx.verticalAngle
@@ -212,7 +213,6 @@ local function dotCircleButton(multitool, ctx)
         end
     end
 
-    local dot = render.dot or element.dot or "."
     local radiusScale = render.radiusScale or element.radiusScale or 1
     local baseRadius = element.dotRadius or 0.022
     local radius = baseRadius * radiusScale
@@ -223,7 +223,6 @@ local function dotCircleButton(multitool, ctx)
     local function emitDot(offsetA, offsetE)
         table.insert(tags, {
             pos = getOffsetPos(ctx, offsetA, offsetE),
-            txt = dot,
             color = color
         })
     end
@@ -330,6 +329,7 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
     local elements = self.elements
 
     local tags = {}
+    local dotVertices = {}
     local vertical = math.pi / 48
     local cameraVec = sm.camera.getDirection()
     local block = { hovered = false }
@@ -349,6 +349,7 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
         local verticalAngle = math.acos(verticalVecElement:dot(verticalVecCamera))
         local ctx = {
             tags = tags,
+            dotVertices = dotVertices,
             element = element,
             levelQuat = levelQuat,
             elevationQuat = elevationQuat,
@@ -385,11 +386,13 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
     -- })
 
     self.updateNametags(tags)
+    self.dotSource:set(dotVertices)
 end
 
 function HoveringUI.cleanUp(multitool)
     local self = multitool.HoveringUI
     self.startAngle = nil
     self.updateNametags(nil)
+    self.dotSource:clear()
     self.elements = nil
 end

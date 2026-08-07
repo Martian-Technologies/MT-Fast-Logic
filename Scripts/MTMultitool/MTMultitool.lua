@@ -157,12 +157,17 @@ function MTMultitool.server_onDestroy(self)
     CopyPaste.server_onDestroy(self)
 end
 
+function MTMultitool.client_onDestroy(self)
+    VertexRenderer.destroy(self)
+end
+
 function MTMultitool.client_onCreate(self)
     self.DEVMODE = false
     ThisMultitool = self
     self.subscriptions = {
         client_onUpdate = {}
     }
+    VertexRenderer.inject(self)
 
     self.saveIdx = 1
 
@@ -202,7 +207,6 @@ function MTMultitool.client_onCreate(self)
     BackupMenu.inject(self)
 
     BlockSelector.inject(self)
-    VertexRenderer.inject(self)
     ConnectionManager.inject(self)
     RangeOffset.inject(self)
 
@@ -333,10 +337,6 @@ function MTMultitool.client_onUpdate(self, dt)
     if not success then
         print("Error in ConnectionManager.client_onUpdate: " .. result)
     end
-    success, result = pcall(VertexRenderer.client_onUpdate, self)
-    if not success then
-        print("Error in VertexRenderer.client_onUpdate: " .. result)
-    end
     success, result = pcall(Heatmap.client_onUpdate, self, dt)
     if not success then
         print("Error in Heatmap.client_onUpdate: " .. result)
@@ -344,6 +344,10 @@ function MTMultitool.client_onUpdate(self, dt)
     success, result = pcall(CopyPaste.client_onUpdate, self)
     if not success then
         print("Error in CopyPaste.client_onUpdate: " .. result)
+    end
+    success, result = pcall(VertexRenderer.client_onUpdate, self)
+    if not success then
+        print("Error in VertexRenderer.client_onUpdate: " .. result)
     end
 
     local isSprinting = self.tool:isSprinting()

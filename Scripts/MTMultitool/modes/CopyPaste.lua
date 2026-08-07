@@ -30,7 +30,7 @@ end
 function CopyPaste.inject(multitool)
     multitool.CopyPaste = {}
     local self = multitool.CopyPaste
-    self.nametagUpdate = NametagManager.createController(multitool)
+    self.dotSource = VertexRenderer.createSource(multitool)
     self.actions = {}
     self.origin = nil
     self.vectors = {}
@@ -1408,7 +1408,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             end
         end
     end
-    self.nametagUpdate(tags)
+    self.dotSource:set(tags)
 end
 
 function CopyPaste.client_onReload(multitool)
@@ -1427,7 +1427,7 @@ end
 
 function CopyPaste.cleanUp(multitool)
     local self = multitool.CopyPaste
-    self.nametagUpdate(nil)
+    self.dotSource:clear()
     self.selectedShapes = {}
     self.selectingShapes = true
     self.shapeGroups = {}
@@ -1444,6 +1444,6 @@ end
 
 function CopyPaste.cleanNametags(multitool)
     local self = multitool.CopyPaste
-    self.nametagUpdate(nil)
+    self.dotSource:clear()
     VolumePlacer.cleanNametags(multitool)
 end

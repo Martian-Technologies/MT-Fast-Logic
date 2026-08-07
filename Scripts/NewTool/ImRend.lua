@@ -105,7 +105,7 @@ function ImRend.init(tool)
             local effect = effects[index]
 
             if updateScale then
-                effect:setScale(sm.vec3.new(1, rectData.wRect[index] * fitScale * 100, rectData.hRect[index] * fitScale * 100))
+                effect:setScale(sm.vec3.new(0.01, rectData.wRect[index] * fitScale, rectData.hRect[index] * fitScale))
             end
 
             if updatePosition then

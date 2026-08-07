@@ -2,8 +2,6 @@ SiliconConverterTool = {}
 
 function SiliconConverterTool.inject(multitool)
     multitool.SiliconConverter = {}
-    local self = multitool.SiliconConverter
-    self.nametagUpdate = NametagManager.createController(multitool)
 end
 
 function SiliconConverterTool.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt_NOTUSED)

@@ -164,8 +164,7 @@ function ConnectionManager.createVertexSubsription(multitool)
             local dotPosition = dot.start * (1 - t) ^ 2 + dot.intermediate * 2 * (1 - t) * t + dot.final * t ^ 2
             table.insert(vertices, {
                 pos = dotPosition,
-                color = dot.color,
-                txt = "•"
+                color = dot.color
             })
         end
         return vertices

@@ -51,6 +51,17 @@
                 "z": 1
             },
             "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/hollow_circle_billboard.rend",
+            "uuid": "82466bb9-f047-43b0-a4ac-d2ca9cdb40f5",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
             "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_00.rend",
             "uuid": "f8755ed7-406a-5d84-b1ca-1328023c136f",
             "showInInventory": false

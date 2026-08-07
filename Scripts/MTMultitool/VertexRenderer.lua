@@ -1,6 +1,6 @@
 VertexRenderer = {}
 
-local circleUuid = sm.uuid.new("18d15b07-479f-4558-b78e-c000a3b16d4c")
+local defaultUuid = sm.uuid.new("18d15b07-479f-4558-b78e-c000a3b16d4c")
 local circleModelRadius = 0.5
 local defaultRadius = 0.015
 local defaultColor = sm.color.new(1, 1, 1, 1)
@@ -130,10 +130,10 @@ end
 
 local function createPoint()
     local effect = sm.effect.createEffect("ShapeRenderable")
-    effect:setParameter("uuid", circleUuid)
     return {
         effect = effect,
         visible = false,
+        uuid = nil,
         positionX = nil,
         positionY = nil,
         positionZ = nil,
@@ -239,6 +239,12 @@ local function syncPoint(point, vertex, rotation, rotationVersion)
     local position = vertex.pos
     local radius = vertex.radius or defaultRadius
     local color = vertex.color or defaultColor
+    local uuid = vertex.uuid or defaultUuid
+
+    if point.uuid ~= uuid then
+        point.effect:setParameter("uuid", uuid)
+        point.uuid = uuid
+    end
 
     if point.positionX == nil or
         math.abs(point.positionX - position.x) > positionEpsilon or

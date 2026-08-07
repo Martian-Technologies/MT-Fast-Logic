@@ -148,6 +148,7 @@ def write_overlays() -> None:
             {
                 "image": f"FastLogicGateOverlays/{image_name}",
                 "icons": [gate_uuid(index)],
+                "underlay": True,
             }
         )
 

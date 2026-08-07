@@ -556,6 +556,22 @@ def read_icon_overlay_entries(gui_dir: Path) -> list[tuple[Path, int, object]]:
     return entries
 
 
+def composite_underlay(
+    atlas: Image.Image, underlay: Image.Image, position: tuple[int, int]
+) -> None:
+    x, y = position
+    left = max(x, 0)
+    top = max(y, 0)
+    right = min(x + underlay.width, atlas.width)
+    bottom = min(y + underlay.height, atlas.height)
+    if left >= right or top >= bottom:
+        return
+
+    source = underlay.crop((left - x, top - y, right - x, bottom - y))
+    foreground = atlas.crop((left, top, right, bottom))
+    atlas.paste(Image.alpha_composite(source, foreground), (left, top))
+
+
 def apply_icon_overlays(root: Path) -> None:
     gui_dir = root / "Gui"
     icon_png = gui_dir / "IconMap.png"
@@ -581,6 +597,9 @@ def apply_icon_overlays(root: Path) -> None:
         all_shapes = entry.get("all_shapes", False)
         if not isinstance(all_shapes, bool):
             raise GenerationError(f"{entry_label} all_shapes must be a boolean")
+        underlay = entry.get("underlay", False)
+        if not isinstance(underlay, bool):
+            raise GenerationError(f"{entry_label} underlay must be a boolean")
 
         targets = set(shapes) if all_shapes else set()
         targets.update(read_icon_names(entry.get("icons"), "icons", entry_label))
@@ -631,7 +650,10 @@ def apply_icon_overlays(root: Path) -> None:
                     f"overlay {image_name} for frame {frame_x} {frame_y} "
                     "would be outside IconMap.png"
                 )
-            atlas.paste(overlay, (x, y), overlay)
+            if underlay:
+                composite_underlay(atlas, overlay, (x, y))
+            else:
+                atlas.paste(overlay, (x, y), overlay)
         applied_counts.append((image_name, len(frame_points)))
 
     temporary = icon_png.with_name(f".{icon_png.name}.overlays-{os.getpid()}")

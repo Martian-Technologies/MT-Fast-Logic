@@ -10,4 +10,6 @@ IconMapsBackups/
 translation_ext/
 CONTEXT.md
 docs/
+.env
+.venv/
 __pycache__/

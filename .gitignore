@@ -1,6 +1,5 @@
 *.mco
 *.mco
-/Cache
 MTMultitoolSavefile*
 NewToolSettings*
 Backups/Backup*

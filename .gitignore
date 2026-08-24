@@ -13,3 +13,6 @@ docs/
 .env
 .venv/
 __pycache__/
+Cache/Bundle
+Cache/Mesh
+Cache/Textures

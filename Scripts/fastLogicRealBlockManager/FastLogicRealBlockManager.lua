@@ -26,6 +26,7 @@ function FastLogicRealBlockManager.init(self)
     self.FastLogicRunner = self.creation.FastLogicRunner
     self.FastLogicAllBlockManager = self.creation.FastLogicAllBlockManager
     self.displayedBlockStates = {}
+    self.displayedTimerUvs = {}
     self.blocksWithData = {}
     self.scanNext = {}
     self.needDisplayUpdate = {}
@@ -45,6 +46,7 @@ function FastLogicRealBlockManager.update(self)
     self.needDisplayUpdate = {}
     -- update states of fast gates
     self:updateDisplay(updatedGates)
+    self:updateTimerDisplay()
 
     for k, v in pairs(self.creation.FastLogicBlockMemorys) do
         if sm.exists(v.interactable) then

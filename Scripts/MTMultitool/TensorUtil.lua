@@ -6,8 +6,7 @@ function sm.MTTensorUtil.renderLine(nametagsTable, origin, destination, color, s
     for i = 0, dotCount do
         table.insert(nametagsTable, {
             pos = origin + delta * (i / dotCount),
-            color = color,
-            txt = "•"
+            color = color
         })
     end
 end
@@ -113,8 +112,7 @@ function sm.MTTensorUtil.renderSpinner(nametagsTable, position, color, spinnerCo
 
         table.insert(nametagsTable, {
             pos = dotPosition,
-            color = color,
-            txt = "•"
+            color = color
         })
     end
 end

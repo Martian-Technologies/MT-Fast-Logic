@@ -20,7 +20,7 @@ function TensorConnect.inject(multitool)
     selfData.dimSteps = {}
     selfData.vectorsFrom = {}
     selfData.vectorsTo = {}
-    selfData.nametagUpdate = NametagManager.createController(multitool)
+    selfData.dotSource = VertexRenderer.createSource(multitool)
 end
 
 function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -144,10 +144,10 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
         end
     elseif selfData.nextAction == "setVectorRange" then
         local origin = selfData.fromOrigin
-        local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsFrom, #sm.MTTensorUtil.colorOrder)]
+        local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsFrom - 1, #sm.MTTensorUtil.colorOrder) + 1]
         if selfData.selecting == "to" then
             origin = selfData.toOrigin
-            vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsTo, #sm.MTTensorUtil.colorOrder)]
+            vecColor = sm.MTTensorUtil.colorOrder[math.fmod(selfData.nDimsTo - 1, #sm.MTTensorUtil.colorOrder) + 1]
         end
         local closestDistance, closestPosition, nSteps = MathUtil.closestPassBetweenContinuousRayAndDiscreteRay(
             sm.camera.getPosition(),
@@ -263,16 +263,19 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     spinnersCount = 0
     for i = 0, #selfData.vectorsFrom - 1 do
         local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder) + 1]
-        local fromCreationRotationQuat = selfData.fromOrigin:getBody().worldRotation
+        local fromBody = selfData.fromOrigin:getBody()
+        local fromCreationRotationQuat = fromBody.worldRotation
         local prevPos = selfData.fromOrigin:getWorldPosition()
         if selfData.vectorsFrom[i + 1]:length() > 0 then
             for l = 1, selfData.dimSteps[i + 1] do
                 if l > 10 and l < selfData.dimSteps[i + 1] - 10 then
                     goto continue
                 end
-                -- gotta rotate selfData.vectorsFrom[i + 1] * l / 4 by fromCreationRotationQuat
-                local pos = selfData.fromOrigin:getWorldPosition() +
-                    fromCreationRotationQuat * (selfData.vectorsFrom[i + 1] * l / 4)
+                local offset = selfData.vectorsFrom[i + 1] * l
+                if not fromBody:isOnLift() then
+                    offset = fromCreationRotationQuat * (offset / 4)
+                end
+                local pos = selfData.fromOrigin:getWorldPosition() + offset
                 sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, 0.03)
                 prevPos = pos
                 ::continue::
@@ -287,14 +290,19 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
         local spinnersCount = 0
         for i = 0, #selfData.vectorsTo - 1 do
             local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder) + 1]
-            local toCreationRotationQuat = selfData.toOrigin:getBody().worldRotation
+            local toBody = selfData.toOrigin:getBody()
+            local toCreationRotationQuat = toBody.worldRotation
             local prevPos = selfData.toOrigin:getWorldPosition()
             if selfData.vectorsTo[i + 1]:length() > 0 then
                 for l = 1, selfData.dimSteps[i + 1] do
                     if l > 10 and l < selfData.dimSteps[i + 1] - 10 then
                         goto continue
                     end
-                    local pos = selfData.toOrigin:getWorldPosition() + toCreationRotationQuat * (selfData.vectorsTo[i + 1] * l / 4)
+                    local offset = selfData.vectorsTo[i + 1] * l
+                    if not toBody:isOnLift() then
+                        offset = toCreationRotationQuat * (offset / 4)
+                    end
+                    local pos = selfData.toOrigin:getWorldPosition() + offset
                     sm.MTTensorUtil.renderVector(tags, prevPos, pos, vecColor, 0.03)
                     prevPos = pos
                     ::continue::
@@ -309,7 +317,7 @@ function TensorConnect.trigger(multitool, primaryState, secondaryState, forceBui
     if recalculateNextAction then
         TensorConnect.recalculateNextAction(multitool)
     end
-    selfData.nametagUpdate(tags)
+    selfData.dotSource:set(tags)
 end
 
 function TensorConnect.recalculateNextAction(multitool)
@@ -478,6 +486,8 @@ function TensorConnect.cleanUp(multitool, noclearpreview)
     selfData.dimSteps = {}
     selfData.vectorsFrom = {}
     selfData.vectorsTo = {}
+    selfData.dotSource:clear()
+    multitool.BlockSelector.bodyConstraint = nil
     if noclearpreview ~= true then
         multitool.ConnectionManager.preview = {}
     end
@@ -576,7 +586,63 @@ function TensorConnect.calculatePreview(multitool)
     end
 end
 
-function TensorConnect.sv_connectTensors(multitool, packet)
+local tensorProgressUpdateInterval = 10
+
+local function getTensorPairCount(dimSteps)
+    local pairCount = 1
+    for _, dimStep in pairs(dimSteps) do
+        pairCount = pairCount * (dimStep + 1)
+    end
+    return pairCount
+end
+
+local function sendTensorProgress(task, state, completed)
+    if task.player == nil or task.progressNetwork == nil then
+        return
+    end
+    local total = task.totalPairs
+    local percent = total > 0 and math.floor(completed / total * 100) or 100
+    task.progressNetwork:sendToClient(task.player, "cl_tensorProgress", {
+        state = state,
+        mode = task.mode,
+        completed = completed,
+        total = total,
+        percent = percent
+    })
+end
+
+function TensorConnect.cl_tensorProgress(multitool, data)
+    if type(data) ~= "table" then
+        return
+    end
+    local state = data.state
+    local vars = {
+        completed = math.floor(tonumber(data.completed) or 0),
+        total = math.floor(tonumber(data.total) or 0),
+        percent = math.floor(tonumber(data.percent) or 0)
+    }
+    local message
+    if state == "queued" then
+        message = tr("mt.tensor.progress_queued", vars)
+    elseif state == "progress" then
+        local id = data.mode == "disconnect" and
+            "mt.tensor.progress_disconnecting" or "mt.tensor.progress_connecting"
+        message = tr(id, vars)
+    elseif state == "complete" then
+        local id = data.mode == "disconnect" and
+            "mt.tensor.progress_disconnected" or "mt.tensor.progress_connected"
+        message = tr(id, vars)
+    else
+        return
+    end
+
+    sm.gui.displayAlertText(message, state == "complete" and 3 or 1)
+    if state == "complete" then
+        sm.gui.chatMessage(message)
+    end
+end
+
+function TensorConnect.sv_connectTensors(multitool, packet, player)
     sm.MTBackupEngine.sv_backupCreation({
         hasCreationData = false,
         body = packet.toOrigin:getBody(),
@@ -593,14 +659,18 @@ function TensorConnect.sv_connectTensors(multitool, packet)
         packet.fromVG = MTMultitoolLib.createVoxelGrid(fromOrigin:getBody())
         packet.toVG = MTMultitoolLib.createVoxelGrid(toOrigin:getBody())
     end
+    packet.player = player
+    packet.progressNetwork = multitool.network
+    packet.totalPairs = getTensorPairCount(packet.dimSteps)
+    packet.lastProgressTick = sm.game.getCurrentTick()
     table.insert(TensorConnect.sv_tasks, packet)
+    sendTensorProgress(packet, "queued", 0)
 end
 
 function TensorConnect.server_onFixedUpdate(multitool, dt)
     if #TensorConnect.sv_tasks == 0 then
         return
     end
-    -- do 100 connections from the first task in the queue
     local task = table.remove(TensorConnect.sv_tasks, 1)
     local fromOrigin = task.fromOrigin
     local toOrigin = task.toOrigin
@@ -618,49 +688,49 @@ function TensorConnect.server_onFixedUpdate(multitool, dt)
         fromPos = fromOrigin:getWorldPosition()
         toPos = toOrigin:getWorldPosition()
     end
-    local nConnections = 1
-    for i, dimStep in pairs(dimSteps) do
-        nConnections = nConnections * (dimStep + 1)
-    end
-    -- print(nConnections)
+    local nConnections = task.totalPairs or getTensorPairCount(dimSteps)
     local makeConnectionsPerTick = 1024
     for k = i, i + makeConnectionsPerTick - 1 do
-        -- print(k)
         if k >= nConnections then
             break
         end
-        for j = 0, nDims - 1 do
-            local fromOffset = sm.vec3.new(0, 0, 0)
-            local toOffset = sm.vec3.new(0, 0, 0)
-            local value = k
-            for l = 0, nDims - 1 do
-                local dimStep = dimSteps[l + 1]
-                local dimValue = value % (dimStep + 1)
-                value = math.floor(value / (dimStep + 1))
-                fromOffset = fromOffset + vectorsFrom[l + 1] * dimValue
-                toOffset = toOffset + vectorsTo[l + 1] * dimValue
-            end
-            local from = fromPos + fromOffset
-            local to = toPos + toOffset
-            local fromShape = MTMultitoolLib.getShapeAtVoxelGrid(fromVG, from)
-            local toShape = MTMultitoolLib.getShapeAtVoxelGrid(toVG, to)
-            if fromShape ~= nil and toShape ~= nil then
-                local fromInt = fromShape:getInteractable()
-                local toInt = toShape:getInteractable()
-                if fromInt ~= nil and toInt ~= nil then
-                    if mode == "connect" then
-                        fromInt:connect(toInt)
-                    elseif mode == "disconnect" then
-                        fromInt:disconnect(toInt)
-                    end
+        local fromOffset = sm.vec3.new(0, 0, 0)
+        local toOffset = sm.vec3.new(0, 0, 0)
+        local value = k
+        for l = 0, nDims - 1 do
+            local dimStep = dimSteps[l + 1]
+            local dimValue = value % (dimStep + 1)
+            value = math.floor(value / (dimStep + 1))
+            fromOffset = fromOffset + vectorsFrom[l + 1] * dimValue
+            toOffset = toOffset + vectorsTo[l + 1] * dimValue
+        end
+        local from = fromPos + fromOffset
+        local to = toPos + toOffset
+        local fromShape = MTMultitoolLib.getShapeAtVoxelGrid(fromVG, from)
+        local toShape = MTMultitoolLib.getShapeAtVoxelGrid(toVG, to)
+        if fromShape ~= nil and toShape ~= nil then
+            local fromInt = fromShape:getInteractable()
+            local toInt = toShape:getInteractable()
+            if fromInt ~= nil and toInt ~= nil then
+                if mode == "connect" then
+                    fromInt:connect(toInt)
+                elseif mode == "disconnect" then
+                    fromInt:disconnect(toInt)
                 end
             end
         end
     end
-    i = i + makeConnectionsPerTick
+
+    i = math.min(i + makeConnectionsPerTick, nConnections)
+    local currentTick = sm.game.getCurrentTick()
     if i >= nConnections then
+        sendTensorProgress(task, "complete", i)
         return
+    elseif currentTick - task.lastProgressTick >= tensorProgressUpdateInterval then
+        task.lastProgressTick = currentTick
+        sendTensorProgress(task, "progress", i)
     end
+
     task.i = i
     table.insert(TensorConnect.sv_tasks, task)
 end

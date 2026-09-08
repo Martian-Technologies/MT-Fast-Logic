@@ -2,10 +2,35 @@ dofile "../TensorUtil.lua"
 
 CopyPaste = {}
 
+sm.MTCopyPasteLiftData = sm.MTCopyPasteLiftData or {}
+sm.MTCopyPasteBodyLocks = sm.MTCopyPasteBodyLocks or {}
+if sm.isServerMode() and not sm.MTCopyPasteLiftHooked then
+    local originalPlaceLift = sm.player.placeLift
+
+    sm.player.placeLift = function(player, selectedBodies, liftPosition, liftLevel, rotationIndex)
+        local selectedShapes = {}
+        if selectedBodies ~= nil and selectedBodies[1] ~= nil and sm.exists(selectedBodies[1]) then
+            selectedShapes = selectedBodies[1]:getCreationShapes()
+        end
+
+        sm.MTCopyPasteLiftData[player.id] = {
+            player = player,
+            selectedShapes = selectedShapes,
+            liftPosition = liftPosition,
+            liftLevel = liftLevel,
+            rotationIndex = rotationIndex
+        }
+
+        return originalPlaceLift(player, selectedBodies, liftPosition, liftLevel, rotationIndex)
+    end
+
+    sm.MTCopyPasteLiftHooked = true
+end
+
 function CopyPaste.inject(multitool)
     multitool.CopyPaste = {}
     local self = multitool.CopyPaste
-    self.nametagUpdate = NametagManager.createController(multitool)
+    self.dotSource = VertexRenderer.createSource(multitool)
     self.actions = {}
     self.origin = nil
     self.vectors = {}
@@ -18,6 +43,8 @@ function CopyPaste.inject(multitool)
     self.shapeVisualizations = {}
     self.toCopyPastePackets = {}
     self.externalConnectionsPolicy = "absolute" -- "ignore" | "absolute" | "relative"
+    self.lastLiftId = nil
+    self.lastLiftLevel = nil
 end
 
 local plasticUuid = sm.uuid.new("628b2d61-5ceb-43e9-8334-a4135566df7a")
@@ -58,27 +85,28 @@ local function addShapes(multitool, shapes)
     local self = multitool.CopyPaste
     local shapeGroup = {}
     for _, shape in ipairs(shapes) do
-        if table.contains(self.selectedShapes, shape) then
-            return
-        end
-        table.insert(self.selectedShapes, shape)
-        table.insert(shapeGroup, shape)
-        local effect = self.shapeVisualizations[shape:getId()]
-        if effect == nil then
-            effect = sm.effect.createEffect("ShapeRenderable")
-            self.shapeVisualizations[shape:getId()] = effect
-        end
-        effect:setParameter("visualization", true)
-        effect:start()
-        effect:setPosition(shape:getInterpolatedWorldPosition())
-        effect:setRotation(shape.worldRotation)
+        if not table.contains(self.selectedShapes, shape) then
+            table.insert(self.selectedShapes, shape)
+            table.insert(shapeGroup, shape)
+            local effect = self.shapeVisualizations[shape:getId()]
+            if effect == nil then
+                effect = sm.effect.createEffect("ShapeRenderable")
+                self.shapeVisualizations[shape:getId()] = effect
+            end
+            effect:setParameter("visualization", true)
+            effect:start()
+            effect:setPosition(shape:getInterpolatedWorldPosition())
+            effect:setRotation(shape.worldRotation)
 
-        local uuid, scale = getEffectData(shape)
-        
-        effect:setParameter("uuid", uuid)
-        effect:setScale(scale)
+            local uuid, scale = getEffectData(shape)
+
+            effect:setParameter("uuid", uuid)
+            effect:setScale(scale)
+        end
     end
-    table.insert(self.shapeGroups, shapeGroup)
+    if #shapeGroup > 0 then
+        table.insert(self.shapeGroups, shapeGroup)
+    end
 end
 
 local function undoShapeSelect(multitool)
@@ -129,71 +157,282 @@ local function doCopyPaste(multitool)
             nSteps = vec.range
         })
     end
+    local ownedLift = sm.localPlayer.getOwnedLift()
     local data = {
         interactables = interactables,
         shapes = shapes,
         vectors = vectors,
         body = self.activeBody,
-        externalConnections = self.externalConnectionsPolicy -- "ignore" | "absolute" | "relative"
+        externalConnections = self.externalConnectionsPolicy, -- "ignore" | "absolute" | "relative"
+        ownedLift = ownedLift ~= nil and {
+            liftPosition = ownedLift.worldPosition * 4,
+            liftLevel = ownedLift.level
+        } or nil
     }
     multitool.network:sendToServer("server_copyPaste", data)
 end
 
-local function findPositionInIntIdMap(intIdMap, intId)
-    for p, id in pairs(intIdMap) do
-        if id == intId then
-            return string.stringToVec(p, ';')
+local function positionKey(position)
+    return string.format("%.6f;%.6f;%.6f", position.x, position.y, position.z)
+end
+
+local function getSelectedControllerData(creationTable, interactables)
+    local selected = {}
+    local result = {}
+    for _, intId in ipairs(interactables) do
+        selected[intId] = true
+    end
+    for _, body in ipairs(creationTable.bodies or {}) do
+        for _, shape in ipairs(body.childs or {}) do
+            local controller = shape.controller
+            if controller ~= nil and selected[controller.id] then
+                result[controller.id] = { data = controller.data }
+            end
+        end
+    end
+    return result
+end
+
+local function restorePreparedBlocks(preparedBlocks)
+    local restored = true
+    for _, prepared in ipairs(preparedBlocks or {}) do
+        if prepared.block ~= nil then
+            local success = pcall(
+                prepared.block.restoreUuidData, prepared.block, prepared.storageData)
+            restored = restored and success
+        end
+    end
+    return restored
+end
+
+local function findLiftData(body, player)
+    for _, liftData in pairs(sm.MTCopyPasteLiftData) do
+        for _, shape in pairs(liftData.selectedShapes) do
+            if sm.exists(shape) and shape.body.id == body.id then
+                return liftData
+            end
+        end
+    end
+
+    if player ~= nil then
+        return sm.MTCopyPasteLiftData[player.id]
+    end
+end
+
+local function getLiftPositionAdjustment(bodies, liftPosition)
+    local lowest = nil
+    local highest = nil
+    for _, body in pairs(bodies) do
+        local low, high = body:getWorldAabb()
+        lowest = lowest == nil and low or lowest:min(low)
+        highest = highest == nil and high or highest:max(high)
+    end
+
+    if lowest == nil then
+        return sm.vec3.zero()
+    end
+
+    local difference = (lowest + (highest - lowest) / 2 - liftPosition / 4) * 4
+    if difference.x >= -1 and difference.x <= 1 then
+        difference.x = 0
+    end
+    if difference.y >= -1 and difference.y <= 1 then
+        difference.y = 0
+    end
+    difference.z = 0
+    return difference
+end
+
+function CopyPaste.client_onUpdate(multitool)
+    if not multitool.tool:isLocal() then
+        return
+    end
+
+    local self = multitool.CopyPaste
+    local lift = sm.localPlayer.getOwnedLift()
+    if lift == nil then
+        self.lastLiftId = nil
+        self.lastLiftLevel = nil
+        return
+    end
+
+    if self.lastLiftId ~= lift.id or self.lastLiftLevel ~= lift.level then
+        self.lastLiftId = lift.id
+        self.lastLiftLevel = lift.level
+        multitool.network:sendToServer("sv_updateCopyPasteLiftLevel", {
+            liftPosition = lift.worldPosition * 4,
+            liftLevel = lift.level
+        })
+    end
+end
+
+function CopyPaste.server_updateLiftLevel(multitool, data, player)
+    local liftData = sm.MTCopyPasteLiftData[player.id]
+    if liftData == nil then
+        liftData = {
+            player = player,
+            selectedShapes = {},
+            rotationIndex = 0
+        }
+        sm.MTCopyPasteLiftData[player.id] = liftData
+    end
+
+    liftData.liftPosition = data.liftPosition
+    liftData.liftLevel = data.liftLevel
+end
+
+function CopyPaste.client_copyPasteFailed(multitool, messageId)
+    sm.gui.displayAlertText(tr(messageId))
+end
+
+function CopyPaste.server_copyPaste(multitool, data, player)
+    if data.ownedLift ~= nil and player ~= nil then
+        CopyPaste.server_updateLiftLevel(multitool, data.ownedLift, player)
+    end
+
+    local targetBody = data.body
+    if targetBody == nil or not sm.exists(targetBody) then
+        return
+    end
+
+    local creationId = sm.MTFastLogic.CreationUtil.getCreationId(targetBody)
+    if sm.MTCopyPasteBodyLocks[creationId] then
+        print("CopyPaste: another copy operation is already preparing this creation")
+        return
+    end
+
+    local creation = sm.MTFastLogic.Creations[creationId]
+    local selectedBlocks = {}
+    local selectedBlockIds = {}
+    if creation ~= nil then
+        for _, intId in ipairs(data.interactables or {}) do
+            local uuid = creation.uuids[intId]
+            local block = uuid ~= nil and creation.AllFastBlocks[uuid] or nil
+            if block ~= nil and not selectedBlockIds[intId] then
+                if block.hasSiliconConnection ~= nil and block:hasSiliconConnection() then
+                    if player ~= nil then
+                        multitool.network:sendToClient(player, "cl_copyPasteFailed",
+                            "mt.copy.silicon_blocks_cannot_be_copied")
+                    end
+                    return
+                end
+                selectedBlockIds[intId] = true
+                table.insert(selectedBlocks, block)
+            end
+        end
+    end
+
+    if #selectedBlocks == 0 then
+        CopyPaste.doCopyPaste(multitool, data)
+        return
+    end
+
+    sm.MTCopyPasteBodyLocks[creationId] = true
+    local preparedBlocks = {}
+    local prepared, prepareError = pcall(function()
+        for _, block in ipairs(selectedBlocks) do
+            if block.type == "BlockMemory" and block.server_saveHeldMemory ~= nil then
+                block:server_saveHeldMemory()
+            end
+            local success, storageData = block:removeUuidData()
+            if not success then
+                error("selected Fast Logic block is connected to Silicon")
+            end
+            table.insert(preparedBlocks, {
+                block = block,
+                storageData = storageData
+            })
+        end
+    end)
+
+    if not prepared then
+        restorePreparedBlocks(preparedBlocks)
+        sm.MTCopyPasteBodyLocks[creationId] = nil
+        print("CopyPaste: failed to prepare Fast Logic data: " .. tostring(prepareError))
+        if player ~= nil then
+            multitool.network:sendToClient(player, "cl_copyPasteFailed",
+                "mt.copy.silicon_blocks_cannot_be_copied")
+        end
+        return
+    end
+
+    multitool.sv_copyPastePackets = multitool.sv_copyPastePackets or {}
+    table.insert(multitool.sv_copyPastePackets, {
+        data = data,
+        creationId = creationId,
+        preparedBlocks = preparedBlocks,
+        phase = "sanitized",
+        tick = sm.game.getCurrentTick() + 1
+    })
+end
+
+function CopyPaste.server_onFixedUpdate(multitool, dt)
+    local packets = multitool.sv_copyPastePackets
+    if packets == nil then
+        return
+    end
+
+    for packetIndex = #packets, 1, -1 do
+        local packet = packets[packetIndex]
+        if sm.game.getCurrentTick() >= packet.tick then
+            local targetBody = packet.data.body
+            if targetBody == nil or not sm.exists(targetBody) then
+                if not restorePreparedBlocks(packet.preparedBlocks) then
+                    print("CopyPaste: failed to restore Fast Logic data after the target was removed")
+                end
+                sm.MTCopyPasteBodyLocks[packet.creationId] = nil
+                table.remove(packets, packetIndex)
+            elseif packet.phase == "sanitized" then
+                local isLifted = targetBody:isOnLift()
+                local success, creationTable = pcall(sm.creation.exportToTable, targetBody, true, isLifted)
+                if success and creationTable ~= nil then
+                    packet.data.copyControllerData = getSelectedControllerData(
+                        creationTable, packet.data.interactables)
+                    if restorePreparedBlocks(packet.preparedBlocks) then
+                        packet.preparedBlocks = nil
+                        packet.phase = "original"
+                    else
+                        packet.phase = "restore"
+                        print("CopyPaste: retrying Fast Logic data restoration")
+                    end
+                    packet.tick = sm.game.getCurrentTick() + 1
+                else
+                    restorePreparedBlocks(packet.preparedBlocks)
+                    sm.MTCopyPasteBodyLocks[packet.creationId] = nil
+                    table.remove(packets, packetIndex)
+                    print("CopyPaste: failed to export UUID-free controller data: " .. tostring(creationTable))
+                end
+            elseif packet.phase == "restore" then
+                if restorePreparedBlocks(packet.preparedBlocks) then
+                    packet.preparedBlocks = nil
+                    packet.phase = "original"
+                end
+                packet.tick = sm.game.getCurrentTick() + 1
+            else
+                local isLifted = targetBody:isOnLift()
+                local success, creationTable = pcall(sm.creation.exportToTable, targetBody, true, isLifted)
+                sm.MTCopyPasteBodyLocks[packet.creationId] = nil
+                table.remove(packets, packetIndex)
+                if success and creationTable ~= nil then
+                    packet.data.creationTable = creationTable
+                    local copied, err = pcall(CopyPaste.doCopyPaste, multitool, packet.data)
+                    if not copied then
+                        print("CopyPaste: copy operation failed: " .. tostring(err))
+                    end
+                else
+                    print("CopyPaste: failed to export restored creation data: " .. tostring(creationTable))
+                end
+            end
         end
     end
 end
 
-function CopyPaste.server_copyPaste(multitool, data)
-    local self = multitool.CopyPaste
-    -- local targetBody = data.body
-    -- local creationTable = sm.creation.exportToTable(targetBody, true, false)
-    -- local interactables = data.interactables
-    -- local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
-    -- local gatesToRestore = {}
-    -- if creation ~= nil then
-    --     for _, block in pairs(creation.AllFastBlocks) do
-    --         if table.contains(interactables, block.interactable:getId()) then
-    --             local s = sm.event.sendToInteractable(block.interactable, "removeUuidData")
-    --             if s == false then
-    --             end
-    --         end
-    --     end
-    -- end
-    -- for _, body in ipairs(creationTable.bodies) do
-    --     for _, shape in ipairs(body.childs) do
-    --         if shape.controller == nil then
-    --             goto continue
-    --         end
-    --         local intId = shape.controller.id
-    --         if table.contains(interactables, intId) then
-    --             gatesToRestore[intId] = shape.controller.data
-    --         end
-    --         ::continue::
-    --     end
-    -- end
-    -- data.gatesToRestore = gatesToRestore
-    -- table.insert(self.toCopyPastePackets, {
-    --     data = data,
-    --     tick = sm.game.getCurrentTick() + 1
-    -- })
-    CopyPaste.doCopyPaste(multitool, data)
-end
-
-function CopyPaste.server_onFixedUpdate(multitool, dt)
-    -- local self = multitool.CopyPaste
-    -- if #self.toCopyPastePackets == 0 then
-    --     return
-    -- end
-    -- local data = self.toCopyPastePackets[1]
-    -- if sm.game.getCurrentTick() < data.tick then
-    --     return
-    -- end
-    -- table.remove(self.toCopyPastePackets, 1)
-    -- CopyPaste.doCopyPaste(multitool, data.data)
+function CopyPaste.server_onDestroy(multitool)
+    for _, packet in ipairs(multitool.sv_copyPastePackets or {}) do
+        restorePreparedBlocks(packet.preparedBlocks)
+        sm.MTCopyPasteBodyLocks[packet.creationId] = nil
+    end
+    multitool.sv_copyPastePackets = nil
 end
 
 function CopyPaste.doCopyPaste(multitool, data)
@@ -201,11 +440,36 @@ function CopyPaste.doCopyPaste(multitool, data)
     local shapes = data.shapes
     local vectors = data.vectors
     local targetBody = data.body
-    local targetBodyObject = nil
     local externalConnections = data.externalConnections
-    local intIdMap = MTMultitoolLib.getVoxelMapInteractableIds(targetBody)
-    local creationTable = sm.creation.exportToTable(targetBody, true, false)
-    local generatedShapes = {}
+    local isLifted = targetBody:isOnLift()
+    local liftData = isLifted and findLiftData(targetBody, multitool.tool:getOwner()) or nil
+    if isLifted and liftData == nil then
+        print("CopyPaste: missing lift data; original creation was not changed")
+        return
+    end
+    local creationTable = data.creationTable or sm.creation.exportToTable(targetBody, true, isLifted)
+    local selectedControllerIds = {}
+    for _, intId in ipairs(interactables) do
+        selectedControllerIds[intId] = true
+    end
+
+    local targetBodyObject = nil
+    for _, body in ipairs(creationTable.bodies or {}) do
+        for _, shape in ipairs(body.childs or {}) do
+            if shape.controller ~= nil and selectedControllerIds[shape.controller.id] then
+                targetBodyObject = body
+                break
+            end
+        end
+        if targetBodyObject ~= nil then
+            break
+        end
+    end
+    targetBodyObject = targetBodyObject or (creationTable.bodies and creationTable.bodies[1])
+    if targetBodyObject == nil then
+        return
+    end
+    local targetBodyShapes = targetBodyObject.childs
     local originalPositionsTakenUpBySource = {}
     local tensor = {}
 
@@ -218,234 +482,189 @@ function CopyPaste.doCopyPaste(multitool, data)
 
     local creation = sm.MTFastLogic.Creations[sm.MTFastLogic.CreationUtil.getCreationId(targetBody)]
     local interactableModes = {}
-    local interactableLums = {}
     local interactableDelays = {}
-    local interactableWipeData = {}
     if creation ~= nil then
         for _, intId in ipairs(interactables) do
             local uuid = creation.uuids[intId]
-            if uuid == nil then
-                goto continue
+            local block = uuid ~= nil and creation.blocks[uuid] or nil
+            local type = block ~= nil and block.type or nil
+            if type == "andBlocks" then
+                interactableModes[intId] = 0
+            elseif type == "orBlocks" then
+                interactableModes[intId] = 1
+            elseif type == "xorBlocks" then
+                interactableModes[intId] = 2
+            elseif type == "nandBlocks" then
+                interactableModes[intId] = 3
+            elseif type == "norBlocks" then
+                interactableModes[intId] = 4
+            elseif type == "xnorBlocks" then
+                interactableModes[intId] = 5
+            elseif type == "timerBlocks" then
+                local seconds = creation.FastTimers[uuid].client_seconds
+                local ticks = creation.FastTimers[uuid].client_ticks
+                interactableDelays[intId] = FastLogicRunnerRunner.convertTimerDelayToData(seconds, ticks)
             end
-            local block = creation.blocks[uuid]
-            if block == nil then
-                goto continue
-            end
-            local type = block.type
-            print(type)
-            if type ~= nil then
-                if type == "andBlocks" then
-                    interactableModes[intId] = 0
-                elseif type == "orBlocks" then
-                    interactableModes[intId] = 1
-                elseif type == "xorBlocks" then
-                    interactableModes[intId] = 2
-                elseif type == "nandBlocks" then
-                    interactableModes[intId] = 3
-                elseif type == "norBlocks" then
-                    interactableModes[intId] = 4
-                elseif type == "xnorBlocks" then
-                    interactableModes[intId] = 5
-                elseif type == "lightBlocks" then
-                    -- advPrint(creation.FastLights[uuid], 3, 100, true)
-                    local light = creation.FastLights[uuid]
-                    interactableLums[intId] = light.data.luminance
-                elseif type == "timerBlocks" then
-                    local seconds = creation.FastTimers[uuid].client_seconds
-                    local ticks = creation.FastTimers[uuid].client_ticks
-                    interactableDelays[intId] = FastLogicRunnerRunner.convertTimerDelayToData(seconds, ticks)
-                elseif type == "Address" or type == "DataIn" or type == "DataOut" or type == "WriteData" or type == "BlockMemory" then
-                    interactableWipeData[intId] = true
-                end
-            -- elseif luminance ~= nil then
-            --     interactableLums[intId] = luminance
-            end
-            ::continue::
         end
     end
-
-
-    -- local worldpos = targetBody.worldPosition
-    -- local worldrot = targetBody.worldRotation
-    -- local world = targetBody:getWorld()
-
-    -- local shapes = targetBody:getCreationShapes()
-    -- for _, shape in pairs(shapes) do
-    --     shape:destroyShape()
-    -- end
-    -- local jsonString = sm.json.writeJsonString(creationTable)
-
-    -- sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
-
--- end if false then
 
     for i = 1, #vectors do
         table.insert(tensor, vectors[i].nSteps)
     end
-    local maxIntId = 0
-    local everyShapeByIntId = {}
+    local selectedIndexById = {}
+    for index, intId in ipairs(interactables) do
+        selectedIndexById[intId] = index
+    end
 
-    local jointShapeIndex = 0
-    local maxJointIndexToNotIncrement = 0
+    local runtimeBodies = { targetBody }
+    for _, body in ipairs(targetBody:getCreationBodies()) do
+        if body ~= targetBody then
+            table.insert(runtimeBodies, body)
+        end
+    end
+
+    local controllerById = {}
+    local positionsById = {}
+    local idAtWorldPosition = {}
+    local maxIntId = 0
+
+    local function registerController(controller)
+        if controller == nil then
+            return
+        end
+        local intId = controller.id
+        if type(intId) ~= "number" or intId < 0 or intId ~= math.floor(intId) then
+            error("CopyPaste: creation contains an invalid controller id")
+        end
+        controllerById[intId] = controller
+        maxIntId = math.max(maxIntId, intId)
+    end
+
     for _, body in ipairs(creationTable.bodies) do
         for _, shape in ipairs(body.childs) do
-            shape.jointShapeIndex = jointShapeIndex
-            jointShapeIndex = jointShapeIndex + 1
-            if shape.controller == nil then
-                for _, nonInt in ipairs(shapes) do
-                    if tostring(nonInt.uuid) == shape.shapeId then
-                        if nonInt.localPosition.x == shape.pos.x and nonInt.localPosition.y == shape.pos.y and nonInt.localPosition.z == shape.pos.z then
-                            targetBodyObject = body
-                            goto continue
-                        end
-                    end
-                end
-                goto continue
-            end
-            local intId = shape.controller.id
-            everyShapeByIntId[intId] = shape
-            if table.contains(interactables, intId) then
-                targetBodyObject = body
-                maxJointIndexToNotIncrement = jointShapeIndex - 1
-            end
-            if intId > maxIntId then
-                maxIntId = intId
-            end
-            ::continue::
+            registerController(shape.controller)
+        end
+    end
+    for _, joint in ipairs(creationTable.joints or {}) do
+        registerController(joint.controller)
+    end
+
+    for _, body in ipairs(runtimeBodies) do
+        local rawMap = MTMultitoolLib.getVoxelMapInteractableIds(body)
+        for positionString, intId in pairs(rawMap) do
+            local localPosition = string.stringToVec(positionString, ';')
+            local worldPosition = body:transformPoint(localPosition)
+            idAtWorldPosition[positionKey(worldPosition)] = intId
+            positionsById[intId] = positionsById[intId] or {}
+            table.insert(positionsById[intId], worldPosition)
         end
     end
 
-    local externalConnectionsIngoing = {}
-    local externalConnectionsOutgoing = {}
-    if externalConnections == "absolute" then
-        for _, body in ipairs(creationTable.bodies) do
-            for _, shape in ipairs(body.childs) do
-                if shape.controller == nil then
-                    goto continue
-                end
-                local intId = shape.controller.id
-                if table.contains(interactables, intId) then
-                    if shape.controller.controllers == nil then
-                        goto continue
-                    end
-                    for _, output in ipairs(shape.controller.controllers) do
-                        local outputId = output.id
-                        if table.contains(interactables, outputId) then
-                            goto continue2
-                        end
-                        table.insert(externalConnectionsOutgoing, {
-                            from = table.find(interactables, intId),
-                            to = outputId
-                        })
-                        ::continue2::
-                    end
-                    goto continue
-                end
-                local outputs = shape.controller.controllers
-                if outputs == nil then
-                    goto continue
-                end
-                for _, output in ipairs(outputs) do
-                    local outputId = output.id
-                    table.insert(externalConnectionsIngoing, {
-                        from = shape.controller.controllers,
-                        to = table.find(interactables, outputId)
-                    })
-                end
-                ::continue::
-            end
-        end
-    end
-    if targetBodyObject == nil then
-        return
-    end
-    local targetBodyShapes = targetBodyObject.childs
     local internalShapesOrdered = {}
     for i = 1, #interactables do
         internalShapesOrdered[i] = false
     end
-    for i = 1, #targetBodyShapes do
-        local shape = targetBodyShapes[i]
-        if shape.controller == nil then
-            goto continue
+    for _, shape in ipairs(targetBodyShapes) do
+        local controller = shape.controller
+        local selectedIndex = controller ~= nil and selectedIndexById[controller.id] or nil
+        if selectedIndex ~= nil then
+            internalShapesOrdered[selectedIndex] = shape
         end
-        local intId = shape.controller.id
-        if table.contains(interactables, intId) then
-            internalShapesOrdered[table.find(interactables, intId)] = shape
+    end
+
+    local selectedShapeIds = {}
+    for _, shape in ipairs(shapes) do
+        if sm.exists(shape) then
+            selectedShapeIds[shape:getId()] = true
         end
-        ::continue::
+    end
+    local extraShapesToCopy = {}
+    for shapeIndex, runtimeShape in ipairs(targetBody:getShapes()) do
+        if selectedShapeIds[runtimeShape:getId()] then
+            local exportedShape = targetBodyShapes[shapeIndex]
+            if exportedShape ~= nil and exportedShape.controller == nil then
+                table.insert(extraShapesToCopy, exportedShape)
+            end
+        end
+    end
+
+    for _, intId in ipairs(interactables) do
+        originalPositionsTakenUpBySource[intId] = positionsById[intId] or {}
     end
 
     local internalConnections = {}
-    local extraShapesToCopy = {}
-    for i = 1, #targetBodyShapes do
-        local shape = targetBodyShapes[i]
-        if shape.controller == nil then
-            local shapeUuid = shape.shapeId
-            local shapePos = shape.pos
-            for _, nonInt in ipairs(shapes) do
-                if tostring(nonInt.uuid) ~= shapeUuid then
-                    goto continue2
-                end
-                if nonInt.localPosition.x ~= shapePos.x or nonInt.localPosition.y ~= shapePos.y or nonInt.localPosition.z ~= shapePos.z then
-                    goto continue2
-                end
-                table.insert(extraShapesToCopy, shape)
-                ::continue2::
-            end
-            goto continue
-        end
-        local intId = shape.controller.id
-        local sourceInternal = table.contains(interactables, intId)
-        if sourceInternal then
-            local allPositions = {}
-            for p, id in pairs(intIdMap) do
-                if id == intId then
-                    table.insert(allPositions, string.stringToVec(p, ';'))
-                end
-            end
-            originalPositionsTakenUpBySource[intId] = allPositions
-        end
-        if externalConnections ~= "relative" and not sourceInternal then
-            goto continue
-        end
-        -- guaranteed for sourceInternal or externalConnections == "relative"
-        local outputs = shape.controller.controllers
-        if outputs == nil then
-            goto continue
-        end
-        for _, output in ipairs(outputs) do
-            local outputId = output.id
-            local targetInternal = table.contains(interactables, outputId)
-            if externalConnections ~= "relative" and not targetInternal then
-                goto continue
-            end
-            -- guaranteed for targetInternal and sourceInternal or externalConnections == "relative"
-            if sourceInternal and not targetInternal then
-                -- guaranteed externalConnections == "relative"
-                local destinationPos = findPositionInIntIdMap(intIdMap, outputId)
-                table.insert(externalConnectionsOutgoing, {
-                    from = table.find(interactables, intId),
-                    to = destinationPos
-                })
-            elseif targetInternal and not sourceInternal then
-                -- guaranteed externalConnections == "relative"
-                local sourcePos = findPositionInIntIdMap(intIdMap, intId)
-                table.insert(externalConnectionsIngoing, {
-                    from = sourcePos,
-                    to = table.find(interactables, outputId)
-                })
-            elseif sourceInternal and targetInternal then
-                table.insert(internalConnections, {
-                    from = table.find(interactables, intId),
-                    to = table.find(interactables, outputId)
-                })
-            end
-        end
-        ::continue::
+    local externalConnectionsIngoing = {}
+    local externalConnectionsOutgoing = {}
+    local unresolvedRelativeConnections = 0
+
+    local function firstEndpoint(intId)
+        local positions = positionsById[intId]
+        return positions ~= nil and positions[1] or nil
     end
 
-    local relativeConnectionsToMake = {}
+    for sourceId, sourceController in pairs(controllerById) do
+        local sourceIndex = selectedIndexById[sourceId]
+        for _, output in ipairs(sourceController.controllers or {}) do
+            local targetId = output.id
+            local targetIndex = selectedIndexById[targetId]
+            if sourceIndex ~= nil and targetIndex ~= nil then
+                table.insert(internalConnections, {
+                    from = sourceIndex,
+                    to = targetIndex
+                })
+            elseif externalConnections == "absolute" then
+                if sourceIndex ~= nil then
+                    table.insert(externalConnectionsOutgoing, {
+                        from = sourceIndex,
+                        to = targetId
+                    })
+                elseif targetIndex ~= nil then
+                    table.insert(externalConnectionsIngoing, {
+                        controller = sourceController,
+                        to = targetIndex
+                    })
+                end
+            elseif externalConnections == "relative" then
+                if sourceIndex ~= nil then
+                    local endpoint = firstEndpoint(targetId)
+                    if endpoint ~= nil then
+                        table.insert(externalConnectionsOutgoing, {
+                            from = sourceIndex,
+                            endpoint = endpoint
+                        })
+                    else
+                        unresolvedRelativeConnections = unresolvedRelativeConnections + 1
+                    end
+                elseif targetIndex ~= nil then
+                    local endpoint = firstEndpoint(sourceId)
+                    if endpoint ~= nil then
+                        table.insert(externalConnectionsIngoing, {
+                            endpoint = endpoint,
+                            to = targetIndex
+                        })
+                    else
+                        unresolvedRelativeConnections = unresolvedRelativeConnections + 1
+                    end
+                end
+            end
+        end
+    end
+
+    if unresolvedRelativeConnections > 0 then
+        print("CopyPaste: skipped " .. unresolvedRelativeConnections ..
+            " relative connections without shape positions")
+    end
+
+    local jointChildInsertionIndex = 0
+    for _, body in ipairs(creationTable.bodies) do
+        jointChildInsertionIndex = jointChildInsertionIndex + #body.childs
+        if body == targetBodyObject then
+            break
+        end
+    end
+
+    local relativeOutgoingToMake = {}
+    local relativeIngoingToMake = {}
 
     local nShapesAdded = 0
 
@@ -464,6 +683,7 @@ function CopyPaste.doCopyPaste(multitool, data)
         for i = 1, #number do
             deltaP = deltaP + vectors[i].step * number[i]
         end
+        local worldDelta = targetBody.worldRotation * (deltaP / 4)
         local newShapes = {}
         for i = 1, #extraShapesToCopy do
             local nonInt = extraShapesToCopy[i]
@@ -485,30 +705,22 @@ function CopyPaste.doCopyPaste(multitool, data)
             newShape.pos.y = newShape.pos.y + deltaP.y
             newShape.pos.z = newShape.pos.z + deltaP.z
             newShape.joints = nil
-            for intId, pList in pairs(originalPositionsTakenUpBySource) do
-                if intId ~= interactables[i] then
-                    goto continue2
-                end
-                for j = 1, #pList do
-                    local p = pList[j] + deltaP / 4
-                    intIdMap[p.x .. ";" .. p.y .. ";" .. p.z] = i + maxIntId
-                end
-                ::continue2::
+            local newControllerId = maxIntId + i
+            for _, position in ipairs(originalPositionsTakenUpBySource[interactables[i]] or {}) do
+                local copiedPosition = position + worldDelta
+                idAtWorldPosition[positionKey(copiedPosition)] = newControllerId
             end
-            newShape.controller.id = maxIntId + i
+            newShape.controller.id = newControllerId
+            local copyData = data.copyControllerData and data.copyControllerData[interactables[i]] or nil
+            if copyData ~= nil then
+                newShape.controller.data = copyData.data
+            end
             if interactableModes[interactables[i]] ~= nil then
                 newShape.controller.data = sm.MTFastLogic.LogicConverter.vGateModesToFGateModes
                 [interactableModes[interactables[i]]]
             end
-            if interactableLums[interactables[i]] ~= nil then
-                newShape.controller.data = sm.MTFastLogic.LogicConverter.vLightLumsToFLightLums
-                    [interactableLums[interactables[i]]]
-            end
             if interactableDelays[interactables[i]] ~= nil then
                 newShape.controller.data = interactableDelays[interactables[i]]
-            end
-            if interactableWipeData[interactables[i]] then
-                newShape.controller.data = nil
             end
             newShape.controller.controllers = {}
             for j = 1, #internalConnections do
@@ -531,8 +743,9 @@ function CopyPaste.doCopyPaste(multitool, data)
                 for j = 1, #externalConnectionsIngoing do
                     local connection = externalConnectionsIngoing[j]
                     if connection.to == i then
-                        table.insert(connection.from, {
-                            id = connection.to + maxIntId
+                        connection.controller.controllers = connection.controller.controllers or {}
+                        table.insert(connection.controller.controllers, {
+                            id = newControllerId
                         })
                     end
                 end
@@ -540,11 +753,10 @@ function CopyPaste.doCopyPaste(multitool, data)
                 for j = 1, #externalConnectionsOutgoing do
                     local connection = externalConnectionsOutgoing[j]
                     if connection.from == i then
-                        local destinationPos = connection.to + deltaP / 4
-                        table.insert(relativeConnectionsToMake, {
-                            from = newShape,
-                            to = destinationPos,
-                            type = "outgoing"
+                        local endpoint = connection.endpoint
+                        table.insert(relativeOutgoingToMake, {
+                            controller = newShape.controller,
+                            endpoint = endpoint + worldDelta
                         })
                     end
                 end
@@ -552,32 +764,19 @@ function CopyPaste.doCopyPaste(multitool, data)
                 for j = 1, #externalConnectionsIngoing do
                     local connection = externalConnectionsIngoing[j]
                     if connection.to == i then
-                        local sourcePos = connection.from + deltaP / 4
-                        table.insert(relativeConnectionsToMake, {
-                            from = sourcePos,
-                            to = connection.to + maxIntId,
-                            type = "ingoing"
+                        local endpoint = connection.endpoint
+                        table.insert(relativeIngoingToMake, {
+                            endpoint = endpoint + worldDelta,
+                            targetId = newControllerId
                         })
-                        -- local sourceIntId = intIdMap[sourcePos.x .. ";" .. sourcePos.y .. ";" .. sourcePos.z]
-                        -- if sourceIntId ~= nil then
-                        --     local sourceShape = everyShapeByIntId[sourceIntId]
-                        --     if sourceShape ~= nil then
-                        --         if sourceShape.controller.controllers == nil then
-                        --             sourceShape.controller.controllers = {}
-                        --         end
-                        --         table.insert(sourceShape.controller.controllers, {
-                        --             id = connection.to + maxIntId
-                        --         })
-                        --     end
-                        -- end
                     end
                 end
             end
             if #newShape.controller.controllers == 0 then
                 newShape.controller.controllers = nil
             end
-            everyShapeByIntId[newShape.controller.id] = newShape
-            
+            controllerById[newControllerId] = newShape.controller
+
             table.insert(newShapes, newShape)
             nShapesAdded = nShapesAdded + 1
             ::continue::
@@ -587,71 +786,77 @@ function CopyPaste.doCopyPaste(multitool, data)
         end
         maxIntId = maxIntId + #interactables
     end)
-    for i = 1, #relativeConnectionsToMake do
-        local connection = relativeConnectionsToMake[i]
-        if connection.type == "outgoing" then
-            local destinationIntId = intIdMap
-                [connection.to.x .. ";" .. connection.to.y .. ";" .. connection.to.z]
-            if destinationIntId ~= nil then
-                if connection.from.controller.controllers == nil then
-                    connection.from.controller.controllers = {}
-                end
-                table.insert(connection.from.controller.controllers, {
-                    id = destinationIntId
-                })
-            end
-        elseif connection.type == "ingoing" then
-            local sourceIntId = intIdMap
-                [connection.from.x .. ";" .. connection.from.y .. ";" .. connection.from.z]
-            if sourceIntId ~= nil then
-                local sourceShape = everyShapeByIntId[sourceIntId]
-                if sourceShape ~= nil then
-                    if sourceShape.controller.controllers == nil then
-                        sourceShape.controller.controllers = {}
-                    end
-                    table.insert(sourceShape.controller.controllers, {
-                        id = connection.to
-                    })
-                end
-            end
+    local function resolveEndpoint(endpoint)
+        return idAtWorldPosition[positionKey(endpoint)]
+    end
+
+    for _, connection in ipairs(relativeOutgoingToMake) do
+        local destinationId = resolveEndpoint(connection.endpoint)
+        if destinationId ~= nil then
+            connection.controller.controllers = connection.controller.controllers or {}
+            table.insert(connection.controller.controllers, { id = destinationId })
+        end
+    end
+    for _, connection in ipairs(relativeIngoingToMake) do
+        local sourceId = resolveEndpoint(connection.endpoint)
+        local sourceController = sourceId ~= nil and controllerById[sourceId] or nil
+        if sourceController ~= nil then
+            sourceController.controllers = sourceController.controllers or {}
+            table.insert(sourceController.controllers, { id = connection.targetId })
         end
     end
 
-    for _, body in ipairs(creationTable.bodies) do
-        for _, shape in ipairs(body.childs) do
-            if shape.controller == nil then
-                goto continue
-            end
-            local intId = shape.controller.id
-            -- if table.contains(gatesToRestore, intId) then
-            --     shape.controller.data = gatesToRestore[gatesToRestore[intId]]
-            -- end
-            ::continue::
-        end
-    end
-
-    if creationTable.joints ~= nil then
-        for _, joint in ipairs(creationTable.joints) do
-            if joint.childA > maxJointIndexToNotIncrement then
+    if nShapesAdded > 0 then
+        for _, joint in ipairs(creationTable.joints or {}) do
+            if joint.childA >= jointChildInsertionIndex then
                 joint.childA = joint.childA + nShapesAdded
             end
-            if joint.childB > maxJointIndexToNotIncrement then
+            if joint.childB ~= -1 and joint.childB >= jointChildInsertionIndex then
                 joint.childB = joint.childB + nShapesAdded
             end
         end
     end
 
-    local worldpos = targetBody.worldPosition
-    local worldrot = targetBody.worldRotation
+    local worldPosition = targetBody.worldPosition
+    local worldRotation = targetBody.worldRotation
     local world = targetBody:getWorld()
+    local originalShapes = targetBody:getCreationShapes()
 
-    local shapes = targetBody:getCreationShapes()
-    for _, shape in pairs(shapes) do
-        shape:destroyShape()
+    local serializationSucceeded, jsonString = pcall(sm.json.writeJsonString, creationTable)
+    if not serializationSucceeded or type(jsonString) ~= "string" then
+        print("CopyPaste: failed to serialize creation: " .. tostring(jsonString))
+        return
     end
-    local jsonString = sm.json.writeJsonString(creationTable)
 
-    sm.creation.importFromString(world, jsonString, worldpos, worldrot, false)
+    for _, shape in pairs(originalShapes) do
+        if sm.exists(shape) then
+            shape:destroyShape()
+        end
+    end
+
+    local importSucceeded, importedBodies = pcall(
+        sm.creation.importFromString, world, jsonString, worldPosition, worldRotation, false)
+    if not importSucceeded or type(importedBodies) ~= "table" or #importedBodies == 0 then
+        print("CopyPaste: original creation was deleted, but the replacement failed to import: " ..
+            tostring(importedBodies))
+        return
+    end
+
+    if isLifted then
+        local adjustment = getLiftPositionAdjustment(importedBodies, liftData.liftPosition)
+        local placed, placeError = pcall(
+            sm.player.placeLift,
+            liftData.player,
+            importedBodies,
+            liftData.liftPosition + adjustment,
+            liftData.liftLevel,
+            liftData.rotationIndex
+        )
+        if not placed then
+            print("CopyPaste: replacement was imported but could not be placed on the lift: " ..
+                tostring(placeError))
+        end
+    end
 end
 
 function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, lookingAt)
@@ -1116,7 +1321,8 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                 end
             end
         elseif state == "selectRange" then
-            local vecColor = sm.MTTensorUtil.colorOrder[math.fmod(#self.vectors, #sm.MTTensorUtil.colorOrder)]
+            local vecColor = sm.MTTensorUtil.colorOrder[
+                math.fmod(#self.vectors - 1, #sm.MTTensorUtil.colorOrder) + 1]
             local closestDistance, closestPosition, nSteps = MathUtil.closestPassBetweenContinuousRayAndDiscreteRay(
                 sm.camera.getPosition(),
                 sm.camera.getDirection(),
@@ -1185,7 +1391,9 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
                         goto continue
                     end
                     local newPos = self.activeBody:transformPoint(self.origin) + vec.globalStep * j
-                    sm.MTTensorUtil.renderVector(tags, prevPos, newPos, sm.MTTensorUtil.colorOrder[math.fmod(i, #sm.MTTensorUtil.colorOrder)], 0.025)
+                    local colorIndex = math.fmod(i - 1, #sm.MTTensorUtil.colorOrder) + 1
+                    sm.MTTensorUtil.renderVector(tags, prevPos, newPos,
+                        sm.MTTensorUtil.colorOrder[colorIndex], 0.025)
                     prevPos = newPos
                     ::continue::
                 end
@@ -1200,7 +1408,7 @@ function CopyPaste.trigger(multitool, primaryState, secondaryState, forceBuild, 
             end
         end
     end
-    self.nametagUpdate(tags)
+    self.dotSource:set(tags)
 end
 
 function CopyPaste.client_onReload(multitool)
@@ -1219,7 +1427,7 @@ end
 
 function CopyPaste.cleanUp(multitool)
     local self = multitool.CopyPaste
-    self.nametagUpdate(nil)
+    self.dotSource:clear()
     self.selectedShapes = {}
     self.selectingShapes = true
     self.shapeGroups = {}
@@ -1228,7 +1436,7 @@ function CopyPaste.cleanUp(multitool)
     end
     self.shapeVisualizations = {}
     self.activeBody = nil
-    multitool.VolumeSelector.body = nil
+    VolumeSelector.cleanUp(multitool)
     self.vectors = {}
     self.actions = {}
     self.origin = nil
@@ -1236,6 +1444,6 @@ end
 
 function CopyPaste.cleanNametags(multitool)
     local self = multitool.CopyPaste
-    self.nametagUpdate(nil)
+    self.dotSource:clear()
     VolumePlacer.cleanNametags(multitool)
 end

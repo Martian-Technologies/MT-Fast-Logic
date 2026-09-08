@@ -13,6 +13,7 @@ function BlockSelector.inject(multitool)
     print("created visualization")
     ConnectionRaycaster:configure(128, 0.4, multitool)
     self.vertexPoints = {}
+    self.vertexRevision = 0
     self.bodyConstraint = nil
     self.raycastLookingAt = nil
     self.enabled = true
@@ -20,7 +21,20 @@ end
 
 function BlockSelector.addVertexPoints(multitool)
     local self = multitool.BlockSelector
-    return self.vertexPoints
+    return self.vertexPoints, self.vertexRevision
+end
+
+local function clearVertexPoints(self)
+    if #self.vertexPoints == 0 then
+        return
+    end
+    self.vertexPoints = {}
+    self.vertexRevision = self.vertexRevision + 1
+end
+
+local function setVertexPoints(self, vertices)
+    self.vertexPoints = vertices
+    self.vertexRevision = self.vertexRevision + 1
 end
 
 function BlockSelector.client_onUnequip(multitool)
@@ -175,7 +189,7 @@ function BlockSelector.client_onUpdate(multitool)
         self.raycastLookingAt = nil
         if not self.tool:isEquipped() then
             -- wipe gui points
-            self.vertexPoints = {}
+            clearVertexPoints(self)
             return
         end
         if self.visualization:isPlaying() then
@@ -184,7 +198,7 @@ function BlockSelector.client_onUpdate(multitool)
         local hit, res = BlockSelector.raycast(multitool)
         if not hit then
             self.visShape = nil
-            self.vertexPoints = {}
+            clearVertexPoints(self)
             self.tool:setDispersionFraction(0)
             self.tool:setCrossHairAlpha(0.3)
             return
@@ -298,7 +312,7 @@ function BlockSelector.client_onUpdate(multitool)
         --     local color = doRaycast(sm.camera.getPosition(), vertex.pos*0.9+(pos+halfSizeAt+halfSizeRight+halfSizeUp)*0.1)
         --     verteces[i].color = color
         -- end
-        self.vertexPoints = verteces
+        setVertexPoints(self, verteces)
     end
 end
 

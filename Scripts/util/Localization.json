@@ -51,7 +51,7 @@
     "English": "Series",
     "Russian": "Подключение в цепочку"
   },
-  "mt.mode.nto_n_connect": {
+  "mt.mode.n_to_n_connect": {
     "English": "N to N",
     "Russian": "Подключение всех ко всем"
   },
@@ -323,6 +323,10 @@
     "English": "Select the end of the inverted input",
     "Russian": "Выбрать конец инвертированного ввода"
   },
+  "mt.decoder.input_lengths": {
+    "English": "The input rows must have the same length. Cancel the last selection.",
+    "Russian": "Ряды входов должны иметь одинаковую длину. Отмените последний выбор."
+  },
   "mt.decoder.output_origin": {
     "English": "Select the origin of the output row of gates",
     "Russian": "Выбрать блок с нулевым адресом"
@@ -407,7 +411,7 @@
     "English": "Parallel",
     "Russian": "Параллельно"
   },
-  "mt.connect.nto_n": {
+  "mt.connect.n_to_n": {
     "English": "NtoN",
     "Russian": "Все ко всем"
   },
@@ -446,6 +450,26 @@
   "mt.tensor.source_range": {
     "English": "Specify the range of the {ordinal} dimension vector of the source tensor",
     "Russian": "Укажите количество повторений {ordinal} базисного вектора исходной матрицы"
+  },
+  "mt.tensor.progress_queued": {
+    "English": "Tensor operation queued: {total} pairs",
+    "Russian": "Операция с матрицей поставлена в очередь: {total} пар"
+  },
+  "mt.tensor.progress_connecting": {
+    "English": "Connecting tensor: {percent}% ({completed} / {total})",
+    "Russian": "Подключение матрицы: {percent}% ({completed} / {total})"
+  },
+  "mt.tensor.progress_disconnecting": {
+    "English": "Disconnecting tensor: {percent}% ({completed} / {total})",
+    "Russian": "Отключение матрицы: {percent}% ({completed} / {total})"
+  },
+  "mt.tensor.progress_connected": {
+    "English": "Tensor connection complete: {total} pairs processed",
+    "Russian": "Подключение матрицы завершено: обработано {total} пар"
+  },
+  "mt.tensor.progress_disconnected": {
+    "English": "Tensor disconnection complete: {total} pairs processed",
+    "Russian": "Отключение матрицы завершено: обработано {total} пар"
   },
   "mt.settings.desc.logic_converter": {
     "English": "Lets you convert Vanilla Logic to Fast Logic and vice versa.",
@@ -491,7 +515,7 @@
     "English": "Connects a row of gates in series, one into the next.",
     "Russian": "Подключает логические затворы по очереди в одну цепочку."
   },
-  "mt.settings.desc.nto_n_connect": {
+  "mt.settings.desc.n_to_n_connect": {
     "English": "Crosswires one row of gates into another.",
     "Russian": "Подключает каждый затвор из первой группы к каждому из второй группы."
   },

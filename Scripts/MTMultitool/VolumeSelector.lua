@@ -16,7 +16,7 @@ function VolumeSelector.inject(multitool)
     self.selectionMode = "inside" -- "inside" or "outside"
     self.doConfirm = true
     self.toolIndices = {}
-    self.nametagUpdate = NametagManager.createController(multitool)
+    self.dotSource = VertexRenderer.createSource(multitool)
 end
 
 function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBuild, toolName, extraTooltip)
@@ -79,7 +79,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
             localPosition = nil
             bodyhit = nil
         end
-        -- self.nametagUpdate(tags)
+        -- self.dotSource:set(tags)
     end
 
     -- display a preview
@@ -206,7 +206,7 @@ function VolumeSelector.trigger(multitool, primaryState, secondaryState, forceBu
         end
     end
 
-    self.nametagUpdate(tags)
+    self.dotSource:set(tags)
 
     local doNotConfirm = false
     if primaryState == 1 then
@@ -261,5 +261,5 @@ function VolumeSelector.cleanUp(multitool)
 end
 
 function VolumeSelector.cleanNametags(multitool)
-    multitool.VolumeSelector.nametagUpdate(nil)
+    multitool.VolumeSelector.dotSource:clear()
 end

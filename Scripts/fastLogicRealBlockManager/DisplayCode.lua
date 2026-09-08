@@ -2,6 +2,46 @@ dofile "../util/util.lua"
 local string = string
 local table = table
 
+function FastLogicRealBlockManager.updateTimerDisplay(self)
+    local runner = self.FastLogicRunner
+    local timers = self.creation.FastTimers
+    if next(timers) == nil then
+        return
+    end
+
+    local frames = runner.timerUvFrames
+    local needsUpdate = runner.didLogicalUpdate or runner.timerUvNeedsUpdate
+    if not needsUpdate then
+        for uuid, _ in pairs(timers) do
+            local id = runner.hashedLookUp[uuid]
+            if id ~= nil and frames[id] == nil then
+                needsUpdate = true
+                break
+            end
+        end
+    end
+    if needsUpdate then
+        frames = runner:computeTimerUvFrames()
+    end
+
+    local displayedTimerUvs = self.displayedTimerUvs
+    local changedTimerUvs = sm.MTFastLogic.FastLogicRunnerRunner.changedTimerUvsArray
+    for uuid, timer in pairs(timers) do
+        local id = runner.hashedLookUp[uuid]
+        if id ~= nil then
+            local uv = frames[id]
+            if uv == nil then
+                uv = runner.blockStates[id] and 1023 or 0
+                frames[id] = uv
+            end
+            if displayedTimerUvs[uuid] ~= uv then
+                displayedTimerUvs[uuid] = uv
+                changedTimerUvs[#changedTimerUvs + 1] = timer.id * 1024 + uv
+            end
+        end
+    end
+end
+
 function FastLogicRealBlockManager.updateDisplay(self, blockToUpdate)
     local creation = self.creation
     local creationBlocks = creation.blocks

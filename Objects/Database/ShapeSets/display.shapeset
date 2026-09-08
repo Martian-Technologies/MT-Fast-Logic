@@ -1,0 +1,576 @@
+{
+    "partList": [
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "000000",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/plane.rend",
+            "uuid": "6a012633-b97e-4591-8566-00047c9d3856",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "000000",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/plane_no_walls.rend",
+            "uuid": "d43a391f-913d-488b-b8ac-247644b02b8b",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/line.rend",
+            "uuid": "1364f63d-663f-4d50-b422-49d3a4ce2938",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/circle_billboard.rend",
+            "uuid": "18d15b07-479f-4558-b78e-c000a3b16d4c",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/otherRends/hollow_circle_billboard.rend",
+            "uuid": "82466bb9-f047-43b0-a4ac-d2ca9cdb40f5",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_00.rend",
+            "uuid": "f8755ed7-406a-5d84-b1ca-1328023c136f",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_01.rend",
+            "uuid": "90e16229-a9ca-55f3-a34a-ce6d695dd574",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_02.rend",
+            "uuid": "822ceb23-b5ee-5d17-906d-0d20c8c91866",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_03.rend",
+            "uuid": "cf892968-9c73-583c-ae0a-4af34fe2e999",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_04.rend",
+            "uuid": "10054d23-e2fa-5195-a837-2a1af64cf1cd",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_05.rend",
+            "uuid": "300a0e68-39be-5776-aa7c-09ce23affcc3",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_06.rend",
+            "uuid": "79e5e207-84ff-56cb-9b8c-f949a3723777",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_07.rend",
+            "uuid": "b346689d-d3f5-591f-ab44-92d8b6d395e9",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_08.rend",
+            "uuid": "9be0f99f-08e6-5f89-844d-8e6643f5d0ff",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_09.rend",
+            "uuid": "8bc8dd09-ad14-572f-bcf2-489fc000003e",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_10.rend",
+            "uuid": "ce1e3f52-29e6-51c1-b52a-1dac0f10377a",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_11.rend",
+            "uuid": "5d7df756-d456-5ccd-92f4-efbbeb2cc167",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_12.rend",
+            "uuid": "507601a3-ac58-510a-ab72-02eda6756234",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_13.rend",
+            "uuid": "dab0e8ff-e8ef-5652-9de3-eb2e8cf62d26",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_14.rend",
+            "uuid": "d5044a50-4dc9-519d-b02b-91ca79e040dc",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_15.rend",
+            "uuid": "0be57ecd-acd2-596b-8e52-805b8c479314",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_16.rend",
+            "uuid": "5e21d7ad-c46f-5984-8a2f-68994ff1b020",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_17.rend",
+            "uuid": "e38cacee-9c62-552f-a900-de7c58443e2e",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_18.rend",
+            "uuid": "c08d5fe1-88cf-5d5e-9d6c-17cd4a24d7cd",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_19.rend",
+            "uuid": "ae7da1c0-ad36-5159-8bb7-dd371cac68db",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_20.rend",
+            "uuid": "6fdd5eaf-577e-54e7-ae53-049410de1180",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_21.rend",
+            "uuid": "b1616725-8f24-52da-900c-53c5fdcc6f8e",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_22.rend",
+            "uuid": "1099844d-831e-54ea-9e56-5a1ebfb1be54",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_23.rend",
+            "uuid": "fc576d6e-4ed2-5429-8e3d-763c8baab275",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_24.rend",
+            "uuid": "4f8f0961-ea49-50f7-bf70-df2072ca9c0c",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_25.rend",
+            "uuid": "cc4824d7-8085-520e-a7ce-5af39fa4f2e4",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_26.rend",
+            "uuid": "f29c73eb-a7d7-5b25-a29c-8921affc6df3",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_27.rend",
+            "uuid": "a08d29f4-fb18-5aac-bff8-2371948321b3",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_28.rend",
+            "uuid": "58877f71-63fb-53cc-ba4a-9303e47301bc",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_29.rend",
+            "uuid": "63d3812a-a425-5849-8769-eae1ae06a1c7",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_30.rend",
+            "uuid": "5e17beeb-922d-59e9-b8f5-79c6f9206418",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_31.rend",
+            "uuid": "b57af155-2dde-5d3b-a3ab-d06b6cc36aed",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_32.rend",
+            "uuid": "41521d31-a05a-5fcb-89c8-402d1879b9e3",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_33.rend",
+            "uuid": "5c2164c1-2854-5412-9318-e2b81c57d972",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_34.rend",
+            "uuid": "6d14d265-c3dc-5aca-893c-2335ecd061f6",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_35.rend",
+            "uuid": "b38b2bc4-9ed9-5251-bfda-a09964aa6b0f",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_36.rend",
+            "uuid": "a2f64f16-596e-5172-9dad-8a9b9f59e6e6",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_37.rend",
+            "uuid": "49efd295-f852-5fc5-bc01-9b1829f75a33",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_38.rend",
+            "uuid": "f92482b3-9ff6-5671-a421-e1397b079f4a",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_39.rend",
+            "uuid": "c6e07d7e-bb44-5d00-b2e2-c2c807e08a8f",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_40.rend",
+            "uuid": "560bb6ba-08e4-5b6a-8b08-35ae1a4e6a46",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_41.rend",
+            "uuid": "37000569-0d94-5f7c-a375-96b1ec1e307e",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_42.rend",
+            "uuid": "e4932df4-0a6b-5b60-8ebf-14cbf19d08d1",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_43.rend",
+            "uuid": "33e75092-d83e-53bc-9bea-6b5e07a2fbc3",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_44.rend",
+            "uuid": "73b07f12-4669-5186-a92f-ffbc661d3b0f",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_45.rend",
+            "uuid": "a2bc7161-267d-547d-9f26-1f16ef565dbb",
+            "showInInventory": false
+        },
+        {
+            "box": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "color": "ffffff",
+            "renderable": "$CONTENT_DATA/Renderable/curve_tubes/Rends/curve_tube_46.rend",
+            "uuid": "361c7c39-6039-5d2b-97a4-44a00e18cdb2",
+            "showInInventory": false
+        }
+    ]
+}

@@ -59,6 +59,7 @@ function SeriesConnect.trigger(multitool, primaryState, secondaryState, forceBui
     else
         multitool.SelectionModeController.modeActive = nil
     end
+    multitool.BlockSelector.bodyConstraint = #selfData.selected == 1 and { selfData.selected[1]:getBody() } or nil
     if primaryState == 1 then
         if #selfData.selected < 2 then
             if lookingAt ~= nil then
@@ -140,5 +141,6 @@ function SeriesConnect.cleanUp(multitool)
     selfData.sequence = {}
     selfData.sequenceFinalGate = nil
     multitool.ConnectionManager.preview = {}
+    multitool.BlockSelector.bodyConstraint = nil
     selfData.nametagUpdate(nil)
 end

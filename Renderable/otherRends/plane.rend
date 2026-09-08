@@ -1,0 +1,19 @@
+{
+    "lodList": [
+        {
+            "mesh": "$CONTENT_DATA/Renderable/otherModels/plane.obj",
+            "subMeshList": [
+                {
+                    "custom": {
+                        "shadow": false
+                    },
+                    "material": "DifAsg",
+                    "textureList": [
+                        "$CONTENT_DATA/Objects/Textures/transparent.png",
+                        "$CONTENT_DATA/Objects/Textures/Glow_ASG.png"
+                    ]
+                }
+            ]
+        }
+    ]
+}

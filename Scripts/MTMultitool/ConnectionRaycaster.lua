@@ -5,7 +5,7 @@ function ConnectionRaycaster:configure(maxDistance, connectionDotRadius, multito
     self.connectionDotRadius = connectionDotRadius
     self.connectionDotRadius2 = connectionDotRadius * connectionDotRadius
     self.bodyCache = {}
-    self.nametagUpdate = NametagManager.createController(multitool)
+    -- self.dotSource = VertexRenderer.createSource(multitool)
 end
 
 function ConnectionRaycaster:raycastToBlock(surface)
@@ -385,7 +385,7 @@ function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint
                             return hitBlock
                         end,
                     }
-                    -- self.nametagUpdate(tags)
+                    -- self.dotSource:set(tags)
                     return true, res
                 end
             end
@@ -437,7 +437,7 @@ function ConnectionRaycaster:rayTraceDDA(rayOrigin, rayDirection, bodyConstraint
             break
         end
     end
-    -- self.nametagUpdate(tags)
+    -- self.dotSource:set(tags)
 
     return false, nil
 end
@@ -594,7 +594,7 @@ function ConnectionRaycaster:rayTraceClosestDot(rayOrigin, rayDirection, bodyCon
             break
         end
     end
-    -- self.nametagUpdate(tags)
+    -- self.dotSource:set(tags)
 
     if closestBlock == nil then
         return false, nil

@@ -153,9 +153,22 @@ end
 
 function ConnectionManager.createVertexSubsription(multitool)
     local self = multitool.ConnectionManager
+    local emptyVertices = {}
+    local inactiveRevision = 0
+    local wasActive = false
+
     local function getVertices()
+        if #self.travellingDots == 0 then
+            if wasActive then
+                wasActive = false
+                inactiveRevision = inactiveRevision + 1
+            end
+            return emptyVertices, inactiveRevision
+        end
+
+        wasActive = true
         local vertices = {}
-        for i, dot in pairs(self.travellingDots) do
+        for _, dot in pairs(self.travellingDots) do
             -- bezier the dot position from the dot's start and end positions based on os clock
             local t = (os.clock() - dot.startTime) / dot.duration
             if t > 1 then
@@ -164,8 +177,7 @@ function ConnectionManager.createVertexSubsription(multitool)
             local dotPosition = dot.start * (1 - t) ^ 2 + dot.intermediate * 2 * (1 - t) * t + dot.final * t ^ 2
             table.insert(vertices, {
                 pos = dotPosition,
-                color = dot.color,
-                txt = "•"
+                color = dot.color
             })
         end
         return vertices

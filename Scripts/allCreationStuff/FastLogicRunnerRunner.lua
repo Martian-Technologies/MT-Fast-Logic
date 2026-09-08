@@ -43,6 +43,7 @@ function FastLogicRunnerRunner.server_onFixedUpdate(self)
             self.bodiesToConvert[2] = {}
         end
         self.changedUuidsArray = {}
+        self.changedTimerUvsArray = {}
         for k, v in pairs(sm.MTFastLogic.Creations) do
             -- v.FastLogicRealBlockManager:update()
             local success, result = pcall(v.FastLogicRealBlockManager.update, v.FastLogicRealBlockManager)

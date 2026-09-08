@@ -1,9 +1,14 @@
 HoveringUI = {}
 
+local hoveringUIDistance = 25
+local filledCircleUuid = sm.uuid.new("18d15b07-479f-4558-b78e-c000a3b16d4c")
+local hollowCircleUuid = sm.uuid.new("82466bb9-f047-43b0-a4ac-d2ca9cdb40f5")
+
 function HoveringUI.inject(multitool)
     multitool.HoveringUI = {}
     local self = multitool.HoveringUI
     self.updateNametags = NametagManager.createController(multitool)
+    self.dotSource = VertexRenderer.createSource(multitool)
     self.startAngle = nil
     self.elements = nil
 end
@@ -174,12 +179,12 @@ local function getOffsetPos(ctx, offsetA, offsetE)
     local element = ctx.element
     local elevationQuat = sm.quat.fromEuler(sm.vec3.new(0, -(element.position.e + offsetE) * 180 / math.pi, 0))
     local azimuthQuat = sm.quat.fromEuler(sm.vec3.new(-(ctx.startAngle + element.position.a + offsetA) * 180 / math.pi, 0, 0))
-    return (ctx.levelQuat * azimuthQuat * elevationQuat) * sm.vec3.new(0, 0, 25) + ctx.cameraPos
+    return (ctx.levelQuat * azimuthQuat * elevationQuat) * sm.vec3.new(0, 0, hoveringUIDistance) + ctx.cameraPos
 end
 
 local function dotCircleButton(multitool, ctx)
     local element = ctx.element
-    local tags = ctx.tags
+    local tags = ctx.dotVertices
 
     local horizontalAngle = ctx.horizontalAngle
     local verticalAngle = ctx.verticalAngle
@@ -212,58 +217,14 @@ local function dotCircleButton(multitool, ctx)
         end
     end
 
-    local dot = render.dot or element.dot or "."
     local radiusScale = render.radiusScale or element.radiusScale or 1
-    local baseRadius = element.dotRadius or 0.022
-    local radius = baseRadius * radiusScale
-    local innerRadius = (element.dotInnerRadius or baseRadius * 0.72) * radiusScale
-    local segments = element.dotSegments or 16
-    local innerSegments = element.dotInnerSegments or 12
-
-    local function emitDot(offsetA, offsetE)
-        table.insert(tags, {
-            pos = getOffsetPos(ctx, offsetA, offsetE),
-            txt = dot,
-            color = color
-        })
-    end
-
-    local function emitCircle(circleRadius, circleSegments)
-        for i = 1, circleSegments do
-            local angle = (i - 1) * 2 * math.pi / circleSegments
-            emitDot(math.cos(angle) * circleRadius, math.sin(angle) * circleRadius)
-        end
-    end
-
-    if render.selected then
-        local fillSpacing = (element.fillDotSpacing or baseRadius * 0.25) * radiusScale
-        local fillRadius = (element.fillRadius or baseRadius * 0.62) * radiusScale
-        local fillSteps = math.ceil(fillRadius / fillSpacing)
-        local fillDots = {}
-        for x = -fillSteps, fillSteps do
-            for y = -fillSteps, fillSteps do
-                local offsetA = x * fillSpacing
-                local offsetE = y * fillSpacing
-                if offsetA * offsetA + offsetE * offsetE <= fillRadius * fillRadius then
-                    table.insert(fillDots, { a = offsetA, e = offsetE })
-                end
-            end
-        end
-        table.sort(fillDots, function(left, right)
-            local leftOrder = left.a - left.e
-            local rightOrder = right.a - right.e
-            if leftOrder == rightOrder then
-                return left.a > right.a
-            end
-            return leftOrder > rightOrder
-        end)
-        for i = 1, #fillDots do
-            emitDot(fillDots[i].a, fillDots[i].e)
-        end
-    end
-
-    emitCircle(radius, segments)
-    emitCircle(innerRadius, innerSegments)
+    local angularRadius = (element.dotRadius or 0.022) * radiusScale
+    table.insert(tags, {
+        pos = getOffsetPos(ctx, 0, 0),
+        color = color,
+        radius = math.tan(angularRadius) * hoveringUIDistance,
+        uuid = render.selected and filledCircleUuid or hollowCircleUuid
+    })
 end
 
 local function indicator(multitool, ctx)
@@ -330,6 +291,7 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
     local elements = self.elements
 
     local tags = {}
+    local dotVertices = {}
     local vertical = math.pi / 48
     local cameraVec = sm.camera.getDirection()
     local block = { hovered = false }
@@ -349,6 +311,7 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
         local verticalAngle = math.acos(verticalVecElement:dot(verticalVecCamera))
         local ctx = {
             tags = tags,
+            dotVertices = dotVertices,
             element = element,
             levelQuat = levelQuat,
             elevationQuat = elevationQuat,
@@ -385,11 +348,13 @@ function HoveringUI.trigger(multitool, primaryState, secondaryState, forceBuild,
     -- })
 
     self.updateNametags(tags)
+    self.dotSource:set(dotVertices)
 end
 
 function HoveringUI.cleanUp(multitool)
     local self = multitool.HoveringUI
     self.startAngle = nil
     self.updateNametags(nil)
+    self.dotSource:clear()
     self.elements = nil
 end

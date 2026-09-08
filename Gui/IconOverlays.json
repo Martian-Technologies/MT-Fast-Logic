@@ -1,0 +1,8 @@
+{
+    "overlays": [
+        {
+            "image": "MT_logo.png",
+            "all_shapes": true
+        }
+    ]
+}

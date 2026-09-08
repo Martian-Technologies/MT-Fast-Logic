@@ -39,6 +39,7 @@ function FastLogicRunner.internalAddBlock(self, path, id, state, timerLength, sk
         if pathName == "timerBlocks" then
             self.timerLengths[id] = timerLength + 1
             self.timerInputStates[id] = false
+            self.timerBlockIds[#self.timerBlockIds + 1] = id
             self:updateLongestTimer()
         elseif pathName == "BlockMemory" then
             self.ramBlockData[id] = self.creation.FastLogicBlockMemorys[self.unhashedLookUp[id]].memory
@@ -62,9 +63,8 @@ function FastLogicRunner.internalRemoveBlock(self, id)
         -- set new states of blocks
         self:internalCollapseMultiBlock(id)
         -- clear anything to do with multiBlock in timeData
-        local otherTimeData = self.timeData[2]
         for i = 1, multiData[6] do
-            local timeDataRow = otherTimeData[i]
+            local timeDataRow = self:getTimeDataRow(2, i)
             if timeDataRow == nil then goto continue end
             local k = 1
             while k <= #timeDataRow do
@@ -73,6 +73,11 @@ function FastLogicRunner.internalRemoveBlock(self, id)
                     local itemId = item[2]
                     if multiBlockData[itemId] ~= false and multiBlockData[itemId][id] then
                         table.remove(timeDataRow, k)
+                        for itemIndex = 1, 6 do
+                            item[itemIndex] = nil
+                        end
+                        local timedEventPool = self.timedEventPool
+                        timedEventPool[#timedEventPool + 1] = item
                     else
                         k = k + 1
                     end
@@ -141,8 +146,16 @@ function FastLogicRunner.internalRemoveBlock(self, id)
     self.runnableBlockPaths[id] = false
     self.nextRunningBlocks[id] = false
     self.runnableBlockPathIds[id] = false
+    if self.timerLengths[id] ~= false then
+        table.removeValue(self.timerBlockIds, id)
+    end
     self.timerLengths[id] = false
     self.timerInputStates[id] = false
+    self.timerUvFrames[id] = nil
+    self.timerUvScratchEpochs[id] = nil
+    self.timerUvScratchStates[id] = nil
+    self.timerUvScratchStarts[id] = nil
+    self.timerUvScratchFrames[id] = nil
     self.altBlockData[id] = false
     self.multiBlockData[id] = false
     self.multiBlockInputMultiBlockId[id] = false
@@ -168,6 +181,9 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
                 end
             end
             blockStates[id] = idStatePairs[i][2]
+            if self.timerLengths[id] ~= false then
+                self.timerUvNeedsUpdate = true
+            end
             blocksToFixInputData[id] = true
             for k = 1, #blockOutputs[id] do
                 blocksToFixInputData[blockOutputs[id][k]] = true
@@ -180,6 +196,9 @@ function FastLogicRunner.internalSetBlockStates(self, idStatePairs, withUpdates)
         for i = 1, #idStatePairs do
             local id = idStatePairs[i][1]
             blockStates[id] = idStatePairs[i][2]
+            if self.timerLengths[id] ~= false then
+                self.timerUvNeedsUpdate = true
+            end
         end
     end
 end
@@ -214,7 +233,7 @@ function FastLogicRunner.internalAddOutput(self, id, idToConnect, skipChecksAndU
         self.blockInputsHash[idToConnect][id] = true
         self.numberOfBlockInputs[idToConnect] = self.numberOfBlockInputs[idToConnect] + 1
         -- update states
-        if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
+        if self.blockStates[id] then
             self.countOfOnInputs[idToConnect] = self.countOfOnInputs[idToConnect] + 1
         end
         -- do fixes
@@ -248,7 +267,7 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChec
             self.numberOfBlockInputs[idToDisconnect] = self.numberOfBlockInputs[idToDisconnect] - 1
         end
         -- update states
-        if self.blockStates[id] and self.runnableBlockPathIds[id] ~= 5 then
+        if self.blockStates[id] then
             self.countOfOnInputs[idToDisconnect] = self.countOfOnInputs[idToDisconnect] - 1
         end
         if skipChecksAndUpdates ~= true then
@@ -256,7 +275,7 @@ function FastLogicRunner.internalRemoveOutput(self, id, idToDisconnect, skipChec
             self:internalFindRamInterfaces(idToDisconnect)
             self:internalFindRamInterfaces(id)
             self:fixBlockInputData(id)
-            self:internalAddBlockToUpdate(idToDisconnect)
+            self:fixBlockInputData(idToDisconnect)
         end
     end
 end
@@ -304,34 +323,24 @@ function FastLogicRunner.updateLongestTimer(self)
             self.longestTimer = length
         end
     end
-    local timerData = self.timeData[1]
-    local otherTimeData = self.timeData[2]
-    while #timerData < self.longestTimer + 1 do
-        local length = #timerData + 1
-        timerData[length] = {}
-        otherTimeData[length] = {}
-    end
+    self:ensureTimeDataLength(self.longestTimer + 1)
 end
 
 function FastLogicRunner.updateLongestTimeToLength(self, length)
     if length > self.longestTimer then
         self.longestTimer = length
     end
-    local timerData = self.timeData[1]
-    local otherTimeData = self.timeData[2]
-    while #timerData < self.longestTimer + 1 do
-        local newLength = #timerData + 1
-        timerData[newLength] = {}
-        otherTimeData[newLength] = {}
-    end
+    self:ensureTimeDataLength(self.longestTimer + 1)
 end
 
 function FastLogicRunner.clearTimerData(self, id)
+    self.timerUvFrames[id] = nil
     local timerData = self.timeData[1]
     for i = 1, #timerData do
-        for ii = 1, #timerData[i] do
-            if timerData[i][ii] == id then
-                table.remove(timerData[i], ii)
+        local row = self:getTimeDataRow(1, i)
+        for ii = 1, #row do
+            if row[ii] == id then
+                table.remove(row, ii)
             end
         end
     end

@@ -225,6 +225,15 @@ function table.getKeysSortedByValue(tbl, sortFunction, validationFunction)
     return keys
 end
 
+function table.findFirstNil(tbl)
+    if #tbl == 0 then return 1 end
+    local index = 1
+    while tbl[index] ~= nil do
+        index = index + 1
+    end
+    return index
+end
+
 printOld = printOld or print
 formater = {}
 local formater = formater
@@ -465,6 +474,17 @@ function table.makeArray(size, val)
         tbl[i] = val
     end
     return tbl
+end
+
+function table.concatTables(table1, table2)
+    local out = {}
+    for _, v in pairs(table1) do
+        table.insert(out, v)
+    end
+    for _, v in pairs(table2) do
+        table.insert(out, v)
+    end
+    return out
 end
 
 function string.replace_char(pos, str, r)

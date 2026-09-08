@@ -7,6 +7,8 @@ dofile("../util/util.lua")
 
 dofile("$GAME_DATA/Scripts/game/AnimationUtil.lua")
 
+dofile("$CONTENT_DATA/Scripts/Flight/FlightController.lua")
+
 dofile("$CONTENT_DATA/Scripts/MTMultitool/SelectionModeController.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/VertexRenderer.lua")
@@ -32,8 +34,6 @@ dofile("$CONTENT_DATA/Scripts/MTMultitool/ConnectionShower.lua")
 dofile("$CONTENT_DATA/Scripts/MTMultitool/StateDisplay.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/CallbackEngine.lua")
-
-dofile("$CONTENT_DATA/Scripts/MTMultitool/Flying.lua")
 
 dofile("$CONTENT_DATA/Scripts/MTMultitool/modes/MultiblockDetector.lua")
 
@@ -112,7 +112,7 @@ MTMultitool.modes = {
     "mt.mode.copy_paste",
     "mt.mode.single_connect",
     "mt.mode.series_connect",
-	"mt.mode.nto_n_connect",
+	"mt.mode.n_to_n_connect",
     "mt.mode.parallel_connect",
     "mt.mode.tensor_connect"
 }
@@ -150,7 +150,15 @@ MTMultitool.DevModeModes = {
 }
 
 function MTMultitool.server_onCreate(self)
-    MTFlying.sv_inject(self)
+    MTFlight.sv_inject(self)
+end
+
+function MTMultitool.server_onDestroy(self)
+    CopyPaste.server_onDestroy(self)
+end
+
+function MTMultitool.client_onDestroy(self)
+    VertexRenderer.destroy(self)
 end
 
 function MTMultitool.client_onCreate(self)
@@ -159,12 +167,13 @@ function MTMultitool.client_onCreate(self)
     self.subscriptions = {
         client_onUpdate = {}
     }
+    VertexRenderer.inject(self)
 
     self.saveIdx = 1
 
     CallbackEngine.inject(self)
 
-    MTFlying.inject(self)
+    MTFlight.inject(self)
     ConnectionShower.inject(self)
     StateDisplay.inject(self)
     DoMeleeState.inject(self)
@@ -198,7 +207,6 @@ function MTMultitool.client_onCreate(self)
     BackupMenu.inject(self)
 
     BlockSelector.inject(self)
-    VertexRenderer.inject(self)
     ConnectionManager.inject(self)
     RangeOffset.inject(self)
 
@@ -294,13 +302,13 @@ function MTMultitool.client_onUpdate(self, dt)
             end
         end
     end
-    -- MTFlying.cl_onUpdate(self, dt)
+    -- MTFlight.cl_onUpdate(self, dt)
     -- VolumeSelector.client_onUpdate(self, dt)
     -- ConnectionShower.client_onUpdate(self)
     local success, result
-    success, result = pcall(MTFlying.cl_onUpdate, self, dt)
+    success, result = pcall(MTFlight.cl_onUpdate, self, dt)
     if not success then
-        print("Error in MTFlying.cl_onUpdate: " .. result)
+        print("Error in MTFlight.cl_onUpdate: " .. result)
     end
     success, result = pcall(VolumeSelector.client_onUpdate, self, dt)
     if not success then
@@ -329,13 +337,17 @@ function MTMultitool.client_onUpdate(self, dt)
     if not success then
         print("Error in ConnectionManager.client_onUpdate: " .. result)
     end
-    success, result = pcall(VertexRenderer.client_onUpdate, self)
-    if not success then
-        print("Error in VertexRenderer.client_onUpdate: " .. result)
-    end
     success, result = pcall(Heatmap.client_onUpdate, self, dt)
     if not success then
         print("Error in Heatmap.client_onUpdate: " .. result)
+    end
+    success, result = pcall(CopyPaste.client_onUpdate, self)
+    if not success then
+        print("Error in CopyPaste.client_onUpdate: " .. result)
+    end
+    success, result = pcall(VertexRenderer.client_onUpdate, self)
+    if not success then
+        print("Error in VertexRenderer.client_onUpdate: " .. result)
     end
 
     local isSprinting = self.tool:isSprinting()
@@ -492,7 +504,9 @@ function MTMultitool.client_onUnequip(self, animate)
     -- for _, func in pairs(self.subscribtions["client_onUnequip"]) do
     --     func(self, animate)
     -- end
-    if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
+    if MTMultitool.internalModes[self.mode] == "LogicConverter" then
+        LogicConverter.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then
         SiliconConverterTool.cleanNametags(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
@@ -540,7 +554,9 @@ function MTMultitool.client_onToggle(self)
     else
         self.SingleConnect.rotated = false
     end
-    if MTMultitool.internalModes[self.mode] == "SiliconConverter" then
+    if MTMultitool.internalModes[self.mode] == "LogicConverter" then
+        LogicConverter.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "SiliconConverter" then
         SiliconConverterTool.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Settings" then
         Settings.cleanUp(self)
@@ -548,6 +564,8 @@ function MTMultitool.client_onToggle(self)
         ModeChanger.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Merger" then
         Merger.cleanUp(self)
+    elseif MTMultitool.internalModes[self.mode] == "VolumeDeleter" then
+        VolumeDeleter.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "Colorizer" then
         Colorizer.cleanUp(self)
     elseif MTMultitool.internalModes[self.mode] == "VolumePlacer" then
@@ -722,7 +740,7 @@ MTGateUUIDs = {
 }
 
 function MTMultitool.server_onFixedUpdate(self, dt)
-    MTFlying.server_onFixedUpdate(self, dt)
+    MTFlight.server_onFixedUpdate(self, dt)
     TensorConnect.server_onFixedUpdate(self, dt)
     Heatmap.server_onFixedUpdate(self, dt)
     CopyPaste.server_onFixedUpdate(self, dt)
@@ -1200,15 +1218,19 @@ function MTMultitool.server_recolor(self, data)
 end
 
 function MTMultitool.cl_notifyFlying(self, data)
-    MTFlying.cl_notifyFlying(self, data)
+    MTFlight.cl_notifyFlying(self, data)
 end
 
-function MTMultitool.sv_toggleFlying(self, data)
-    MTFlying.sv_toggleFlying(self, data)
+function MTMultitool.sv_toggleFlying(self, data, player)
+    MTFlight.sv_toggleFlying(self, data, player)
 end
 
-function MTMultitool.sv_connectTensors(self, data)
-    TensorConnect.sv_connectTensors(self, data)
+function MTMultitool.sv_connectTensors(self, data, player)
+    TensorConnect.sv_connectTensors(self, data, player)
+end
+
+function MTMultitool.cl_tensorProgress(self, data)
+    TensorConnect.cl_tensorProgress(self, data)
 end
 
 function MTMultitool.sv_receiveBlueprintPacket(self, data)
@@ -1219,8 +1241,16 @@ function MTMultitool.sv_loadBackup(self, data)
     sm.MTBackupEngine.sv_loadBackup(self, data)
 end
 
-function MTMultitool.server_copyPaste(self, data)
-    CopyPaste.server_copyPaste(self, data)
+function MTMultitool.server_copyPaste(self, data, player)
+    CopyPaste.server_copyPaste(self, data, player)
+end
+
+function MTMultitool.cl_copyPasteFailed(self, messageId)
+    CopyPaste.client_copyPasteFailed(self, messageId)
+end
+
+function MTMultitool.sv_updateCopyPasteLiftLevel(self, data, player)
+    CopyPaste.server_updateLiftLevel(self, data, player)
 end
 
 function MTMultitool.cl_ConnectionManager_commitPreview(self, data)

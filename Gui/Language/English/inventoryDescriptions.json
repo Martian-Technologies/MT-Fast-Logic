@@ -3,6 +3,10 @@
       "description" : "A logic multitool developed by MTech. This tool can be used to change the color of logic gate connection dots, convert parts of your creation to silicon, and make large amounts of connections in parallel.",
       "title" : "MT Multitool"
    },
+   "8823ec3e-5ffc-4154-acb9-9c533faea2cf" : {
+      "description" : "A new version of the logic multitool being developed by MTech. This tool aims to streamline a lot of what the original multitool could do and make it faster to use.",
+      "title" : "[BETA] MT Multitool"
+   },
    "6a9dbff5-7562-4e9a-99ae-3590ece88112" : {
       "description" : "Speed Up: You can change simulation speed of Fast Logic by pressing U or Crouch + U on a Fast Logic block.\n\nColored Connections: The Multitool in Colorizer mode can change the color of logic gate connection dots.\n\nSilicon: The Multitool in Silicon Convert mode can convert parts of your creation to silicon. This will make your game less laggy and allow you to spawn much larger creations.",
       "title" : "Fast Logic Gate"

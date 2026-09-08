@@ -101,6 +101,7 @@ function FastLogicRunner.findMultiBlocks(self, id)
 
             self:internalAddBlockToMultiBlock(blocks[1], multiBlockId, true, false)
             self.multiBlockData[multiBlockId][6] = length
+            self.multiBlockData[multiBlockId][7] = self:makeTimerUvLineProjections(blocks)
             for i = 2, #blocks-1 do
                 self:internalAddBlockToMultiBlock(blocks[i], multiBlockId, false, false)
             end

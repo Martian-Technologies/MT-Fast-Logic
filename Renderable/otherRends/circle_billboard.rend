@@ -1,0 +1,13 @@
+{
+    "lodList": [
+        {
+            "mesh": "$CONTENT_DATA/Renderable/otherModels/circle_billboard.obj",
+            "subMeshList": [
+                {
+                    "material": "ConnectJoint",
+                    "textureList": []
+                }
+            ]
+        }
+    ]
+}

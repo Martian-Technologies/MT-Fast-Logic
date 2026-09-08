@@ -93,10 +93,10 @@ function SingleConnect.trigger(multitool, primaryState, secondaryState, forceBui
         end
         if #self.selectedSource == #self.selectedTarget then
             canParallel = true
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " " .. tr("mt.connect.nto_n") .. "     ",
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " " .. tr("mt.connect.n_to_n") .. "     ",
                 sm.gui.getKeyBinding("Reload", true), action .. " " .. tr("mt.connect.parallel") .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " " .. tr("mt.connect.change_mode"))
         else
-            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " " .. tr("mt.connect.nto_n") .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " " .. tr("mt.connect.change_mode"))
+            sm.gui.setInteractionText("", sm.gui.getKeyBinding("ForceBuild", true), action .. " " .. tr("mt.connect.n_to_n") .. "     " .. sm.gui.getKeyBinding("NextCreateRotation", true) .. " " .. tr("mt.connect.change_mode"))
         end
         if MTMultitool.handleForceBuild(multitool, forceBuild) then
             cm.preview = {}

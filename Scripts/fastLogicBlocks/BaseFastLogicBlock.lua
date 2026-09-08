@@ -180,6 +180,9 @@ end
 function BaseFastLogicBlock.client_onCreate(self)
     sm.MTFastLogic.client_FastLogicBlockLookUp[self.interactable:getId()] = self
     self:client_onCreate2()
+    if self.requestsLogicalState ~= false then
+        self.network:sendToServer("server_requestState", {})
+    end
 end
 
 function BaseFastLogicBlock.client_onCreate2(self)
@@ -300,6 +303,22 @@ function BaseFastLogicBlock.server_changeSpeed(self, isCrouching)
     self:sendMessageToAll({ id = "mt.chat.updates_per_tick", vars = { value = self.creation.FastLogicRunner.numberOfUpdatesPerTick } })
 end
 
+function BaseFastLogicBlock.server_requestState(self, _, player)
+    local state = self.state == true
+    local runner = self.FastLogicRunner
+    if runner ~= nil and self.data ~= nil and self.data.uuid ~= nil then
+        local id = runner.hashedLookUp[self.data.uuid]
+        if id ~= nil then
+            state = runner.blockStates[id] == true
+        end
+    end
+    self.network:sendToClient(player, "client_setState", state)
+end
+
+function BaseFastLogicBlock.client_setState(self, state)
+    self:client_updateTexture(state)
+end
+
 function BaseFastLogicBlock.client_updateTexture(self, state)
 end
 
@@ -326,24 +345,43 @@ function BaseFastLogicBlock.remove(self, removeAllData)
 end
 
 function BaseFastLogicBlock.removeUuidData(self)
-    for i = 1, #self.creation.blocks[self.data.uuid].inputs do
-        local otherUuid = self.creation.blocks[self.data.uuid].inputs[i]
-        if self.creation.blocks[otherUuid] ~= nil then
-            if self.creation.blocks[otherUuid].isSilicon then
-                return
-            end
-        end
+    if self:hasSiliconConnection() then
+        return false
     end
-    for i = 1, #self.creation.blocks[self.data.uuid].outputs do
-        local otherUuid = self.creation.blocks[self.data.uuid].outputs[i]
-        if self.creation.blocks[otherUuid] ~= nil then
-            if self.creation.blocks[otherUuid].isSilicon then
-                return
-            end
-        end
+
+    local storageData = self.storage:load()
+    if type(storageData) == "table" then
+        storageData = table.deepCopy(storageData)
     end
+
     local uuid = self.data.uuid
     self.data.uuid = nil
     self:server_saveDataToStorage()
     self.data.uuid = uuid
+    return true, storageData
+end
+
+function BaseFastLogicBlock.restoreUuidData(self, storageData)
+    self.storage:save(storageData)
+end
+
+function BaseFastLogicBlock.hasSiliconConnection(self)
+    local block = self.creation.blocks[self.data.uuid]
+    if block == nil then
+        return false
+    end
+
+    for _, otherUuid in ipairs(block.inputs or {}) do
+        local other = self.creation.blocks[otherUuid]
+        if other ~= nil and other.isSilicon then
+            return true
+        end
+    end
+    for _, otherUuid in ipairs(block.outputs or {}) do
+        local other = self.creation.blocks[otherUuid]
+        if other ~= nil and other.isSilicon then
+            return true
+        end
+    end
+    return false
 end

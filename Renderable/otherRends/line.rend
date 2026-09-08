@@ -1,0 +1,13 @@
+{
+    "lodList": [
+        {
+            "mesh": "$GAME_DATA/Objects/Mesh/fittings/obj_fittings_pipe.mesh",
+            "subMeshList": [
+                {
+                    "material": "ConnectJoint",
+                    "textureList": []
+                }
+            ]
+        }
+    ]
+}

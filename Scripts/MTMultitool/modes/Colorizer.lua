@@ -80,13 +80,7 @@ local function injectElements(multitool)
                 color = sm.MTFastLogic.FastLogicBlockColors[i],
                 angleBoundHorizontal = 0.035 * fovMult,
                 angleBoundVertical = 0.035 * fovMult,
-                dot = "•",
                 dotRadius = 0.023 * fovMult,
-                dotInnerRadius = 0.016 * fovMult,
-                dotSegments = 12,
-                dotInnerSegments = 8,
-                fillDotSpacing = 0.006 * fovMult,
-                fillRadius = 0.014 * fovMult,
                 getrender = function(hovering)
                     return {
                         color = sm.MTFastLogic.FastLogicBlockColors[i],

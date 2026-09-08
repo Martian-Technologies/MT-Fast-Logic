@@ -174,10 +174,11 @@ end
 function NtoNConnect.cleanUp(multitool)
     local self = multitool.NtoNConnect
     local selfData = self.data
-    selfData.seq1.start = nil
-    selfData.seq1.final = nil
+    selfData.seq1 = { start = nil, final = nil, sequence = {} }
+    selfData.seq2 = { start = nil, final = nil, sequence = {} }
     selfData.selected = {}
     multitool.ConnectionManager.preview = {}
+    multitool.BlockSelector.bodyConstraint = nil
     selfData.nametagUpdate(nil)
 end
 

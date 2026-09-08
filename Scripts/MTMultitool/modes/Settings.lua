@@ -17,7 +17,7 @@ local modesAndTheirFunctions = {
     ["DecoderMaker"] = "mt.settings.desc.decoder_maker",
     ["SingleConnect"] = "mt.settings.desc.single_connect",
     ["SeriesConnect"] = "mt.settings.desc.series_connect",
-    ["NtoNConnect"] = "mt.settings.desc.nto_n_connect",
+    ["NtoNConnect"] = "mt.settings.desc.n_to_n_connect",
     ["ParallelConnect"] = "mt.settings.desc.parallel_connect",
     ["TensorConnect"] = "mt.settings.desc.tensor_connect",
 }
@@ -81,7 +81,7 @@ local function injectElements(multitool)
             type = "toggleButton",
             position = { a = 0, e = (#MTMultitool.internalModes-v) * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
             color = {
-                on = sm.color.new(0.2, 0.9, 0.2),
+                on = sm.color.new(0.0, 0.45, 0.0),
                 off = sm.color.new(0.9, 0.2, 0.2)
             },
             text = MTMultitool.modes[i],
@@ -202,7 +202,7 @@ local function injectElements(multitool)
         getrender = function(hovering)
             local isFlying = multitool.MTFlying.flying
             local text = tr("mt.settings.fly_mode", { state = isFlying and tr("mt.common.on") or tr("mt.common.off") })
-            local color = isFlying and sm.color.new(0.2, 0.9, 0.2) or sm.color.new(0.9, 0.2, 0.2)
+            local color = isFlying and sm.color.new(0.0, 0.45, 0.0) or sm.color.new(0.9, 0.2, 0.2)
             if hovering then
                 text = "[ " .. text .. " ]"
             end
@@ -240,10 +240,10 @@ local function injectElements(multitool)
             }
         end,
         onclick = function()
-            local options = { 128, 256, 512, 1024, 2048, 4096, 8194, 16384, "unlimited" }
+            local options = { 128, 256, 512, 1024, 2048, 4096, 8192, 16384, "unlimited" }
             local idx = table.find(options, multitool.ConnectionManager.connectionDisplayLimit)
             local newLimit = options[1]
-            if idx ~= #options then
+            if idx and (idx ~= #options) then
                 newLimit = options[idx + 1]
             end
             ConnectionManager.updateConnectionLimitDisplay(multitool, newLimit)
@@ -258,7 +258,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 7 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.show_connections",
@@ -280,7 +280,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 6 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.hide_connection",
@@ -302,7 +302,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 5 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.show_gate_states",
@@ -354,7 +354,7 @@ local function injectElements(multitool)
         type = "toggleButton",
         position = { a = sideColumnAzimuth, e = 12 * math.pi / 90 * fovMult }, -- a = azimuth, e = elevation
         color = {
-            on = sm.color.new(0.2, 0.9, 0.2),
+            on = sm.color.new(0.0, 0.45, 0.0),
             off = sm.color.new(0.9, 0.2, 0.2)
         },
         text = "mt.settings.hammer_one_tick",

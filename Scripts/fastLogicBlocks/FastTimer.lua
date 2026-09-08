@@ -4,6 +4,7 @@ dofile "../util/util.lua"
 FastTimer = table.deepCopyTo(BaseFastLogicBlock, (FastTimer or class()))
 FastTimer.maxParentCount = 1
 FastTimer.maxChildCount = -1  -- infinite
+FastTimer.requestsLogicalState = false
 
 function FastTimer.getData2(self)
     self.creation.FastTimers[self.data.uuid] = self
@@ -27,11 +28,14 @@ end
 
 function FastTimer.server_onDestroy2(self)
     self.creation.FastTimers[self.data.uuid] = nil
+    self.creation.FastLogicRealBlockManager.displayedTimerUvs[self.data.uuid] = nil
 end
 
 function FastTimer.client_onCreate2(self)
     self.client_seconds = 0
     self.client_ticks = 0
+    self.client_uv = nil
+    self.network:sendToServer("server_requestUvFrame", {})
 end
 
 function FastTimer.client_onDestroy2(self)
@@ -85,6 +89,26 @@ function FastTimer.client_onClientDataUpdate(self, data)
 end
 
 function FastTimer.client_updateTexture(self)
+end
+
+function FastTimer.client_setUvFrame(self, uv)
+    if self.client_uv ~= uv then
+        self.client_uv = uv
+        self.interactable:setUvFrameIndex(uv)
+    end
+end
+
+function FastTimer.server_requestUvFrame(self, _, player)
+    local runner = self.FastLogicRunner
+    local id = runner.hashedLookUp[self.data.uuid]
+    local uv = id ~= nil and runner.timerUvFrames[id] or nil
+    if uv == nil and id ~= nil then
+        uv = runner:computeTimerUvFrames()[id]
+    end
+    if uv == nil then
+        uv = 0
+    end
+    self.network:sendToClient(player, "client_setUvFrame", uv)
 end
 
 function FastTimer.server_saveTime(self, data)
